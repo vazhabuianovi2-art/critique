@@ -4640,7 +4640,7 @@ function tradeBelongsToAccount(trade, account) {
   if (account.isPlaceholder || String(account.id) === String(createAccountPlaceholder.id)) return false;
   if (trade?.accountId) return String(trade.accountId) === String(account.id);
   if (trade?.accountName) return String(trade.accountName) === String(account.name);
-  return String(account.id) === String(defaultAccount.id) || String(account.name) === String(defaultAccount.name);
+  return true;
 }
 
 function getTradesForAccount(trades = [], account) {
@@ -5243,6 +5243,7 @@ function readLocalTradesFallback(userId) {
   try {
     const userSaved = JSON.parse(localStorage.getItem(getUserTradesKey(userId)) || "[]");
     if (Array.isArray(userSaved) && userSaved.length) return userSaved.map(normalizeTradeForStorage);
+    if (userId) return [];
 
     const oldSaved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
     return Array.isArray(oldSaved) ? oldSaved.map(normalizeTradeForStorage) : [];
@@ -5439,6 +5440,13 @@ export default function TradingJournalDashboard() {
     setTradesLoading(true);
     setHasLoadedRemoteTrades(false);
     setDataMessage("");
+    const cachedRestore = readRestoreCache(authUser.id);
+    const cachedTrades = mergeTradesUnique(readLocalTradesFallback(authUser.id), Array.isArray(cachedRestore?.trades) ? cachedRestore.trades : []);
+    if (cachedTrades.length) {
+      setTrades(cachedTrades);
+    } else {
+      setTrades([]);
+    }
 
     loadTradesFromSupabase(authUser.id)
       .then(async (rows) => {
@@ -5750,6 +5758,7 @@ export default function TradingJournalDashboard() {
 
   const activeTrades = useMemo(() => getTradesForAccount(trades, account), [trades, account]);
   const accountBalance = useMemo(() => calculateAccountBalance(account, trades), [account, trades]);
+  const isInitialRemoteDataLoading = Boolean(supabase && isAuthenticated && tradesLoading && !hasLoadedRemoteTrades);
 
   const filteredTrades = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -6168,7 +6177,15 @@ Skipped duplicates: ${duplicateCount}
             {dataMessage}
           </div>
         )}
-        {tradeViewMode === "details" && viewTrade ? (
+        {isInitialRemoteDataLoading ? (
+          <div className="flex min-h-[62vh] items-center justify-center">
+            <div className="rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-8 text-center shadow-[0_18px_55px_rgba(217,70,239,0.14)]">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/10 text-xl font-black text-fuchsia-300">✦</div>
+              <div className="text-2xl font-black text-white">Loading your trading data</div>
+              <div className="mt-2 text-sm font-semibold text-zinc-400">Syncing your account, trades, and balance before showing the dashboard.</div>
+            </div>
+          </div>
+        ) : tradeViewMode === "details" && viewTrade ? (
           <TradeDetailsPage
             trade={viewTrade}
             account={account}
