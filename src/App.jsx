@@ -136,6 +136,25 @@ function getFriendlyAuthError(error, fallback = "Authentication failed. Try agai
 }
 
 async function updatePasswordWithRetry(password) {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+  if (accessToken) {
+    let apiError = null;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      if (attempt > 0) await wait(700 * attempt);
+      const response = await fetch("/api/update-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accessToken, password }),
+      });
+      if (response.ok) return;
+      const payload = await response.json().catch(() => null);
+      apiError = new Error(payload?.error || `Could not update password (${response.status}).`);
+      if (response.status < 500) throw apiError;
+    }
+    if (apiError) throw apiError;
+  }
+
   let lastError = null;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     if (attempt > 0) {
@@ -151,19 +170,6 @@ async function updatePasswordWithRetry(password) {
     lastError = error;
     if (!/failed to fetch|networkerror|load failed|fetch/i.test(String(error?.message || error))) break;
     await wait(650);
-  }
-
-  const { data: sessionData } = await supabase.auth.getSession();
-  const accessToken = sessionData?.session?.access_token;
-  if (accessToken) {
-    const response = await fetch("/api/update-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ accessToken, password }),
-    });
-    if (response.ok) return;
-    const payload = await response.json().catch(() => null);
-    throw new Error(payload?.error || "Could not update password.");
   }
 
   throw lastError;

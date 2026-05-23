@@ -1,4 +1,6 @@
 export default async function handler(request, response) {
+  response.setHeader("Cache-Control", "no-store");
+
   if (request.method === "OPTIONS") {
     response.setHeader("Allow", "POST, OPTIONS");
     return response.status(204).end();
@@ -10,7 +12,7 @@ export default async function handler(request, response) {
   }
 
   try {
-    const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+    const supabaseUrl = String(process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "").replace(/\/+$/, "");
     const anonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -18,7 +20,15 @@ export default async function handler(request, response) {
       return response.status(500).json({ error: "Supabase environment variables are missing." });
     }
 
-    const { accessToken, password } = request.body || {};
+    let body = {};
+    try {
+      body = typeof request.body === "string"
+        ? JSON.parse(request.body || "{}")
+        : request.body || {};
+    } catch {
+      return response.status(400).json({ error: "Invalid request body." });
+    }
+    const { accessToken, password } = body;
     if (!accessToken || typeof accessToken !== "string") {
       return response.status(400).json({ error: "Reset session token is missing." });
     }
@@ -27,7 +37,7 @@ export default async function handler(request, response) {
     }
 
     if (serviceRoleKey) {
-      const userResponse = await fetch(`${supabaseUrl.replace(/\/+$/, "")}/auth/v1/user`, {
+      const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
         method: "GET",
         headers: {
           apikey: anonKey,
@@ -48,7 +58,7 @@ export default async function handler(request, response) {
         return response.status(400).json({ error: "Could not identify the reset user." });
       }
 
-      const adminResponse = await fetch(`${supabaseUrl.replace(/\/+$/, "")}/auth/v1/admin/users/${userId}`, {
+      const adminResponse = await fetch(`${supabaseUrl}/auth/v1/admin/users/${userId}`, {
         method: "PUT",
         headers: {
           apikey: serviceRoleKey,
@@ -68,7 +78,7 @@ export default async function handler(request, response) {
       return response.status(200).json({ ok: true });
     }
 
-    const upstream = await fetch(`${supabaseUrl.replace(/\/+$/, "")}/auth/v1/user`, {
+    const upstream = await fetch(`${supabaseUrl}/auth/v1/user`, {
       method: "PUT",
       headers: {
         apikey: anonKey,
