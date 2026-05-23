@@ -5,9 +5,17 @@ create extension if not exists "pgcrypto";
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
-  account_data jsonb not null default '{}'::jsonb,
+  account_data jsonb default null,
   updated_at timestamptz not null default now()
 );
+
+alter table public.profiles
+  alter column account_data drop not null,
+  alter column account_data drop default;
+
+update public.profiles
+  set account_data = null
+  where account_data = '{}'::jsonb;
 
 create table if not exists public.trades (
   id uuid primary key default gen_random_uuid(),

@@ -3,26 +3,40 @@ import { createClient } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
 import {
   BarChart3,
+  Bell,
   BookOpen,
   Calendar,
   Camera,
   ChevronLeft,
   ChevronRight,
+  Database,
   Download,
   Edit3,
   Eye,
+  EyeOff,
   Filter,
+  Lock,
+  Mail,
   LayoutDashboard,
   ListChecks,
+  LogIn,
+  Moon,
+  PlayCircle,
   Plus,
+  Save,
   Search,
   Settings,
+  ShieldCheck,
+  Sparkles,
+  Sun,
   CreditCard,
   LogOut,
   Target,
   TrendingUp,
   Trash2,
   Upload,
+  User,
+  UserPlus,
   X,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -49,8 +63,10 @@ const ROUTINE_KEY = "critique_pre_trade_routine_v1";
 const THEME_KEY = "critique_theme_mode_v1";
 const RESTORE_CACHE_PREFIX = "critique_last_successful_restore_v1";
 const USER_TRADES_KEY_PREFIX = "critique_user_trades_v2";
+const REMEMBER_AUTH_KEY = "critique_remember_auth_v1";
+const PROFILE_PHOTO_KEY = "critique_profile_photo_v1";
 const MAX_SCREENSHOTS = 5;
-const BRAND_NAME = "Critique";
+const BRAND_NAME = "TryCritique";
 const BRAND_MARK = "◉";
 const TRADING_SESSIONS = ["Asia", "London", "NY-AM", "Lunch", "NY-PM", "Pre-Market"];
 
@@ -68,6 +84,39 @@ const hasValidSupabaseUrl = /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(SUPABAS
 const hasValidSupabaseKey = SUPABASE_ANON_KEY.length > 40;
 const supabase = hasValidSupabaseUrl && hasValidSupabaseKey ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 const isSupabaseReady = Boolean(supabase);
+
+function BrandBolt({ className = "" }) {
+  return (
+    <svg className={className} viewBox="0 0 48 64" fill="none" aria-hidden="true">
+      <path d="M30 2 9 34h13l-4 28 22-38H26L30 2Z" fill="url(#brand-bolt-gradient)" />
+      <path d="M25 7 15 30h10l-2 18 10-25H23l2-16Z" fill="#050007" fillOpacity="0.72" />
+      <defs>
+        <linearGradient id="brand-bolt-gradient" x1="9" x2="40" y1="2" y2="62" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#f0abfc" />
+          <stop offset="0.42" stopColor="#d946ef" />
+          <stop offset="1" stopColor="#7c3aed" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+function formatDisplayName(value, fallback = "User") {
+  const raw = String(value || "").trim();
+  if (!raw) return fallback;
+  const name = raw.includes("@") ? raw.split("@")[0] : raw;
+  const cleaned = name.replace(/[._-]+/g, " ").replace(/\s+/g, " ").trim();
+  if (!cleaned) return fallback;
+  return cleaned
+    .split(" ")
+    .map((part) => part ? part.charAt(0).toUpperCase() + part.slice(1) : "")
+    .join(" ");
+}
+
+function getUserDisplayName(user, fallback = "User") {
+  const metadata = user?.user_metadata || {};
+  return formatDisplayName(metadata.full_name || metadata.name || metadata.user_name || user?.email, fallback);
+}
 
 const THEME_STYLE_CSS = `
   html,
@@ -148,6 +197,259 @@ const THEME_STYLE_CSS = `
   .light-theme [class*="bg-black/95"] {
     background-color: rgba(255, 255, 255, 0.72) !important;
     color: #0f172a !important;
+  }
+
+  .light-theme .auth-shell {
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 48%, #f7efff 100%) !important;
+    color: #0f172a !important;
+  }
+
+  .light-theme .auth-shell [class*="bg-black/35"],
+  .light-theme .auth-shell [class*="bg-black/45"] {
+    background-color: rgba(255, 255, 255, 0.82) !important;
+    color: #0f172a !important;
+  }
+
+  .light-theme .auth-shell input,
+  .light-theme .auth-shell textarea,
+  .light-theme .auth-shell select {
+    background-color: #f8fafc !important;
+    border-color: rgba(148, 163, 184, 0.34) !important;
+    color: #0f172a !important;
+  }
+
+  .light-theme .auth-shell input::placeholder,
+  .light-theme .auth-shell textarea::placeholder {
+    color: #94a3b8 !important;
+  }
+
+  .light-theme .auth-shell [class*="text-fuchsia-300"] {
+    color: #c026d3 !important;
+  }
+
+  .light-theme .auth-shell [class*="text-emerald-300"],
+  .light-theme .auth-shell [class*="text-emerald-400"] {
+    color: #059669 !important;
+  }
+
+  .light-theme .auth-shell [class*="border-white/10"],
+  .light-theme .auth-shell [class*="border-emerald-500/20"],
+  .light-theme .auth-shell [class*="border-fuchsia-500/20"],
+  .light-theme .auth-shell [class*="border-fuchsia-500/30"] {
+    border-color: rgba(203, 213, 225, 0.9) !important;
+  }
+
+  .hero-dashboard-stage {
+    perspective: 1200px;
+  }
+
+  .hero-dashboard-card,
+  .hero-float-card,
+  .hero-metric-card,
+  .hero-progress-fill {
+    transition: transform 360ms ease, box-shadow 360ms ease, border-color 360ms ease, filter 360ms ease;
+  }
+
+  .hero-dashboard-stage:hover .hero-dashboard-card {
+    transform: translateY(-10px) rotateX(5deg) rotateY(-7deg) scale(1.015);
+    box-shadow: 0 42px 110px rgba(126, 34, 206, 0.32);
+  }
+
+  .hero-dashboard-stage:hover .hero-float-profit {
+    transform: translate(-14px, -12px) rotate(-5deg);
+  }
+
+  .hero-dashboard-stage:hover .hero-float-streak {
+    transform: translate(12px, -8px) rotate(5deg);
+  }
+
+  .hero-dashboard-stage:hover .hero-float-dd {
+    transform: translate(8px, 12px) rotate(-3deg);
+  }
+
+  .hero-dashboard-stage:hover .hero-metric-card {
+    transform: translateY(-6px);
+    border-color: rgba(217, 70, 239, 0.38);
+  }
+
+  .hero-dashboard-stage:hover .hero-progress-fill {
+    transform: scaleX(1.12);
+    filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.45));
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-float-card {
+      animation: heroFloat 5.5s ease-in-out infinite;
+    }
+
+    .hero-float-streak {
+      animation-delay: 0.8s;
+    }
+
+    .hero-float-dd {
+      animation-delay: 1.4s;
+    }
+  }
+
+  @keyframes heroFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-7px); }
+  }
+
+  .stats-interactive-card {
+    position: relative;
+    overflow: hidden;
+    transform: translateZ(0);
+    transition:
+      transform 260ms cubic-bezier(.2,.8,.2,1),
+      border-color 260ms ease,
+      box-shadow 260ms ease,
+      background 260ms ease;
+  }
+
+  .stats-interactive-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.06) 42%, rgba(255,255,255,0.14) 50%, rgba(255,255,255,0.04) 58%, transparent 100%);
+    transform: translateX(-135%);
+    transition: transform 700ms cubic-bezier(.2,.8,.2,1);
+  }
+
+  .stats-interactive-card::after {
+    content: "";
+    position: absolute;
+    inset: auto 12% -42% 12%;
+    height: 58%;
+    border-radius: 999px;
+    pointer-events: none;
+    filter: blur(34px);
+    opacity: 0;
+    transition: opacity 260ms ease;
+  }
+
+  .stats-interactive-card:hover {
+    transform: translateY(-8px) scale(1.028);
+  }
+
+  .stats-interactive-card:hover::before {
+    transform: translateX(135%);
+  }
+
+  .stats-interactive-card:hover::after {
+    opacity: 1;
+  }
+
+  .stats-card-green {
+    background: linear-gradient(145deg, rgba(4,18,12,0.92), rgba(2,6,4,0.96) 48%, rgba(5,36,20,0.84));
+    border-color: rgba(34,197,94,0.18);
+  }
+
+  .stats-card-green::after {
+    background: rgba(34,197,94,0.28);
+  }
+
+  .stats-card-green:hover {
+    border-color: rgba(34,197,94,0.38);
+    box-shadow: 0 26px 80px rgba(16,185,129,0.14), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  .stats-card-amber {
+    background: linear-gradient(145deg, rgba(35,16,5,0.92), rgba(8,4,2,0.96) 48%, rgba(54,24,7,0.84));
+    border-color: rgba(245,158,11,0.20);
+  }
+
+  .stats-card-amber::after {
+    background: rgba(245,158,11,0.24);
+  }
+
+  .stats-card-amber:hover {
+    border-color: rgba(245,158,11,0.42);
+    box-shadow: 0 26px 80px rgba(245,158,11,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  .stats-card-purple {
+    background: linear-gradient(145deg, rgba(20,7,31,0.92), rgba(4,4,6,0.96) 48%, rgba(37,12,58,0.72));
+    border-color: rgba(217,70,239,0.22);
+  }
+
+  .stats-card-purple::after {
+    background: rgba(217,70,239,0.24);
+  }
+
+  .stats-card-purple:hover {
+    border-color: rgba(217,70,239,0.48);
+    box-shadow: 0 26px 80px rgba(217,70,239,0.15), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  .light-theme .stats-interactive-card {
+    background: linear-gradient(145deg, #ffffff 0%, #fbf7ff 54%, #ffffff 100%) !important;
+    border-color: rgba(226,232,240,.95) !important;
+    color: #111827 !important;
+    box-shadow: 0 14px 34px rgba(15,23,42,.07) !important;
+  }
+
+  .light-theme .stats-interactive-card::before {
+    background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,.22) 34%, rgba(217,70,239,.18) 50%, rgba(16,185,129,.08) 64%, transparent 100%) !important;
+  }
+
+  .light-theme .stats-interactive-card::after {
+    opacity: .35;
+    filter: blur(42px);
+  }
+
+  .light-theme .stats-card-green {
+    background: linear-gradient(145deg, #ffffff 0%, #f0fdf4 58%, #ecfdf5 100%) !important;
+    border-color: rgba(16,185,129,.24) !important;
+  }
+
+  .light-theme .stats-card-green::after {
+    background: rgba(16,185,129,.16) !important;
+  }
+
+  .light-theme .stats-card-green:hover {
+    border-color: rgba(16,185,129,.38) !important;
+    box-shadow: 0 22px 54px rgba(16,185,129,.16), 0 0 0 1px rgba(16,185,129,.10) inset !important;
+  }
+
+  .light-theme .stats-card-amber {
+    background: linear-gradient(145deg, #ffffff 0%, #fff7ed 58%, #fffbeb 100%) !important;
+    border-color: rgba(245,158,11,.26) !important;
+  }
+
+  .light-theme .stats-card-amber::after {
+    background: rgba(245,158,11,.15) !important;
+  }
+
+  .light-theme .stats-card-amber:hover {
+    border-color: rgba(245,158,11,.42) !important;
+    box-shadow: 0 22px 54px rgba(245,158,11,.14), 0 0 0 1px rgba(245,158,11,.10) inset !important;
+  }
+
+  .light-theme .stats-card-purple {
+    background: linear-gradient(145deg, #ffffff 0%, #faf5ff 55%, #fdf4ff 100%) !important;
+    border-color: rgba(217,70,239,.25) !important;
+  }
+
+  .light-theme .stats-card-purple::after {
+    background: rgba(217,70,239,.15) !important;
+  }
+
+  .light-theme .stats-card-purple:hover {
+    border-color: rgba(217,70,239,.46) !important;
+    box-shadow: 0 22px 54px rgba(217,70,239,.15), 0 0 0 1px rgba(217,70,239,.10) inset !important;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .stats-soft-float {
+      animation: statsSoftFloat 5.8s ease-in-out infinite;
+    }
+  }
+
+  @keyframes statsSoftFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
   }
 
   .light-theme [class*="from-zinc-950"],
@@ -2386,6 +2688,79 @@ const THEME_STYLE_CSS = `
     backdrop-filter: blur(18px) !important;
   }
 
+  .light-theme .account-switcher-menu,
+  .light-theme .sidebar-user-menu {
+    background: rgba(255,255,255,.97) !important;
+    color: #111827 !important;
+    border-color: rgba(226,232,240,.95) !important;
+    box-shadow: 0 24px 70px rgba(15,23,42,.16), 0 0 0 1px rgba(217,70,239,.08) inset !important;
+    ring-color: transparent !important;
+  }
+
+  .light-theme .account-switcher-menu > div:first-child {
+    border-bottom-color: rgba(226,232,240,.9) !important;
+    background: linear-gradient(135deg, #ffffff, #faf5ff) !important;
+  }
+
+  .light-theme .account-switcher-menu button,
+  .light-theme .sidebar-user-menu button {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border-color: rgba(226,232,240,.85) !important;
+    box-shadow: none !important;
+  }
+
+  .light-theme .account-switcher-menu button:hover,
+  .light-theme .sidebar-user-menu button:hover {
+    background: #faf5ff !important;
+    border-color: rgba(217,70,239,.26) !important;
+    color: #86198f !important;
+  }
+
+  .light-theme .account-switcher-menu .bg-fuchsia-500,
+  .light-theme .sidebar-user-menu .bg-fuchsia-500 {
+    background: linear-gradient(135deg, #d946ef, #8b5cf6) !important;
+    color: #ffffff !important;
+  }
+
+  .light-theme .account-switcher-menu [class*="bg-blue-500"],
+  .light-theme .account-switcher-menu [class*="bg-white/15"] {
+    background: #eef2ff !important;
+    color: #475569 !important;
+    border-color: rgba(203,213,225,.8) !important;
+  }
+
+  .light-theme .account-switcher-menu .border-t,
+  .light-theme .sidebar-user-menu .h-px {
+    border-color: rgba(226,232,240,.9) !important;
+    background: rgba(226,232,240,.9) !important;
+  }
+
+  .light-theme .calendar-hero-pro,
+  .light-theme .calendar-shell-pro,
+  .light-theme .calendar-guide-pro,
+  .light-theme .calendar-summary-card-pro,
+  .light-theme .calendar-week-summary-pro,
+  .light-theme .mistake-panel-clean,
+  .light-theme .mistake-coach-hero,
+  .light-theme .issue-clean-card,
+  .light-theme .fix-step-card,
+  .light-theme .coach-summary-card,
+  .light-theme .guide-mini-card,
+  .light-theme .mini-coach-metric {
+    background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(250,245,255,.78) 58%, rgba(255,255,255,.96)) !important;
+    color: #111827 !important;
+    border-color: rgba(226,232,240,.95) !important;
+    box-shadow: 0 18px 44px rgba(15,23,42,.07) !important;
+  }
+
+  .light-theme .calendar-hero-pro::before,
+  .light-theme .calendar-shell-pro::before,
+  .light-theme .mistake-panel-clean::before,
+  .light-theme .mistake-coach-hero::before {
+    background: radial-gradient(circle at top left, rgba(217,70,239,.10), transparent 34%), radial-gradient(circle at bottom right, rgba(16,185,129,.08), transparent 36%) !important;
+  }
+
   /* Calendar day details modal */
   .calendar-day-modal-pro {
     background: linear-gradient(135deg, #050505 0%, #090909 52%, #07030b 100%) !important;
@@ -3383,6 +3758,17 @@ const defaultAccount = {
   description: "Practice trading with virtual money",
 };
 
+const createAccountPlaceholder = {
+  ...defaultAccount,
+  id: "create-account",
+  name: "Create account",
+  type: "No account yet",
+  currency: "USD",
+  balance: 0,
+  description: "Create your first trading account",
+  isPlaceholder: true,
+};
+
 const emptyForm = {
   symbol: "",
   direction: "Buy",
@@ -3416,8 +3802,6 @@ const nav = [
   [Calendar, "Calendar"],
   [BarChart3, "Statistics"],
   [Target, "Mistake Detector"],
-  [Settings, "Settings"],
-  [CreditCard, "Billing"],
 ];
 
 const quotes = [
@@ -3559,6 +3943,21 @@ function getTradeDateKey(trade) {
   if (/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(raw)) return raw;
   const date = new Date(raw);
   return Number.isNaN(date.getTime()) ? raw : formatDateKey(date);
+}
+
+function getTradeOrderValue(trade) {
+  const createdAt = Number(trade?.createdAt || 0);
+  if (createdAt) return createdAt;
+  const numericId = Number(trade?.id || 0);
+  return Number.isNaN(numericId) ? 0 : numericId;
+}
+
+function sortTradesChronologically(trades = []) {
+  return [...(Array.isArray(trades) ? trades : [])].sort((a, b) => {
+    const dateCompare = String(getTradeDateKey(a)).localeCompare(String(getTradeDateKey(b)));
+    if (dateCompare) return dateCompare;
+    return getTradeOrderValue(a) - getTradeOrderValue(b);
+  });
 }
 
 function getTradeRR(trade) {
@@ -3777,6 +4176,7 @@ function getNewestDashboardTrades(trades, limit = 8) {
 
 function tradeBelongsToAccount(trade, account) {
   if (!account) return true;
+  if (account.isPlaceholder || String(account.id) === String(createAccountPlaceholder.id)) return false;
   if (trade?.accountId) return String(trade.accountId) === String(account.id);
   if (trade?.accountName) return String(trade.accountName) === String(account.name);
   return String(account.id) === String(defaultAccount.id) || String(account.name) === String(defaultAccount.name);
@@ -4099,7 +4499,17 @@ function validateImportedTrade(trade) {
 }
 
 function getTradeDuplicateKey(trade) {
-  return [getTradeDateKey(trade), String(trade.pair || "").toUpperCase(), String(trade.direction || "").toUpperCase(), Number(trade.quantity || 0), Number(trade.pnl || 0), String(trade.setup || "")].join("|");
+  const amount = (value) => Number(value || 0).toFixed(2);
+  return [
+    getTradeDateKey(trade),
+    String(trade.pair || "").trim().toUpperCase(),
+    String(trade.direction || "").trim().toUpperCase(),
+    amount(trade.quantity),
+    amount(trade.risk),
+    amount(trade.pnl),
+    String(trade.setup || "").trim().toLowerCase(),
+    String(trade.session || "").trim().toLowerCase(),
+  ].join("|");
 }
 
 function parseTradesCSV(text, account, existingTrades = []) {
@@ -4201,7 +4611,7 @@ function calculateStatistics(trades = [], startingBalance = 50000) {
   let equity = 0;
   let peak = 0;
   let maxDrawdown = 0;
-  [...safeTrades].reverse().forEach((trade) => {
+  sortTradesChronologically(safeTrades).forEach((trade) => {
     equity += Number(trade.pnl || 0);
     peak = Math.max(peak, equity);
     maxDrawdown = Math.max(maxDrawdown, peak - equity);
@@ -4303,7 +4713,8 @@ async function loadAccountFromSupabase(userId) {
     .eq("id", userId)
     .maybeSingle();
   if (error) throw error;
-  return data?.account_data || null;
+  const accountData = data?.account_data;
+  return accountData && typeof accountData === "object" && Object.keys(accountData).length ? accountData : null;
 }
 
 async function saveAccountToSupabase(userId, account) {
@@ -4391,7 +4802,7 @@ function mergeTradesUnique(primary = [], secondary = []) {
   const seen = new Set();
   [...primary, ...secondary].forEach((trade) => {
     const normalized = normalizeTradeForStorage(trade);
-    const key = normalized.supabaseId || (typeof normalized.id === "string" && normalized.id.includes("-") ? normalized.id : getTradeDuplicateKey(normalized));
+    const key = getTradeDuplicateKey(normalized);
     if (seen.has(key)) return;
     seen.add(key);
     output.push(normalized);
@@ -4479,10 +4890,10 @@ export default function TradingJournalDashboard() {
   const [trades, setTrades] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      const parsed = saved ? JSON.parse(saved) : starterTrades;
+      const parsed = saved ? JSON.parse(saved) : [];
       return parsed.map((trade) => ({ ...trade, screenshots: normalizeScreenshots(trade), tags: normalizeTags(trade) }));
     } catch {
-      return starterTrades;
+      return [];
     }
   });
   const [accounts, setAccounts] = useState(() => {
@@ -4492,19 +4903,25 @@ export default function TradingJournalDashboard() {
         return savedAccounts.map((item, index) => ({ ...defaultAccount, ...item, id: item.id || `acc-${index + 1}` }));
       }
       const legacyAccount = JSON.parse(localStorage.getItem(ACCOUNT_KEY) || "null");
-      return [{ ...defaultAccount, ...(legacyAccount || {}), id: legacyAccount?.id || defaultAccount.id }];
+      return legacyAccount?.id ? [{ ...defaultAccount, ...legacyAccount, id: legacyAccount.id }] : [];
     } catch {
-      return [defaultAccount];
+      return [];
     }
   });
   const [activeAccountId, setActiveAccountId] = useState(() => {
     try {
-      return localStorage.getItem(ACTIVE_ACCOUNT_KEY) || defaultAccount.id;
+      return localStorage.getItem(ACTIVE_ACCOUNT_KEY) || "";
     } catch {
-      return defaultAccount.id;
+      return "";
     }
   });
-  const account = useMemo(() => accounts.find((item) => String(item.id) === String(activeAccountId)) || accounts[0] || defaultAccount, [accounts, activeAccountId]);
+  const [pendingAccountDraft, setPendingAccountDraft] = useState(null);
+  const account = useMemo(() => {
+    const existing = accounts.find((item) => String(item.id) === String(activeAccountId));
+    if (existing) return existing;
+    if (pendingAccountDraft && String(pendingAccountDraft.id) === String(activeAccountId)) return pendingAccountDraft;
+    return accounts[0] || createAccountPlaceholder;
+  }, [accounts, activeAccountId, pendingAccountDraft]);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isAccountSwitcherOpen, setIsAccountSwitcherOpen] = useState(false);
   const [isSidebarUserMenuOpen, setIsSidebarUserMenuOpen] = useState(false);
@@ -4537,24 +4954,36 @@ export default function TradingJournalDashboard() {
       return "dark";
     }
   });
-  const [authPage, setAuthPage] = useState("login");
+  const [authPage, setAuthPage] = useState("landing");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authUser, setAuthUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [authMessage, setAuthMessage] = useState("");
   const [passwordRecoverySession, setPasswordRecoverySession] = useState(false);
   const [tradesLoading, setTradesLoading] = useState(false);
+  const [hasLoadedRemoteTrades, setHasLoadedRemoteTrades] = useState(false);
   const [dataMessage, setDataMessage] = useState("");
+  const [profilePhoto, setProfilePhoto] = useState(() => {
+    try {
+      return localStorage.getItem(PROFILE_PHOTO_KEY) || "";
+    } catch {
+      return "";
+    }
+  });
+  const profileName = getUserDisplayName(authUser, account?.isPlaceholder ? "User" : account.name || "User");
+  const profileInitial = String(profileName || authUser?.email || "U").trim().charAt(0).toUpperCase();
 
   useEffect(() => {
     if (authLoading || tradesLoading) return;
+    if (supabase && isAuthenticated && !hasLoadedRemoteTrades) return;
     saveLocalTradesFallback(trades, authUser?.id);
-  }, [trades, authUser?.id, authLoading, tradesLoading]);
+  }, [trades, authUser?.id, authLoading, tradesLoading, isAuthenticated, hasLoadedRemoteTrades]);
 
   useEffect(() => {
     if (!supabase || !authUser?.id || !isAuthenticated) return undefined;
     let mounted = true;
     setTradesLoading(true);
+    setHasLoadedRemoteTrades(false);
     setDataMessage("");
 
     const localBeforeFetch = readLocalTradesFallback(authUser.id);
@@ -4572,19 +5001,10 @@ export default function TradingJournalDashboard() {
         const localTrades = readLocalTradesFallback(authUser.id);
 
         if (rows.length) {
-          const mergedTrades = mergeTradesUnique(rows, localTrades);
-          setTrades(mergedTrades);
-          saveLocalTradesFallback(mergedTrades, authUser.id);
-          saveRestoreCache(authUser.id, { trades: mergedTrades, account, routine, theme });
-
-          if (localTrades.length && mergedTrades.length > rows.length) {
-            try {
-              await replaceTradesInSupabase(authUser.id, mergedTrades);
-              setDataMessage(`Local trades were merged back into Supabase ✅ Trades: ${mergedTrades.length}`);
-            } catch (syncError) {
-              setDataMessage(syncError?.message || "Local trades are safe in browser storage, but Supabase merge failed. Check RLS policies.");
-            }
-          }
+          const serverTrades = mergeTradesUnique(rows, []);
+          setTrades(serverTrades);
+          saveLocalTradesFallback(serverTrades, authUser.id);
+          saveRestoreCache(authUser.id, { trades: serverTrades, account, routine, theme });
           return;
         }
 
@@ -4626,7 +5046,10 @@ export default function TradingJournalDashboard() {
         setDataMessage(error?.message || "Could not load trades from Supabase.");
       })
       .finally(() => {
-        if (mounted) setTradesLoading(false);
+        if (mounted) {
+          setHasLoadedRemoteTrades(true);
+          setTradesLoading(false);
+        }
       });
 
     return () => {
@@ -4635,8 +5058,13 @@ export default function TradingJournalDashboard() {
   }, [authUser?.id, isAuthenticated]);
   useEffect(() => {
     localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
-    localStorage.setItem(ACTIVE_ACCOUNT_KEY, account.id);
-    localStorage.setItem(ACCOUNT_KEY, JSON.stringify(account));
+    if (accounts.length && !account.isPlaceholder) {
+      localStorage.setItem(ACTIVE_ACCOUNT_KEY, account.id);
+      localStorage.setItem(ACCOUNT_KEY, JSON.stringify(account));
+    } else {
+      localStorage.removeItem(ACTIVE_ACCOUNT_KEY);
+      localStorage.removeItem(ACCOUNT_KEY);
+    }
   }, [accounts, account]);
 
   useEffect(() => {
@@ -4664,15 +5092,29 @@ export default function TradingJournalDashboard() {
   useEffect(() => { localStorage.setItem(THEME_KEY, theme); }, [theme]);
 
   useEffect(() => {
+    if (!accounts.length || activeAccountId) return;
+    setActiveAccountId(accounts[0].id);
+  }, [accounts, activeAccountId]);
+
+  useEffect(() => {
     if (!supabase) {
       setAuthLoading(false);
       return undefined;
     }
 
     let mounted = true;
+    const isRecoveryUrl = window.location.pathname.includes("/auth/reset-password") || window.location.hash.includes("type=recovery");
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
       const user = data?.session?.user || null;
+      if (isRecoveryUrl) {
+        setPasswordRecoverySession(true);
+        setAuthPage("updatePassword");
+        setAuthUser(user);
+        setIsAuthenticated(false);
+        setAuthLoading(false);
+        return;
+      }
       setAuthUser(user);
       setIsAuthenticated(Boolean(user));
       setAuthLoading(false);
@@ -4721,7 +5163,7 @@ export default function TradingJournalDashboard() {
         const { error } = await supabase.auth.signUp({
           email: values.email,
           password: values.password,
-          options: { data: { full_name: values.name, account_type: values.accountType } },
+          options: { data: { full_name: values.name } },
         });
         if (error) throw error;
         setAuthMessage("Registration started. Check your Gmail inbox for the confirmation email.");
@@ -4767,7 +5209,9 @@ export default function TradingJournalDashboard() {
       ...defaultAccount,
       ...(nextAccount || {}),
       id: nextAccount?.id || account?.id || `acc-${Date.now()}`,
+      name: String(nextAccount?.name || "").trim() || `Account ${accounts.length + 1}`,
       balance: Number(nextAccount?.balance || 0),
+      isPlaceholder: false,
     };
 
     try {
@@ -4778,6 +5222,7 @@ export default function TradingJournalDashboard() {
         const exists = current.some((item) => String(item.id) === String(finalAccount.id));
         return exists ? current.map((item) => String(item.id) === String(finalAccount.id) ? finalAccount : item) : [finalAccount, ...current];
       });
+      setPendingAccountDraft(null);
       setActiveAccountId(finalAccount.id);
       return { ok: true };
     } catch (error) {
@@ -4790,15 +5235,23 @@ export default function TradingJournalDashboard() {
     const newAccount = {
       ...defaultAccount,
       id: `acc-${Date.now()}`,
-      name: `Account ${accounts.length + 1}`,
+      name: accounts.length ? `Account ${accounts.length + 1}` : "",
       type: "Demo Account",
       balance: 50000,
-      description: "Another trading account",
+      description: accounts.length ? "Another trading account" : "My first trading account",
     };
-    setAccounts((current) => [newAccount, ...current]);
+    setPendingAccountDraft(newAccount);
     setActiveAccountId(newAccount.id);
     setIsAccountSwitcherOpen(false);
     setIsAccountModalOpen(true);
+  }
+
+  function closeAccountModal() {
+    if (pendingAccountDraft && String(activeAccountId) === String(pendingAccountDraft.id)) {
+      setPendingAccountDraft(null);
+      setActiveAccountId(accounts[0]?.id || "");
+    }
+    setIsAccountModalOpen(false);
   }
 
   useEffect(() => {
@@ -4842,13 +5295,18 @@ export default function TradingJournalDashboard() {
 
   const curve = useMemo(() => {
     let balance = 0;
-    return [...activeTrades].reverse().map((trade) => {
+    return sortTradesChronologically(activeTrades).map((trade) => {
       balance += Number(trade.pnl || 0);
-      return { date: trade.date, pnl: balance, winRate: stats.winRate };
+      return { date: getTradeDateKey(trade), pnl: balance, winRate: stats.winRate };
     });
   }, [activeTrades, stats.winRate]);
 
   function openAddTrade(dateOverride) {
+    if (!accounts.length) {
+      setDataMessage("Create your first trading account before logging trades.");
+      createNewAccount();
+      return;
+    }
     setEditingTradeId(null);
     setForm({ ...emptyForm, date: typeof dateOverride === "string" ? dateOverride : formatDateKey(new Date()), screenshots: [] });
     setIsTradeModalOpen(true);
@@ -4864,6 +5322,11 @@ export default function TradingJournalDashboard() {
     setIsTradeModalOpen(false);
   }
   async function saveTrade() {
+    if (!accounts.length || account.isPlaceholder) {
+      setDataMessage("Create your first trading account before saving trades.");
+      createNewAccount();
+      return;
+    }
     const required = [form.symbol, form.date, form.session, form.strategy];
     const pnl = Number(form.pnl);
     const quantity = Number(form.quantity);
@@ -5055,7 +5518,7 @@ Skipped duplicates: ${duplicateCount}
 
   if (!isAuthenticated) {
     return (
-      <div className={theme === "light" ? "light-theme min-h-screen overflow-x-hidden bg-black text-white" : "min-h-screen overflow-x-hidden bg-black text-white"}>
+      <div className={theme === "light" ? "light-theme min-h-screen overflow-x-hidden bg-[#f8fafc] text-slate-950" : "min-h-screen overflow-x-hidden bg-black text-white"}>
         <style>{THEME_STYLE_CSS}</style>
         <AuthPage
           authPage={authPage}
@@ -5087,16 +5550,16 @@ Skipped duplicates: ${duplicateCount}
           </button>
         </div>
         <div className="relative mt-10">
-          <button onClick={() => setIsAccountSwitcherOpen((open) => !open)} className="account-sidebar-card flex w-full items-center justify-between rounded-lg border border-white/10 bg-zinc-950 px-3 py-3 text-left hover:border-fuchsia-500/40">
+          <button onClick={() => accounts.length ? setIsAccountSwitcherOpen((open) => !open) : createNewAccount()} className="account-sidebar-card flex w-full items-center justify-between rounded-lg border border-white/10 bg-zinc-950 px-3 py-3 text-left hover:border-fuchsia-500/40">
             <div>
-              <div className="text-sm font-bold">🎯 {account.name}</div>
-              <div className="text-xs text-zinc-400">{account.currency} {accountBalance.currentBalance.toLocaleString()}</div>
+              <div className="text-sm font-bold">{accounts.length ? `🎯 ${account.name}` : "＋ Create account"}</div>
+              <div className="text-xs text-zinc-400">{accounts.length ? `${account.currency} ${accountBalance.currentBalance.toLocaleString()}` : "No trading account yet"}</div>
             </div>
             <span className={isAccountSwitcherOpen ? "rotate-180 text-zinc-500 transition" : "text-zinc-500 transition"}>⌄</span>
           </button>
 
           {isAccountSwitcherOpen && (
-            <motion.div initial={{ opacity: 0, y: 8, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="absolute left-0 top-14 z-50 w-80 overflow-hidden rounded-xl border border-white/10 bg-[#070707] p-1 shadow-[0_18px_55px_rgba(0,0,0,0.90)] ring-1 ring-fuchsia-500/15">
+            <motion.div initial={{ opacity: 0, y: 8, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="account-switcher-menu absolute left-0 top-14 z-50 w-80 overflow-hidden rounded-xl border border-white/10 bg-[#070707] p-1 shadow-[0_18px_55px_rgba(0,0,0,0.90)] ring-1 ring-fuchsia-500/15">
               <div className="flex items-center justify-between border-b border-white/10 px-3 py-3">
                 <div className="text-sm font-black text-white">Trading Accounts</div>
                 <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-black text-white">{accounts.length} Account{accounts.length === 1 ? "" : "s"}</span>
@@ -5139,7 +5602,7 @@ Skipped duplicates: ${duplicateCount}
         </div>
         <div className="mt-6 space-y-2">
           {nav.map(([Icon, label]) => (
-            <button key={label} onClick={() => { setActive(label); setTradeViewMode(null); }} className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm ${active === label && !tradeViewMode ? "bg-fuchsia-500 text-black font-black" : "text-zinc-300 hover:bg-white/5"}`}>
+            <button key={label} onClick={() => { setActive(label); setTradeViewMode(null); }} className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-[1.035] hover:border hover:border-fuchsia-500/30 hover:shadow-[0_0_22px_rgba(217,70,239,0.18)]" : ""} ${active === label && !tradeViewMode ? "bg-fuchsia-500 text-black font-black" : "text-zinc-300 hover:bg-white/5"}`}>
               <Icon size={18} /> {label}
             </button>
           ))}
@@ -5149,7 +5612,7 @@ Skipped duplicates: ${duplicateCount}
             <motion.div
               initial={{ opacity: 0, y: 12, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              className="mb-3 overflow-hidden rounded-2xl border border-white/10 bg-[#070707] p-2 shadow-[0_18px_55px_rgba(0,0,0,0.85)] ring-1 ring-fuchsia-500/10"
+              className="sidebar-user-menu mb-3 overflow-hidden rounded-lg border border-white/10 bg-[#070707] p-3 shadow-[0_18px_55px_rgba(0,0,0,0.85)] ring-1 ring-fuchsia-500/10"
             >
               <button
                 onClick={() => {
@@ -5157,9 +5620,9 @@ Skipped duplicates: ${duplicateCount}
                   setTradeViewMode(null);
                   setIsSidebarUserMenuOpen(false);
                 }}
-                className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-bold text-zinc-200 transition hover:bg-white/5 hover:text-white"
+                className="flex w-full items-center gap-4 rounded-lg px-3 py-3 text-left text-sm font-bold text-white transition hover:bg-white/5"
               >
-                <Settings size={17} className="text-zinc-400" />
+                <Settings size={17} className="text-zinc-400" strokeWidth={2.2} />
                 Settings
               </button>
               <button
@@ -5168,17 +5631,17 @@ Skipped duplicates: ${duplicateCount}
                   setTradeViewMode(null);
                   setIsSidebarUserMenuOpen(false);
                 }}
-                className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-bold text-zinc-200 transition hover:bg-white/5 hover:text-white"
+                className="flex w-full items-center gap-4 rounded-lg px-3 py-3 text-left text-sm font-bold text-white transition hover:bg-white/5"
               >
-                <CreditCard size={17} className="text-zinc-400" />
+                <CreditCard size={17} className="text-zinc-400" strokeWidth={2.2} />
                 Billing
               </button>
-              <div className="my-2 h-px bg-white/10" />
+              <div className="my-3 h-px bg-white/10" />
               <button
                 onClick={handleSignOut}
-                className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-bold text-red-400 transition hover:bg-red-500/10 hover:text-red-300"
+                className="flex w-full items-center gap-4 rounded-lg px-3 py-3 text-left text-sm font-bold text-red-400 transition hover:bg-red-500/10 hover:text-red-300"
               >
-                <LogOut size={17} />
+                <LogOut size={17} strokeWidth={2.2} />
                 Sign out
               </button>
             </motion.div>
@@ -5186,13 +5649,15 @@ Skipped duplicates: ${duplicateCount}
 
           <button
             onClick={() => setIsSidebarUserMenuOpen((open) => !open)}
-            className="account-sidebar-card flex w-full items-center justify-between rounded-xl border border-fuchsia-500/20 bg-fuchsia-950/40 p-3 text-left transition hover:border-fuchsia-400/50 hover:bg-fuchsia-950/55"
+            className="account-sidebar-card flex w-full items-center justify-between rounded-lg border border-fuchsia-500/20 bg-fuchsia-950/40 p-3 text-left transition hover:border-fuchsia-400/50 hover:bg-fuchsia-950/55"
           >
             <div className="flex min-w-0 items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-fuchsia-500 text-sm font-black text-black">v</div>
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-fuchsia-500 text-sm font-black text-black">
+                {profilePhoto ? <img src={profilePhoto} alt="Profile" className="h-full w-full object-cover" /> : profileInitial}
+              </div>
               <div className="min-w-0">
-                <div className="truncate text-sm font-black text-white">{authUser?.user_metadata?.full_name || account.name || "vazha buianovi"}</div>
-                <div className="text-xs font-semibold text-zinc-400">{authUser?.email || "Pro Trial"}</div>
+                <div className="truncate text-sm font-black text-white">{profileName}</div>
+                <div className="text-xs font-semibold text-zinc-400">Pro Trial</div>
               </div>
             </div>
             <span className={isSidebarUserMenuOpen ? "text-zinc-400 transition rotate-180" : "text-zinc-400 transition"}>⌄</span>
@@ -5201,11 +5666,6 @@ Skipped duplicates: ${duplicateCount}
       </aside>
       <main className="min-h-screen overflow-x-hidden pb-24 p-4 sm:p-6 lg:p-8">
         <div className="w-full max-w-none">
-        {tradesLoading && (
-          <div className="mb-5 rounded-2xl border border-fuchsia-500/25 bg-fuchsia-500/10 px-4 py-3 text-sm font-black text-fuchsia-300">
-            Loading your saved trades from Supabase...
-          </div>
-        )}
         {dataMessage && (
           <div className="mb-5 rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-black text-red-300">
             {dataMessage}
@@ -5236,7 +5696,8 @@ Skipped duplicates: ${duplicateCount}
             onSelectCalendarDate={(dateKey) => { setSelectedCalendarDate(dateKey); setActive("Calendar"); }}
             onViewAllTrades={() => setActive("Journal")}
             onOpenMistakeDetector={() => setActive("Mistake Detector")}
-            onOpenAccount={() => setIsAccountModalOpen(true)}
+            onOpenAccount={() => accounts.length ? setIsAccountModalOpen(true) : createNewAccount()}
+            profileName={profileName}
           />
         ) : active === "Journal" ? (
           <JournalPage
@@ -5267,24 +5728,26 @@ Skipped duplicates: ${duplicateCount}
             setSelectedDate={setSelectedCalendarDate}
           />
         ) : active === "Statistics" ? (
-          <StatisticsPage stats={stats} curve={curve} trades={activeTrades} onExport={() => exportTradesToCSV(activeTrades)} />
+          <SimpleStatisticsPage stats={stats} curve={curve} trades={activeTrades} onExport={() => exportTradesToCSV(activeTrades)} />
         ) : active === "Mistake Detector" ? (
-          <MistakeDetectorPage trades={activeTrades} />
+          <SimpleMistakeDetectorPage trades={activeTrades} />
         ) : active === "Settings" ? (
-          <SettingsPage
+          <SettingsPagePro
             account={account}
             accountBalance={accountBalance}
             authUser={authUser}
             theme={theme}
             setTheme={setTheme}
             isSupabaseReady={isSupabaseReady}
-            onOpenAccount={() => setIsAccountModalOpen(true)}
+            onOpenAccount={() => accounts.length ? setIsAccountModalOpen(true) : createNewAccount()}
             onBackup={() => exportCritiqueBackup({ trades: activeTrades, account, routine, theme })}
             onRestore={() => backupFileRef.current?.click()}
             onSignOut={handleSignOut}
+            profilePhoto={profilePhoto}
+            setProfilePhoto={setProfilePhoto}
           />
         ) : (
-          <BillingPage account={account} authUser={authUser} />
+          <BillingPagePro account={account} authUser={authUser} />
         )}
         </div>
       </main>
@@ -5294,7 +5757,7 @@ Skipped duplicates: ${duplicateCount}
       {isTradeModalOpen && <AddTradeModal isEditing={Boolean(editingTradeId)} form={form} setForm={setForm} onClose={closeTradeModal} onSave={saveTrade} account={account} accountBalance={accountBalance} />}
       {importPreview && <ImportPreviewModal preview={importPreview} onConfirm={confirmImportTrades} onClose={() => setImportPreview(null)} />}
       {isRoutineOpen && <PreTradeRoutineModal routine={routine} setRoutine={setRoutine} onClose={() => setIsRoutineOpen(false)} />}
-      {isAccountModalOpen && <AccountModal account={account} accountBalance={accountBalance} onSaveAccount={handleSaveAccountSettings} onClose={() => setIsAccountModalOpen(false)} />}
+      {isAccountModalOpen && <AccountModal account={account} accountBalance={accountBalance} onSaveAccount={handleSaveAccountSettings} onClose={closeAccountModal} />}
     </div>
   );
 }
@@ -5330,7 +5793,7 @@ function MobileBottomNav({ active, setActive, onAdd, setTradeViewMode }) {
                 setTradeViewMode(null);
                 setActive(label);
               }}
-              className={isAdd ? "mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-fuchsia-500 text-white shadow-[0_0_22px_rgba(217,70,239,.38)]" : selected ? "flex flex-col items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 px-1 py-2 text-fuchsia-300" : "flex flex-col items-center justify-center rounded-xl px-1 py-2 text-zinc-500"}
+              className={isAdd ? "mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-fuchsia-500 text-white shadow-[0_0_22px_rgba(217,70,239,.38)]" : selected ? "flex flex-col items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 px-1 py-2 text-fuchsia-300 transition-all duration-200 hover:scale-110" : `flex flex-col items-center justify-center rounded-xl px-1 py-2 text-zinc-500 transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-110 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" : "hover:text-zinc-300"}`}
             >
               <Icon size={18} />
               <span className="mt-1 text-[9px] font-black leading-tight">{label === "Mistake Detector" ? "Mistake" : label}</span>
@@ -5615,7 +6078,7 @@ function ReviewBox({ title, value, tone }) {
   return <div className={`rounded-xl border p-4 ${cls}`}><div className="text-xs font-black uppercase tracking-widest text-zinc-400">{title}</div><div className="mt-2 text-sm font-semibold text-zinc-300">{value}</div></div>;
 }
 
-function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades, onAdd, onView, onStartDay, routine, selectedCalendarDate, onSelectCalendarDate, onViewAllTrades, onOpenMistakeDetector, onOpenAccount }) {
+function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades, onAdd, onView, onStartDay, routine, selectedCalendarDate, onSelectCalendarDate, onViewAllTrades, onOpenMistakeDetector, onOpenAccount, profileName = "User" }) {
   const [performanceMode, setPerformanceMode] = useState("EquityCurve");
   const quote = quotes[new Date().getDate() % quotes.length];
   const checkedCount = routineItems.filter((item) => routine.checked?.[item.id]).length;
@@ -5630,18 +6093,16 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
         <div className="hidden items-center gap-4 lg:flex">
           <button onClick={onOpenAccount} className="flex items-center gap-2 rounded-xl border border-white/10 bg-zinc-950/80 px-4 py-2 text-sm font-black text-white shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
             <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
-            {account.name}
+            {account?.isPlaceholder ? "Create account" : account.name}
             <span className="rounded-lg bg-white/10 px-2 py-0.5 text-xs">{account.currency}</span>
           </button>
-          <button className="rounded-xl border border-white/10 bg-black px-3 py-2 text-zinc-300 hover:border-fuchsia-500/40 hover:text-white">♧</button>
-          <button className="rounded-xl border border-white/10 bg-black px-3 py-2 text-zinc-300 hover:border-fuchsia-500/40 hover:text-white">☼</button>
         </div>
       </div>
 
       <div className="dashboard-hero rounded-2xl border border-fuchsia-500/35 bg-gradient-to-r from-fuchsia-950/45 via-black to-orange-950/10 p-6 shadow-[0_0_45px_rgba(168,85,247,0.13)]">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <h1 className="text-3xl font-black xl:text-4xl">Welcome back, vazha! 👋</h1>
+            <h1 className="text-3xl font-black xl:text-4xl">Welcome back, {profileName}! 👋</h1>
             <p className="mt-3 flex items-center gap-2 text-base font-semibold text-zinc-400">▣ {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}</p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -5924,10 +6385,10 @@ function PerformanceOverviewChart({ mode, trades, curve, stats }) {
     if (mode === "WinRate") {
       let total = 0;
       let wins = 0;
-      return [...trades].reverse().map((trade) => {
+      return sortTradesChronologically(trades).map((trade) => {
         total += 1;
         if (Number(trade.pnl) > 0) wins += 1;
-        return { date: trade.date, value: total ? (wins / total) * 100 : 0 };
+        return { date: getTradeDateKey(trade), value: total ? (wins / total) * 100 : 0 };
       });
     }
     if (mode === "DailyP&L") {
@@ -5974,20 +6435,20 @@ function PerformanceOverviewChart({ mode, trades, curve, stats }) {
 function PerformanceScorePanel({ stats }) {
   const [hoveredMetric, setHoveredMetric] = useState(null);
   const score = Math.min(100, Math.max(0, Number(stats.score || 0)));
-  const center = { x: 140, y: 138 };
+  const center = { x: 165, y: 142 };
   const baseMetrics = stats.metrics || {};
   const metricOrder = [
-    { key: "winRate", x: 140, y: 34, anchor: "middle" },
-    { key: "profitFactor", x: 214, y: 76, anchor: "start" },
-    { key: "avgWinLoss", x: 214, y: 160, anchor: "start" },
-    { key: "recoveryFactor", x: 140, y: 202, anchor: "middle" },
-    { key: "maxDrawdown", x: 66, y: 160, anchor: "end" },
-    { key: "consistency", x: 66, y: 76, anchor: "end" },
+    { key: "winRate", x: 165, y: 34, anchor: "middle" },
+    { key: "profitFactor", x: 255, y: 88, anchor: "start" },
+    { key: "avgWinLoss", x: 255, y: 194, anchor: "start" },
+    { key: "recoveryFactor", x: 165, y: 248, anchor: "middle" },
+    { key: "maxDrawdown", x: 75, y: 194, anchor: "end" },
+    { key: "consistency", x: 75, y: 88, anchor: "end" },
   ];
 
   const chartPoints = metricOrder.map((point) => {
     const metric = baseMetrics[point.key] || { label: point.key, description: "", actual: "—", score: 0 };
-    const scale = Math.max(0.12, Number(metric.score || 0) / 100);
+    const scale = Math.max(0.22, Number(metric.score || 0) / 100);
     return {
       ...point,
       px: center.x + (point.x - center.x) * scale,
@@ -6033,26 +6494,37 @@ function PerformanceScorePanel({ stats }) {
         )}
 
         <div className="flex justify-center">
-          <svg width="290" height="235" viewBox="0 0 280 235" className="overflow-visible">
-            <polygon points="140,34 214,76 214,160 140,202 66,160 66,76" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-            <polygon points="140,60 196,92 196,148 140,180 84,148 84,92" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1" />
-            <polygon points="140,86 177,107 177,139 140,160 103,139 103,107" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1" />
+          <svg width="330" height="280" viewBox="0 0 330 280" className="overflow-visible">
+            <defs>
+              <filter id="radarGlow" x="-60%" y="-60%" width="220%" height="220%">
+                <feGaussianBlur stdDeviation="5" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            <polygon points="165,34 255,88 255,194 165,248 75,194 75,88" fill="rgba(255,255,255,0.015)" stroke="rgba(255,255,255,0.20)" strokeWidth="1.2" />
+            <polygon points="165,61 232,101 232,181 165,221 98,181 98,101" fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth="1" />
+            <polygon points="165,88 210,115 210,167 165,194 120,167 120,115" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+            <polygon points="165,115 187,128 187,154 165,167 143,154 143,128" fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="1" />
 
             {metricOrder.map((point) => (
-              <line key={point.key} x1="140" y1="138" x2={point.x} y2={point.y} stroke="rgba(255,255,255,0.18)" />
+              <line key={point.key} x1={center.x} y1={center.y} x2={point.x} y2={point.y} stroke="rgba(255,255,255,0.16)" />
             ))}
 
-            <polygon points={radarPoints} fill="rgba(34,197,94,0.28)" stroke="#22c55e" strokeWidth="3" />
+            <circle cx={center.x} cy={center.y} r="4" fill="rgba(34,197,94,0.45)" />
+            <polygon points={radarPoints} fill="rgba(34,197,94,0.24)" stroke="#22c55e" strokeWidth="3" filter="url(#radarGlow)" />
 
             {chartPoints.map((point) => (
               <circle
                 key={point.key}
                 cx={point.px}
                 cy={point.py}
-                r={hoveredMetric === point.key ? 7 : 5}
+                r={hoveredMetric === point.key ? 8 : 5.5}
                 fill="#22c55e"
                 stroke="#06150c"
-                strokeWidth="2"
+                strokeWidth="2.5"
                 onMouseEnter={() => setHoveredMetric(point.key)}
                 onMouseLeave={() => setHoveredMetric(null)}
                 className="cursor-pointer transition-all"
@@ -6061,9 +6533,9 @@ function PerformanceScorePanel({ stats }) {
 
             {metricOrder.map((point) => {
               const metric = baseMetrics[point.key] || { label: point.key };
-              const labelX = point.key === "profitFactor" || point.key === "avgWinLoss" ? point.x + 8 : point.key === "maxDrawdown" || point.key === "consistency" ? 8 : point.x;
-              const labelY = point.key === "winRate" ? point.y - 12 : point.key === "recoveryFactor" ? point.y + 18 : point.y + 4;
-              const labelAnchor = point.key === "maxDrawdown" || point.key === "consistency" ? "start" : point.anchor;
+              const labelX = point.key === "profitFactor" || point.key === "avgWinLoss" ? point.x + 12 : point.key === "maxDrawdown" || point.key === "consistency" ? point.x - 12 : point.x;
+              const labelY = point.key === "winRate" ? point.y - 14 : point.key === "recoveryFactor" ? point.y + 22 : point.y + 4;
+              const labelAnchor = point.key === "maxDrawdown" || point.key === "consistency" ? "end" : point.anchor;
               return (
                 <text
                   key={point.key}
@@ -6826,6 +7298,227 @@ function getBestPerformanceStats(trades = []) {
   };
 }
 
+function SettingsToggle({ checked, onClick }) {
+  return (
+    <button type="button" onClick={onClick} className={checked ? "relative h-7 w-12 shrink-0 rounded-full bg-fuchsia-500" : "relative h-7 w-12 shrink-0 rounded-full bg-zinc-800"}>
+      <span className={checked ? "absolute right-1 top-1 h-5 w-5 rounded-full bg-black" : "absolute left-1 top-1 h-5 w-5 rounded-full bg-black ring-1 ring-zinc-700"} />
+    </button>
+  );
+}
+
+function SettingsPanel({ icon, title, subtitle, children, className = "" }) {
+  return (
+    <section className={`rounded-lg border border-white/12 bg-[#070707] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.18)] ${className}`}>
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5 text-white">{icon}</div>
+        <div>
+          <h2 className="text-2xl font-black text-white">{title}</h2>
+          {subtitle && <p className="mt-1 text-sm font-semibold text-zinc-400">{subtitle}</p>}
+        </div>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, isSupabaseReady, onOpenAccount, onBackup, onRestore, onSignOut, profilePhoto, setProfilePhoto }) {
+  const profileName = getUserDisplayName(authUser, account?.isPlaceholder ? "User" : account?.name || "User");
+  const profileInitials = profileName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join("") || "U";
+  const currentBalance = Number(accountBalance?.currentBalance || account?.balance || 0);
+  const tradePnl = Number(accountBalance?.tradePnl || 0);
+  const profilePhotoInputRef = useRef(null);
+  const [fullName, setFullName] = useState(profileName);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [preferences, setPreferences] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("critique_settings_preferences_v1") || "null") || { currency: account?.currency || "USD", timezone: "Asia/Tbilisi (GMT+4)", weekStartsOn: "Monday" };
+    } catch {
+      return { currency: account?.currency || "USD", timezone: "Asia/Tbilisi (GMT+4)", weekStartsOn: "Monday" };
+    }
+  });
+  const [notifications, setNotifications] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("critique_notification_settings_v1") || "null") || { tradeEmail: true, tradePush: true, weeklyReports: true, goals: true, marketing: false };
+    } catch {
+      return { tradeEmail: true, tradePush: true, weeklyReports: true, goals: true, marketing: false };
+    }
+  });
+
+  useEffect(() => { localStorage.setItem("critique_settings_preferences_v1", JSON.stringify(preferences)); }, [preferences]);
+  useEffect(() => { localStorage.setItem("critique_notification_settings_v1", JSON.stringify(notifications)); }, [notifications]);
+
+  async function uploadProfilePhoto(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setMessage("Please choose an image file.");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setMessage("Profile photo must be under 10MB.");
+      return;
+    }
+    const photo = await fileToBase64(file);
+    localStorage.setItem(PROFILE_PHOTO_KEY, photo);
+    setProfilePhoto?.(photo);
+    setMessage("Profile photo updated.");
+  }
+
+  function removeProfilePhoto() {
+    localStorage.removeItem(PROFILE_PHOTO_KEY);
+    setProfilePhoto?.("");
+    setMessage("Profile photo removed.");
+  }
+
+  async function saveName() {
+    setMessage("");
+    if (!fullName.trim()) {
+      setMessage("Name cannot be empty.");
+      return;
+    }
+    if (supabase && authUser?.id) {
+      const { error } = await supabase.auth.updateUser({ data: { full_name: fullName.trim() } });
+      if (error) {
+        setMessage(error.message || "Could not save name.");
+        return;
+      }
+    }
+    setMessage("Profile name saved.");
+  }
+
+  async function changePassword() {
+    setMessage("");
+    if (newPassword.length < 6) {
+      setMessage("New password must be at least 6 characters.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setMessage("Password confirmation does not match.");
+      return;
+    }
+    if (!supabase) {
+      setMessage("Supabase is not connected.");
+      return;
+    }
+    if (!authUser?.email || !currentPassword) {
+      setMessage("Enter your current password first.");
+      return;
+    }
+    const { error: currentPasswordError } = await supabase.auth.signInWithPassword({ email: authUser.email, password: currentPassword });
+    if (currentPasswordError) {
+      setMessage("Current password is not correct.");
+      return;
+    }
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) {
+      setMessage(error.message || "Could not change password.");
+      return;
+    }
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setMessage("Password changed successfully.");
+  }
+
+  const toggleNotification = (key) => setNotifications((current) => ({ ...current, [key]: !current[key] }));
+  const canChangePassword = Boolean(currentPassword) && newPassword.length >= 6 && newPassword === confirmPassword;
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+      <TopCrumb page="Settings" />
+      <div className="mb-7 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h1 className="text-4xl font-black tracking-tight text-white">Settings</h1>
+          <p className="mt-2 text-base font-semibold text-zinc-400">Manage your account preferences and application settings</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="rounded-xl border border-white/10 bg-zinc-950 px-4 py-2 text-sm font-black text-white">{account?.currency || preferences.currency}</span>
+          <span className={isSupabaseReady ? "rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-2 text-sm font-black text-emerald-300" : "rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-2 text-sm font-black text-amber-300"}>{isSupabaseReady ? "Cloud ready" : "Local mode"}</span>
+        </div>
+      </div>
+      {message && <div className="mb-5 rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 px-4 py-3 text-sm font-bold text-fuchsia-200">{message}</div>}
+
+      <div className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
+        <SettingsPanel icon={<User size={25} />} title="Profile Information" subtitle="Update your personal information and account details">
+          <div className="mt-8">
+            <div className="text-sm font-black text-white">Profile Photo</div>
+            <div className="mt-3 flex flex-wrap items-center gap-4">
+              <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-zinc-900 text-2xl font-black text-white">
+                {profilePhoto ? <img src={profilePhoto} alt="Profile" className="h-full w-full object-cover" /> : profileInitials}
+              </div>
+              <div>
+                <input ref={profilePhotoInputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={uploadProfilePhoto} className="hidden" />
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" onClick={() => profilePhotoInputRef.current?.click()} variant="outline" className="border-white/15 bg-black text-white"><Camera size={16} /> Change Photo</Button>
+                  {profilePhoto && <Button type="button" onClick={removeProfilePhoto} variant="outline" className="border-red-500/35 bg-red-500/10 text-red-300"><Trash2 size={16} /> Remove</Button>}
+                </div>
+                <p className="mt-2 text-xs font-semibold text-zinc-400">JPG, PNG or WebP. Max 10MB.</p>
+              </div>
+            </div>
+          </div>
+          <div className="my-8 h-px bg-white/10" />
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="Full Name"><Input value={fullName} onChange={(event) => setFullName(event.target.value)} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
+            <Field label="Email Address"><Input value={authUser?.email || ""} disabled className="border-white/10 bg-zinc-800 text-zinc-400 disabled:opacity-100" /><p className="mt-2 text-xs font-semibold text-zinc-400">Email cannot be changed after registration</p></Field>
+          </div>
+          <div className="mt-4 flex justify-end"><Button onClick={saveName} className="bg-fuchsia-500 text-black"><Save size={16} /> Save Name</Button></div>
+          <div className="my-8 h-px bg-white/10" />
+          <h3 className="text-lg font-black text-white">Change Password</h3>
+          <div className="mt-5 grid gap-4">
+            <Field label="Current Password"><Input type="password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="New Password"><Input type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
+              <Field label="Confirm Password"><Input type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
+            </div>
+          </div>
+          <div className="mt-4 flex justify-end"><Button onClick={changePassword} disabled={!canChangePassword} variant="outline" className="border-white/15 bg-black text-white disabled:cursor-not-allowed disabled:opacity-45"><Save size={16} /> Change Password</Button></div>
+        </SettingsPanel>
+
+        <div className="space-y-6">
+          <SettingsPanel icon={<Sparkles size={25} />} title="Appearance" subtitle="Customize how Critique looks">
+            <div className="mt-8 flex items-center justify-between"><div className="font-black text-white">Dark Mode</div><SettingsToggle checked={theme === "dark"} onClick={() => setTheme(theme === "dark" ? "light" : "dark")} /></div>
+          </SettingsPanel>
+          <SettingsPanel icon={<Target size={25} />} title="Trading Preferences" subtitle="Default settings for trading">
+            <div className="mt-7 space-y-5">
+              <Field label="Default Account"><Select value={account?.name || "Trading Account"} onChange={onOpenAccount}><option>{account?.name || "Trading Account"}</option></Select></Field>
+              <Field label="Currency"><Select value={preferences.currency} onChange={(event) => setPreferences((current) => ({ ...current, currency: event.target.value }))}><option value="USD">USD ($)</option><option value="EUR">EUR</option><option value="GBP">GBP</option></Select></Field>
+              <Field label="Timezone"><Select value={preferences.timezone} onChange={(event) => setPreferences((current) => ({ ...current, timezone: event.target.value }))}><option>Asia/Tbilisi (GMT+4)</option><option>Eastern Time (GMT-4)</option><option>London (GMT+0)</option><option>Central Europe (GMT+1)</option></Select></Field>
+              <Field label="Week Starts On"><Select value={preferences.weekStartsOn} onChange={(event) => setPreferences((current) => ({ ...current, weekStartsOn: event.target.value }))}><option>Monday</option><option>Sunday</option></Select></Field>
+            </div>
+            <div className="mt-5 flex justify-end"><Button className="bg-fuchsia-500 text-black"><Save size={16} /> Save Preferences</Button></div>
+          </SettingsPanel>
+        </div>
+      </div>
+
+      <SettingsPanel icon={<Bell size={25} />} title="Notifications" subtitle="Choose what notifications you want to receive" className="mt-6">
+        <div className="mt-7 space-y-5">
+          {[["tradeEmail", "Trade Confirmations (Email)", "Get email notifications when trades are executed"], ["tradePush", "Trade Confirmations (Push)", "Get push notifications when trades are executed"], ["weeklyReports", "Weekly Reports", "Receive weekly performance summaries"], ["goals", "Goal Achievements", "Celebrate when you reach your goals"], ["marketing", "Marketing Updates", "Product updates and trading tips"]].map(([key, title, detail]) => (
+            <div key={key} className="flex items-center justify-between gap-4"><div><div className="font-black text-white">{title}</div><div className="text-sm font-semibold text-zinc-400">{detail}</div></div><SettingsToggle checked={Boolean(notifications[key])} onClick={() => toggleNotification(key)} /></div>
+          ))}
+        </div>
+        <div className="mt-6 flex justify-end"><Button className="bg-fuchsia-500 text-black"><Save size={16} /> Save Notifications</Button></div>
+      </SettingsPanel>
+
+      <SettingsPanel icon={<Database size={25} />} title="Trading Accounts" subtitle="Manage your trading accounts and view account statistics. Each account keeps its trades separate." className="mt-6">
+        <button onClick={onOpenAccount} className="mt-7 flex w-full items-center justify-between rounded-lg border border-fuchsia-500 bg-fuchsia-950/20 px-5 py-4 text-left">
+          <div><div className="flex items-center gap-2"><span className="font-black text-white">{account?.name || "Trading Account"}</span><span className="rounded-full bg-white/10 px-2 py-1 text-xs font-black text-white">Default</span><span className="rounded-full bg-fuchsia-500 px-2 py-1 text-xs font-black text-black">Active</span></div><div className="mt-2 text-sm font-semibold text-zinc-400">{account?.type || "Demo Account"} - {account?.currency || "USD"} {currentBalance.toLocaleString()} - <span className={tradePnl >= 0 ? "text-emerald-400" : "text-red-400"}>{formatMoney(tradePnl)}</span></div></div>
+          <Edit3 size={18} className="text-zinc-400" />
+        </button>
+        <div className="mt-5 rounded-lg bg-white/[0.05] p-4"><div className="font-black text-white">Account Tips</div><div className="mt-3 space-y-2 text-sm font-semibold text-zinc-400"><div>- New accounts are created from the account menu.</div><div>- Click an account to make it active and filter your trades.</div><div>- Your default account is used for new trades unless you change it.</div></div></div>
+      </SettingsPanel>
+
+      <SettingsPanel icon={<ShieldCheck size={25} />} title="Data & Privacy" className="mt-6 max-w-xl">
+        <Button onClick={onBackup} variant="outline" className="mt-6 w-full border-white/15 bg-black text-white"><Download size={16} /> Export My Data</Button>
+        <Button onClick={onRestore} variant="outline" className="mt-3 w-full border-amber-500/35 bg-amber-500/10 text-amber-300"><Upload size={16} /> Restore Backup</Button>
+        <Button onClick={onSignOut} className="mt-4 w-full bg-red-800 text-white hover:bg-red-700"><LogOut size={16} /> Delete Account</Button>
+      </SettingsPanel>
+    </motion.div>
+  );
+}
 
 function SettingsPage({ account, accountBalance, authUser, theme, setTheme, isSupabaseReady, onOpenAccount, onBackup, onRestore, onSignOut }) {
   const currentBalance = Number(accountBalance?.currentBalance || account?.balance || 0);
@@ -6914,6 +7607,185 @@ function SettingsPage({ account, accountBalance, authUser, theme, setTheme, isSu
             <Button onClick={onSignOut} variant="outline" className="mt-5 border-red-500/35 bg-red-500/10 text-red-300"><LogOut size={16} /> Sign Out</Button>
           </CardContent>
         </Card>
+      </div>
+    </motion.div>
+  );
+}
+
+function BillingPagePro({ account, authUser }) {
+  const features = [
+    "Unlimited trade imports & logging",
+    "Comprehensive trading journal",
+    "Advanced performance analytics",
+    "Image & screenshot uploads",
+    "Advanced tagging & filtering",
+    "Up to 20 trading accounts",
+    "Mistake detector insights",
+    "Mood & emotion tracking",
+    "Win/loss streak analysis",
+    "Start your day intentions",
+    "Beautiful trading dashboard",
+    "CSV export & import",
+    "Custom strategies & tags",
+    "Priority support",
+  ];
+  const nextBillingDate = "May 25th, 2026";
+  const subscriptionId = "sub_crtq_pro_trial";
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="pb-10">
+      <TopCrumb page="Billing" />
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-8 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 className="text-4xl font-black tracking-tight text-white">Billing & Subscription</h1>
+            <p className="mt-2 text-lg font-semibold text-zinc-400">Manage your Critique Pro subscription</p>
+          </div>
+          <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-zinc-950 px-4 py-2 text-sm font-black text-white">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
+            {account?.name || "Trading Account"}
+            <span className="rounded-lg bg-white/10 px-2 py-0.5 text-xs">{account?.currency || "USD"}</span>
+          </div>
+        </div>
+
+        <section className="overflow-hidden rounded-lg border border-fuchsia-500/30 bg-gradient-to-r from-fuchsia-950/35 via-[#13071e] to-black p-6 shadow-[0_18px_70px_rgba(217,70,239,0.12)]">
+          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-300"><Sparkles size={26} /></div>
+              <div>
+                <h2 className="text-2xl font-black text-white">Free Trial Active</h2>
+                <p className="text-sm font-semibold text-zinc-400">Expires on May 25, 2026</p>
+              </div>
+            </div>
+            <span className="rounded-full bg-fuchsia-500 px-6 py-3 text-lg font-black text-black shadow-[0_14px_30px_rgba(217,70,239,0.28)]">2 days left</span>
+          </div>
+          <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10">
+            <div className="h-full w-[74%] rounded-full bg-gradient-to-r from-fuchsia-400 to-purple-600" />
+          </div>
+        </section>
+
+        <div className="mt-8 grid gap-8 xl:grid-cols-[1.15fr_0.85fr]">
+          <section className="rounded-lg border border-white/12 bg-[#070707] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.22)]">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <Sparkles size={28} className="text-fuchsia-400" />
+                <div>
+                  <h2 className="text-2xl font-black text-white">Current Plan</h2>
+                  <p className="mt-2 text-sm font-semibold text-zinc-400">7-day free trial with Critique Pro</p>
+                </div>
+              </div>
+              <span className="rounded-full border border-blue-500/35 bg-blue-500/10 px-4 py-2 text-sm font-black text-blue-300">TRIALING</span>
+            </div>
+
+            <div className="mt-8 grid gap-4 rounded-lg bg-white/[0.06] p-5 sm:grid-cols-2">
+              <div>
+                <div className="text-sm font-bold text-zinc-400">Plan Type</div>
+                <div className="mt-3 text-3xl font-black text-white">Critique Pro</div>
+                <div className="mt-2 text-sm font-semibold text-zinc-400">Monthly billing</div>
+              </div>
+              <div>
+                <div className="text-sm font-bold text-zinc-400">Price</div>
+                <div className="mt-3 text-3xl font-black text-fuchsia-400">$10/month</div>
+                <div className="mt-2 text-sm font-semibold text-zinc-400">After trial ends</div>
+              </div>
+            </div>
+
+            <h3 className="mt-9 text-2xl font-black text-white">What's Included</h3>
+            <div className="mt-6 grid gap-x-8 gap-y-5 md:grid-cols-2">
+              {features.map((feature) => (
+                <div key={feature} className="flex items-center gap-3 text-base font-bold text-white">
+                  <span className="text-xl font-black text-emerald-400">✓</span>
+                  {feature}
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-9 rounded-lg border border-amber-500/30 bg-amber-500/10 p-5">
+              <div className="flex gap-3">
+                <span className="text-xl text-amber-400">!</span>
+                <div>
+                  <div className="font-black text-amber-400">Subscription Ending</div>
+                  <p className="mt-2 text-sm font-semibold text-amber-200">Your subscription will end on May 25, 2026</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-lg border border-white/12 bg-[#070707] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.22)]">
+            <div className="flex items-center gap-3">
+              <Settings size={24} className="text-white" />
+              <h2 className="text-xl font-black text-white">Manage Subscription</h2>
+            </div>
+            <h3 className="mt-7 text-2xl font-black text-white">Subscription Management</h3>
+            <p className="mt-2 text-sm font-semibold text-zinc-400">Manage your Critique Pro subscription and billing</p>
+
+            <div className="mt-6 inline-flex rounded-lg bg-white/10 p-1">
+              <button className="flex items-center gap-2 rounded-md bg-black px-4 py-2 text-sm font-black text-white"><CreditCard size={15} /> Overview</button>
+              <button className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-black text-zinc-400">Payment History</button>
+            </div>
+
+            <div className="mt-6 rounded-lg border border-white/12 bg-black/35 p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex gap-3">
+                  <Sparkles size={24} className="text-fuchsia-400" />
+                  <div>
+                    <h4 className="text-xl font-black text-white">Current Plan</h4>
+                    <p className="text-sm font-semibold text-zinc-400">Your subscription details and status</p>
+                  </div>
+                </div>
+                <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-black text-blue-700">Trial</span>
+              </div>
+
+              <div className="mt-7 flex items-end justify-between gap-4">
+                <div>
+                  <div className="text-sm font-bold text-zinc-400">Plan</div>
+                  <div className="mt-2 text-3xl font-black text-white">Critique Pro</div>
+                </div>
+                <span className="rounded-full border border-white/15 px-4 py-2 text-sm font-black text-white">Monthly</span>
+              </div>
+
+              <div className="my-7 h-px bg-white/10" />
+              <div className="space-y-6">
+                <div>
+                  <div className="text-sm font-bold text-zinc-400">Next Billing Date</div>
+                  <div className="mt-2 text-2xl font-black text-white">{nextBillingDate}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-zinc-400">Billing Email</div>
+                  <div className="mt-2 truncate rounded-md bg-white/10 px-3 py-2 text-sm font-bold text-zinc-200">{authUser?.email || "No email found"}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-zinc-400">Subscription ID</div>
+                  <div className="mt-2 inline-block rounded-md bg-white/10 px-3 py-2 font-mono text-xs text-zinc-300">{subscriptionId}</div>
+                </div>
+              </div>
+
+              <div className="mt-7 rounded-lg border border-orange-300/40 bg-orange-50 p-4 text-sm font-semibold leading-6 text-orange-700">
+                Your subscription is set to cancel at the end of your current billing period ({nextBillingDate}). You'll retain access to Pro features until then.
+              </div>
+
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-lg border border-white/12 bg-black p-5 text-center">
+                  <div className="font-black text-white">Monthly</div>
+                  <div className="mt-5 text-4xl font-black text-white">$0.33</div>
+                  <div className="mt-1 text-sm font-semibold text-zinc-400">/day</div>
+                  <div className="mt-3 text-sm font-semibold text-zinc-400">$10 billed monthly</div>
+                  <Button variant="outline" className="mt-5 border-white/15 bg-black text-white">Reactivate Monthly</Button>
+                </div>
+                <div className="rounded-lg border border-fuchsia-500/40 bg-fuchsia-950/12 p-5 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="font-black text-white">Yearly</span>
+                    <span className="rounded-full bg-emerald-500/15 px-2 py-1 text-xs font-black text-emerald-400">Save 28%</span>
+                  </div>
+                  <div className="mt-5 text-4xl font-black text-white">$0.24</div>
+                  <div className="mt-1 text-sm font-semibold text-zinc-400">/day</div>
+                  <div className="mt-3 text-sm font-semibold text-zinc-400">$86 billed annually</div>
+                  <Button className="mt-5 bg-fuchsia-500 text-black">Switch to Yearly</Button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </motion.div>
   );
@@ -7098,6 +7970,498 @@ function AccountModal({ account, accountBalance, onSaveAccount, onClose }) {
   );
 }
 
+function SimplePageShell({ crumb, title, subtitle, action, children }) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="pb-10">
+      <TopCrumb page={crumb} />
+      <div className="mb-7 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h1 className="text-4xl font-black tracking-tight text-white">{title}</h1>
+          <p className="mt-2 max-w-3xl text-base font-semibold leading-7 text-zinc-400">{subtitle}</p>
+        </div>
+        {action}
+      </div>
+      {children}
+    </motion.div>
+  );
+}
+
+function SimpleStatCard({ label, value, detail, tone = "fuchsia" }) {
+  const color = tone === "green" ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-300" : tone === "red" ? "border-red-500/25 bg-red-500/10 text-red-300" : tone === "amber" ? "border-amber-500/25 bg-amber-500/10 text-amber-300" : "border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300";
+  return (
+    <div className={`stats-interactive-card ${tone === "green" ? "stats-card-green" : tone === "amber" ? "stats-card-amber" : "stats-card-purple"} rounded-lg border p-5 ${color}`}>
+      <div className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500">{label}</div>
+      <div className="mt-3 text-3xl font-black text-white">{value}</div>
+      <div className="mt-2 text-sm font-semibold leading-6 text-zinc-400">{detail}</div>
+    </div>
+  );
+}
+
+function SimplePanel({ title, subtitle, children, icon }) {
+  return (
+    <section className="rounded-lg border border-white/12 bg-[#070707] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.18)] transition-all duration-300 hover:border-fuchsia-500/25 hover:shadow-[0_24px_70px_rgba(217,70,239,0.08)]">
+      <div className="mb-5 flex items-start gap-3">
+        {icon && <div className="text-fuchsia-400">{icon}</div>}
+        <div>
+          <h2 className="text-2xl font-black text-white">{title}</h2>
+          {subtitle && <p className="mt-1 text-sm font-semibold leading-6 text-zinc-400">{subtitle}</p>}
+        </div>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function SimpleStatisticsPage({ trades = [], onExport }) {
+  const [rangeFilter, setRangeFilter] = useState("30 days");
+  const [strategyFilter, setStrategyFilter] = useState("All");
+  const [activeTab, setActiveTab] = useState("Overview");
+  const [refreshTick, setRefreshTick] = useState(0);
+  const allTrades = Array.isArray(trades) ? trades : [];
+  const strategyOptions = ["All", ...Array.from(new Set(allTrades.map((trade) => trade.setup).filter(Boolean)))];
+  const visibleTrades = useMemo(() => {
+    const today = new Date();
+    const days = rangeFilter === "7 days" ? 7 : rangeFilter === "30 days" ? 30 : rangeFilter === "90 days" ? 90 : null;
+    const start = new Date(today);
+    if (days) start.setDate(today.getDate() - days + 1);
+    start.setHours(0, 0, 0, 0);
+    return allTrades.filter((trade) => {
+      if (strategyFilter !== "All" && trade.setup !== strategyFilter) return false;
+      if (!days) return true;
+      const date = new Date(`${getTradeDateKey(trade)}T00:00:00`);
+      return !Number.isNaN(date.getTime()) && date >= start && date <= today;
+    });
+  }, [allTrades, rangeFilter, strategyFilter, refreshTick]);
+
+  const stats = useMemo(() => calculateStatistics(visibleTrades), [visibleTrades]);
+  const curve = useMemo(() => {
+    let balance = 0;
+    return sortTradesChronologically(visibleTrades).map((trade) => {
+      balance += Number(trade.pnl || 0);
+      return { date: getTradeDateKey(trade), value: balance };
+    });
+  }, [visibleTrades]);
+  const profitFactor = Number(stats.profitFactor || 0);
+  const expectancy = stats.trades ? stats.totalPnl / stats.trades : 0;
+  const strategyRows = Object.entries(stats.strategyStats || {}).sort((a, b) => Number(b[1].pnl || 0) - Number(a[1].pnl || 0));
+  const sessionRows = Object.entries(stats.sessionStats || {}).sort((a, b) => Number(b[1].pnl || 0) - Number(a[1].pnl || 0));
+  const mistakeRows = Object.entries(stats.mistakeStats || {}).filter(([name]) => name && name !== "None").sort((a, b) => Number(a[1].pnl || 0) - Number(b[1].pnl || 0));
+  const bestPerformance = useMemo(() => getBestPerformanceStats(visibleTrades), [visibleTrades]);
+  const wins = visibleTrades.filter((trade) => Number(trade.pnl || 0) > 0);
+  const bestTradeItem = [...visibleTrades].sort((a, b) => Number(b.pnl || 0) - Number(a.pnl || 0))[0];
+  const smallestWinItem = [...wins].sort((a, b) => Number(a.pnl || 0) - Number(b.pnl || 0))[0];
+  const weekdayRows = getWeekdayStatsRows(visibleTrades);
+  const tabs = [
+    ["Overview", BarChart3],
+    ["Patterns", Calendar],
+    ["Strategies", ListChecks],
+    ["Charts", TrendingUp],
+    ["News", BookOpen],
+  ];
+
+  return (
+    <SimplePageShell
+      crumb="Statistics"
+      title="Statistics"
+      subtitle="Comprehensive trading performance analytics"
+      action={
+        <div className="flex flex-wrap gap-2">
+          <Select value={strategyFilter} onChange={(e) => setStrategyFilter(e.target.value)}>{strategyOptions.map((strategy) => <option key={strategy} value={strategy}>{strategy === "All" ? "All Strategies" : strategy}</option>)}</Select>
+          <Select value={rangeFilter} onChange={(e) => setRangeFilter(e.target.value)}><option>7 days</option><option>30 days</option><option>90 days</option><option>All time</option></Select>
+          <Button onClick={() => setRefreshTick((tick) => tick + 1)} variant="outline" className="border-white/15 bg-black text-white"><RefreshCwIcon /> Refresh</Button>
+          <Button onClick={onExport} variant="outline" className="border-white/15 bg-black text-white"><Download size={16} /> CSV</Button>
+        </div>
+      }
+    >
+      <div className="mt-2 h-px bg-white/10" />
+      <div className="mt-6 inline-flex max-w-full flex-wrap gap-2 rounded-xl border border-white/10 bg-[#111113] p-2 shadow-[0_18px_45px_rgba(0,0,0,0.22)]">
+        {tabs.map(([tab, Icon]) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => setActiveTab(tab)}
+            className={activeTab === tab ? "flex items-center gap-2 rounded-lg bg-black px-5 py-3 text-sm font-black text-white shadow-[0_12px_28px_rgba(0,0,0,0.38)]" : "flex items-center gap-2 rounded-lg px-5 py-3 text-sm font-black text-zinc-400 transition hover:bg-white/5 hover:text-white"}
+          >
+            <Icon size={16} />
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === "Overview" && (
+        <>
+          <StatsSectionTitle title="Performance Overview" icon={<BarChart3 size={20} />} />
+          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+            <DashboardStatTile label="Total P&L" value={formatMoney(stats.totalPnl)} badge={stats.totalPnl >= 0 ? "Profit" : "Loss"} tone={stats.totalPnl >= 0 ? "green" : "red"} />
+            <DashboardStatTile label="Win Rate" value={`${stats.winRate.toFixed(1)}%`} badge={`${stats.wins}W/${stats.losses}L`} tone="green" />
+            <DashboardStatTile label="Trades" value={stats.trades} badge={`${stats.trades} closed`} />
+            <DashboardStatTile label="Avg Win" value={formatMoney(stats.avgWin)} tone="green" />
+            <DashboardStatTile label="Avg Loss" value={formatMoney(stats.avgLoss)} tone={stats.avgLoss > 0 ? "red" : "neutral"} />
+            <DashboardStatTile label="Profit Factor" value={profitFactor >= 999 ? "999.00" : profitFactor.toFixed(2)} badge={profitFactor >= 999 ? "Perfect" : profitFactor >= 1 ? "Good" : "Needs work"} tone="green" />
+          </div>
+
+          <StatsSectionTitle title="Advanced Analytics" icon={<span className="text-lg font-black">%</span>} className="mt-12" />
+          <div className="mt-4 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            <AdvancedAnalyticsTile label="Expectancy" value={formatMoney(expectancy)} badge="Per trade" active />
+            <AdvancedAnalyticsTile label="Risk-Adjusted" value={stats.trades > 1 ? Math.max(0, expectancy / Math.max(1, stats.maxDrawdown || 1)).toFixed(2) : "0.00"} badge="Sharpe ratio" />
+            <AdvancedAnalyticsTile label="Best Trade" value={formatMoney(bestTradeItem?.pnl || 0)} badge={bestTradeItem?.pair || "No trade"} tone="green" />
+            <AdvancedAnalyticsTile label="Smallest Win" value={formatMoney(smallestWinItem?.pnl || 0)} badge={smallestWinItem?.pair || "No win"} tone="amber" />
+          </div>
+
+          <StatsSectionTitle title="Best Performance" icon={<span className="text-lg font-black">🏆</span>} className="mt-12" />
+          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <BestPerfTile label="Best Day" value={formatMoney(bestPerformance.day.pnl)} detail={bestPerformance.day.label} badge={`${bestPerformance.day.count} trades`} />
+            <BestPerfTile label="Best Week" value={formatMoney(bestPerformance.week.pnl)} detail={bestPerformance.week.label} badge={`${bestPerformance.week.count} trades`} />
+            <BestPerfTile label="Best Month" value={formatMoney(bestPerformance.month.pnl)} detail={bestPerformance.month.label} badge={`${bestPerformance.month.count} trades`} />
+            <BestPerfTile label="Best Year" value={formatMoney(bestPerformance.year.pnl)} detail={bestPerformance.year.label} badge={`${bestPerformance.year.count} trades`} />
+            <BestPerfTile label="Best Session" value={formatMoney(sessionRows[0]?.[1]?.pnl || 0)} detail={sessionRows[0]?.[0] || "No session"} badge={`${sessionRows[0]?.[1]?.count || 0} trades`} />
+          </div>
+
+          <div className="mt-12 grid gap-6 xl:grid-cols-2">
+            <SimplePanel title="Performance Timeline" subtitle="Cumulative P&L over selected trades." icon={<TrendingUp size={24} />}>
+              <div className="h-80 rounded-lg bg-black/35 p-3">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={curve} margin={{ top: 16, right: 20, left: 0, bottom: 6 }}>
+                    <CartesianGrid strokeDasharray="2 6" stroke="rgba(148,163,184,0.20)" vertical={false} />
+                    <XAxis dataKey="date" stroke="#64748b" tickLine={false} />
+                    <YAxis stroke="#64748b" tickLine={false} tickFormatter={(value) => `$${value}`} />
+                    <Tooltip contentStyle={{ background: "#09090b", border: "1px solid #333", borderRadius: 12, color: "#fff" }} formatter={(value) => [formatMoney(value), "P&L"]} />
+                    <Line type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </SimplePanel>
+            <SimplePanel title="Win/Loss Analysis" subtitle="A quick view of your accuracy." icon={<Target size={24} />}>
+              <div className="flex min-h-80 items-center justify-center">
+                <div className="flex h-56 w-56 flex-col items-center justify-center rounded-full border-[6px] border-emerald-500/45 bg-black/35">
+                  <div className="text-5xl font-black text-white">{stats.winRate.toFixed(1)}<span className="text-xl">%</span></div>
+                  <div className="mt-2 text-sm font-semibold text-zinc-400">Win Rate</div>
+                  <div className="mt-5 flex gap-5 text-sm font-bold"><span className="text-emerald-300">{stats.wins} wins</span><span className="text-red-300">{stats.losses} losses</span></div>
+                </div>
+              </div>
+            </SimplePanel>
+          </div>
+        </>
+      )}
+
+      {activeTab === "Patterns" && (
+        <div className="mt-10">
+          <StatsSectionTitle title="Weekday Performance (Monday - Friday)" icon={<Calendar size={20} />} />
+          <div className="mt-5 grid gap-4 xl:grid-cols-5">
+            {weekdayRows.map((day) => <WeekdayTile key={day.short} day={day} />)}
+          </div>
+          <div className="mt-6 grid gap-6 xl:grid-cols-2">
+            <SimplePanel title="Best Sessions" subtitle="Sessions where your performance is strongest." icon={<Target size={24} />}>
+              <SimpleStatsRows rows={sessionRows.slice(0, 5)} empty="No session data yet." />
+            </SimplePanel>
+            <SimplePanel title="Costly Mistakes" subtitle="Mistakes that cost the most money." icon={<ShieldCheck size={24} />}>
+              <SimpleStatsRows rows={mistakeRows.slice(0, 5)} empty="No mistake data yet." negative />
+            </SimplePanel>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "Strategies" && (
+        <div className="mt-10">
+          <StatsSectionTitle title="Strategy Performance" icon={<Sparkles size={20} />} />
+          <div className="mt-5 rounded-lg border border-fuchsia-500/25 bg-fuchsia-950/10 p-5">
+            <div className="grid grid-cols-4 gap-4 text-center text-xs font-black uppercase tracking-wider text-zinc-500">
+              <span>Strategy</span><span>Win Rate</span><span>Total P&L</span><span>Avg RR</span>
+            </div>
+            {strategyRows.length ? strategyRows.map(([name, item]) => {
+              const decisive = Number(item.wins || 0) + Number(item.losses || 0);
+              const winRate = decisive ? (Number(item.wins || 0) / decisive) * 100 : 0;
+              const avgRR = item.riskTrades ? Number(item.rrSum || 0) / item.riskTrades : 0;
+              return (
+                <div key={name} className="mt-4 grid grid-cols-4 gap-4 rounded-lg border border-white/10 bg-black/35 p-4 text-center">
+                  <div className="text-lg font-black text-white">{name}</div>
+                  <div className="text-lg font-black text-emerald-300">{winRate.toFixed(1)}%</div>
+                  <div className={Number(item.pnl || 0) >= 0 ? "text-lg font-black text-emerald-300" : "text-lg font-black text-red-300"}>{formatMoney(item.pnl || 0)}</div>
+                  <div className="text-lg font-black text-emerald-300">{avgRR.toFixed(2)}</div>
+                </div>
+              );
+            }) : <div className="mt-4 rounded-lg border border-dashed border-white/10 p-5 text-sm font-semibold text-zinc-500">No strategy data yet.</div>}
+          </div>
+        </div>
+      )}
+
+      {activeTab === "Charts" && (
+        <div className="mt-10 grid gap-6 xl:grid-cols-2">
+          <SimplePanel title="Performance Timeline" subtitle="Cumulative P&L over time." icon={<TrendingUp size={24} />}>
+            <div className="h-96 rounded-lg bg-black/35 p-3">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={curve} margin={{ top: 16, right: 20, left: 0, bottom: 6 }}>
+                  <CartesianGrid strokeDasharray="2 6" stroke="rgba(148,163,184,0.20)" vertical={false} />
+                  <XAxis dataKey="date" stroke="#64748b" tickLine={false} />
+                  <YAxis stroke="#64748b" tickLine={false} tickFormatter={(value) => `$${value}`} />
+                  <Tooltip contentStyle={{ background: "#09090b", border: "1px solid #333", borderRadius: 12, color: "#fff" }} formatter={(value) => [formatMoney(value), "P&L"]} />
+                  <Line type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </SimplePanel>
+          <SimplePanel title="Risk Snapshot" subtitle="The risk numbers that matter most." icon={<ShieldCheck size={24} />}>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <SimpleStatCard label="Max Drawdown" value={formatMoney(stats.maxDrawdown)} detail={`${stats.maxDrawdownPercent.toFixed(1)}% account drawdown.`} tone={stats.maxDrawdownPercent <= 3 ? "green" : stats.maxDrawdownPercent <= 6 ? "amber" : "red"} />
+              <SimpleStatCard label="Avg R:R" value={Number(stats.avgRR || 0).toFixed(2)} detail="Average reward compared to risk." tone={stats.avgRR >= 1 ? "green" : "amber"} />
+              <SimpleStatCard label="Avg Win/Loss" value={stats.avgWinLoss >= 999 ? "Perfect" : stats.avgWinLoss.toFixed(2)} detail="Winner size compared to loser size." tone={stats.avgWinLoss >= 1.2 ? "green" : stats.avgWinLoss >= 1 ? "amber" : "red"} />
+              <SimpleStatCard label="Recovery Factor" value={stats.recoveryFactor >= 999 ? "Perfect" : Number(stats.recoveryFactor || 0).toFixed(2)} detail="Profit compared to drawdown." tone={stats.recoveryFactor >= 1 ? "green" : "amber"} />
+            </div>
+          </SimplePanel>
+        </div>
+      )}
+
+      {activeTab === "News" && (
+        <div className="mt-10 grid gap-6 xl:grid-cols-3">
+          <SimpleStatCard label="Main Insight" value={stats.totalPnl >= 0 ? "Profitable" : "Needs work"} detail={stats.totalPnl >= 0 ? "Your selected range is net positive." : "Your selected range is net negative."} tone={stats.totalPnl >= 0 ? "green" : "red"} />
+          <SimpleStatCard label="Best Focus" value={bestStrategy?.[0] || "Add trades"} detail="Keep measuring this setup across more trades." tone="fuchsia" />
+          <SimpleStatCard label="Next Check" value="Risk" detail="Watch drawdown and average loss before increasing size." tone="amber" />
+        </div>
+      )}
+
+      {activeTab === "Risk" && (
+        <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          <SimpleStatCard label="Max Drawdown" value={formatMoney(stats.maxDrawdown)} detail={`${stats.maxDrawdownPercent.toFixed(1)}% account drawdown.`} tone={stats.maxDrawdownPercent <= 3 ? "green" : stats.maxDrawdownPercent <= 6 ? "amber" : "red"} />
+          <SimpleStatCard label="Avg R:R" value={Number(stats.avgRR || 0).toFixed(2)} detail="Average reward compared to risk." tone={stats.avgRR >= 1 ? "green" : "amber"} />
+          <SimpleStatCard label="Avg Win/Loss" value={stats.avgWinLoss >= 999 ? "Perfect" : stats.avgWinLoss.toFixed(2)} detail="Winner size compared to loser size." tone={stats.avgWinLoss >= 1.2 ? "green" : stats.avgWinLoss >= 1 ? "amber" : "red"} />
+          <SimpleStatCard label="Recovery Factor" value={stats.recoveryFactor >= 999 ? "Perfect" : Number(stats.recoveryFactor || 0).toFixed(2)} detail="Profit compared to drawdown." tone={stats.recoveryFactor >= 1 ? "green" : "amber"} />
+        </div>
+      )}
+    </SimplePageShell>
+  );
+}
+
+function RefreshCwIcon() {
+  return <span className="text-sm leading-none">↻</span>;
+}
+
+function StatsSectionTitle({ title, icon, className = "" }) {
+  return (
+    <div className={`flex items-center gap-3 ${className}`}>
+      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-fuchsia-500/15 text-fuchsia-300">{icon}</span>
+      <h2 className="text-2xl font-black text-white">{title}</h2>
+    </div>
+  );
+}
+
+function DashboardStatTile({ label, value, badge, tone = "neutral" }) {
+  const valueClass = tone === "green" ? "text-emerald-400" : tone === "red" ? "text-red-400" : "text-zinc-300";
+  const badgeClass = tone === "green" ? "bg-emerald-500/15 text-emerald-300" : tone === "red" ? "bg-red-500/15 text-red-300" : "bg-white/12 text-zinc-200";
+  return (
+    <div className={`stats-interactive-card ${tone === "green" ? "stats-card-green" : tone === "red" ? "stats-card-amber" : "stats-card-purple"} rounded-lg border border-white/10 p-5 text-center shadow-[0_16px_45px_rgba(0,0,0,0.20)]`}>
+      <div className="mx-auto mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-xs font-black text-zinc-400">$</div>
+      <div className="text-xs font-black uppercase tracking-wider text-zinc-500">{label}</div>
+      <div className={`mt-4 text-3xl font-black ${valueClass}`}>{value}</div>
+      {badge && <div className={`mx-auto mt-3 inline-flex rounded-full px-3 py-1 text-xs font-black ${badgeClass}`}>{badge}</div>}
+    </div>
+  );
+}
+
+function AdvancedAnalyticsTile({ label, value, badge, active, tone = "green" }) {
+  const activeClass = active ? "stats-card-purple border-fuchsia-500/60" : tone === "amber" ? "stats-card-amber" : tone === "green" ? "stats-card-green" : "stats-card-purple";
+  return (
+    <div className={`stats-interactive-card ${activeClass} rounded-lg border p-6 text-center`}>
+      <div className="text-xs font-black uppercase tracking-wider text-zinc-500">{label}</div>
+      <div className="mt-4 text-3xl font-black text-emerald-400">{value}</div>
+      {badge && <div className="mx-auto mt-3 inline-flex rounded-md bg-white/10 px-3 py-1 text-xs font-black text-zinc-300">{badge}</div>}
+    </div>
+  );
+}
+
+function BestPerfTile({ label, value, detail, badge }) {
+  return (
+    <div className="stats-interactive-card stats-card-purple rounded-lg border border-white/10 p-5 shadow-[0_16px_45px_rgba(0,0,0,0.22)]">
+      <div className="mb-5 flex items-center justify-between">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-zinc-400"><Calendar size={15} /></span>
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-fuchsia-500/15 text-fuchsia-300">★</span>
+      </div>
+      <div className="text-xs font-black uppercase tracking-wider text-zinc-500">{label}</div>
+      <div className="mt-3 text-3xl font-black text-emerald-400">{value}</div>
+      <div className="mt-2 font-bold text-white">{detail}</div>
+      {badge && <div className="mt-4 inline-flex rounded-full bg-white/12 px-3 py-1 text-xs font-black text-white">{badge}</div>}
+    </div>
+  );
+}
+
+function getWeekdayStatsRows(trades = []) {
+  const labels = [
+    ["Mon", "Monday", 1],
+    ["Tue", "Tuesday", 2],
+    ["Wed", "Wednesday", 3],
+    ["Thu", "Thursday", 4],
+    ["Fri", "Friday", 5],
+  ];
+  return labels.map(([short, name, day]) => {
+    const dayTrades = trades.filter((trade) => {
+      const date = new Date(`${getTradeDateKey(trade)}T00:00:00`);
+      return !Number.isNaN(date.getTime()) && date.getDay() === day;
+    });
+    const summary = summarizeTrades(dayTrades);
+    const riskTrades = dayTrades.filter((trade) => Number(trade.risk || 0) > 0);
+    const avgRR = riskTrades.length ? riskTrades.reduce((sum, trade) => sum + getTradeRR(trade), 0) / riskTrades.length : 0;
+    return { short, name, ...summary, avgRR };
+  });
+}
+
+function WeekdayTile({ day }) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-gradient-to-br from-black via-black to-fuchsia-950/20 p-5">
+      <div className="text-center">
+        <div className="text-lg font-black text-white">{day.short}</div>
+        <div className="text-sm font-semibold text-zinc-400">{day.name}</div>
+      </div>
+      <div className="mt-5 space-y-3 text-sm">
+        <div className="flex items-center justify-between"><span className="font-bold text-zinc-300">Trades</span><b className="text-white">{day.count}</b></div>
+        {day.count ? (
+          <>
+            <div className="flex items-center justify-between"><span className="font-bold text-zinc-300">Win Rate</span><b className="text-emerald-300">{day.winRate.toFixed(1)}%</b></div>
+            <div className="flex items-center justify-between"><span className="font-bold text-zinc-300">Avg RR</span><b className="text-amber-300">{day.avgRR.toFixed(2)}</b></div>
+            <div className="border-t border-white/10 pt-3 text-center"><span className="text-zinc-400">Total P&L</span><div className={day.pnl >= 0 ? "font-black text-emerald-300" : "font-black text-red-300"}>{formatMoney(day.pnl)}</div></div>
+          </>
+        ) : <div className="py-8 text-center text-sm font-semibold text-zinc-500">No trades</div>}
+      </div>
+    </div>
+  );
+}
+
+function SimpleStatsRows({ rows, empty, negative = false }) {
+  if (!rows?.length) return <div className="rounded-lg border border-dashed border-white/10 bg-black/25 p-5 text-sm font-semibold text-zinc-500">{empty}</div>;
+  return (
+    <div className="space-y-3">
+      {rows.map(([name, item]) => {
+        const pnl = Number(item?.pnl || 0);
+        const tone = pnl >= 0 && !negative ? "text-emerald-300" : pnl < 0 ? "text-red-300" : "text-zinc-300";
+        const winRate = item?.wins || item?.losses ? (Number(item.wins || 0) / Math.max(1, Number(item.wins || 0) + Number(item.losses || 0))) * 100 : null;
+        return (
+          <div key={name} className="rounded-lg border border-white/10 bg-black/35 p-4">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <div className="font-black text-white">{name}</div>
+                <div className="mt-1 text-xs font-bold text-zinc-500">{item?.count || 0} trades{winRate !== null ? ` · ${winRate.toFixed(1)}% win rate` : ""}</div>
+              </div>
+              <div className={`text-lg font-black ${tone}`}>{formatMoney(pnl)}</div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function SimpleMistakeDetectorPage({ trades = [] }) {
+  const [rangeFilter, setRangeFilter] = useState("All time");
+  const allTrades = Array.isArray(trades) ? trades : [];
+  const visibleTrades = useMemo(() => {
+    const today = new Date();
+    const days = rangeFilter === "7 days" ? 7 : rangeFilter === "30 days" ? 30 : rangeFilter === "90 days" ? 90 : null;
+    if (!days) return allTrades;
+    const start = new Date(today);
+    start.setDate(today.getDate() - days + 1);
+    start.setHours(0, 0, 0, 0);
+    return allTrades.filter((trade) => {
+      const date = new Date(`${getTradeDateKey(trade)}T00:00:00`);
+      return !Number.isNaN(date.getTime()) && date >= start && date <= today;
+    });
+  }, [allTrades, rangeFilter]);
+  const detector = useMemo(() => getMistakeDetectorStats(visibleTrades), [visibleTrades]);
+  const extra = useMemo(() => getDetectorEnhancements(visibleTrades, detector), [visibleTrades, detector]);
+  const losses = visibleTrades.filter((trade) => Number(trade.pnl || 0) < 0);
+  const mainIssue = detector.mainIssue;
+  const root = detector.mainRoot;
+  const focusPlan = detector.focusPlan || [];
+  const topIssues = detector.issues.slice(0, 4);
+  const worstSetup = extra.lossGroupsBySetup[0];
+  const worstSession = extra.lossGroupsBySession[0];
+
+  return (
+    <SimplePageShell
+      crumb="Mistake Detector"
+      title="Mistake Detector"
+      subtitle="A simple coach report. It shows your biggest mistake, why it happens, how much it costs, and what to fix next."
+      action={<Select value={rangeFilter} onChange={(e) => setRangeFilter(e.target.value)}><option>All time</option><option>7 days</option><option>30 days</option><option>90 days</option></Select>}
+    >
+      <div className="rounded-lg border border-fuchsia-500/25 bg-gradient-to-r from-fuchsia-950/30 via-black to-red-950/10 p-6">
+        <div className="text-xs font-black uppercase tracking-[0.18em] text-fuchsia-300">Coach Summary</div>
+        <div className="mt-2 text-3xl font-black text-white">{mainIssue ? translateDetectorText(mainIssue.title) : "No clear mistake yet"}</div>
+        <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-zinc-400">
+          {mainIssue ? `${mainIssue.count} losing trades match this pattern. Estimated cost: ${formatMoney(detector.affectedPnl)}.` : "Add losing trades with mistake, emotion, timing and notes so the detector can find patterns."}
+        </p>
+      </div>
+
+      <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <SimpleStatCard label="Losses Analyzed" value={losses.length} detail="Only losing trades are used for mistake detection." tone="red" />
+        <SimpleStatCard label="Confidence" value={`${detector.confidence || 0}%`} detail="How often the main mistake appears." tone="fuchsia" />
+        <SimpleStatCard label="Lost P&L" value={formatMoney(detector.affectedPnl || 0)} detail="Money connected to this pattern." tone="red" />
+        <SimpleStatCard label="Data Quality" value={`${extra.dataQuality || 0}%`} detail="More filled fields means better analysis." tone={(extra.dataQuality || 0) >= 70 ? "green" : "amber"} />
+      </div>
+
+      <div className="mt-6 grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+        <SimplePanel title="What Went Wrong" subtitle="The main pattern behind losing trades." icon={<Target size={24} />}>
+          <div className="rounded-lg border border-red-500/25 bg-red-500/10 p-5">
+            <div className="text-sm font-black uppercase tracking-[0.18em] text-red-300">Main Mistake</div>
+            <div className="mt-3 text-3xl font-black text-white">{mainIssue ? translateDetectorText(mainIssue.title) : "No data yet"}</div>
+            <div className="mt-3 text-sm font-semibold leading-6 text-zinc-400">{mainIssue ? translateDetectorFix(mainIssue.fix) : "Log more losing trades to build a reliable pattern."}</div>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <SimpleStatCard label="Root Cause" value={root ? translateDetectorText(root.title) : "Unknown"} detail="Main reason behind the mistake." tone="amber" />
+            <SimpleStatCard label="Risk Level" value={extra.severityLabel || "Low"} detail="Based on frequency and cost." tone={extra.severity >= 75 ? "red" : extra.severity >= 45 ? "amber" : "green"} />
+          </div>
+        </SimplePanel>
+
+        <SimplePanel title="Fix Plan" subtitle="Use this before your next trade." icon={<ListChecks size={24} />}>
+          <div className="space-y-3">
+            {(focusPlan.length ? focusPlan.slice(0, 3) : ["Wait for the full setup before entry.", "Do not increase risk after a loss.", "Review the trade before taking the next setup."]).map((step, index) => (
+              <div key={step} className="flex gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-sm font-black text-black">{index + 1}</div>
+                <div className="text-sm font-semibold leading-6 text-zinc-200">{step}</div>
+              </div>
+            ))}
+          </div>
+        </SimplePanel>
+      </div>
+
+      <div className="mt-6 grid gap-6 xl:grid-cols-3">
+        <SimplePanel title="Top Mistakes" subtitle="The most common losing patterns.">
+          <div className="space-y-3">
+            {topIssues.length ? topIssues.map((issue, index) => (
+              <div key={issue.key} className="rounded-lg border border-white/10 bg-black/35 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="font-black text-white">{index + 1}. {translateDetectorText(issue.title)}</div>
+                    <div className="mt-1 text-xs font-bold text-zinc-400">{issue.count} losses · {formatMoney(issue.pnl)}</div>
+                  </div>
+                  <span className="rounded-full bg-red-500/15 px-2 py-1 text-xs font-black text-red-300">{losses.length ? Math.round((issue.count / losses.length) * 100) : 0}%</span>
+                </div>
+              </div>
+            )) : <EmptyDetectorText text="No mistake pattern yet." />}
+          </div>
+        </SimplePanel>
+
+        <SimplePanel title="Where It Happens" subtitle="Setup and session with most loss impact.">
+          <div className="space-y-3">
+            <SimpleStatCard label="Worst Setup" value={worstSetup ? translateDetectorText(worstSetup.name) : "No data"} detail={worstSetup ? formatMoney(worstSetup.pnl) : "Needs more trades"} tone="red" />
+            <SimpleStatCard label="Worst Session" value={worstSession ? translateDetectorText(worstSession.name) : "No data"} detail={worstSession ? formatMoney(worstSession.pnl) : "Needs more trades"} tone="amber" />
+          </div>
+        </SimplePanel>
+
+        <SimplePanel title="Improve Accuracy" subtitle="Fill these fields for better results.">
+          <div className="mb-4 h-3 overflow-hidden rounded-full bg-white/10">
+            <div className="h-full rounded-full bg-gradient-to-r from-fuchsia-500 to-emerald-400" style={{ width: `${extra.dataQuality || 0}%` }} />
+          </div>
+          <div className="space-y-2">
+            {extra.missingTop?.length ? extra.missingTop.slice(0, 4).map((item) => (
+              <div key={item.key} className="flex items-center justify-between rounded-lg border border-white/10 bg-black/35 px-3 py-2 text-sm">
+                <span className="font-bold text-zinc-300">{item.label}</span>
+                <span className="font-black text-amber-300">missing {item.count}</span>
+              </div>
+            )) : <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 p-4 text-sm font-bold text-emerald-300">Your important fields are filled.</div>}
+          </div>
+        </SimplePanel>
+      </div>
+    </SimplePageShell>
+  );
+}
+
 function StatisticsPage({ stats: initialStats, curve: initialCurve, trades = [], onExport }) {
   const [statisticsTab, setStatisticsTab] = useState("Overview");
   const [strategyFilter, setStrategyFilter] = useState("All");
@@ -7124,9 +8488,9 @@ function StatisticsPage({ stats: initialStats, curve: initialCurve, trades = [],
   const stats = useMemo(() => calculateStatistics(closedTrades), [closedTrades, refreshTick]);
   const curve = useMemo(() => {
     let balance = 0;
-    return [...closedTrades].reverse().map((trade) => {
+    return sortTradesChronologically(closedTrades).map((trade) => {
       balance += Number(trade.pnl || 0);
-      return { date: trade.date, pnl: balance, winRate: stats.winRate };
+      return { date: getTradeDateKey(trade), pnl: balance, winRate: stats.winRate };
     });
   }, [closedTrades, stats.winRate, refreshTick]);
 
@@ -7884,7 +9248,7 @@ function DetectorProfile({ title, profile, tone }) {
 function getDetectorEnhancements(trades = [], detector = {}) {
   const safe = Array.isArray(trades) ? trades : [];
   const losses = safe.filter((trade) => Number(trade.pnl || 0) < 0);
-  const ordered = [...safe].sort((a, b) => String(getTradeDateKey(a)).localeCompare(String(getTradeDateKey(b))) || Number(a.createdAt || a.id || 0) - Number(b.createdAt || b.id || 0));
+  const ordered = sortTradesChronologically(safe);
   const requiredFields = ["mistake", "emotion", "entryTiming", "confirmation", "ruleBroken", "marketCondition", "setupQuality", "ruleFollowed", "entryQuality", "exitQuality"];
   const totalChecks = Math.max(1, safe.length * requiredFields.length);
   let filledChecks = 0;
@@ -8885,12 +10249,30 @@ function StatCard({ title, value, green, gold }) {
 }
 
 function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessage, isSupabaseReady, passwordRecoverySession, theme, setTheme }) {
+  if (authPage === "landing") {
+    return <LandingPage setAuthPage={setAuthPage} theme={theme} setTheme={setTheme} />;
+  }
+
   const isLogin = authPage === "login";
   const isRegister = authPage === "register";
   const isForgot = authPage === "forgot";
   const isUpdatePassword = authPage === "updatePassword";
   const [showPassword, setShowPassword] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "", accountType: "Trader" });
+  const rememberedAuth = useMemo(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(REMEMBER_AUTH_KEY) || "null");
+      return saved && typeof saved === "object" ? saved : null;
+    } catch {
+      return null;
+    }
+  }, []);
+  const [rememberMe, setRememberMe] = useState(Boolean(rememberedAuth?.remember));
+  const [form, setForm] = useState({
+    name: "",
+    email: rememberedAuth?.email || "",
+    password: rememberedAuth?.password || "",
+    confirm: "",
+  });
   const [error, setError] = useState("");
 
   function update(key, value) {
@@ -8898,9 +10280,18 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
     setError("");
   }
 
+  useEffect(() => {
+    if (!isLogin) return;
+    if (!rememberMe) {
+      localStorage.removeItem(REMEMBER_AUTH_KEY);
+      return;
+    }
+    localStorage.setItem(REMEMBER_AUTH_KEY, JSON.stringify({ remember: true, email: form.email, password: form.password }));
+  }, [form.email, form.password, isLogin, rememberMe]);
+
   async function submitAuth(event) {
     event.preventDefault();
-    if (!String(form.email || "").includes("@")) {
+    if (!isUpdatePassword && !String(form.email || "").includes("@")) {
       setError("Please enter a valid email address.");
       return;
     }
@@ -8920,26 +10311,29 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
 
   const title = isLogin ? "Welcome back" : isRegister ? "Create your account" : isUpdatePassword ? "Create new password" : "Reset password";
   const subtitle = isLogin ? "Sign in to continue your trading journey" : isRegister ? "Start tracking your trades with clarity" : isUpdatePassword ? "Choose a new secure password for your account" : "Enter your email and we will send a reset link";
+  const isLight = theme === "light";
+  const authInputClass = isLight ? "border-slate-200 bg-slate-50 pl-11 text-slate-950 placeholder:text-slate-400 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" : "border-white/10 bg-black/45 pl-11 text-white placeholder:text-zinc-500 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20";
+  const authPasswordInputClass = isLight ? "border-slate-200 bg-slate-50 pl-11 pr-11 text-slate-950 placeholder:text-slate-400 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" : "border-white/10 bg-black/45 pl-11 pr-11 text-white placeholder:text-zinc-500 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20";
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(217,70,239,0.18),transparent_34%),radial-gradient(circle_at_84%_80%,rgba(16,185,129,0.10),transparent_28%),linear-gradient(135deg,#000_0%,#060206_45%,#12051b_100%)]" />
-      <div className="pointer-events-none absolute left-1/2 top-0 h-full w-px bg-gradient-to-b from-transparent via-fuchsia-500/15 to-transparent" />
+    <div className={isLight ? "auth-shell relative min-h-screen overflow-hidden bg-[#f8fafc] text-slate-950" : "auth-shell relative min-h-screen overflow-hidden bg-black text-white"}>
+      <div className={isLight ? "pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(217,70,239,0.13),transparent_28%),radial-gradient(circle_at_88%_76%,rgba(16,185,129,0.12),transparent_30%),linear-gradient(135deg,#f8fafc_0%,#ffffff_48%,#f7efff_100%)]" : "pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(217,70,239,0.18),transparent_34%),radial-gradient(circle_at_84%_80%,rgba(16,185,129,0.10),transparent_28%),linear-gradient(135deg,#000_0%,#060206_45%,#12051b_100%)]"} />
+      <div className={isLight ? "pointer-events-none absolute left-1/2 top-0 h-full w-px bg-gradient-to-b from-transparent via-fuchsia-200 to-transparent" : "pointer-events-none absolute left-1/2 top-0 h-full w-px bg-gradient-to-b from-transparent via-fuchsia-500/15 to-transparent"} />
 
       <div className="relative z-10 flex min-h-screen flex-col lg:grid lg:grid-cols-[520px_1fr]">
         <div className="flex min-h-screen items-center justify-center p-6 lg:p-10">
-          <motion.div initial={{ opacity: 0, y: 16, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="w-full max-w-[430px] rounded-[2rem] border border-white/10 bg-black/75 p-8 shadow-[0_28px_90px_rgba(0,0,0,0.75),0_0_40px_rgba(217,70,239,0.10)] backdrop-blur-xl">
-            <div className="mb-8 flex items-center justify-between">
+          <motion.div initial={{ opacity: 0, y: 16, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} className={isLight ? "w-full max-w-[430px] rounded-[2rem] border border-slate-200 bg-white/90 p-8 text-slate-950 shadow-[0_28px_90px_rgba(15,23,42,0.12),0_0_40px_rgba(217,70,239,0.10)] backdrop-blur-xl" : "w-full max-w-[480px] rounded-[1.6rem] border border-white/12 bg-[#050507]/92 p-10 shadow-[0_28px_90px_rgba(0,0,0,0.78),0_0_40px_rgba(217,70,239,0.08)] backdrop-blur-xl"}>
+            <div className={isLight ? "mb-8 flex items-center justify-between" : "mb-10 flex items-center justify-center gap-4"}>
               <div className="flex items-center gap-3">
-                <span className="text-4xl text-fuchsia-400 drop-shadow-[0_0_18px_rgba(217,70,239,0.95)]">{BRAND_MARK}</span>
+                <BrandBolt className="h-11 w-8 drop-shadow-[0_0_18px_rgba(217,70,239,0.95)]" />
                 <span className="text-2xl font-black tracking-tight">{BRAND_NAME}</span>
               </div>
-              <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-black text-zinc-300 hover:border-fuchsia-500/50 hover:text-white">{theme === "dark" ? "☀" : "🌙"}</button>
+              <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className={isLight ? "rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-black text-slate-800 shadow-sm hover:border-fuchsia-300" : "absolute right-8 top-8 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-black text-zinc-300 hover:border-fuchsia-500/50 hover:text-white"}>{theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}</button>
             </div>
 
             <div className="text-center">
-              <h1 className="text-3xl font-black tracking-tight text-white">{title}</h1>
-              <p className="mt-3 text-sm font-semibold leading-6 text-zinc-400">{subtitle}</p>
+              <h1 className={isLight ? "text-3xl font-black tracking-tight text-slate-950" : "text-3xl font-black tracking-tight text-white"}>{title}</h1>
+              <p className={isLight ? "mt-3 text-sm font-semibold leading-6 text-slate-500" : "mt-3 text-sm font-semibold leading-6 text-zinc-400"}>{subtitle}</p>
             </div>
 
             {!isSupabaseReady && (
@@ -8962,36 +10356,43 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
 
               {isRegister && (
                 <AuthField label="Full name" icon="👤">
-                  <Input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Enter your name" className="border-white/10 bg-black/45 pl-11 text-white placeholder:text-zinc-500 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" />
+                  <Input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Enter your name" className={authInputClass} />
                 </AuthField>
               )}
 
               <AuthField label="Email address" icon="✉">
-                <Input value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="Enter your email" className="border-white/10 bg-black/45 pl-11 text-white placeholder:text-zinc-500 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" />
+                <Input value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="Enter your email" className={authInputClass} />
               </AuthField>
 
               {!isForgot && (
                 <AuthField label={isUpdatePassword ? "New password" : "Password"} icon="🔒">
-                  <Input type={showPassword ? "text" : "password"} value={form.password} onChange={(e) => update("password", e.target.value)} placeholder="Enter your password" className="border-white/10 bg-black/45 pl-11 pr-11 text-white placeholder:text-zinc-500 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" />
-                  <button type="button" onClick={() => setShowPassword((current) => !current)} className="absolute right-3 top-[35px] text-zinc-500 hover:text-white">{showPassword ? "🙈" : "👁"}</button>
+                  <Input type={showPassword ? "text" : "password"} value={form.password} onChange={(e) => update("password", e.target.value)} placeholder="Enter your password" className={authPasswordInputClass} />
+                  <button type="button" onClick={() => setShowPassword((current) => !current)} className={isLight ? "absolute right-3 top-[35px] text-slate-400 hover:text-slate-950" : "absolute right-3 top-[35px] text-zinc-500 hover:text-white"} aria-label={showPassword ? "Hide password" : "Show password"}>
+                    {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                  </button>
                 </AuthField>
               )}
 
               {(isRegister || isUpdatePassword) && (
                 <AuthField label="Confirm password" icon="🔐">
-                  <Input type={showPassword ? "text" : "password"} value={form.confirm} onChange={(e) => update("confirm", e.target.value)} placeholder="Repeat your password" className="border-white/10 bg-black/45 pl-11 text-white placeholder:text-zinc-500 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" />
-                </AuthField>
-              )}
-
-              {isRegister && (
-                <AuthField label="Account type" icon="🎯">
-                  <Select value={form.accountType} onChange={(e) => update("accountType", e.target.value)}><option>Trader</option><option>Prop Firm</option><option>Demo</option><option>Funded Account</option></Select>
+                  <Input type={showPassword ? "text" : "password"} value={form.confirm} onChange={(e) => update("confirm", e.target.value)} placeholder="Repeat your password" className={authInputClass} />
                 </AuthField>
               )}
 
               {isLogin && (
                 <div className="flex items-center justify-between text-sm">
-                  <label className="flex items-center gap-2 font-semibold text-zinc-400"><input type="checkbox" className="h-4 w-4 accent-fuchsia-500" /> Remember me</label>
+                  <label className="flex items-center gap-2 font-semibold text-zinc-400">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(event) => {
+                        setRememberMe(event.target.checked);
+                        if (!event.target.checked) localStorage.removeItem(REMEMBER_AUTH_KEY);
+                      }}
+                      className="h-4 w-4 accent-fuchsia-500"
+                    />
+                    Remember me
+                  </label>
                   <button type="button" onClick={() => setAuthPage("forgot")} className="font-black text-fuchsia-300 hover:text-fuchsia-200">Forgot password?</button>
                 </div>
               )}
@@ -9045,11 +10446,440 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
   );
 }
 
-function AuthField({ label, icon, children }) {
+function LandingPage({ setAuthPage, theme, setTheme }) {
+  const isLight = theme === "light";
+  const navItems = ["Features", "How it works", "Pricing", "FAQ"];
+  const metrics = [
+    ["Portfolio Value", "$247,890"],
+    ["Win Rate", "78.3%"],
+    ["Risk", "1.2%"],
+  ];
+  const goHome = () => {
+    window.history.replaceState(null, "", window.location.pathname);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
-    <label className="relative block text-sm font-black text-white">
+    <div className={isLight ? "min-h-screen overflow-x-hidden bg-[#f8fafc] text-slate-950" : "min-h-screen overflow-x-hidden bg-black text-white"}>
+      <div
+        className={
+          isLight
+            ? "pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(217,70,239,0.12),transparent_30%),radial-gradient(circle_at_82%_62%,rgba(20,184,166,0.12),transparent_30%),linear-gradient(135deg,#f8fafc_0%,#ffffff_46%,#f7f0ff_100%)]"
+            : "pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_70%_18%,rgba(126,34,206,0.20),transparent_31%),radial-gradient(circle_at_82%_70%,rgba(20,184,166,0.12),transparent_29%),linear-gradient(135deg,#000_0%,#020409_45%,#07020d_100%)]"
+        }
+      />
+      <header className={isLight ? "fixed inset-x-0 top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl" : "fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-black/85 backdrop-blur-xl"}>
+        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-5 lg:px-8">
+          <button type="button" onClick={goHome} className="flex items-center gap-3 text-xl font-black">
+            <span className="text-fuchsia-400 drop-shadow-[0_0_16px_rgba(217,70,239,0.95)]">{BRAND_MARK}</span>
+            <span>{BRAND_NAME}</span>
+          </button>
+          <nav className={isLight ? "hidden items-center gap-9 text-sm font-black text-slate-500 md:flex" : "hidden items-center gap-9 text-sm font-black text-zinc-400 md:flex"}>
+            {navItems.map((item) => (
+              <a key={item} href={`#${item.toLowerCase().replaceAll(" ", "-")}`} className={isLight ? "transition hover:text-slate-950" : "transition hover:text-white"}>
+                {item}
+              </a>
+            ))}
+          </nav>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <button
+              type="button"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className={isLight ? "flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-black text-slate-800 shadow-sm transition hover:border-fuchsia-300" : "flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-sm font-black text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-white"}
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+            </button>
+            <button type="button" onClick={() => setAuthPage("login")} className={isLight ? "inline-flex text-sm font-black text-slate-600 transition hover:text-slate-950" : "inline-flex text-sm font-black text-zinc-200 transition hover:text-white"}>
+              Log In
+            </button>
+            <button type="button" onClick={() => setAuthPage("register")} className="rounded-xl bg-fuchsia-500 px-4 py-2.5 text-sm font-black text-white shadow-[0_18px_42px_rgba(217,70,239,0.28)] transition hover:bg-fuchsia-400">
+              Get Started
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="relative z-10 pt-16">
+        <section className="mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-14 px-5 py-16 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="max-w-2xl">
+            <div className={isLight ? "mb-7 inline-flex items-center gap-2 rounded-full border border-fuchsia-300 bg-fuchsia-50 px-4 py-2 text-xs font-black uppercase tracking-wider text-slate-950" : "mb-7 inline-flex items-center gap-2 rounded-full border border-fuchsia-500/25 bg-fuchsia-500/10 px-4 py-2 text-xs font-black uppercase tracking-wider text-fuchsia-200"}>
+              <Sparkles size={15} />
+              Trading journal for serious growth
+            </div>
+            <h1 className="text-6xl font-black leading-[0.94] tracking-tight sm:text-7xl lg:text-8xl">
+              Trade<br />
+              Smarter<br />
+              <span className="bg-gradient-to-r from-blue-400 via-fuchsia-400 to-emerald-400 bg-clip-text text-transparent">Not Harder</span>
+            </h1>
+            <p className={isLight ? "mt-8 max-w-xl text-lg font-semibold leading-8 text-slate-600 sm:text-xl" : "mt-8 max-w-xl text-lg font-semibold leading-8 text-zinc-400 sm:text-xl"}>
+              The all-in-one trading journal that tracks your psychology, reveals your edge, and turns every trade into a sharper decision.
+            </p>
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+              <button type="button" onClick={() => setAuthPage("register")} className={isLight ? "inline-flex h-14 items-center justify-center gap-3 rounded-xl bg-white px-8 text-base font-black text-slate-950 shadow-[0_22px_50px_rgba(15,23,42,0.10)] transition hover:scale-[1.02] hover:bg-slate-50" : "inline-flex h-14 items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-blue-500 to-fuchsia-600 px-8 text-base font-black text-white shadow-[0_22px_50px_rgba(99,102,241,0.28)] transition hover:scale-[1.02]"}>
+                Start Free Trial
+                <ChevronRight size={19} />
+              </button>
+              <button type="button" onClick={() => setAuthPage("login")} className={isLight ? "inline-flex h-14 items-center justify-center gap-3 rounded-xl border border-fuchsia-200 bg-white/65 px-8 text-base font-black text-slate-950 transition hover:border-fuchsia-300 hover:bg-white" : "inline-flex h-14 items-center justify-center gap-3 rounded-xl border border-white/15 bg-black/40 px-8 text-base font-black text-white transition hover:border-fuchsia-400/60 hover:bg-white/5"}>
+                <PlayCircle size={20} />
+                Watch Demo
+              </button>
+            </div>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 24, rotate: -2 }} animate={{ opacity: 1, y: 0, rotate: -2 }} transition={{ delay: 0.1, duration: 0.65 }} className="hero-dashboard-stage relative mx-auto w-full max-w-[660px] py-16">
+            <div className={isLight ? "hero-float-card hero-float-profit absolute left-0 top-12 z-20 rounded-2xl border border-fuchsia-200 bg-white/90 px-6 py-4 shadow-[0_20px_70px_rgba(15,23,42,0.16)] backdrop-blur-xl" : "hero-float-card hero-float-profit absolute left-0 top-12 z-20 rounded-2xl border border-white/10 bg-black/80 px-6 py-4 shadow-[0_20px_70px_rgba(0,0,0,0.55)] backdrop-blur-xl"}>
+              <div className="flex items-center gap-4">
+                <span className="text-3xl font-black text-emerald-400">$</span>
+                <div>
+                  <div className={isLight ? "text-xs font-black text-slate-500" : "text-xs font-black text-zinc-500"}>Today's P&L</div>
+                  <div className="text-xl font-black text-emerald-400">+$4,280</div>
+                </div>
+              </div>
+            </div>
+            <div className={isLight ? "hero-float-card hero-float-streak absolute right-1 top-40 z-20 rounded-2xl border border-fuchsia-200 bg-white/90 px-5 py-6 shadow-[0_20px_70px_rgba(15,23,42,0.16)] backdrop-blur-xl" : "hero-float-card hero-float-streak absolute right-1 top-40 z-20 rounded-2xl border border-white/10 bg-black/80 px-5 py-6 shadow-[0_20px_70px_rgba(0,0,0,0.55)] backdrop-blur-xl"}>
+              <TrendingUp className="text-fuchsia-300" size={24} />
+              <div className={isLight ? "mt-3 text-xs font-black text-slate-500" : "mt-3 text-xs font-black text-zinc-500"}>Streak</div>
+              <div className="text-2xl font-black text-fuchsia-300">12W</div>
+            </div>
+            <div className={isLight ? "hero-float-card hero-float-dd absolute bottom-16 right-12 z-20 rounded-xl border border-slate-200 bg-white/90 px-5 py-3 text-sm font-black text-slate-950 shadow-[0_20px_70px_rgba(15,23,42,0.14)]" : "hero-float-card hero-float-dd absolute bottom-16 right-12 z-20 rounded-xl border border-white/10 bg-black/80 px-5 py-3 text-sm font-black text-blue-300 shadow-[0_20px_70px_rgba(0,0,0,0.55)]"}>
+              Max DD: 3.2%
+            </div>
+
+            <div className={isLight ? "hero-dashboard-card relative overflow-hidden rounded-[2rem] border border-fuchsia-200/70 bg-gradient-to-br from-white via-fuchsia-100/60 to-emerald-100/55 p-8 shadow-[0_34px_100px_rgba(126,34,206,0.16)]" : "hero-dashboard-card relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-zinc-900/95 via-purple-950/45 to-emerald-950/55 p-8 shadow-[0_0_90px_rgba(126,34,206,0.23)]"}>
+              <div className={isLight ? "absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(217,70,239,0.12),transparent_30%),radial-gradient(circle_at_88%_20%,rgba(16,185,129,0.12),transparent_32%)]" : "absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(217,70,239,0.24),transparent_28%),radial-gradient(circle_at_88%_20%,rgba(16,185,129,0.18),transparent_32%)]"} />
+              <div className="relative z-10">
+                <div className="mb-8 flex items-center justify-between">
+                  <div className="flex gap-2">
+                    <span className="h-3 w-3 rounded-full bg-red-500" />
+                    <span className="h-3 w-3 rounded-full bg-amber-400" />
+                    <span className="h-3 w-3 rounded-full bg-emerald-400" />
+                  </div>
+                  <span className={isLight ? "font-mono text-sm font-black text-slate-400" : "font-mono text-sm font-black text-zinc-400"}>{BRAND_NAME} Pro</span>
+                </div>
+                <div className="flex items-start justify-between gap-6">
+                  <div>
+                    <div className={isLight ? "text-lg font-black text-slate-600" : "text-lg font-black text-zinc-200"}>Portfolio Value</div>
+                    <div className={isLight ? "mt-8 h-3 w-56 rounded-full bg-slate-300" : "mt-8 h-3 w-56 rounded-full bg-zinc-800"}>
+                      <div className="hero-progress-fill h-full w-[78%] origin-left rounded-full bg-gradient-to-r from-emerald-400 to-blue-500" />
+                    </div>
+                  </div>
+                  <div className="text-right text-4xl font-black text-emerald-400">$247,890</div>
+                </div>
+                <div className="mt-7 grid grid-cols-3 gap-4">
+                  {metrics.map(([label, value]) => (
+                    <div key={label} className={isLight ? "hero-metric-card rounded-2xl border border-slate-200 bg-white/75 p-5 shadow-sm" : "hero-metric-card rounded-2xl border border-white/8 bg-black/20 p-5"}>
+                      <div className={isLight ? "text-xs font-black text-slate-500" : "text-xs font-black text-zinc-500"}>{label}</div>
+                      <div className={isLight ? "mt-3 text-2xl font-black text-slate-950" : "mt-3 text-2xl font-black text-white"}>{value}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className={isLight ? "mt-6 flex items-center gap-3 rounded-2xl border border-emerald-300 bg-emerald-50 px-5 py-4 text-sm font-black text-emerald-600" : "mt-6 flex items-center gap-3 rounded-2xl border border-emerald-400/25 bg-emerald-400/10 px-5 py-4 text-sm font-black text-emerald-300"}>
+                  <ShieldCheck size={18} />
+                  Trading on track: strong momentum
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </section>
+
+        <section id="features" className="mx-auto min-h-screen w-full max-w-7xl scroll-mt-16 px-5 py-24 lg:px-8">
+          <div className="max-w-3xl">
+            <div className="text-sm font-black uppercase tracking-[0.22em] text-fuchsia-400">Features</div>
+            <h2 className={isLight ? "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl" : "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-white sm:text-6xl"}>
+              Everything you need.<br />Nothing you don&apos;t.
+            </h2>
+          </div>
+
+          <div className="mt-24 grid items-center gap-14 lg:grid-cols-[0.86fr_1.14fr]">
+            <div className="max-w-lg">
+              <div className="text-sm font-black uppercase tracking-[0.22em] text-fuchsia-400">Smart Trade Journal</div>
+              <h3 className={isLight ? "mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl" : "mt-5 text-3xl font-black leading-tight text-white sm:text-4xl"}>
+                Every trade. Every detail.<br />Instantly searchable.
+              </h3>
+              <p className={isLight ? "mt-6 text-lg font-semibold leading-8 text-slate-600" : "mt-6 text-lg font-semibold leading-8 text-zinc-400"}>
+                Log trades in seconds, attach screenshots, add strategy tags, filter by session, emotion, or outcome. Replaces your spreadsheet completely.
+              </p>
+            </div>
+
+            <div className={isLight ? "overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white/78 shadow-[0_28px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl" : "overflow-hidden rounded-[1.35rem] border border-white/12 bg-black/55 shadow-[0_28px_90px_rgba(0,0,0,0.55)] backdrop-blur-xl"}>
+              <div className={isLight ? "flex items-center justify-between border-b border-slate-200 px-5 py-4" : "flex items-center justify-between border-b border-white/10 px-5 py-4"}>
+                <div className={isLight ? "text-sm font-black text-slate-950" : "text-sm font-black text-white"}>Trade Journal</div>
+                <div className="flex items-center gap-4">
+                  <button type="button" className={isLight ? "rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-500" : "rounded-lg border border-white/12 bg-black px-3 py-1.5 text-xs font-bold text-zinc-400"}>Sort: Date</button>
+                  <span className={isLight ? "text-xs font-bold text-slate-500" : "text-xs font-bold text-zinc-400"}>47 trades</span>
+                  <span className="grid h-8 w-8 grid-cols-2 gap-0.5 rounded-lg bg-fuchsia-500/18 p-2">
+                    <i className="rounded-sm bg-fuchsia-400" />
+                    <i className="rounded-sm bg-fuchsia-400/55" />
+                    <i className="rounded-sm bg-fuchsia-400/55" />
+                    <i className="rounded-sm bg-fuchsia-400" />
+                  </span>
+                </div>
+              </div>
+
+              <div className={isLight ? "grid grid-cols-5 border-b border-slate-200 text-center" : "grid grid-cols-5 border-b border-white/10 text-center"}>
+                {[
+                  ["+$4,280", "Total P&L", "text-emerald-400"],
+                  ["68%", "Win Rate", "text-fuchsia-400"],
+                  ["47", "Trades", "text-cyan-400"],
+                  ["$184", "Avg Win", "text-emerald-400"],
+                  ["1.9R", "Avg R", "text-amber-400"],
+                ].map(([value, label, tone]) => (
+                  <div key={label} className={isLight ? "border-r border-slate-200 px-3 py-4 last:border-r-0" : "border-r border-white/10 px-3 py-4 last:border-r-0"}>
+                    <div className={`text-sm font-black ${tone}`}>{value}</div>
+                    <div className={isLight ? "mt-1 text-[11px] font-bold text-slate-500" : "mt-1 text-[11px] font-bold text-zinc-400"}>{label}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid gap-4 p-4 sm:grid-cols-2">
+                {[
+                  ["NQ", "Long", "NY AM · Breakout", "+$580", ["confluence", "trend"], "green"],
+                  ["ES", "Short", "London · Mean Revert", "$120", ["fakeout"], "red"],
+                  ["AAPL", "Long", "NY AM · Trend Follow", "+$340", ["momentum"], "green"],
+                  ["CL", "Long", "NY PM · Breakout", "+$210", ["news", "vol"], "green"],
+                ].map(([symbol, side, meta, pnl, tags, tone]) => (
+                  <div key={symbol} className={tone === "red" ? "rounded-2xl border border-red-500/30 bg-red-500/8 p-4" : "rounded-2xl border border-emerald-500/30 bg-emerald-500/8 p-4"}>
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className={isLight ? "text-lg font-black text-slate-950" : "text-lg font-black text-white"}>
+                          {symbol} <span className={tone === "red" ? "rounded-md bg-red-500/20 px-2 py-1 text-[10px] font-black text-red-400" : "rounded-md bg-emerald-500/20 px-2 py-1 text-[10px] font-black text-emerald-400"}>{side}</span>
+                        </div>
+                        <div className={isLight ? "mt-3 text-xs font-semibold text-slate-500" : "mt-3 text-xs font-semibold text-zinc-400"}>{meta}</div>
+                      </div>
+                      <div className={tone === "red" ? "text-sm font-black text-red-400" : "text-sm font-black text-emerald-400"}>{tone === "red" ? "↘" : "↗"} {pnl}</div>
+                    </div>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {tags.map((tag) => (
+                        <span key={tag} className="rounded-full border border-fuchsia-500/35 bg-fuchsia-500/12 px-2.5 py-1 text-[11px] font-bold text-fuchsia-300">{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="how-it-works" className="mx-auto min-h-screen w-full max-w-7xl scroll-mt-16 px-5 py-24 lg:px-8">
+          <div className="grid items-start gap-14 lg:grid-cols-[0.9fr_1.1fr]">
+            <div className="max-w-xl">
+              <div className="text-sm font-black uppercase tracking-[0.22em] text-fuchsia-400">How it works</div>
+              <h2 className={isLight ? "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl" : "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-white sm:text-6xl"}>
+                From setup to insight<br />in three clean steps.
+              </h2>
+              <p className={isLight ? "mt-6 text-lg font-semibold leading-8 text-slate-600" : "mt-6 text-lg font-semibold leading-8 text-zinc-400"}>
+                Critique keeps the flow simple: capture the trade, review the psychology, then use the dashboard to see what is actually improving.
+              </p>
+
+              <div className="mt-12 space-y-4">
+                {[
+                  ["01", "Log the trade", "Add symbol, session, direction, risk, result, screenshots and tags in one focused form."],
+                  ["02", "Review your behavior", "Mark the mistake, emotion, rule follow-through and what you would improve next time."],
+                  ["03", "Find your edge", "Filter patterns across your journal and turn repeated problems into a practical focus plan."],
+                ].map(([step, title, copy]) => (
+                  <div key={step} className={isLight ? "rounded-2xl border border-slate-200 bg-white/78 p-5 shadow-sm" : "rounded-2xl border border-white/10 bg-white/[0.03] p-5"}>
+                    <div className="flex gap-4">
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/12 text-sm font-black text-fuchsia-300">{step}</span>
+                      <div>
+                        <div className={isLight ? "text-lg font-black text-slate-950" : "text-lg font-black text-white"}>{title}</div>
+                        <p className={isLight ? "mt-2 text-sm font-semibold leading-6 text-slate-600" : "mt-2 text-sm font-semibold leading-6 text-zinc-400"}>{copy}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className={isLight ? "relative overflow-hidden rounded-[1.6rem] border border-slate-200 bg-white/80 p-5 shadow-[0_28px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl" : "relative overflow-hidden rounded-[1.6rem] border border-white/12 bg-black/55 p-5 shadow-[0_28px_90px_rgba(0,0,0,0.55)] backdrop-blur-xl"}>
+              <div className={isLight ? "absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(217,70,239,0.12),transparent_28%),radial-gradient(circle_at_90%_80%,rgba(16,185,129,0.10),transparent_30%)]" : "absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(217,70,239,0.18),transparent_28%),radial-gradient(circle_at_90%_80%,rgba(16,185,129,0.12),transparent_30%)]"} />
+              <div className="relative z-10">
+                <div className="mb-5 flex items-center justify-between">
+                  <div>
+                    <div className={isLight ? "text-sm font-black text-slate-950" : "text-sm font-black text-white"}>Today&apos;s Workflow</div>
+                    <div className={isLight ? "mt-1 text-xs font-bold text-slate-500" : "mt-1 text-xs font-bold text-zinc-500"}>Pre-market to post-trade review</div>
+                  </div>
+                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/12 px-3 py-1 text-xs font-black text-emerald-400">On track</span>
+                </div>
+
+                <div className="grid gap-4 lg:grid-cols-[0.92fr_1.08fr]">
+                  <div className={isLight ? "rounded-2xl border border-slate-200 bg-slate-50/80 p-4" : "rounded-2xl border border-white/10 bg-black/35 p-4"}>
+                    <div className={isLight ? "text-xs font-black uppercase tracking-wider text-slate-500" : "text-xs font-black uppercase tracking-wider text-zinc-500"}>Add Trade</div>
+                    {[
+                      ["Symbol", "NQ"],
+                      ["Session", "NY AM"],
+                      ["Direction", "Long"],
+                      ["Risk", "$120"],
+                    ].map(([label, value]) => (
+                      <div key={label} className={isLight ? "mt-3 flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-3" : "mt-3 flex items-center justify-between rounded-xl border border-white/10 bg-black/45 px-3 py-3"}>
+                        <span className={isLight ? "text-xs font-bold text-slate-500" : "text-xs font-bold text-zinc-500"}>{label}</span>
+                        <span className={isLight ? "text-sm font-black text-slate-950" : "text-sm font-black text-white"}>{value}</span>
+                      </div>
+                    ))}
+                    <div className="mt-4 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 px-4 py-3 text-center text-sm font-black text-white">Save Trade</div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className={isLight ? "rounded-2xl border border-slate-200 bg-white p-5" : "rounded-2xl border border-white/10 bg-black/35 p-5"}>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className={isLight ? "text-xs font-black uppercase tracking-wider text-slate-500" : "text-xs font-black uppercase tracking-wider text-zinc-500"}>Review Signal</div>
+                          <div className={isLight ? "mt-2 text-2xl font-black text-slate-950" : "mt-2 text-2xl font-black text-white"}>Discipline: 84%</div>
+                        </div>
+                        <ListChecks className="text-fuchsia-400" size={28} />
+                      </div>
+                      <div className={isLight ? "mt-5 h-3 rounded-full bg-slate-200" : "mt-5 h-3 rounded-full bg-white/10"}>
+                        <div className="h-full w-[84%] rounded-full bg-gradient-to-r from-fuchsia-500 to-emerald-400" />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className={isLight ? "rounded-2xl border border-emerald-200 bg-emerald-50 p-4" : "rounded-2xl border border-emerald-500/25 bg-emerald-500/10 p-4"}>
+                        <div className="text-xs font-black text-emerald-500">Best setup</div>
+                        <div className={isLight ? "mt-2 text-xl font-black text-slate-950" : "mt-2 text-xl font-black text-white"}>Breakout</div>
+                      </div>
+                      <div className={isLight ? "rounded-2xl border border-red-200 bg-red-50 p-4" : "rounded-2xl border border-red-500/25 bg-red-500/10 p-4"}>
+                        <div className="text-xs font-black text-red-400">Main leak</div>
+                        <div className={isLight ? "mt-2 text-xl font-black text-slate-950" : "mt-2 text-xl font-black text-white"}>FOMO</div>
+                      </div>
+                    </div>
+
+                    <div className={isLight ? "rounded-2xl border border-fuchsia-200 bg-fuchsia-50 p-4" : "rounded-2xl border border-fuchsia-500/25 bg-fuchsia-500/10 p-4"}>
+                      <div className="text-xs font-black uppercase tracking-wider text-fuchsia-400">Next focus</div>
+                      <p className={isLight ? "mt-2 text-sm font-semibold leading-6 text-slate-600" : "mt-2 text-sm font-semibold leading-6 text-zinc-300"}>Wait for full confirmation before entering the second setup.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="pricing" className="mx-auto min-h-screen w-full max-w-7xl scroll-mt-16 px-5 py-24 lg:px-8">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="text-sm font-black uppercase tracking-[0.22em] text-fuchsia-400">Pricing</div>
+            <h2 className={isLight ? "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl" : "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-white sm:text-6xl"}>
+              Simple price.<br />Serious trading clarity.
+            </h2>
+            <p className={isLight ? "mx-auto mt-6 max-w-2xl text-lg font-semibold leading-8 text-slate-600" : "mx-auto mt-6 max-w-2xl text-lg font-semibold leading-8 text-zinc-400"}>
+              One plan with the core tools you need to journal, review, and improve every trading session.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-16 grid max-w-5xl items-center gap-8 lg:grid-cols-[0.95fr_1.05fr]">
+            <div className={isLight ? "relative overflow-hidden rounded-[1.6rem] border border-fuchsia-200 bg-white/85 p-8 shadow-[0_28px_90px_rgba(15,23,42,0.12)]" : "relative overflow-hidden rounded-[1.6rem] border border-fuchsia-500/25 bg-black/60 p-8 shadow-[0_28px_90px_rgba(0,0,0,0.55)]"}>
+              <div className="absolute right-0 top-0 h-40 w-40 rounded-bl-[4rem] bg-fuchsia-500/12" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <div className={isLight ? "text-sm font-black uppercase tracking-[0.18em] text-slate-500" : "text-sm font-black uppercase tracking-[0.18em] text-zinc-500"}>Critique Pro</div>
+                    <div className={isLight ? "mt-2 text-2xl font-black text-slate-950" : "mt-2 text-2xl font-black text-white"}>Trading journal subscription</div>
+                  </div>
+                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/12 px-3 py-1 text-xs font-black text-emerald-400">Best value</span>
+                </div>
+
+                <div className="mt-10 flex items-end gap-3">
+                  <span className={isLight ? "text-7xl font-black tracking-tight text-slate-950" : "text-7xl font-black tracking-tight text-white"}>$10</span>
+                  <span className={isLight ? "pb-3 text-lg font-black text-slate-500" : "pb-3 text-lg font-black text-zinc-400"}>/ month</span>
+                </div>
+
+                <p className={isLight ? "mt-5 text-sm font-semibold leading-6 text-slate-600" : "mt-5 text-sm font-semibold leading-6 text-zinc-400"}>
+                  Built for traders who want a simple system for tracking decisions, mistakes, risk, and progress.
+                </p>
+
+                <button type="button" onClick={() => setAuthPage("register")} className="mt-8 flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-sm font-black text-white shadow-[0_18px_36px_rgba(217,70,239,0.24)] transition hover:scale-[1.01]">
+                  Start for $10/month
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            </div>
+
+            <div className={isLight ? "rounded-[1.6rem] border border-slate-200 bg-white/72 p-6 shadow-sm backdrop-blur-xl" : "rounded-[1.6rem] border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl"}>
+              <div className={isLight ? "mb-5 text-sm font-black uppercase tracking-[0.18em] text-slate-500" : "mb-5 text-sm font-black uppercase tracking-[0.18em] text-zinc-500"}>Included</div>
+              <div className="grid gap-3">
+                {[
+                  ["Unlimited trades", "Log every setup, result, screenshot and review note."],
+                  ["Dashboard analytics", "Track win rate, P&L curve, R multiple and account performance."],
+                  ["Mistake detector", "See repeated behavioral leaks and focus on the highest-impact fix."],
+                  ["Calendar and statistics", "Review sessions, months, strategies and trading consistency."],
+                  ["Backup and restore", "Export or restore your journal data when you need it."],
+                ].map(([title, copy]) => (
+                  <div key={title} className={isLight ? "rounded-2xl border border-slate-200 bg-slate-50/80 p-4" : "rounded-2xl border border-white/10 bg-black/35 p-4"}>
+                    <div className="flex gap-3">
+                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-xs font-black text-emerald-400">✓</span>
+                      <div>
+                        <div className={isLight ? "text-sm font-black text-slate-950" : "text-sm font-black text-white"}>{title}</div>
+                        <p className={isLight ? "mt-1 text-sm font-semibold leading-6 text-slate-600" : "mt-1 text-sm font-semibold leading-6 text-zinc-400"}>{copy}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="faq" className="mx-auto min-h-screen w-full max-w-7xl scroll-mt-16 px-5 py-24 lg:px-8">
+          <div className="grid gap-14 lg:grid-cols-[0.9fr_1.1fr]">
+            <div className="max-w-xl">
+              <div className="text-sm font-black uppercase tracking-[0.22em] text-fuchsia-400">FAQ</div>
+              <h2 className={isLight ? "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl" : "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-white sm:text-6xl"}>
+                Questions before<br />you start?
+              </h2>
+              <p className={isLight ? "mt-6 text-lg font-semibold leading-8 text-slate-600" : "mt-6 text-lg font-semibold leading-8 text-zinc-400"}>
+                The short version: Critique is built to help you keep your journal simple, searchable, and useful after every trading day.
+              </p>
+
+              <div className={isLight ? "mt-10 rounded-[1.35rem] border border-fuchsia-200 bg-white/80 p-6 shadow-sm" : "mt-10 rounded-[1.35rem] border border-fuchsia-500/25 bg-fuchsia-500/8 p-6"}>
+                <div className="flex items-start gap-4">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-fuchsia-500/15 text-fuchsia-300">
+                    <Sparkles size={22} />
+                  </span>
+                  <div>
+                    <div className={isLight ? "text-lg font-black text-slate-950" : "text-lg font-black text-white"}>Designed for quick review</div>
+                    <p className={isLight ? "mt-2 text-sm font-semibold leading-6 text-slate-600" : "mt-2 text-sm font-semibold leading-6 text-zinc-400"}>
+                      Use it during your session, then come back later to review patterns without rebuilding spreadsheets.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {[
+                ["Do I need Supabase to use it?", "Supabase sync is supported, but your journal also keeps a local browser backup so your trades remain available on this device."],
+                ["Can I attach screenshots?", "Yes. Trades can include screenshots, notes, tags, rule review, emotion, setup quality, entry quality and exit quality."],
+                ["Will it show my mistakes?", "Yes. The mistake detector groups repeated issues and helps you choose one focus area instead of guessing what to fix."],
+                ["Can I export my data?", "Yes. You can export CSV files and also create a JSON backup for restoring your journal later."],
+                ["What happens after I click Get Started?", "You create an account, then the app opens your dashboard, journal, calendar, statistics and settings pages."],
+              ].map(([question, answer], index) => (
+                <details key={question} className={isLight ? "group rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm open:border-fuchsia-200" : "group rounded-2xl border border-white/10 bg-white/[0.03] p-5 open:border-fuchsia-500/35"}>
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/12 text-xs font-black text-fuchsia-300">{String(index + 1).padStart(2, "0")}</span>
+                      <span className={isLight ? "text-base font-black text-slate-950" : "text-base font-black text-white"}>{question}</span>
+                    </div>
+                    <span className="text-xl font-black text-fuchsia-400 transition group-open:rotate-45">+</span>
+                  </summary>
+                  <p className={isLight ? "mt-4 pl-13 text-sm font-semibold leading-6 text-slate-600" : "mt-4 pl-13 text-sm font-semibold leading-6 text-zinc-400"}>
+                    {answer}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+function AuthField({ label, icon, children }) {
+  const cleanIcon = label.includes("Email") ? <Mail size={17} /> : label.includes("password") || label.includes("Password") ? <Lock size={17} /> : label.includes("Full") ? <User size={17} /> : label.includes("Account") ? <Target size={17} /> : icon;
+  return (
+    <label className="relative block text-sm font-black">
       <span className="mb-2 block">{label}</span>
-      <span className="pointer-events-none absolute left-3 top-[34px] z-10 flex h-6 w-6 items-center justify-center text-zinc-500">{icon}</span>
+      <span className="pointer-events-none absolute left-3 top-[34px] z-10 flex h-6 w-6 items-center justify-center text-zinc-500">{cleanIcon}</span>
       {children}
     </label>
   );
