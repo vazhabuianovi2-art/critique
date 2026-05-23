@@ -118,6 +118,11 @@ function getUserDisplayName(user, fallback = "User") {
   return formatDisplayName(metadata.full_name || metadata.name || metadata.user_name || user?.email, fallback);
 }
 
+function getFirstDisplayName(name, fallback = "User") {
+  const displayName = formatDisplayName(name, fallback);
+  return displayName.split(" ")[0] || fallback;
+}
+
 const THEME_STYLE_CSS = `
   html,
   body,
@@ -2163,6 +2168,30 @@ const THEME_STYLE_CSS = `
     font-size: .72rem;
     font-style: normal;
     box-shadow: 0 0 18px rgba(217,70,239,.24), inset 0 1px 0 rgba(255,255,255,.10);
+    animation: inspirationSpark 2.4s ease-in-out infinite;
+    will-change: transform, filter, opacity;
+  }
+
+  .moving-text-spark:nth-child(3) {
+    animation-delay: 1.1s;
+  }
+
+  .daily-inspiration-star {
+    display: inline-block;
+    animation: inspirationStarTwinkle 1.9s ease-in-out infinite;
+    color: #f0abfc;
+    filter: drop-shadow(0 0 10px rgba(217,70,239,.7));
+  }
+
+  .daily-inspiration-star:last-child {
+    animation-delay: .85s;
+  }
+
+  .waving-hand {
+    display: inline-block;
+    transform-origin: 70% 70%;
+    animation: waveHand 1.35s ease-in-out infinite;
+    will-change: transform;
   }
 
   .moving-text-divider {
@@ -2175,6 +2204,27 @@ const THEME_STYLE_CSS = `
     13% { opacity: 1; transform: translateY(0); }
     16.66% { opacity: 0; transform: translateY(-10px); }
     100% { opacity: 0; transform: translateY(-10px); }
+  }
+
+  @keyframes inspirationSpark {
+    0%, 100% { transform: translateY(0) rotate(0deg) scale(1); opacity: .82; filter: brightness(1); }
+    35% { transform: translateY(-3px) rotate(14deg) scale(1.16); opacity: 1; filter: brightness(1.35); }
+    70% { transform: translateY(2px) rotate(-10deg) scale(.96); opacity: .9; filter: brightness(1.08); }
+  }
+
+  @keyframes inspirationStarTwinkle {
+    0%, 100% { transform: translateY(0) scale(1) rotate(0deg); opacity: .7; }
+    50% { transform: translateY(-2px) scale(1.22) rotate(18deg); opacity: 1; }
+  }
+
+  @keyframes waveHand {
+    0%, 100% { transform: rotate(0deg); }
+    12% { transform: rotate(16deg); }
+    24% { transform: rotate(-9deg); }
+    36% { transform: rotate(14deg); }
+    48% { transform: rotate(-5deg); }
+    60% { transform: rotate(8deg); }
+    72% { transform: rotate(0deg); }
   }
 
   .mistake-coach-hero {
@@ -6102,7 +6152,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
       <div className="dashboard-hero rounded-2xl border border-fuchsia-500/35 bg-gradient-to-r from-fuchsia-950/45 via-black to-orange-950/10 p-6 shadow-[0_0_45px_rgba(168,85,247,0.13)]">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <h1 className="text-3xl font-black xl:text-4xl">Welcome back, {profileName}! 👋</h1>
+            <h1 className="text-3xl font-black xl:text-4xl">Welcome back, {getFirstDisplayName(profileName)}! <span className="waving-hand" aria-hidden="true">👋</span></h1>
             <p className="mt-3 flex items-center gap-2 text-base font-semibold text-zinc-400">▣ {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}</p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -6111,7 +6161,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
           </div>
         </div>
         <div className="dashboard-inspiration mt-6 rounded-xl border border-white/10 bg-gradient-to-r from-white/[0.04] via-fuchsia-500/[0.05] to-orange-500/[0.05] p-5 text-center">
-          <div className="text-sm font-black uppercase tracking-widest text-fuchsia-400">✬ Daily Inspiration ✬</div>
+          <div className="text-sm font-black uppercase tracking-widest text-fuchsia-400"><span className="daily-inspiration-star">✬</span> Daily Inspiration <span className="daily-inspiration-star">✬</span></div>
           <div className="moving-text-wrap mt-2">
             <div className="moving-text-track">
               {quotes.map((item, index) => (
@@ -6273,10 +6323,15 @@ function TradingActivityPanel({ trades, selectedDate, onSelectDate }) {
   const [hoveredDay, setHoveredDay] = useState(null);
   const grouped = groupTradesByDate(trades);
   const days = getLastTradingDays(20).map((day) => ({ ...day, summary: summarizeTrades(grouped[day.key] || []) }));
-  const activeDays = days.filter((day) => day.summary.count > 0).length;
-  const winDays = days.filter((day) => day.summary.pnl > 0).length;
-  const lossDays = days.filter((day) => day.summary.pnl < 0).length;
-  const breakEvenDays = days.filter((day) => day.summary.count > 0 && day.summary.pnl === 0).length;
+  const activityTotals = days.reduce(
+    (totals, day) => ({
+      trades: totals.trades + Number(day.summary.count || 0),
+      wins: totals.wins + Number(day.summary.wins || 0),
+      losses: totals.losses + Number(day.summary.losses || 0),
+      breakEvens: totals.breakEvens + Number(day.summary.breakEvens || 0),
+    }),
+    { trades: 0, wins: 0, losses: 0, breakEvens: 0 }
+  );
 
   return (
     <div className="dashboard-activity-card light-card relative flex h-full min-h-0 flex-col overflow-visible rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-5 shadow-[0_20px_55px_rgba(217,70,239,0.10)]">
@@ -6349,10 +6404,10 @@ function TradingActivityPanel({ trades, selectedDate, onSelectDate }) {
 
       <div className="relative z-10 mt-auto border-t border-white/10 pt-5">
         <div className="grid grid-cols-2 gap-3">
-          <ActivityStat tone="fuchsia" title="ACTIVE" value={activeDays} subtitle="sessions" icon="●" />
-          <ActivityStat tone="emerald" title="WINS" value={winDays} subtitle="profitable" icon="↗" />
-          <ActivityStat tone="red" title="LOSSES" value={lossDays} subtitle="unprofitable" icon="↘" />
-          <ActivityStat tone="amber" title="BE" value={breakEvenDays} subtitle="neutral" icon="—" />
+          <ActivityStat tone="fuchsia" title="ACTIVE" value={activityTotals.trades} subtitle="trades" icon="●" />
+          <ActivityStat tone="emerald" title="WINS" value={activityTotals.wins} subtitle="profitable trades" icon="↗" />
+          <ActivityStat tone="red" title="LOSSES" value={activityTotals.losses} subtitle="unprofitable trades" icon="↘" />
+          <ActivityStat tone="amber" title="BE" value={activityTotals.breakEvens} subtitle="neutral trades" icon="—" />
         </div>
       </div>
     </div>
