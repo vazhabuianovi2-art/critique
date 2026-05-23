@@ -123,6 +123,30 @@ const hasValidSupabaseKey = SUPABASE_ANON_KEY.length > 40;
 const supabase = hasValidSupabaseUrl && hasValidSupabaseKey ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 const isSupabaseReady = Boolean(supabase);
 
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getFriendlyAuthError(error, fallback = "Authentication failed. Try again.") {
+  const message = String(error?.message || error || "");
+  if (/failed to fetch|networkerror|load failed|fetch/i.test(message)) {
+    return "Could not reach the authentication server. Check your internet connection, wait a few seconds, and try again.";
+  }
+  return message || fallback;
+}
+
+async function updatePasswordWithRetry(password) {
+  let lastError = null;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const { error } = await supabase.auth.updateUser({ password });
+    if (!error) return;
+    lastError = error;
+    if (!/failed to fetch|networkerror|load failed|fetch/i.test(String(error?.message || error))) break;
+    await wait(650);
+  }
+  throw lastError;
+}
+
 function BrandBolt({ className = "" }) {
   return (
     <svg className={className} viewBox="0 0 48 64" fill="none" aria-hidden="true">
@@ -5802,8 +5826,7 @@ export default function TradingJournalDashboard() {
         if (!passwordSession) {
           throw new Error("Password reset session expired. Request a new reset link and open the latest email.");
         }
-        const { error } = await supabase.auth.updateUser({ password: values.password });
-        if (error) throw error;
+        await updatePasswordWithRetry(values.password);
         setPasswordRecoverySession(false);
         setAuthMessage("Password updated successfully. You can now sign in with your new password.");
         setAuthPage("login");
@@ -5811,8 +5834,9 @@ export default function TradingJournalDashboard() {
         return { ok: true };
       }
     } catch (error) {
-      setAuthMessage(error?.message || "Authentication failed. Try again.");
-      return { ok: false, error };
+      const friendlyError = new Error(getFriendlyAuthError(error));
+      setAuthMessage(friendlyError.message);
+      return { ok: false, error: friendlyError };
     } finally {
       setAuthLoading(false);
     }
