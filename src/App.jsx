@@ -5810,8 +5810,15 @@ export default function TradingJournalDashboard() {
       setActiveAccountId(finalAccount.id);
       return { ok: true };
     } catch (error) {
-      setDataMessage(error?.message || "Could not save account settings to Supabase.");
-      return { ok: false, error };
+      console.warn("Could not save account settings to Supabase; saved locally instead.", error?.message || error);
+      setAccounts((current) => {
+        const exists = current.some((item) => String(item.id) === String(normalizedAccount.id));
+        return exists ? current.map((item) => String(item.id) === String(normalizedAccount.id) ? normalizedAccount : item) : [normalizedAccount, ...current];
+      });
+      setPendingAccountDraft(null);
+      setActiveAccountId(normalizedAccount.id);
+      setDataMessage("");
+      return { ok: true, offline: true };
     }
   }
 
@@ -11199,6 +11206,14 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
   const isLight = theme === "light";
   const authInputClass = isLight ? "border-slate-200 bg-slate-50 pl-11 text-slate-950 placeholder:text-slate-400 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" : "border-white/10 bg-black/45 pl-11 text-white placeholder:text-zinc-500 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20";
   const authPasswordInputClass = isLight ? "border-slate-200 bg-slate-50 pl-11 pr-11 text-slate-950 placeholder:text-slate-400 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" : "border-white/10 bg-black/45 pl-11 pr-11 text-white placeholder:text-zinc-500 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20";
+  const authMessageIsWarning = /expired|invalid|request a new|open the latest|could not|failed/i.test(authMessage || "");
+  const authMessageClass = authMessageIsWarning
+    ? isLight
+      ? "mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold leading-6 text-amber-700"
+      : "mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm font-bold leading-6 text-amber-200"
+    : isLight
+      ? "mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold leading-6 text-emerald-700"
+      : "mt-6 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm font-bold leading-6 text-emerald-300";
 
   return (
     <div className={isLight ? "auth-shell relative min-h-screen overflow-hidden bg-[#f8fafc] text-slate-950" : "auth-shell relative min-h-screen overflow-hidden bg-black text-white"}>
@@ -11227,7 +11242,7 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
               </div>
             )}
             {authMessage && (
-              <div className="mt-6 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm font-bold leading-6 text-emerald-300">
+              <div className={authMessageClass}>
                 {authMessage}
               </div>
             )}
