@@ -7,6 +7,7 @@ import {
   BookOpen,
   Calendar,
   Camera,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Database,
@@ -860,6 +861,63 @@ const THEME_STYLE_CSS = `
     color: #ffffff !important;
   }
 
+  .custom-select-menu {
+    background: #030303 !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(217,70,239,.65) rgba(24,24,27,.95);
+  }
+
+  .custom-select-menu::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .custom-select-menu::-webkit-scrollbar-track {
+    background: rgba(24,24,27,.95);
+    border-radius: 999px;
+  }
+
+  .custom-select-menu::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #d946ef, #10b981);
+    border-radius: 999px;
+  }
+
+  .custom-select-option,
+  .custom-select-option span,
+  .custom-select-selected,
+  .custom-select-selected span {
+    color: #e4e4e7 !important;
+    text-shadow: none !important;
+  }
+
+  .custom-select-option:not(.custom-select-active):hover,
+  .custom-select-option:not(.custom-select-active):hover span {
+    color: #ffffff !important;
+    background: linear-gradient(90deg, rgba(217,70,239,.20), rgba(16,185,129,.10)) !important;
+  }
+
+  .custom-select-active,
+  .custom-select-active span {
+    color: #f4f4f5 !important;
+    background: rgba(255,255,255,.06) !important;
+    box-shadow: inset 0 0 0 1px rgba(217,70,239,.28) !important;
+  }
+
+  .date-picker-popover {
+    color: #f8fafc !important;
+  }
+
+  .date-picker-day-current .date-picker-day-number {
+    color: #f8fafc !important;
+  }
+
+  .date-picker-day-muted .date-picker-day-number {
+    color: #64748b !important;
+  }
+
+  .date-picker-day-selected .date-picker-day-number {
+    color: #ffffff !important;
+  }
+
   .light-theme .account-sidebar-card {
     background: #ffffff !important;
     color: #0f172a !important;
@@ -1160,10 +1218,15 @@ const THEME_STYLE_CSS = `
   .dashboard-recent-list,
   .dashboard-routine-card,
   .journal-hero,
-  .journal-search-panel,
   .journal-sort-panel {
     position: relative;
     overflow: hidden;
+  }
+
+  .journal-search-panel {
+    position: relative;
+    overflow: visible !important;
+    z-index: 30;
   }
 
   .dashboard-panel::before,
@@ -5012,6 +5075,7 @@ export default function TradingJournalDashboard() {
   }, [accounts, activeAccountId, pendingAccountDraft]);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isAccountSwitcherOpen, setIsAccountSwitcherOpen] = useState(false);
+  const [accountDeleteTarget, setAccountDeleteTarget] = useState(null);
   const [isSidebarUserMenuOpen, setIsSidebarUserMenuOpen] = useState(false);
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
   const [isRoutineOpen, setIsRoutineOpen] = useState(false);
@@ -5026,6 +5090,7 @@ export default function TradingJournalDashboard() {
     }
   });
   const [editingTradeId, setEditingTradeId] = useState(null);
+  const [tradeDeleteTarget, setTradeDeleteTarget] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [viewTrade, setViewTrade] = useState(null);
   const [importPreview, setImportPreview] = useState(null);
@@ -5334,6 +5399,30 @@ export default function TradingJournalDashboard() {
     setIsAccountModalOpen(true);
   }
 
+  function requestDeleteAccount(accountId) {
+    const targetAccount = accounts.find((item) => String(item.id) === String(accountId));
+    if (!targetAccount) return;
+    setAccountDeleteTarget(targetAccount);
+  }
+
+  function confirmDeleteAccount() {
+    const accountId = accountDeleteTarget?.id;
+    if (!accountId) return;
+    setAccounts((current) => {
+      const next = current.filter((item) => String(item.id) !== String(accountId));
+      if (String(activeAccountId) === String(accountId)) {
+        setActiveAccountId(next[0]?.id || "");
+      }
+      return next;
+    });
+    if (pendingAccountDraft && String(pendingAccountDraft.id) === String(accountId)) {
+      setPendingAccountDraft(null);
+    }
+    setIsAccountSwitcherOpen(false);
+    setIsAccountModalOpen(false);
+    setAccountDeleteTarget(null);
+  }
+
   function closeAccountModal() {
     if (pendingAccountDraft && String(activeAccountId) === String(pendingAccountDraft.id)) {
       setPendingAccountDraft(null);
@@ -5570,6 +5659,16 @@ Skipped duplicates: ${duplicateCount}
     setShowFilters(true);
     setFilters((current) => ({ ...current, strategy: current.strategy || "All" }));
   }
+  function requestDeleteTrade(id) {
+    const tradeToDelete = trades.find((trade) => trade.id === id);
+    if (tradeToDelete) setTradeDeleteTarget(tradeToDelete);
+  }
+  async function confirmDeleteTrade() {
+    const id = tradeDeleteTarget?.id;
+    if (!id) return;
+    await deleteTrade(id);
+    setTradeDeleteTarget(null);
+  }
   async function deleteTrade(id) {
     const tradeToDelete = trades.find((trade) => trade.id === id);
     try {
@@ -5658,7 +5757,7 @@ Skipped duplicates: ${duplicateCount}
                   const itemBalance = calculateAccountBalance(item, trades);
                   const isActive = String(item.id) === String(account.id);
                   return (
-                    <button key={item.id} onClick={() => { setActiveAccountId(item.id); setIsAccountSwitcherOpen(false); }} className={isActive ? "flex w-full items-center justify-between rounded-lg border border-fuchsia-500/25 bg-fuchsia-500/12 px-3 py-3 text-left" : "flex w-full items-center justify-between rounded-lg border border-transparent px-3 py-3 text-left hover:border-fuchsia-500/25 hover:bg-white/5"}>
+                    <div key={item.id} role="button" tabIndex={0} onClick={() => { setActiveAccountId(item.id); setIsAccountSwitcherOpen(false); }} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setActiveAccountId(item.id); setIsAccountSwitcherOpen(false); } }} className={isActive ? "flex w-full cursor-pointer items-center justify-between rounded-lg border border-fuchsia-500/25 bg-fuchsia-500/12 px-3 py-3 text-left" : "flex w-full cursor-pointer items-center justify-between rounded-lg border border-transparent px-3 py-3 text-left hover:border-fuchsia-500/25 hover:bg-white/5"}>
                       <div className="flex min-w-0 items-center gap-3">
                         <span className="text-lg">🎯</span>
                         <div className="min-w-0">
@@ -5672,8 +5771,11 @@ Skipped duplicates: ${duplicateCount}
                           </div>
                         </div>
                       </div>
-                      <button type="button" onClick={(event) => { event.stopPropagation(); setActiveAccountId(item.id); setIsAccountModalOpen(true); setIsAccountSwitcherOpen(false); }} className="rounded-lg border border-white/10 bg-black/40 px-2 py-1 text-[10px] font-black text-zinc-400 hover:border-fuchsia-500/50 hover:text-fuchsia-300">Edit</button>
-                    </button>
+                      <div className="flex items-center gap-2">
+                        <button type="button" onClick={(event) => { event.stopPropagation(); setActiveAccountId(item.id); setIsAccountModalOpen(true); setIsAccountSwitcherOpen(false); }} className="rounded-lg border border-white/10 bg-black/40 px-2 py-1 text-[10px] font-black text-zinc-400 hover:border-fuchsia-500/50 hover:text-fuchsia-300">Edit</button>
+                        <button type="button" onClick={(event) => { event.stopPropagation(); requestDeleteAccount(item.id); }} className="rounded-lg border border-red-500/25 bg-red-500/10 p-1.5 text-red-300 transition hover:border-red-400/70 hover:bg-red-500/20 hover:text-red-200" aria-label={`Delete ${item.name}`}><Trash2 size={13} /></button>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
@@ -5765,7 +5867,7 @@ Skipped duplicates: ${duplicateCount}
             account={account}
             onBack={() => { setTradeViewMode(null); setViewTrade(null); }}
             onEdit={() => openEditTrade(viewTrade)}
-            onDelete={() => deleteTrade(viewTrade.id)}
+            onDelete={() => requestDeleteTrade(viewTrade.id)}
             onExport={() => exportTradesToCSV([viewTrade])}
           />
         ) : active === "Dashboard" ? (
@@ -5801,7 +5903,7 @@ Skipped duplicates: ${duplicateCount}
             onAdd={openAddTrade}
             onEdit={openEditTrade}
             onView={openTradeDetails}
-            onRemove={deleteTrade}
+            onRemove={requestDeleteTrade}
             onExport={() => exportTradesToCSV(activeTrades)}
             onImport={() => importFileRef.current?.click()}
             onBackup={() => exportCritiqueBackup({ trades: activeTrades, account, routine, theme })}
@@ -5846,6 +5948,40 @@ Skipped duplicates: ${duplicateCount}
       {importPreview && <ImportPreviewModal preview={importPreview} onConfirm={confirmImportTrades} onClose={() => setImportPreview(null)} />}
       {isRoutineOpen && <PreTradeRoutineModal routine={routine} setRoutine={setRoutine} onClose={() => setIsRoutineOpen(false)} />}
       {isAccountModalOpen && <AccountModal account={account} accountBalance={accountBalance} onSaveAccount={handleSaveAccountSettings} onClose={closeAccountModal} />}
+      {tradeDeleteTarget && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-5 backdrop-blur-sm">
+          <motion.div initial={{ opacity: 0, scale: 0.96, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="w-full max-w-sm rounded-2xl border border-red-500/30 bg-gradient-to-br from-zinc-950 via-black to-[#140607] p-5 shadow-[0_24px_70px_rgba(0,0,0,0.75)] ring-1 ring-red-500/10">
+            <div className="flex items-start gap-3">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-red-500/35 bg-red-500/10 text-red-300"><Trash2 size={18} /></span>
+              <div>
+                <div className="text-lg font-black text-white">Delete trade?</div>
+                <p className="mt-2 text-sm font-semibold leading-6 text-zinc-400">Are you sure you want to delete <span className="font-black text-white">{tradeDeleteTarget.symbol || "this trade"}</span>?</p>
+              </div>
+            </div>
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <button type="button" onClick={() => setTradeDeleteTarget(null)} className="rounded-xl border border-white/10 bg-black px-4 py-3 text-sm font-black text-zinc-300 transition hover:border-fuchsia-500/40 hover:text-white">No</button>
+              <button type="button" onClick={confirmDeleteTrade} className="rounded-xl border border-red-500/45 bg-red-500/15 px-4 py-3 text-sm font-black text-red-200 transition hover:bg-red-500 hover:text-white">Yes, delete</button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+      {accountDeleteTarget && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-5 backdrop-blur-sm">
+          <motion.div initial={{ opacity: 0, scale: 0.96, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="w-full max-w-sm rounded-2xl border border-red-500/30 bg-gradient-to-br from-zinc-950 via-black to-[#140607] p-5 shadow-[0_24px_70px_rgba(0,0,0,0.75)] ring-1 ring-red-500/10">
+            <div className="flex items-start gap-3">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-red-500/35 bg-red-500/10 text-red-300"><Trash2 size={18} /></span>
+              <div>
+                <div className="text-lg font-black text-white">Delete account?</div>
+                <p className="mt-2 text-sm font-semibold leading-6 text-zinc-400">Are you sure you want to delete <span className="font-black text-white">{accountDeleteTarget.name}</span>?</p>
+              </div>
+            </div>
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <button type="button" onClick={() => setAccountDeleteTarget(null)} className="rounded-xl border border-white/10 bg-black px-4 py-3 text-sm font-black text-zinc-300 transition hover:border-fuchsia-500/40 hover:text-white">No</button>
+              <button type="button" onClick={confirmDeleteAccount} className="rounded-xl border border-red-500/45 bg-red-500/15 px-4 py-3 text-sm font-black text-red-200 transition hover:bg-red-500 hover:text-white">Yes, delete</button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
@@ -5940,7 +6076,7 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
       <div className="journal-search-panel mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-zinc-950 via-black to-[#100716] p-4 shadow-[0_16px_38px_rgba(217,70,239,0.08)]">
         <div className="flex flex-col gap-4 lg:flex-row">
           <div className="group relative flex flex-1 items-center gap-3 overflow-hidden rounded-xl border border-fuchsia-500/35 bg-gradient-to-br from-zinc-950 via-black to-black px-4 py-3 text-zinc-400 shadow-[0_0_22px_rgba(217,70,239,0.12)] transition-all duration-300 hover:border-fuchsia-400/80 hover:shadow-2xl hover:shadow-fuchsia-500/25 focus-within:border-fuchsia-400/90 focus-within:shadow-[0_0_28px_rgba(217,70,239,0.28)]"><div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent" /><div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300 shadow-[0_0_14px_rgba(217,70,239,0.18)]"><Search size={18} /></div><Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search trades, symbols, strategies..." className="relative z-10 border-0 bg-transparent text-white placeholder:text-zinc-500 focus-visible:ring-0" /></div>
-          <Button onClick={() => setShowFilters(!showFilters)} variant="outline" className={showFilters ? "border-fuchsia-500/60 bg-fuchsia-500 text-white font-black shadow-[0_0_18px_rgba(217,70,239,0.28)] hover:bg-fuchsia-400" : "border-fuchsia-500/35 bg-fuchsia-500/15 text-fuchsia-300 font-black hover:border-fuchsia-400/70 hover:bg-fuchsia-500/25 hover:text-white"}><Filter size={16} /> Filters {showFilters ? "⌃" : "⌄"}</Button>
+          <Button onClick={() => setShowFilters(!showFilters)} variant="outline" className={showFilters ? "border-fuchsia-500/60 bg-fuchsia-500 text-white font-black shadow-[0_0_18px_rgba(217,70,239,0.28)] hover:bg-fuchsia-400" : "border-fuchsia-500/35 bg-fuchsia-500/15 text-fuchsia-300 font-black hover:border-fuchsia-400/70 hover:bg-fuchsia-500/25 hover:text-white"}><Filter size={16} /> Filters <ChevronDown size={15} className={showFilters ? "rotate-180 transition-transform" : "transition-transform"} /></Button>
         </div>
         {showFilters && (
           <div className="mt-6 rounded-xl border border-fuchsia-500/45 bg-gradient-to-br from-zinc-950 via-black to-black p-5 shadow-[0_0_28px_rgba(217,70,239,0.22)] ring-1 ring-fuchsia-500/15">
@@ -6002,12 +6138,32 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
 
 function DateFilterField({ label, value, onChange }) {
   const [isOpen, setIsOpen] = useState(false);
+  const pickerRef = useRef(null);
+  const pickerId = useRef(`date-picker-${Math.random().toString(36).slice(2)}`);
   const baseDate = value ? new Date(`${value}T00:00:00`) : new Date();
   const [viewDate, setViewDate] = useState(new Date(baseDate.getFullYear(), baseDate.getMonth(), 1));
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
   const monthName = viewDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   const cells = getCalendarCells(year, month);
+
+  useEffect(() => {
+    function closeOtherDropdowns(event) {
+      if (event.detail !== pickerId.current) setIsOpen(false);
+    }
+    window.addEventListener("critique-dropdown-open", closeOtherDropdowns);
+    return () => window.removeEventListener("critique-dropdown-open", closeOtherDropdowns);
+  }, []);
+
+  function toggleDatePicker() {
+    setIsOpen((open) => {
+      const next = !open;
+      if (next) {
+        window.dispatchEvent(new CustomEvent("critique-dropdown-open", { detail: pickerId.current }));
+      }
+      return next;
+    });
+  }
 
   function pickDate(dateKey) {
     setIsOpen(false);
@@ -6016,17 +6172,17 @@ function DateFilterField({ label, value, onChange }) {
 
   return (
     <Field label={label}>
-      <div className="relative">
+      <div ref={pickerRef} className="relative">
         <button
           type="button"
-          onClick={() => setIsOpen((open) => !open)}
+          onClick={toggleDatePicker}
           className="date-picker-trigger flex h-10 w-full items-center gap-3 rounded-md border border-white/15 bg-black px-3 text-left text-sm text-white outline-none transition-all hover:border-fuchsia-400 focus:border-fuchsia-400 focus:shadow-[0_0_14px_rgba(217,70,239,0.16)]"
         >
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300 shadow-[0_0_12px_rgba(217,70,239,0.16)]"><Calendar size={16} /></span>
+          <Calendar size={15} className="shrink-0 text-fuchsia-300/80" />
           <span className={value ? "date-picker-value text-white" : "date-picker-placeholder text-zinc-500"}>{value || "mm/dd/yyyy"}</span>
         </button>
         {isOpen && (
-          <div className="date-picker-popover absolute left-0 top-12 z-[9999] w-80 rounded-xl border border-fuchsia-500/40 bg-black p-4 shadow-[0_18px_55px_rgba(0,0,0,0.95)] ring-1 ring-fuchsia-500/20">
+          <div className="date-picker-popover relative z-[40] mt-2 w-full max-w-80 rounded-xl border border-fuchsia-500/40 bg-[#050505] p-4 shadow-[0_18px_55px_rgba(0,0,0,0.95)] ring-1 ring-fuchsia-500/20">
             <div className="mb-4 flex items-center justify-between">
               <button type="button" onClick={() => setViewDate(new Date(year, month - 1, 1))} className="date-picker-nav rounded-lg border border-white/10 bg-zinc-950 p-2 text-zinc-300 hover:border-fuchsia-500/50"><ChevronLeft size={16} /></button>
               <div className="date-picker-title font-black text-white">{monthName}</div>
@@ -6046,12 +6202,9 @@ function DateFilterField({ label, value, onChange }) {
                     pickDate(cell.key);
                   }}
                   onClick={(event) => event.stopPropagation()}
-                  className={`date-picker-day relative z-10 h-9 rounded-lg text-xs font-bold transition-all hover:bg-fuchsia-500/20 ${value === cell.key ? "date-picker-day-selected bg-fuchsia-500 text-black" : cell.isCurrentMonth ? "date-picker-day-current bg-zinc-950 text-white" : "date-picker-day-muted bg-black text-zinc-600"}`}
+                  className={`date-picker-day relative z-10 h-9 rounded-lg text-xs font-bold transition-all hover:bg-fuchsia-500/20 ${value === cell.key ? "date-picker-day-selected bg-fuchsia-500 text-white" : cell.isCurrentMonth ? "date-picker-day-current bg-zinc-950 text-white" : "date-picker-day-muted bg-black text-zinc-600"}`}
                 >
-                  <span
-                    className="date-picker-day-number"
-                    style={{ color: value === cell.key ? "#ffffff" : cell.isCurrentMonth ? "#0f172a" : "#475569", opacity: 1, visibility: "visible", display: "inline-block", fontWeight: 900 }}
-                  >
+                  <span className="date-picker-day-number">
                     {cell.day}
                   </span>
                 </button>
@@ -6700,6 +6853,8 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate }) {
   const monthKey = `${year}-${String(monthIndex + 1).padStart(2, "0")}`;
   const monthStats = summarizeTrades(trades.filter((trade) => getTradeDateKey(trade).startsWith(monthKey)));
   const weekRows = Array.from({ length: 6 }, (_, weekIndex) => cells.slice(weekIndex * 7, weekIndex * 7 + 7));
+  const todayKey = formatDateKey(new Date());
+  const todayStats = summarizeTrades(grouped[todayKey] || []);
   const selectedDayTrades = grouped[selectedDate] || [];
   const selectedDayStats = summarizeTrades(selectedDayTrades);
   const activeMonthDays = Object.entries(grouped).filter(([dateKey]) => dateKey.startsWith(monthKey));
@@ -6745,10 +6900,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate }) {
               <button onClick={() => setCalendarMonth(new Date(year, monthIndex - 1, 1))} className="calendar-nav-button flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-black text-zinc-300 shadow-[0_0_14px_rgba(217,70,239,0.10)] transition hover:border-fuchsia-400/70 hover:text-fuchsia-200">
                 <ChevronLeft size={20} />
               </button>
-              <div className="calendar-title-icon flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/18 text-fuchsia-300 shadow-[0_0_18px_rgba(217,70,239,0.18)]">
-                <Calendar size={22} />
-              </div>
-              <div>
+              <div className="min-w-[240px]">
                 <h1 className="text-3xl font-black tracking-tight text-white xl:text-5xl">{monthName}</h1>
                 <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-zinc-400">Track trading days, weekly performance, best/worst days and selected day details in one clean view.</p>
               </div>
@@ -6771,13 +6923,11 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate }) {
 
       <CalendarMonthSummary
         monthStats={monthStats}
-        selectedDate={selectedDate}
-        selectedDayStats={selectedDayStats}
+        selectedDate={todayKey}
+        selectedDayStats={todayStats}
         bestMonthDay={bestMonthDay}
         worstMonthDay={worstMonthDay}
       />
-
-      <CalendarGuide />
 
       <div className="calendar-shell-pro calendar-neon-panel mt-7 overflow-x-auto rounded-2xl border border-white/10 bg-black p-6 shadow-[0_0_34px_rgba(217,70,239,0.10)]">
         <div className="grid min-w-[1120px] grid-cols-[repeat(7,minmax(0,1fr))_170px] gap-3">
@@ -6788,8 +6938,11 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate }) {
           ))}
 
           {weekRows.map((week, weekIndex) => {
-            const weekTrades = week.filter((cell) => !isWeekendDateKey(cell.key)).flatMap((cell) => grouped[cell.key] || []);
-            const weekStats = summarizeTrades(weekTrades);
+            const weekDayStats = week.map((cell) => summarizeTrades(grouped[cell.key] || []));
+            const weekStats = weekDayStats.reduce((summary, dayStats) => ({
+              count: summary.count + dayStats.count,
+              pnl: summary.pnl + dayStats.pnl,
+            }), { count: 0, pnl: 0 });
 
             return (
               <React.Fragment key={weekIndex}>
@@ -6957,7 +7110,7 @@ function CalendarMonthSummary({ monthStats, selectedDate, selectedDayStats, best
   return (
     <section className="calendar-summary-pro mt-7 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
       <CalendarSummaryCard title="Month Result" value={formatMoney(monthStats.pnl)} text={`${monthStats.count} trades this month`} tone={monthStats.pnl >= 0 ? "emerald" : "red"} />
-      <CalendarSummaryCard title="Selected Day" value={formatMoney(selectedDayStats.pnl)} text={`${selectedLabel} · ${selectedDayStats.count} trade${selectedDayStats.count === 1 ? "" : "s"}`} tone={selectedDayStats.pnl > 0 ? "emerald" : selectedDayStats.pnl < 0 ? "red" : "amber"} />
+      <CalendarSummaryCard title="Today" value={formatMoney(selectedDayStats.pnl)} text={`${selectedLabel} · ${selectedDayStats.count} trade${selectedDayStats.count === 1 ? "" : "s"}`} tone={selectedDayStats.pnl > 0 ? "emerald" : selectedDayStats.pnl < 0 ? "red" : "amber"} />
       <CalendarSummaryCard title="Best Day" value={bestMonthDay ? formatMoney(bestMonthDay.pnl) : "$0"} text={bestMonthDay ? bestMonthDay.dateKey : "No profitable day yet"} tone="emerald" />
       <CalendarSummaryCard title="Worst Day" value={worstMonthDay ? formatMoney(worstMonthDay.pnl) : "$0"} text={worstMonthDay ? worstMonthDay.dateKey : "No losing day yet"} tone="red" />
     </section>
@@ -7036,6 +7189,17 @@ function AddTradeModal({ isEditing, form, setForm, onClose, onSave, account, acc
     localStorage.setItem(CUSTOM_STRATEGIES_KEY, JSON.stringify(next));
     setNewStrategyName("");
     updateField("strategy", name);
+  }
+
+  function deleteCustomStrategy(name) {
+    const shouldDelete = window.confirm(`Delete strategy "${name}"?`);
+    if (!shouldDelete) return;
+    const next = customStrategies.filter((strategy) => strategy !== name);
+    setCustomStrategies(next);
+    localStorage.setItem(CUSTOM_STRATEGIES_KEY, JSON.stringify(next));
+    if (form.strategy === name) {
+      updateField("strategy", DEFAULT_STRATEGIES[0]);
+    }
   }
 
   return (
@@ -7125,11 +7289,12 @@ function AddTradeModal({ isEditing, form, setForm, onClose, onSave, account, acc
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <Field label="Strategy">
                   <div className="space-y-3">
-                    <SegmentedChoice
+                    <StrategyChoice
                       value={form.strategy}
                       options={strategyOptions}
+                      customOptions={customStrategies}
                       onChange={(value) => updateField("strategy", value)}
-                      tone="strategy"
+                      onDelete={deleteCustomStrategy}
                     />
                     <div className="flex gap-2">
                       <Input value={newStrategyName} onChange={(e) => setNewStrategyName(e.target.value)} placeholder="Add your strategy name" className="trade-context-input border-white/10 bg-black/45 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" />
@@ -7203,6 +7368,50 @@ function AddTradeModal({ isEditing, form, setForm, onClose, onSave, account, acc
           <Button onClick={onSave} disabled={hasFormErrors} className="bg-fuchsia-500 text-black hover:bg-fuchsia-400 disabled:cursor-not-allowed disabled:opacity-40"><Plus size={16} /> {isEditing ? "Update Trade" : "Save Trade"}</Button>
         </div>
       </motion.div>
+    </div>
+  );
+}
+
+function StrategyChoice({ value, options = [], customOptions = [], onChange, onDelete }) {
+  const customSet = new Set(customOptions);
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((option) => {
+        const selected = String(value || "") === String(option);
+        const isCustom = customSet.has(option);
+        return (
+          <button
+            key={option}
+            type="button"
+            onClick={() => onChange?.(option)}
+            className={`group flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-black transition-all duration-200 hover:scale-[1.02] ${selected ? "border-emerald-400/60 bg-emerald-500/15 text-emerald-200 shadow-[0_0_18px_rgba(16,185,129,.12)]" : "border-white/10 bg-black/35 text-zinc-400 hover:border-emerald-500/35 hover:text-emerald-200"}`}
+          >
+            <span>{option}</span>
+            {isCustom && (
+              <span
+                role="button"
+                tabIndex={0}
+                aria-label={`Delete ${option}`}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onDelete?.(option);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    onDelete?.(option);
+                  }
+                }}
+                className="ml-1 flex h-5 w-5 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[11px] text-zinc-500 transition hover:border-red-400/60 hover:bg-red-500/15 hover:text-red-300 group-hover:text-zinc-300"
+              >
+                x
+              </span>
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -8262,6 +8471,7 @@ function SimpleStatisticsPage({ trades = [], onExport }) {
   const profitFactor = Number(stats.profitFactor || 0);
   const expectancy = stats.trades ? stats.totalPnl / stats.trades : 0;
   const strategyRows = Object.entries(stats.strategyStats || {}).sort((a, b) => Number(b[1].pnl || 0) - Number(a[1].pnl || 0));
+  const bestStrategy = strategyRows[0];
   const sessionRows = Object.entries(stats.sessionStats || {}).sort((a, b) => Number(b[1].pnl || 0) - Number(a[1].pnl || 0));
   const mistakeRows = Object.entries(stats.mistakeStats || {}).filter(([name]) => name && name !== "None").sort((a, b) => Number(a[1].pnl || 0) - Number(b[1].pnl || 0));
   const bestPerformance = useMemo(() => getBestPerformanceStats(visibleTrades), [visibleTrades]);
@@ -8273,7 +8483,6 @@ function SimpleStatisticsPage({ trades = [], onExport }) {
     ["Overview", BarChart3],
     ["Patterns", Calendar],
     ["Strategies", ListChecks],
-    ["Charts", TrendingUp],
     ["News", BookOpen],
   ];
 
@@ -8287,7 +8496,6 @@ function SimpleStatisticsPage({ trades = [], onExport }) {
           <Select value={strategyFilter} onChange={(e) => setStrategyFilter(e.target.value)}>{strategyOptions.map((strategy) => <option key={strategy} value={strategy}>{strategy === "All" ? "All Strategies" : strategy}</option>)}</Select>
           <Select value={rangeFilter} onChange={(e) => setRangeFilter(e.target.value)}><option>7 days</option><option>30 days</option><option>90 days</option><option>All time</option></Select>
           <Button onClick={() => setRefreshTick((tick) => tick + 1)} variant="outline" className="border-white/15 bg-black text-white"><RefreshCwIcon /> Refresh</Button>
-          <Button onClick={onExport} variant="outline" className="border-white/15 bg-black text-white"><Download size={16} /> CSV</Button>
         </div>
       }
     >
@@ -8308,8 +8516,8 @@ function SimpleStatisticsPage({ trades = [], onExport }) {
 
       {activeTab === "Overview" && (
         <>
-          <StatsSectionTitle title="Performance Overview" icon={<BarChart3 size={20} />} />
-          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+          <StatsSectionTitle title="Performance Overview" icon={<BarChart3 size={20} />} className="mt-10" />
+          <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             <DashboardStatTile label="Total P&L" value={formatMoney(stats.totalPnl)} badge={stats.totalPnl >= 0 ? "Profit" : "Loss"} tone={stats.totalPnl >= 0 ? "green" : "red"} />
             <DashboardStatTile label="Win Rate" value={`${stats.winRate.toFixed(1)}%`} badge={`${stats.wins}W/${stats.losses}L`} tone="green" />
             <DashboardStatTile label="Trades" value={stats.trades} badge={`${stats.trades} closed`} />
@@ -8335,30 +8543,6 @@ function SimpleStatisticsPage({ trades = [], onExport }) {
             <BestPerfTile label="Best Session" value={formatMoney(sessionRows[0]?.[1]?.pnl || 0)} detail={sessionRows[0]?.[0] || "No session"} badge={`${sessionRows[0]?.[1]?.count || 0} trades`} />
           </div>
 
-          <div className="mt-12 grid gap-6 xl:grid-cols-2">
-            <SimplePanel title="Performance Timeline" subtitle="Cumulative P&L over selected trades." icon={<TrendingUp size={24} />}>
-              <div className="h-80 rounded-lg bg-black/35 p-3">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={curve} margin={{ top: 16, right: 20, left: 0, bottom: 6 }}>
-                    <CartesianGrid strokeDasharray="2 6" stroke="rgba(148,163,184,0.20)" vertical={false} />
-                    <XAxis dataKey="date" stroke="#64748b" tickLine={false} />
-                    <YAxis stroke="#64748b" tickLine={false} tickFormatter={(value) => `$${value}`} />
-                    <Tooltip contentStyle={{ background: "#09090b", border: "1px solid #333", borderRadius: 12, color: "#fff" }} formatter={(value) => [formatMoney(value), "P&L"]} />
-                    <Line type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </SimplePanel>
-            <SimplePanel title="Win/Loss Analysis" subtitle="A quick view of your accuracy." icon={<Target size={24} />}>
-              <div className="flex min-h-80 items-center justify-center">
-                <div className="flex h-56 w-56 flex-col items-center justify-center rounded-full border-[6px] border-emerald-500/45 bg-black/35">
-                  <div className="text-5xl font-black text-white">{stats.winRate.toFixed(1)}<span className="text-xl">%</span></div>
-                  <div className="mt-2 text-sm font-semibold text-zinc-400">Win Rate</div>
-                  <div className="mt-5 flex gap-5 text-sm font-bold"><span className="text-emerald-300">{stats.wins} wins</span><span className="text-red-300">{stats.losses} losses</span></div>
-                </div>
-              </div>
-            </SimplePanel>
-          </div>
         </>
       )}
 
@@ -8382,50 +8566,17 @@ function SimpleStatisticsPage({ trades = [], onExport }) {
       {activeTab === "Strategies" && (
         <div className="mt-10">
           <StatsSectionTitle title="Strategy Performance" icon={<Sparkles size={20} />} />
-          <div className="mt-5 rounded-lg border border-fuchsia-500/25 bg-fuchsia-950/10 p-5">
-            <div className="grid grid-cols-4 gap-4 text-center text-xs font-black uppercase tracking-wider text-zinc-500">
-              <span>Strategy</span><span>Win Rate</span><span>Total P&L</span><span>Avg RR</span>
-            </div>
+          <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {strategyRows.length ? strategyRows.map(([name, item]) => {
               const decisive = Number(item.wins || 0) + Number(item.losses || 0);
               const winRate = decisive ? (Number(item.wins || 0) / decisive) * 100 : 0;
               const avgRR = item.riskTrades ? Number(item.rrSum || 0) / item.riskTrades : 0;
+              const pnl = Number(item.pnl || 0);
               return (
-                <div key={name} className="mt-4 grid grid-cols-4 gap-4 rounded-lg border border-white/10 bg-black/35 p-4 text-center">
-                  <div className="text-lg font-black text-white">{name}</div>
-                  <div className="text-lg font-black text-emerald-300">{winRate.toFixed(1)}%</div>
-                  <div className={Number(item.pnl || 0) >= 0 ? "text-lg font-black text-emerald-300" : "text-lg font-black text-red-300"}>{formatMoney(item.pnl || 0)}</div>
-                  <div className="text-lg font-black text-emerald-300">{avgRR.toFixed(2)}</div>
-                </div>
+                <StrategyStatsCard key={name} name={name} item={item} winRate={winRate} avgRR={avgRR} pnl={pnl} />
               );
-            }) : <div className="mt-4 rounded-lg border border-dashed border-white/10 p-5 text-sm font-semibold text-zinc-500">No strategy data yet.</div>}
+            }) : <div className="rounded-lg border border-dashed border-white/10 p-5 text-sm font-semibold text-zinc-500">No strategy data yet.</div>}
           </div>
-        </div>
-      )}
-
-      {activeTab === "Charts" && (
-        <div className="mt-10 grid gap-6 xl:grid-cols-2">
-          <SimplePanel title="Performance Timeline" subtitle="Cumulative P&L over time." icon={<TrendingUp size={24} />}>
-            <div className="h-96 rounded-lg bg-black/35 p-3">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={curve} margin={{ top: 16, right: 20, left: 0, bottom: 6 }}>
-                  <CartesianGrid strokeDasharray="2 6" stroke="rgba(148,163,184,0.20)" vertical={false} />
-                  <XAxis dataKey="date" stroke="#64748b" tickLine={false} />
-                  <YAxis stroke="#64748b" tickLine={false} tickFormatter={(value) => `$${value}`} />
-                  <Tooltip contentStyle={{ background: "#09090b", border: "1px solid #333", borderRadius: 12, color: "#fff" }} formatter={(value) => [formatMoney(value), "P&L"]} />
-                  <Line type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </SimplePanel>
-          <SimplePanel title="Risk Snapshot" subtitle="The risk numbers that matter most." icon={<ShieldCheck size={24} />}>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <SimpleStatCard label="Max Drawdown" value={formatMoney(stats.maxDrawdown)} detail={`${stats.maxDrawdownPercent.toFixed(1)}% account drawdown.`} tone={stats.maxDrawdownPercent <= 3 ? "green" : stats.maxDrawdownPercent <= 6 ? "amber" : "red"} />
-              <SimpleStatCard label="Avg R:R" value={Number(stats.avgRR || 0).toFixed(2)} detail="Average reward compared to risk." tone={stats.avgRR >= 1 ? "green" : "amber"} />
-              <SimpleStatCard label="Avg Win/Loss" value={stats.avgWinLoss >= 999 ? "Perfect" : stats.avgWinLoss.toFixed(2)} detail="Winner size compared to loser size." tone={stats.avgWinLoss >= 1.2 ? "green" : stats.avgWinLoss >= 1 ? "amber" : "red"} />
-              <SimpleStatCard label="Recovery Factor" value={stats.recoveryFactor >= 999 ? "Perfect" : Number(stats.recoveryFactor || 0).toFixed(2)} detail="Profit compared to drawdown." tone={stats.recoveryFactor >= 1 ? "green" : "amber"} />
-            </div>
-          </SimplePanel>
         </div>
       )}
 
@@ -8522,15 +8673,23 @@ function getWeekdayStatsRows(trades = []) {
 }
 
 function WeekdayTile({ day }) {
+  const hasTrades = day.count > 0;
+  const tone = !hasTrades ? "border-white/10 from-black via-black to-zinc-950/40" : day.pnl >= 0 ? "border-emerald-500/25 from-emerald-950/30 via-black to-fuchsia-950/10" : "border-red-500/25 from-red-950/25 via-black to-fuchsia-950/10";
   return (
-    <div className="rounded-lg border border-white/10 bg-gradient-to-br from-black via-black to-fuchsia-950/20 p-5">
-      <div className="text-center">
-        <div className="text-lg font-black text-white">{day.short}</div>
-        <div className="text-sm font-semibold text-zinc-400">{day.name}</div>
+    <button type="button" className={`group relative min-h-[230px] overflow-hidden rounded-xl border bg-gradient-to-br p-5 text-left shadow-[0_16px_45px_rgba(0,0,0,0.20)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-fuchsia-400/70 hover:shadow-[0_0_28px_rgba(217,70,239,0.18)] ${tone}`}>
+      <div className="pointer-events-none absolute right-0 top-0 h-20 w-20 rounded-bl-3xl bg-fuchsia-500/10 transition group-hover:bg-fuchsia-500/16" />
+      <div className="relative z-10 flex items-start justify-between">
+        <div>
+          <div className="text-2xl font-black text-white">{day.short}</div>
+          <div className="mt-1 text-sm font-semibold text-zinc-400">{day.name}</div>
+        </div>
+        <span className={hasTrades ? "rounded-full border border-fuchsia-500/30 bg-fuchsia-500/12 px-3 py-1 text-xs font-black text-fuchsia-200" : "rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-black text-zinc-500"}>
+          {hasTrades ? "Active" : "No trades"}
+        </span>
       </div>
-      <div className="mt-5 space-y-3 text-sm">
+      <div className="relative z-10 mt-5 space-y-3 text-sm">
         <div className="flex items-center justify-between"><span className="font-bold text-zinc-300">Trades</span><b className="text-white">{day.count}</b></div>
-        {day.count ? (
+        {hasTrades ? (
           <>
             <div className="flex items-center justify-between"><span className="font-bold text-zinc-300">Win Rate</span><b className="text-emerald-300">{day.winRate.toFixed(1)}%</b></div>
             <div className="flex items-center justify-between"><span className="font-bold text-zinc-300">Avg RR</span><b className="text-amber-300">{day.avgRR.toFixed(2)}</b></div>
@@ -8538,7 +8697,33 @@ function WeekdayTile({ day }) {
           </>
         ) : <div className="py-8 text-center text-sm font-semibold text-zinc-500">No trades</div>}
       </div>
-    </div>
+    </button>
+  );
+}
+
+function StrategyStatsCard({ name, item, winRate, avgRR, pnl }) {
+  const wins = Number(item.wins || 0);
+  const losses = Number(item.losses || 0);
+  const breakEvens = Number(item.breakEvens || 0);
+  return (
+    <button type="button" className={`group relative min-h-[220px] overflow-hidden rounded-xl border bg-gradient-to-br p-5 text-left shadow-[0_16px_45px_rgba(0,0,0,0.20)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-fuchsia-400/70 hover:shadow-[0_0_28px_rgba(217,70,239,0.18)] ${pnl >= 0 ? "border-emerald-500/25 from-emerald-950/25 via-black to-fuchsia-950/10" : "border-red-500/25 from-red-950/25 via-black to-fuchsia-950/10"}`}>
+      <div className="pointer-events-none absolute right-0 top-0 h-20 w-20 rounded-bl-3xl bg-fuchsia-500/10 transition group-hover:bg-fuchsia-500/16" />
+      <div className="relative z-10 flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="truncate text-xl font-black text-white">{name}</div>
+          <div className="mt-1 text-xs font-bold text-zinc-500">{item.count || 0} trades</div>
+        </div>
+        <span className={pnl >= 0 ? "rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-black text-emerald-300" : "rounded-full border border-red-500/25 bg-red-500/10 px-3 py-1 text-xs font-black text-red-300"}>
+          {pnl >= 0 ? "Profit" : "Loss"}
+        </span>
+      </div>
+      <div className={pnl >= 0 ? "relative z-10 mt-5 text-3xl font-black text-emerald-400" : "relative z-10 mt-5 text-3xl font-black text-red-400"}>{formatMoney(pnl)}</div>
+      <div className="relative z-10 mt-5 grid grid-cols-3 gap-2 text-center">
+        <div className="rounded-lg border border-white/10 bg-black/25 p-2"><div className="text-[10px] font-black uppercase text-zinc-500">Win</div><div className="font-black text-emerald-300">{winRate.toFixed(1)}%</div></div>
+        <div className="rounded-lg border border-white/10 bg-black/25 p-2"><div className="text-[10px] font-black uppercase text-zinc-500">Avg RR</div><div className="font-black text-amber-300">{avgRR.toFixed(2)}</div></div>
+        <div className="rounded-lg border border-white/10 bg-black/25 p-2"><div className="text-[10px] font-black uppercase text-zinc-500">W/L/BE</div><div className="font-black text-zinc-200">{wins}/{losses}/{breakEvens}</div></div>
+      </div>
+    </button>
   );
 }
 
@@ -10410,10 +10595,38 @@ function getSelectOptionKey(label) {
 
 function Select({ value, onChange, children }) {
   const [open, setOpen] = useState(false);
+  const [placement, setPlacement] = useState("down");
+  const selectRef = useRef(null);
+  const selectId = useRef(`select-${Math.random().toString(36).slice(2)}`);
   const options = flattenSelectChildren(children);
   const selected = options.find((option) => String(option.value) === String(value)) || options[0];
-  const selectedStyle = getSelectOptionStyle(selected?.label);
   const selectedKey = getSelectOptionKey(selected?.label);
+
+  useEffect(() => {
+    function closeOtherSelects(event) {
+      if (event.detail !== selectId.current) setOpen(false);
+    }
+    window.addEventListener("critique-select-open", closeOtherSelects);
+    window.addEventListener("critique-dropdown-open", closeOtherSelects);
+    return () => {
+      window.removeEventListener("critique-select-open", closeOtherSelects);
+      window.removeEventListener("critique-dropdown-open", closeOtherSelects);
+    };
+  }, []);
+
+  function toggleOpen() {
+    setOpen((current) => {
+      const next = !current;
+      if (next) {
+        const rect = selectRef.current?.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - (rect?.bottom || 0);
+        setPlacement(spaceBelow < 280 ? "up" : "down");
+        window.dispatchEvent(new CustomEvent("critique-select-open", { detail: selectId.current }));
+        window.dispatchEvent(new CustomEvent("critique-dropdown-open", { detail: selectId.current }));
+      }
+      return next;
+    });
+  }
 
   function choose(option) {
     onChange?.({ target: { value: option.value } });
@@ -10421,20 +10634,19 @@ function Select({ value, onChange, children }) {
   }
 
   return (
-    <div className="relative">
+    <div ref={selectRef} className="relative">
       <button
         type="button"
-        onClick={() => setOpen((current) => !current)}
+        onClick={toggleOpen}
         className="custom-select-trigger flex h-10 w-full items-center justify-between rounded-md border border-white/15 bg-black px-3 text-left text-sm text-white outline-none transition-all hover:border-fuchsia-400 focus:border-fuchsia-400 focus:shadow-[0_0_14px_rgba(217,70,239,0.16)]"
       >
         <span className={`custom-select-selected custom-select-option-${selectedKey} flex items-center gap-2`}>
-          {selectedStyle.icon && <span className="w-4 text-center font-black">{selectedStyle.icon}</span>}
           <span className="font-black">{selected?.label || "Select"}</span>
         </span>
-        <span className={open ? "text-fuchsia-300 transition-transform rotate-180" : "text-fuchsia-300 transition-transform"}>⌄</span>
+        <ChevronDown size={16} className={open ? "text-fuchsia-300 transition-transform rotate-180" : "text-fuchsia-300 transition-transform"} />
       </button>
       {open && (
-        <div className="custom-select-menu absolute left-0 top-11 z-[80] max-h-64 w-full overflow-y-auto rounded-xl border border-fuchsia-500/40 bg-[#050005] p-1 shadow-[0_18px_55px_rgba(0,0,0,0.95)] ring-1 ring-fuchsia-500/20">
+        <div className={`custom-select-menu absolute left-0 z-[9999] max-h-64 w-full overflow-y-auto rounded-xl border border-fuchsia-500/40 bg-[#050005] p-1 shadow-[0_18px_55px_rgba(0,0,0,0.95)] ring-1 ring-fuchsia-500/20 ${placement === "up" ? "bottom-11" : "top-11"}`}>
           {options.map((option) => {
             const active = String(option.value) === String(value);
             const style = getSelectOptionStyle(option.label);
@@ -10447,9 +10659,8 @@ function Select({ value, onChange, children }) {
                   event.preventDefault();
                   choose(option);
                 }}
-                className={`custom-select-option custom-select-option-${optionKey} flex min-h-9 w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-black leading-5 transition-all ${active ? `custom-select-active ${style.active}` : style.normal}`}
+                className={`custom-select-option custom-select-option-${optionKey} flex min-h-9 w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-black leading-5 transition-all ${active ? "custom-select-active" : style.normal}`}
               >
-                {style.icon && <span className="w-4 text-center font-black">{style.icon}</span>}
                 <span>{option.label}</span>
               </button>
             );
@@ -10460,7 +10671,7 @@ function Select({ value, onChange, children }) {
   );
 }
 function StatCard({ title, value, green, gold }) {
-  const iconMap = { "Total Trades": "⌁", "Win Rate": "🏆", "Avg P&L": "$", "Avg R:R": "↗", "Total P&L": "$", "TOTAL P&L": "$", "WIN RATE": "🏆", "TRADES": "⌁", "AVG WIN": "↗", "AVG LOSS": "↘", "PROFIT FACTOR": "✦" };
+  const iconMap = { "Total Trades": "⌁", "Win Rate": "🏆", "Break Even": "—", "Avg P&L": "$", "Avg R:R": "↗", "Total P&L": "$", "TOTAL P&L": "$", "WIN RATE": "🏆", "BREAK EVEN": "—", "TRADES": "⌁", "AVG WIN": "↗", "AVG LOSS": "↘", "PROFIT FACTOR": "✦" };
   const icon = iconMap[title] || "✦";
   const iconTone = green ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300 shadow-[0_0_14px_rgba(16,185,129,0.18)]" : gold ? "border-amber-500/30 bg-amber-500/10 text-amber-300 shadow-[0_0_14px_rgba(245,158,11,0.18)]" : "border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300 shadow-[0_0_14px_rgba(217,70,239,0.18)]";
   return <Card className="group relative overflow-hidden border-fuchsia-500/35 bg-gradient-to-br from-zinc-950 via-black to-black text-white shadow-[0_0_22px_rgba(217,70,239,0.12)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-fuchsia-400/80 hover:shadow-2xl hover:shadow-fuchsia-500/25"><div className="absolute right-0 top-0 h-20 w-20 rounded-bl-[2rem] bg-fuchsia-500/10" /><div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent" /><CardContent className="relative z-10 p-5"><div className="flex items-start justify-between gap-3"><div><div className="text-xs font-black uppercase tracking-wider text-zinc-400">{title}</div><div className={`mt-4 text-2xl font-black ${green ? "text-emerald-400" : gold ? "text-amber-400" : "text-white"}`}><AnimatedValue value={value} /></div></div><div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-lg font-black ${iconTone}`}>{icon}</div></div></CardContent></Card>;
