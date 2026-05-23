@@ -94,7 +94,17 @@ function getEnvValue(key) {
 
 function getSiteOrigin() {
   const configured = getEnvValue("VITE_SITE_URL").replace(/\/+$/, "");
-  if (configured) return configured;
+  if (configured) {
+    try {
+      return new URL(configured).origin;
+    } catch {
+      try {
+        return new URL(`https://${configured}`).origin;
+      } catch {
+        return configured.split("/")[0];
+      }
+    }
+  }
   try {
     return window.location.origin;
   } catch {
@@ -103,7 +113,7 @@ function getSiteOrigin() {
 }
 
 function getAuthRedirectUrl(path = "") {
-  return `${getSiteOrigin()}${path}`;
+  return `${getSiteOrigin()}${String(path || "").startsWith("/") ? path : `/${path}`}`;
 }
 
 const SUPABASE_URL = getEnvValue("VITE_SUPABASE_URL");
@@ -11209,7 +11219,17 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
   const isLight = theme === "light";
   const authInputClass = isLight ? "border-slate-200 bg-slate-50 pl-11 text-slate-950 placeholder:text-slate-400 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" : "border-white/10 bg-black/45 pl-11 text-white placeholder:text-zinc-500 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20";
   const authPasswordInputClass = isLight ? "border-slate-200 bg-slate-50 pl-11 pr-11 text-slate-950 placeholder:text-slate-400 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" : "border-white/10 bg-black/45 pl-11 pr-11 text-white placeholder:text-zinc-500 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20";
-  const authMessageIsWarning = /expired|invalid|request a new|open the latest|could not|failed/i.test(authMessage || "");
+  const resetUrlHasRecoverySignal = (() => {
+    try {
+      const hash = window.location.hash || "";
+      const search = window.location.search || "";
+      return /code=|access_token|refresh_token|error=|error_code/i.test(`${search}${hash}`);
+    } catch {
+      return false;
+    }
+  })();
+  const visibleAuthMessage = isForgot && /expired|invalid/i.test(authMessage || "") && !resetUrlHasRecoverySignal ? "" : authMessage;
+  const authMessageIsWarning = /expired|invalid|request a new|open the latest|could not|failed/i.test(visibleAuthMessage || "");
   const authMessageClass = authMessageIsWarning
     ? isLight
       ? "mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold leading-6 text-amber-700"
@@ -11244,9 +11264,9 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
                 Supabase is not connected. Make sure .env is inside the project root and restart npm run dev after saving it.
               </div>
             )}
-            {authMessage && (
+            {visibleAuthMessage && (
               <div className={authMessageClass}>
-                {authMessage}
+                {visibleAuthMessage}
               </div>
             )}
 
