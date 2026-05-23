@@ -5508,10 +5508,12 @@ export default function TradingJournalDashboard() {
         if (localTrades.length) {
           setTrades(localTrades);
           saveRestoreCache(authUser.id, { trades: localTrades, account, routine, theme });
-          setDataMessage(`Supabase load failed, but your browser backup is loaded ✅ Trades: ${localTrades.length}. Error: ${error?.message || "Unknown error"}`);
+          console.warn("Supabase trade load failed; using browser backup.", error?.message || error);
+          setDataMessage("");
           return;
         }
-        setDataMessage(error?.message || "Could not load trades from Supabase.");
+        console.warn("Supabase trade load failed and no browser backup was available.", error?.message || error);
+        setDataMessage("");
       })
       .finally(() => {
         if (mounted) {
