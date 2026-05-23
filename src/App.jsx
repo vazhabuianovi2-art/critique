@@ -5587,14 +5587,37 @@ export default function TradingJournalDashboard() {
     let mounted = true;
     const isRecoveryUrl = window.location.pathname.includes("/auth/reset-password") || window.location.hash.includes("type=recovery");
     const recoveryCode = new URLSearchParams(window.location.search).get("code");
+    const recoveryHashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
 
-    async function initializeAuthSession() {
-      if (isRecoveryUrl && recoveryCode) {
+    async function recoverPasswordSessionFromUrl() {
+      if (!isRecoveryUrl) return null;
+
+      if (recoveryCode) {
         const { data, error } = await supabase.auth.exchangeCodeForSession(recoveryCode);
         if (error) throw error;
         window.history.replaceState(null, "", "/auth/reset-password");
         return data?.session || null;
       }
+
+      const accessToken = recoveryHashParams.get("access_token");
+      const refreshToken = recoveryHashParams.get("refresh_token");
+      if (accessToken && refreshToken) {
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        if (error) throw error;
+        window.history.replaceState(null, "", "/auth/reset-password");
+        return data?.session || null;
+      }
+
+      const { data } = await supabase.auth.getSession();
+      return data?.session || null;
+    }
+
+    async function initializeAuthSession() {
+      const recoverySession = await recoverPasswordSessionFromUrl();
+      if (isRecoveryUrl) return recoverySession;
 
       const { data } = await supabase.auth.getSession();
       return data?.session || null;
@@ -5687,7 +5710,31 @@ export default function TradingJournalDashboard() {
 
       if (mode === "updatePassword") {
         const { data: sessionData } = await supabase.auth.getSession();
-        if (!sessionData?.session) {
+        let passwordSession = sessionData?.session || null;
+
+        if (!passwordSession && window.location.pathname.includes("/auth/reset-password")) {
+          const urlCode = new URLSearchParams(window.location.search).get("code");
+          const urlHashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+          const accessToken = urlHashParams.get("access_token");
+          const refreshToken = urlHashParams.get("refresh_token");
+
+          if (urlCode) {
+            const { data, error } = await supabase.auth.exchangeCodeForSession(urlCode);
+            if (error) throw error;
+            passwordSession = data?.session || null;
+            window.history.replaceState(null, "", "/auth/reset-password");
+          } else if (accessToken && refreshToken) {
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+            if (error) throw error;
+            passwordSession = data?.session || null;
+            window.history.replaceState(null, "", "/auth/reset-password");
+          }
+        }
+
+        if (!passwordSession) {
           throw new Error("Password reset session expired. Request a new reset link and open the latest email.");
         }
         const { error } = await supabase.auth.updateUser({ password: values.password });
