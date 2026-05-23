@@ -5590,9 +5590,20 @@ export default function TradingJournalDashboard() {
     const isRecoveryUrl = window.location.pathname.includes("/auth/reset-password") || window.location.hash.includes("type=recovery");
     const recoveryCode = new URLSearchParams(window.location.search).get("code");
     const recoveryHashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const recoveryErrorCode = recoveryHashParams.get("error_code") || recoveryHashParams.get("error");
+    const recoveryErrorDescription = recoveryHashParams.get("error_description");
 
     async function recoverPasswordSessionFromUrl() {
       if (!isRecoveryUrl) return null;
+
+      if (recoveryErrorCode) {
+        window.history.replaceState(null, "", "/auth/reset-password");
+        throw new Error(
+          recoveryErrorCode === "otp_expired"
+            ? "Password reset link expired. Send a new reset email and open the latest link."
+            : recoveryErrorDescription || "Password reset link is invalid. Send a new reset email."
+        );
+      }
 
       if (recoveryCode) {
         const { data, error } = await supabase.auth.exchangeCodeForSession(recoveryCode);
@@ -5629,6 +5640,15 @@ export default function TradingJournalDashboard() {
       if (!mounted) return;
       const user = session?.user || null;
       if (isRecoveryUrl) {
+        if (!session) {
+          setPasswordRecoverySession(false);
+          setAuthPage("forgot");
+          setAuthUser(null);
+          setIsAuthenticated(false);
+          setAuthMessage("Password reset link expired. Send a new reset email and open the latest link.");
+          setAuthLoading(false);
+          return;
+        }
         setPasswordRecoverySession(true);
         setAuthPage("updatePassword");
         setAuthUser(user);
@@ -5642,13 +5662,19 @@ export default function TradingJournalDashboard() {
     }).catch((error) => {
       if (!mounted) return;
       setAuthMessage(error?.message || "Could not open password reset session. Request a new reset link.");
-      setPasswordRecoverySession(isRecoveryUrl);
+      setPasswordRecoverySession(false);
       setAuthPage(isRecoveryUrl ? "forgot" : "login");
+      setAuthUser(null);
+      setIsAuthenticated(false);
       setAuthLoading(false);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       const user = session?.user || null;
+      const onRecoveryPath = window.location.pathname.includes("/auth/reset-password");
+      if (onRecoveryPath && !window.location.hash.includes("type=recovery")) {
+        return;
+      }
 
       if (event === "PASSWORD_RECOVERY") {
         setPasswordRecoverySession(true);
