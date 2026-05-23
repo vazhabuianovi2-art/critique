@@ -5586,9 +5586,23 @@ export default function TradingJournalDashboard() {
 
     let mounted = true;
     const isRecoveryUrl = window.location.pathname.includes("/auth/reset-password") || window.location.hash.includes("type=recovery");
-    supabase.auth.getSession().then(({ data }) => {
+    const recoveryCode = new URLSearchParams(window.location.search).get("code");
+
+    async function initializeAuthSession() {
+      if (isRecoveryUrl && recoveryCode) {
+        const { data, error } = await supabase.auth.exchangeCodeForSession(recoveryCode);
+        if (error) throw error;
+        window.history.replaceState(null, "", "/auth/reset-password");
+        return data?.session || null;
+      }
+
+      const { data } = await supabase.auth.getSession();
+      return data?.session || null;
+    }
+
+    initializeAuthSession().then((session) => {
       if (!mounted) return;
-      const user = data?.session?.user || null;
+      const user = session?.user || null;
       if (isRecoveryUrl) {
         setPasswordRecoverySession(true);
         setAuthPage("updatePassword");
@@ -5599,6 +5613,12 @@ export default function TradingJournalDashboard() {
       }
       setAuthUser(user);
       setIsAuthenticated(Boolean(user));
+      setAuthLoading(false);
+    }).catch((error) => {
+      if (!mounted) return;
+      setAuthMessage(error?.message || "Could not open password reset session. Request a new reset link.");
+      setPasswordRecoverySession(isRecoveryUrl);
+      setAuthPage(isRecoveryUrl ? "forgot" : "login");
       setAuthLoading(false);
     });
 
@@ -5666,6 +5686,10 @@ export default function TradingJournalDashboard() {
       }
 
       if (mode === "updatePassword") {
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData?.session) {
+          throw new Error("Password reset session expired. Request a new reset link and open the latest email.");
+        }
         const { error } = await supabase.auth.updateUser({ password: values.password });
         if (error) throw error;
         setPasswordRecoverySession(false);
