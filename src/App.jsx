@@ -132,6 +132,20 @@ function getUserDisplayName(user, fallback = "User") {
   return formatDisplayName(metadata.full_name || metadata.name || metadata.user_name || user?.email, fallback);
 }
 
+function getProfilePhotoKey(userId) {
+  return userId ? `${PROFILE_PHOTO_KEY}_${userId}` : PROFILE_PHOTO_KEY;
+}
+
+function getStoredProfilePhoto(user) {
+  const metadataPhoto = user?.user_metadata?.profile_photo || user?.user_metadata?.avatar_url || "";
+  if (metadataPhoto) return metadataPhoto;
+  try {
+    return localStorage.getItem(getProfilePhotoKey(user?.id)) || localStorage.getItem(PROFILE_PHOTO_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
 function getFirstDisplayName(name, fallback = "User") {
   const displayName = formatDisplayName(name, fallback);
   return displayName.split(" ")[0] || fallback;
@@ -1078,35 +1092,58 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .trade-card {
-    background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 58%, #ffffff 100%) !important;
-    border-color: rgba(217, 70, 239, 0.42) !important;
-    box-shadow: 0 16px 42px rgba(168, 85, 247, 0.12) !important;
+    background: #ffffff !important;
+    border-color: rgba(226, 232, 240, 0.96) !important;
+    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.07) !important;
   }
 
   .light-theme .trade-screenshot-area {
-    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 52%, #faf5ff 100%) !important;
-    border-bottom: 1px solid rgba(168, 85, 247, 0.16) !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: 190px !important;
+    overflow: hidden !important;
+    border-radius: 16px 16px 0 0 !important;
+    background: #020617 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(203, 213, 225, 0.95) !important;
+    box-shadow: none !important;
   }
 
   .light-theme .trade-screenshot-image {
     opacity: 1 !important;
-    filter: contrast(1.08) saturate(1.05) !important;
+    filter: contrast(1.14) saturate(1.08) !important;
+    border-radius: 0 !important;
+  }
+
+  .light-theme .trade-screenshot-area::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: 16px 16px 0 0;
+    background: linear-gradient(to top, rgba(15,23,42,.26), rgba(15,23,42,.04) 34%, transparent 62%);
+    box-shadow: inset 0 0 0 1px rgba(15,23,42,.10);
+  }
+
+  .light-theme .trade-screenshot-overlay {
+    background: linear-gradient(to top, rgba(15,23,42,.28), rgba(15,23,42,.06) 34%, transparent 66%) !important;
+    opacity: 1 !important;
   }
 
   .light-theme .trade-no-screenshot {
-    background: linear-gradient(135deg, #ffffff 0%, #fdf4ff 55%, #faf5ff 100%) !important;
-    color: #7e22ce !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 60%, #f1f5f9 100%) !important;
+    color: #475569 !important;
   }
 
   .light-theme .trade-no-screenshot-icon {
-    background: rgba(217, 70, 239, 0.14) !important;
-    border-color: rgba(217, 70, 239, 0.36) !important;
-    color: #d946ef !important;
-    box-shadow: 0 10px 26px rgba(217, 70, 239, 0.14) !important;
+    background: #ffffff !important;
+    border-color: rgba(203, 213, 225, 0.95) !important;
+    color: #7c3aed !important;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08) !important;
   }
 
   .light-theme .trade-no-screenshot-text {
-    color: #7e22ce !important;
+    color: #7c3aed !important;
     font-weight: 900 !important;
   }
 
@@ -1458,6 +1495,23 @@ const THEME_STYLE_CSS = `
   .light-theme .journal-add-btn,
   .light-theme .journal-add-btn * {
     color: #ffffff !important;
+  }
+
+  .light-theme .journal-backup-btn.journal-backup-btn {
+    background: #ecfdf5 !important;
+    color: #047857 !important;
+    border-color: rgba(16,185,129,.28) !important;
+    box-shadow: 0 10px 24px rgba(16,185,129,.10) !important;
+  }
+
+  .light-theme .journal-backup-btn.journal-backup-btn * {
+    color: #047857 !important;
+  }
+
+  .light-theme .journal-backup-btn.journal-backup-btn:hover {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+    border-color: rgba(16,185,129,.38) !important;
   }
 
   .light-theme .statistics-tabs {
@@ -2805,6 +2859,211 @@ const THEME_STYLE_CSS = `
     color: #86198f !important;
     border-color: rgba(217,70,239,.24) !important;
     box-shadow: 0 8px 20px rgba(217,70,239,.08) !important;
+  }
+
+  .light-theme .calendar-page-pro {
+    background: radial-gradient(circle at top left, rgba(217,70,239,.08), transparent 26%), linear-gradient(135deg, #f8fafc 0%, #ffffff 46%, #f9fafb 100%) !important;
+    color: #111827 !important;
+  }
+
+  .light-theme .calendar-page-pro > .mb-8 {
+    color: #111827 !important;
+  }
+
+  .light-theme .calendar-page-pro .hidden button:not(.calendar-nav-button):not(.calendar-top-pill) {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border-color: rgba(226,232,240,.96) !important;
+    box-shadow: 0 10px 26px rgba(15,23,42,.06) !important;
+  }
+
+  .light-theme .calendar-summary-pro {
+    border-radius: 1.75rem !important;
+    background: linear-gradient(135deg, rgba(248,250,252,.92), rgba(255,255,255,.72) 54%, rgba(241,245,249,.88)) !important;
+    padding: .15rem !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.86) !important;
+  }
+
+  .light-theme .calendar-summary-card-pro.calendar-summary-card-pro {
+    background: linear-gradient(135deg, rgba(255,255,255,.90), rgba(248,250,252,.82)) !important;
+    border-color: rgba(226,232,240,.82) !important;
+    box-shadow: 0 12px 30px rgba(15,23,42,.055) !important;
+  }
+
+  .light-theme .calendar-summary-good.calendar-summary-card-pro {
+    background: linear-gradient(135deg, rgba(255,255,255,.92), rgba(236,253,245,.78)) !important;
+  }
+
+  .light-theme .calendar-summary-bad.calendar-summary-card-pro {
+    background: linear-gradient(135deg, rgba(255,255,255,.92), rgba(255,241,242,.74)) !important;
+  }
+
+  .light-theme .calendar-summary-warn.calendar-summary-card-pro {
+    background: linear-gradient(135deg, rgba(255,255,255,.92), rgba(255,251,235,.78)) !important;
+  }
+
+  .light-theme .dashboard-hero,
+  .light-theme .dashboard-performance-card,
+  .light-theme .dashboard-score-card,
+  .light-theme .dashboard-recent-card,
+  .light-theme .dashboard-activity-card,
+  .light-theme .dashboard-routine-cta,
+  .light-theme .quick-insights-section {
+    background: #ffffff !important;
+    border-color: rgba(226,232,240,.96) !important;
+    color: #111827 !important;
+    box-shadow: 0 18px 42px rgba(15,23,42,.07) !important;
+  }
+
+  .light-theme .dashboard-hero {
+    background: linear-gradient(135deg, #ffffff 0%, #fbfdff 58%, #f8fafc 100%) !important;
+  }
+
+  .light-theme .dashboard-inspiration,
+  .light-theme .moving-text-wrap {
+    background: #ffffff !important;
+    border-color: rgba(226,232,240,.96) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 10px 26px rgba(15,23,42,.045) !important;
+  }
+
+  .light-theme .moving-text-item {
+    color: #334155 !important;
+  }
+
+  .light-theme .moving-text-spark {
+    background: #f8fafc !important;
+    color: #a21caf !important;
+    border-color: rgba(226,232,240,.96) !important;
+    box-shadow: none !important;
+  }
+
+  .light-theme .dashboard-section-icon,
+  .light-theme .dashboard-performance-icon,
+  .light-theme .dashboard-recent-icon,
+  .light-theme .dashboard-routine-icon {
+    background: #f8fafc !important;
+    color: #7c3aed !important;
+    border-color: rgba(226,232,240,.96) !important;
+    box-shadow: 0 10px 24px rgba(15,23,42,.06) !important;
+  }
+
+  .light-theme .dashboard-routine-icon {
+    color: #059669 !important;
+  }
+
+  .light-theme .dashboard-start-btn.dashboard-start-btn {
+    background: #ecfdf5 !important;
+    color: #047857 !important;
+    border-color: rgba(16,185,129,.28) !important;
+    box-shadow: 0 12px 26px rgba(16,185,129,.10) !important;
+  }
+
+  .light-theme .dashboard-start-btn.dashboard-start-btn:hover {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+    border-color: rgba(16,185,129,.38) !important;
+    box-shadow: 0 16px 34px rgba(16,185,129,.14) !important;
+  }
+
+  .light-theme .dashboard-dash-card {
+    background: #ffffff !important;
+    border-color: rgba(226,232,240,.96) !important;
+    box-shadow: 0 14px 32px rgba(15,23,42,.06) !important;
+  }
+
+  .light-theme .dashboard-dash-card .rounded-full,
+  .light-theme .dashboard-dash-card [class*="rounded-full"][class*="bg-"],
+  .light-theme .dashboard-dash-card [class*="rounded-md"][class*="bg-"] {
+    background: #f8fafc !important;
+    color: #475569 !important;
+    border: 1px solid rgba(226,232,240,.96) !important;
+    box-shadow: none !important;
+  }
+
+  .light-theme .dashboard-dash-card .dashboard-card-badge.dashboard-card-badge {
+    background: #dcfce7 !important;
+    color: #047857 !important;
+    border-color: rgba(16,185,129,.22) !important;
+    box-shadow: none !important;
+  }
+
+  .light-theme .dashboard-recent-list {
+    background: #f8fafc !important;
+    border-color: rgba(226,232,240,.96) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.8) !important;
+  }
+
+  .light-theme button.dashboard-recent-row.dashboard-recent-row {
+    background: #ffffff !important;
+    border-color: rgba(226,232,240,.96) !important;
+    color: #111827 !important;
+    box-shadow: 0 8px 22px rgba(15,23,42,.045) !important;
+  }
+
+  .light-theme button.dashboard-recent-row.dashboard-recent-row:hover {
+    background: #fbfdff !important;
+    border-color: rgba(148,163,184,.55) !important;
+    box-shadow: 0 14px 30px rgba(15,23,42,.075) !important;
+  }
+
+  .light-theme .dashboard-recent-row .text-white {
+    color: #111827 !important;
+  }
+
+  .light-theme .dashboard-recent-row span,
+  .light-theme .dashboard-recent-row div {
+    color: #111827 !important;
+  }
+
+  .light-theme .dashboard-recent-row .text-zinc-400,
+  .light-theme .dashboard-recent-row .text-zinc-500 {
+    color: #64748b !important;
+  }
+
+  .light-theme .dashboard-recent-row .text-fuchsia-100,
+  .light-theme .dashboard-recent-row .trade-tag {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    border-color: rgba(203,213,225,.95) !important;
+  }
+
+  .light-theme .dashboard-routine-cta {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fffb 100%) !important;
+    border-color: rgba(16,185,129,.20) !important;
+  }
+
+  .light-theme .dashboard-routine-cta .bg-zinc-800 {
+    background: #e2e8f0 !important;
+  }
+
+  .light-theme .pretrade-modal-panel {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border-color: rgba(226,232,240,.96) !important;
+    box-shadow: 0 28px 80px rgba(15,23,42,.18) !important;
+  }
+
+  .light-theme .pretrade-routine-item {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border-color: rgba(226,232,240,.96) !important;
+    box-shadow: 0 10px 26px rgba(15,23,42,.055) !important;
+  }
+
+  .light-theme .pretrade-routine-item:hover {
+    border-color: rgba(217,70,239,.26) !important;
+    box-shadow: 0 16px 36px rgba(15,23,42,.08) !important;
+  }
+
+  .light-theme .pretrade-routine-item-checked {
+    background: #f0fdf4 !important;
+    border-color: rgba(16,185,129,.26) !important;
+  }
+
+  .light-theme .pretrade-status-card {
+    background: #f8fafc !important;
+    color: #111827 !important;
+    border-color: rgba(226,232,240,.96) !important;
   }
 
   .light-theme .mobile-bottom-nav,
@@ -4307,6 +4566,30 @@ function fileToBase64(file) {
   });
 }
 
+function resizeImageToDataUrl(file, maxSize = 512, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const image = new Image();
+      image.onload = () => {
+        const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+        const width = Math.max(1, Math.round(image.width * scale));
+        const height = Math.max(1, Math.round(image.height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(image, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      image.onerror = reject;
+      image.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 async function uploadScreenshotsForTrade(event, form, setForm) {
   const files = Array.from(event.target.files || []).filter((file) => file.type.startsWith("image/"));
   const current = normalizeScreenshots(form);
@@ -4941,8 +5224,8 @@ function readLocalTradesFallback(userId) {
 function saveLocalTradesFallback(tradesToSave, userId) {
   try {
     const safeTrades = Array.isArray(tradesToSave) ? tradesToSave.map(normalizeTradeForStorage) : [];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(safeTrades));
-    localStorage.setItem(getUserTradesKey(userId), JSON.stringify(safeTrades));
+    if (!userId) localStorage.setItem(STORAGE_KEY, JSON.stringify(safeTrades));
+    if (userId) localStorage.setItem(getUserTradesKey(userId), JSON.stringify(safeTrades));
   } catch (error) {
     console.warn("Could not save local trades fallback:", error?.message || error);
   }
@@ -5118,7 +5401,7 @@ export default function TradingJournalDashboard() {
   const [dataMessage, setDataMessage] = useState("");
   const [profilePhoto, setProfilePhoto] = useState(() => {
     try {
-      return localStorage.getItem(PROFILE_PHOTO_KEY) || "";
+      return getStoredProfilePhoto(null);
     } catch {
       return "";
     }
@@ -5139,19 +5422,9 @@ export default function TradingJournalDashboard() {
     setHasLoadedRemoteTrades(false);
     setDataMessage("");
 
-    const localBeforeFetch = readLocalTradesFallback(authUser.id);
-    if (localBeforeFetch.length) {
-      setTrades(localBeforeFetch);
-      saveRestoreCache(authUser.id, { trades: localBeforeFetch, account, routine, theme });
-    }
-
     loadTradesFromSupabase(authUser.id)
       .then(async (rows) => {
         if (!mounted || !Array.isArray(rows)) return;
-
-        const cachedRestore = readRestoreCache(authUser.id);
-        const cachedTrades = Array.isArray(cachedRestore?.trades) ? cachedRestore.trades : [];
-        const localTrades = readLocalTradesFallback(authUser.id);
 
         if (rows.length) {
           const serverTrades = mergeTradesUnique(rows, []);
@@ -5161,7 +5434,7 @@ export default function TradingJournalDashboard() {
           return;
         }
 
-        const fallbackTrades = mergeTradesUnique(localTrades, cachedTrades);
+        const fallbackTrades = [];
 
         if (fallbackTrades.length) {
           setTrades(fallbackTrades);
@@ -5185,7 +5458,9 @@ export default function TradingJournalDashboard() {
         }
 
         setTrades([]);
-        setDataMessage("Supabase returned 0 trades and no local backup was found. Add/Restore trades again, then refresh to test.");
+        saveLocalTradesFallback([], authUser.id);
+        saveRestoreCache(authUser.id, { trades: [], account, routine, theme });
+        setDataMessage("");
       })
       .catch((error) => {
         if (!mounted) return;
@@ -5243,6 +5518,9 @@ export default function TradingJournalDashboard() {
   }, [authUser?.id, isAuthenticated]);
   useEffect(() => { localStorage.setItem(ROUTINE_KEY, JSON.stringify(routine)); }, [routine]);
   useEffect(() => { localStorage.setItem(THEME_KEY, theme); }, [theme]);
+  useEffect(() => {
+    setProfilePhoto(getStoredProfilePhoto(authUser));
+  }, [authUser?.id, authUser?.user_metadata?.profile_photo, authUser?.user_metadata?.avatar_url]);
 
   useEffect(() => {
     if (!accounts.length || activeAccountId) return;
@@ -6068,7 +6346,7 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
           <Button onClick={onStrategies} variant="outline" className="journal-action-btn border-white/15 bg-black text-white"><ListChecks size={16} /> Strategies</Button>
           <Button onClick={onImport} variant="outline" className="journal-action-btn border-white/15 bg-black text-white"><Upload size={16} /> CSV Import</Button>
           <Button onClick={onExport} variant="outline" className="journal-action-btn border-white/15 bg-black text-white"><Download size={16} /> CSV</Button>
-          <Button onClick={onBackup} variant="outline" className="journal-action-btn border-emerald-500/35 bg-emerald-500/10 text-emerald-300"><Download size={16} /> Backup</Button>
+          <Button onClick={onBackup} variant="outline" className="journal-action-btn journal-backup-btn border-emerald-500/35 bg-emerald-500/10 text-emerald-300"><Download size={16} /> Backup</Button>
           <Button onClick={onRestore} variant="outline" className="journal-action-btn border-amber-500/35 bg-amber-500/10 text-amber-300"><Upload size={16} /> Restore</Button>
           <Button onClick={onAdd} className="journal-add-btn bg-fuchsia-500 text-white shadow-[0_0_18px_rgba(217,70,239,0.22)]"><Plus size={16} /> Add Trade</Button>
         </div>
@@ -6234,7 +6512,7 @@ function TradeCard({ trade, onView, onEdit, onRemove }) {
       <div className="absolute right-0 top-0 h-28 w-28 rounded-bl-[2rem] bg-fuchsia-500/10" />
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent" />
       <button onClick={onView} className="trade-screenshot-area relative block h-48 w-full overflow-hidden bg-zinc-900 text-left">
-        {screenshots.length ? <><img src={screenshots[0]} alt="Trade screenshot" className="trade-screenshot-image h-full w-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:opacity-95" /><div className="absolute inset-0 bg-gradient-to-t from-black via-black/15 to-transparent" /></> : <div className="trade-no-screenshot flex h-full flex-col items-center justify-center bg-gradient-to-br from-zinc-950 via-black to-fuchsia-950/20 text-zinc-500"><div className="trade-no-screenshot-icon flex h-14 w-14 items-center justify-center rounded-2xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300"><Camera size={24} /></div><span className="trade-no-screenshot-text mt-3 text-xs font-bold">No Screenshot</span><span className="mt-1 text-[11px] font-semibold text-zinc-500">Edit trade → upload image</span></div>}
+        {screenshots.length ? <><img src={screenshots[0]} alt="Trade screenshot" className="trade-screenshot-image h-full w-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:opacity-95" /><div className="trade-screenshot-overlay absolute inset-0 bg-gradient-to-t from-black via-black/15 to-transparent" /></> : <div className="trade-no-screenshot flex h-full flex-col items-center justify-center bg-gradient-to-br from-zinc-950 via-black to-fuchsia-950/20 text-zinc-500"><div className="trade-no-screenshot-icon flex h-14 w-14 items-center justify-center rounded-2xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300"><Camera size={24} /></div><span className="trade-no-screenshot-text mt-3 text-xs font-bold">No Screenshot</span><span className="mt-1 text-[11px] font-semibold text-zinc-500">Edit trade → upload image</span></div>}
         <div className="absolute left-4 top-4 flex gap-2"><span className="rounded-full border border-fuchsia-500/30 bg-black/70 px-3 py-1 text-xs font-black text-fuchsia-300 backdrop-blur">{trade.pair}</span><span className={`rounded-full border px-3 py-1 text-xs font-black tracking-wider backdrop-blur ${getTradeDirectionClass(trade.direction)}`}>{trade.direction}</span></div>
         <div className={`absolute bottom-4 right-4 rounded-xl border px-4 py-2 text-lg font-black backdrop-blur ${getPnlPillClass(pnl)}`}>{getPnlArrow(pnl)} {formatMoney(pnl)}</div>
       </button>
@@ -6380,7 +6658,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
         <div className="dashboard-performance-card light-card rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-6 shadow-[0_20px_55px_rgba(217,70,239,0.10)]">
           <div className="relative z-10 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-black text-fuchsia-300"><TrendingUp size={22} /></div>
+              <div className="dashboard-performance-icon flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-black text-fuchsia-300"><TrendingUp size={22} /></div>
               <div>
                 <h2 className="text-2xl font-black">Performance Overview</h2>
                 <p className="text-sm text-zinc-400">Your cumulative P&L over time</p>
@@ -6410,7 +6688,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
           <div className="dashboard-recent-card light-card relative flex flex-1 flex-col overflow-hidden rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-6 shadow-[0_20px_55px_rgba(217,70,239,0.10)]">
             <div className="relative z-10 mb-5 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/15 text-fuchsia-300"><TrendingUp size={22} /></div>
+                <div className="dashboard-recent-icon flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/15 text-fuchsia-300"><TrendingUp size={22} /></div>
                 <div>
                   <h2 className="text-2xl font-black">Recent Trades</h2>
                   <p className="text-sm text-zinc-400">Your latest activity</p>
@@ -6440,7 +6718,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
             </div>
           </div>
 
-          <button onClick={onStartDay} className="group relative min-h-[220px] w-full overflow-hidden rounded-2xl border border-emerald-500/40 bg-gradient-to-br from-emerald-950/50 via-black to-[#050307] p-6 text-left">
+          <button onClick={onStartDay} className="dashboard-routine-cta group relative min-h-[220px] w-full overflow-hidden rounded-2xl border border-emerald-500/40 bg-gradient-to-br from-emerald-950/50 via-black to-[#050307] p-6 text-left">
             <div className="relative z-10 flex h-full flex-col justify-between">
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -6448,7 +6726,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
                   <div className="mt-4 text-4xl font-black text-white">{checkedCount}/{routineItems.length}</div>
                   <div className="mt-2 text-sm font-bold text-emerald-300">{routinePercent === 100 ? "Ready to Trade" : `${routinePercent}% complete`}</div>
                 </div>
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/15 text-2xl text-emerald-300">✅</div>
+                <div className="dashboard-routine-icon flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/15 text-2xl text-emerald-300">✅</div>
               </div>
               <div className="mt-6">
                 <div className="mb-2 flex justify-between text-[10px] font-black uppercase tracking-wider text-zinc-500"><span>Checklist Progress</span><span>{routinePercent}%</span></div>
@@ -6488,7 +6766,7 @@ function QuickInsights({ insights }) {
     red: "border-red-500/30 bg-red-500/10 text-red-300",
   };
   return (
-    <section className="mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-5 shadow-[0_18px_45px_rgba(217,70,239,0.10)]">
+    <section className="quick-insights-section mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-5 shadow-[0_18px_45px_rgba(217,70,239,0.10)]">
       <div className="mb-4 flex items-center justify-between">
         <SectionTitle title="Quick Insights" icon={<Target size={18} />} />
         <span className="rounded-full border border-fuchsia-500/25 bg-fuchsia-500/10 px-3 py-1 text-xs font-black text-fuchsia-300">Auto analysis</span>
@@ -6875,7 +7153,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate }) {
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="relative -m-4 min-h-screen bg-black p-4 sm:-m-6 sm:p-6 lg:-m-8 lg:p-8">
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="calendar-page-pro relative -m-4 min-h-screen bg-black p-4 sm:-m-6 sm:p-6 lg:-m-8 lg:p-8">
       <div className="mb-8 flex items-center justify-between gap-4">
         <TopCrumb page="Calendar" />
         <div className="hidden items-center gap-5 lg:flex">
@@ -6884,8 +7162,6 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate }) {
             v
             <span className="rounded-lg bg-white/10 px-2 py-0.5 text-xs">USD</span>
           </button>
-          <button className="text-xl text-zinc-300 hover:text-white">♧</button>
-          <button className="text-xl text-zinc-300 hover:text-white">☼</button>
         </div>
       </div>
 
@@ -7606,7 +7882,7 @@ function PreTradeRoutineModal({ routine, setRoutine, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-6 backdrop-blur-sm">
-      <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} className="max-h-[90vh] w-full max-w-[860px] overflow-y-auto rounded-2xl border border-white/15 bg-black p-6 shadow-2xl">
+      <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} className="pretrade-modal-panel max-h-[90vh] w-full max-w-[860px] overflow-y-auto rounded-2xl border border-white/15 bg-black p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-500/40 bg-emerald-500/15 text-emerald-300">✅</div>
@@ -7628,7 +7904,7 @@ function PreTradeRoutineModal({ routine, setRoutine, onClose }) {
           {routineItems.map((item) => {
             const checked = Boolean(routine.checked?.[item.id]);
             return (
-              <button key={item.id} onClick={() => toggleItem(item.id)} className={`group relative overflow-hidden rounded-xl border bg-gradient-to-br p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:shadow-2xl ${checked ? "border-emerald-500/60 from-emerald-950/45 via-emerald-950/10 to-black shadow-emerald-500/10" : "border-white/10 from-zinc-950 via-black to-black hover:border-fuchsia-500/40 hover:shadow-fuchsia-500/10"}`}>
+              <button key={item.id} onClick={() => toggleItem(item.id)} className={`pretrade-routine-item ${checked ? "pretrade-routine-item-checked" : ""} group relative overflow-hidden rounded-xl border bg-gradient-to-br p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:shadow-2xl ${checked ? "border-emerald-500/60 from-emerald-950/45 via-emerald-950/10 to-black shadow-emerald-500/10" : "border-white/10 from-zinc-950 via-black to-black hover:border-fuchsia-500/40 hover:shadow-fuchsia-500/10"}`}>
                 <div className="flex items-start justify-between">
                   <div className="flex gap-4">
                     <div className={checked ? "flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-300" : "flex h-11 w-11 items-center justify-center rounded-xl bg-white/5 text-zinc-300"}>{item.icon}</div>
@@ -7651,7 +7927,7 @@ function PreTradeRoutineModal({ routine, setRoutine, onClose }) {
           <Textarea value={routine.notes} onChange={(e) => setRoutine({ ...routine, notes: e.target.value })} placeholder="Market bias, important levels, news, mental state..." className="min-h-28 border-white/15 bg-black" />
         </div>
 
-        <div className={ready ? "mt-6 rounded-xl border border-emerald-500/40 bg-emerald-950/25 p-5" : "mt-6 rounded-xl border border-amber-500/40 bg-amber-950/20 p-5"}>
+        <div className={ready ? "pretrade-status-card mt-6 rounded-xl border border-emerald-500/40 bg-emerald-950/25 p-5" : "pretrade-status-card mt-6 rounded-xl border border-amber-500/40 bg-amber-950/20 p-5"}>
           <div className={ready ? "text-2xl font-black text-emerald-400" : "text-2xl font-black text-amber-400"}>{ready ? "Ready to Trade" : "Not Ready Yet"}</div>
           <p className="mt-1 text-sm text-zinc-400">{ready ? "Checklist complete. Follow your plan and risk limits." : "Finish the checklist before opening a position."}</p>
         </div>
@@ -7785,20 +8061,38 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
       setMessage("Please choose an image file.");
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      setMessage("Profile photo must be under 10MB.");
+    if (file.size > 8 * 1024 * 1024) {
+      setMessage("Profile photo must be under 8MB.");
       return;
     }
-    const photo = await fileToBase64(file);
-    localStorage.setItem(PROFILE_PHOTO_KEY, photo);
-    setProfilePhoto?.(photo);
-    setMessage("Profile photo updated.");
+    try {
+      const photo = await resizeImageToDataUrl(file);
+      localStorage.setItem(PROFILE_PHOTO_KEY, photo);
+      localStorage.setItem(getProfilePhotoKey(authUser?.id), photo);
+      setProfilePhoto?.(photo);
+      if (supabase && authUser?.id) {
+        const { data, error } = await supabase.auth.updateUser({ data: { profile_photo: photo, avatar_url: photo } });
+        if (error) throw error;
+        if (data?.user) setProfilePhoto?.(getStoredProfilePhoto(data.user));
+      }
+      setMessage("Profile photo updated.");
+    } catch (error) {
+      setMessage(`Profile photo saved locally, but cloud sync failed: ${error?.message || "try a smaller image"}`);
+    }
   }
 
-  function removeProfilePhoto() {
+  async function removeProfilePhoto() {
     localStorage.removeItem(PROFILE_PHOTO_KEY);
+    localStorage.removeItem(getProfilePhotoKey(authUser?.id));
     setProfilePhoto?.("");
-    setMessage("Profile photo removed.");
+    try {
+      if (supabase && authUser?.id) {
+        await supabase.auth.updateUser({ data: { profile_photo: null, avatar_url: null } });
+      }
+      setMessage("Profile photo removed.");
+    } catch (error) {
+      setMessage(`Photo removed locally, but cloud sync failed: ${error?.message || "try again"}`);
+    }
   }
 
   async function saveName() {
@@ -8500,13 +8794,13 @@ function SimpleStatisticsPage({ trades = [], onExport }) {
       }
     >
       <div className="mt-2 h-px bg-white/10" />
-      <div className="mt-6 inline-flex max-w-full flex-wrap gap-2 rounded-xl border border-white/10 bg-[#111113] p-2 shadow-[0_18px_45px_rgba(0,0,0,0.22)]">
+      <div className="statistics-tabs mt-6 inline-flex max-w-full flex-wrap gap-2 rounded-xl border border-white/10 bg-[#111113] p-2 shadow-[0_18px_45px_rgba(0,0,0,0.22)]">
         {tabs.map(([tab, Icon]) => (
           <button
             key={tab}
             type="button"
             onClick={() => setActiveTab(tab)}
-            className={activeTab === tab ? "flex items-center gap-2 rounded-lg bg-black px-5 py-3 text-sm font-black text-white shadow-[0_12px_28px_rgba(0,0,0,0.38)]" : "flex items-center gap-2 rounded-lg px-5 py-3 text-sm font-black text-zinc-400 transition hover:bg-white/5 hover:text-white"}
+            className={activeTab === tab ? "statistics-tab statistics-tab-active flex items-center gap-2 rounded-lg bg-black px-5 py-3 text-sm font-black text-white shadow-[0_12px_28px_rgba(0,0,0,0.38)]" : "statistics-tab flex items-center gap-2 rounded-lg px-5 py-3 text-sm font-black text-zinc-400 transition hover:bg-white/5 hover:text-white"}
           >
             <Icon size={16} />
             {tab}
@@ -10512,7 +10806,7 @@ function DashCard({ title, value, tone, icon, badge }) {
   const styles = { emerald: { card: "from-emerald-950/45 via-emerald-950/10 to-black border-emerald-500/45 hover:border-emerald-400/80 hover:shadow-emerald-500/20", icon: "bg-emerald-500/10 text-emerald-400", value: "text-white", line: "text-emerald-400", badge: "bg-emerald-500/20 text-emerald-300", glow: "bg-emerald-500/10" }, fuchsia: { card: "from-fuchsia-950/45 via-fuchsia-950/10 to-black border-fuchsia-500/45 hover:border-fuchsia-400/80 hover:shadow-fuchsia-500/20", icon: "bg-fuchsia-500/10 text-fuchsia-400", value: "text-white", line: "text-violet-400", badge: "bg-emerald-500/20 text-emerald-300", glow: "bg-fuchsia-500/10" }, cyan: { card: "from-cyan-950/45 via-cyan-950/10 to-black border-cyan-500/45 hover:border-cyan-400/80 hover:shadow-cyan-500/20", icon: "bg-cyan-500/10 text-cyan-400", value: "text-white", line: "text-cyan-400", badge: "bg-zinc-700/70 text-zinc-300", glow: "bg-cyan-500/10" }, amber: { card: "from-orange-950/45 via-orange-950/10 to-black border-orange-500/45 hover:border-orange-400/80 hover:shadow-orange-500/20", icon: "bg-amber-500/10 text-amber-400", value: "text-white", line: "text-amber-400", badge: "bg-emerald-500/20 text-emerald-300", glow: "bg-amber-500/10" } };
   const s = styles[tone] || styles.emerald;
   const isCustomValue = React.isValidElement(value);
-  return <button className={`group relative overflow-hidden rounded-xl border bg-gradient-to-br p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:scale-[1.025] hover:shadow-2xl ${s.card}`}><div className={`absolute right-0 top-0 h-24 w-24 rounded-bl-3xl ${s.glow}`} /><div className="relative z-10 flex items-start justify-between"><div><div className="text-xs font-black uppercase tracking-wider text-zinc-400">{title}</div><div className={`mt-4 text-3xl font-black ${s.value}`}>{isCustomValue ? value : <AnimatedValue value={value} />}</div></div><div className={`flex h-10 w-10 items-center justify-center rounded-xl text-lg font-black ${s.icon}`}>{icon}</div></div><div className="relative z-10 mt-3 flex items-end justify-between"><span className={`rounded-md px-2 py-1 text-xs font-black ${s.badge}`}>{badge}</span><svg width="86" height="34" viewBox="0 0 86 34" fill="none" className={`${s.line} opacity-90 transition-transform duration-300 group-hover:scale-110`}><path d="M2 26 C8 28, 11 12, 17 18 S27 27, 33 16 S45 13, 51 18 S61 8, 68 10 S76 5, 84 2" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" /><path d="M2 31 C11 28, 15 20, 22 22 S32 27, 38 19 S49 15, 55 20 S65 11, 72 13 S78 8, 84 7" stroke="currentColor" strokeWidth="1" opacity="0.35" fill="none" strokeLinecap="round" /></svg></div></button>;
+  return <button className={`dashboard-dash-card group relative overflow-hidden rounded-xl border bg-gradient-to-br p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:scale-[1.025] hover:shadow-2xl ${s.card}`}><div className={`absolute right-0 top-0 h-24 w-24 rounded-bl-3xl ${s.glow}`} /><div className="relative z-10 flex items-start justify-between"><div><div className="text-xs font-black uppercase tracking-wider text-zinc-400">{title}</div><div className={`mt-4 text-3xl font-black ${s.value}`}>{isCustomValue ? value : <AnimatedValue value={value} />}</div></div><div className={`flex h-10 w-10 items-center justify-center rounded-xl text-lg font-black ${s.icon}`}>{icon}</div></div><div className="relative z-10 mt-3 flex items-end justify-between"><span className={`dashboard-card-badge rounded-md border px-2 py-1 text-xs font-black ${s.badge}`}>{badge}</span><svg width="86" height="34" viewBox="0 0 86 34" fill="none" className={`${s.line} opacity-90 transition-transform duration-300 group-hover:scale-110`}><path d="M2 26 C8 28, 11 12, 17 18 S27 27, 33 16 S45 13, 51 18 S61 8, 68 10 S76 5, 84 2" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" /><path d="M2 31 C11 28, 15 20, 22 22 S32 27, 38 19 S49 15, 55 20 S65 11, 72 13 S78 8, 84 7" stroke="currentColor" strokeWidth="1" opacity="0.35" fill="none" strokeLinecap="round" /></svg></div></button>;
 }
 function Chart({ curve, tall }) { return <div className={tall ? "mt-5 h-96" : "mt-5 h-72"}><ResponsiveContainer width="100%" height="100%"><LineChart data={curve}><CartesianGrid strokeDasharray="3 3" opacity={0.12} /><XAxis dataKey="date" stroke="#777" /><YAxis stroke="#777" /><Tooltip contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }} /><Line type="monotone" dataKey="pnl" stroke="#a855f7" strokeWidth={3} dot={{ r: 5 }} /></LineChart></ResponsiveContainer></div>; }
 function SectionTitle({ title, icon, gold }) { return <div className="flex items-center gap-3 text-xl font-black"><div className={`rounded-lg p-2 ${gold ? "bg-amber-500/20 text-amber-400" : "bg-fuchsia-500/20 text-fuchsia-400"}`}>{icon}</div>{title}</div>; }
