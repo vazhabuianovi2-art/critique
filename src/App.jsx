@@ -5598,11 +5598,14 @@ export default function TradingJournalDashboard() {
 
     let mounted = true;
     const isRecoveryUrl = window.location.pathname.includes("/auth/reset-password") || window.location.hash.includes("type=recovery");
-    const recoveryCode = new URLSearchParams(window.location.search).get("code");
+    const recoverySearchParams = new URLSearchParams(window.location.search);
+    const recoveryCode = recoverySearchParams.get("code");
+    const recoveryTokenHash = recoverySearchParams.get("token_hash");
+    const recoveryType = recoverySearchParams.get("type") || "recovery";
     const recoveryHashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
     const recoveryErrorCode = recoveryHashParams.get("error_code") || recoveryHashParams.get("error");
     const recoveryErrorDescription = recoveryHashParams.get("error_description");
-    const hasRecoveryTokens = Boolean(recoveryCode || recoveryHashParams.get("access_token") || recoveryHashParams.get("refresh_token"));
+    const hasRecoveryTokens = Boolean(recoveryCode || recoveryTokenHash || recoveryHashParams.get("access_token") || recoveryHashParams.get("refresh_token"));
 
     async function recoverPasswordSessionFromUrl() {
       if (!isRecoveryUrl) return null;
@@ -5617,6 +5620,16 @@ export default function TradingJournalDashboard() {
       }
 
       if (!hasRecoveryTokens) return null;
+
+      if (recoveryTokenHash) {
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash: recoveryTokenHash,
+          type: recoveryType,
+        });
+        if (error) throw error;
+        window.history.replaceState(null, "", "/auth/reset-password");
+        return data?.session || null;
+      }
 
       if (recoveryCode) {
         const { data, error } = await supabase.auth.exchangeCodeForSession(recoveryCode);
@@ -5754,12 +5767,23 @@ export default function TradingJournalDashboard() {
         let passwordSession = sessionData?.session || null;
 
         if (!passwordSession && window.location.pathname.includes("/auth/reset-password")) {
-          const urlCode = new URLSearchParams(window.location.search).get("code");
+          const urlSearchParams = new URLSearchParams(window.location.search);
+          const urlCode = urlSearchParams.get("code");
+          const urlTokenHash = urlSearchParams.get("token_hash");
+          const urlRecoveryType = urlSearchParams.get("type") || "recovery";
           const urlHashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
           const accessToken = urlHashParams.get("access_token");
           const refreshToken = urlHashParams.get("refresh_token");
 
-          if (urlCode) {
+          if (urlTokenHash) {
+            const { data, error } = await supabase.auth.verifyOtp({
+              token_hash: urlTokenHash,
+              type: urlRecoveryType,
+            });
+            if (error) throw error;
+            passwordSession = data?.session || null;
+            window.history.replaceState(null, "", "/auth/reset-password");
+          } else if (urlCode) {
             const { data, error } = await supabase.auth.exchangeCodeForSession(urlCode);
             if (error) throw error;
             passwordSession = data?.session || null;
