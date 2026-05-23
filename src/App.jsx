@@ -152,6 +152,28 @@ async function updatePasswordWithRetry(password) {
     if (!/failed to fetch|networkerror|load failed|fetch/i.test(String(error?.message || error))) break;
     await wait(650);
   }
+
+  const { data: sessionData } = await supabase.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+  if (accessToken && SUPABASE_URL && SUPABASE_ANON_KEY) {
+    try {
+      const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+        method: "PUT",
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password }),
+      });
+      if (response.ok) return;
+      const payload = await response.json().catch(() => null);
+      throw new Error(payload?.msg || payload?.message || `Password update failed (${response.status})`);
+    } catch (fallbackError) {
+      throw fallbackError || lastError;
+    }
+  }
+
   throw lastError;
 }
 
