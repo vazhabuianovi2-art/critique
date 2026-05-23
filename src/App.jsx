@@ -130,14 +130,22 @@ function wait(ms) {
 function getFriendlyAuthError(error, fallback = "Authentication failed. Try again.") {
   const message = String(error?.message || error || "");
   if (/failed to fetch|networkerror|load failed|fetch/i.test(message)) {
-    return "Could not reach the authentication server. Check your internet connection, wait a few seconds, and try again.";
+    return "The reset link is valid, but the browser could not reach Supabase to save the new password. Turn off VPN/ad blocker if enabled, refresh once, and try again.";
   }
   return message || fallback;
 }
 
 async function updatePasswordWithRetry(password) {
   let lastError = null;
-  for (let attempt = 0; attempt < 2; attempt += 1) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    if (attempt > 0) {
+      await wait(850 * attempt);
+      try {
+        await supabase.auth.refreshSession();
+      } catch {
+        await supabase.auth.getSession();
+      }
+    }
     const { error } = await supabase.auth.updateUser({ password });
     if (!error) return;
     lastError = error;
