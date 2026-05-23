@@ -65,10 +65,23 @@ const RESTORE_CACHE_PREFIX = "critique_last_successful_restore_v1";
 const USER_TRADES_KEY_PREFIX = "critique_user_trades_v2";
 const REMEMBER_AUTH_KEY = "critique_remember_auth_v1";
 const PROFILE_PHOTO_KEY = "critique_profile_photo_v1";
+const CUSTOM_STRATEGIES_KEY = "critique_custom_strategies_v1";
 const MAX_SCREENSHOTS = 5;
 const BRAND_NAME = "TryCritique";
 const BRAND_MARK = "◉";
 const TRADING_SESSIONS = ["Asia", "London", "NY-AM", "Lunch", "NY-PM", "Pre-Market"];
+const DEFAULT_STRATEGIES = ["Liquidity Sweep", "ICT FVG", "Order Block", "Breaker Block", "Silver Bullet"];
+const EMOTION_OPTIONS = [
+  ["Calm", "Focus", "◌"],
+  ["Confident", "Ready", "✦"],
+  ["Fearful", "Careful", "◇"],
+  ["Greedy", "Risk", "$"],
+  ["FOMO", "Impulse", "↗"],
+  ["Revenge", "Reset", "!"],
+];
+const MISTAKE_OPTIONS = ["None", "Early Entry", "Late Entry", "No Confirmation", "Overtrading", "Emotional Trade", "Bad Risk Management", "Moved Stop Loss"];
+const RULE_BROKEN_OPTIONS = ["None", "Moved SL", "Overrisk", "No Confirmation", "Chased Price", "Revenge Trade"];
+const SETUP_QUALITY_OPTIONS = ["A+", "A", "B", "C", "D"];
 
 function getEnvValue(key) {
   try {
@@ -3889,6 +3902,27 @@ function normalizeTags(value) {
   return [];
 }
 
+function splitMultiValues(value) {
+  if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
+  return String(value || "").split(",").map((item) => item.trim()).filter(Boolean);
+}
+
+function joinMultiValues(values = []) {
+  return [...new Set(values.map((item) => String(item).trim()).filter(Boolean))].join(", ");
+}
+
+function getResultTagFromPnl(value) {
+  const result = getResultFromPnl(value);
+  if (result === "Win") return "result:win";
+  if (result === "Loss") return "result:loss";
+  return "result:break-even";
+}
+
+function syncResultTag(tagsValue, pnl) {
+  const tags = normalizeTags({ tags: tagsValue }).filter((tag) => !String(tag).toLowerCase().startsWith("result:"));
+  return [getResultTagFromPnl(pnl), ...tags].join(", ");
+}
+
 function formatMoney(value) {
   const number = Number(value || 0);
   const prefix = number >= 0 ? "$" : "-$";
@@ -4066,6 +4100,7 @@ function getTradeGrade(trade) {
 }
 
 function getTradeGradeClass(grade) {
+  if (grade === "A+") return "border-fuchsia-500/45 bg-fuchsia-500/15 text-fuchsia-200";
   if (grade === "A") return "border-emerald-500/40 bg-emerald-500/15 text-emerald-300";
   if (grade === "B") return "border-blue-500/40 bg-blue-500/15 text-blue-300";
   if (grade === "C") return "border-amber-500/40 bg-amber-500/15 text-amber-300";
@@ -4344,21 +4379,22 @@ function getMistakeDetectorStats(trades = []) {
   }
 
   losses.forEach((trade) => {
-    const mistake = trade.mistake && trade.mistake !== "None" ? trade.mistake : "Unclassified mistake";
+    const mistakes = splitMultiValues(trade.mistake).filter((item) => item && item !== "None");
+    const primaryMistake = mistakes[0] || "Unclassified mistake";
     const timing = trade.entryTiming || "On Time";
-    const emotion = trade.emotion || "Calm";
-    const ruleBroken = trade.ruleBroken || "None";
+    const emotions = splitMultiValues(trade.emotion).length ? splitMultiValues(trade.emotion) : ["Calm"];
+    const brokenRules = splitMultiValues(trade.ruleBroken).filter((item) => item && item !== "None");
     const setupQuality = trade.setupQuality || getTradeGrade(trade);
 
-    if (mistake !== "Unclassified mistake") addIssue(`mistake-${mistake}`, mistake, trade, "Execution", `Focus on removing ${mistake.toLowerCase()} before increasing size.`, 1.3);
+    if (mistakes.length) mistakes.forEach((mistake) => addIssue(`mistake-${mistake}`, mistake, trade, "Execution", `Focus on removing ${mistake.toLowerCase()} before increasing size.`, 1.3));
     else addIssue("unclassified", "Unclassified mistake", trade, "Discipline", "Tag the exact mistake after each loss so the detector can become more accurate.", 0.6);
 
     if (["Early", "Late"].includes(timing)) addIssue(`timing-${timing}`, `${timing} entry timing`, trade, "Execution", timing === "Late" ? "Stop chasing price. Wait for the next valid retracement or skip the trade." : "Do not enter before full confirmation. Let the setup complete first.", 1.4);
-    if (["Fearful", "Greedy", "FOMO", "Revenge"].includes(emotion)) addIssue(`emotion-${emotion}`, `${emotion} emotion`, trade, "Psychology", "Add a 30-second pause before entry and confirm you are not trading from emotion.", 1.2);
+    emotions.filter((emotion) => ["Fearful", "Greedy", "FOMO", "Revenge"].includes(emotion)).forEach((emotion) => addIssue(`emotion-${emotion}`, `${emotion} emotion`, trade, "Psychology", "Add a 30-second pause before entry and confirm you are not trading from emotion.", 1.2));
     if (Number(trade.entryQuality || 0) > 0 && Number(trade.entryQuality || 0) <= 2) addIssue("entry-low", "Low entry quality", trade, "Execution", "Wait for full confirmation. Do not enter before the setup is complete.", 1.25);
     if (Number(trade.exitQuality || 0) > 0 && Number(trade.exitQuality || 0) <= 2) addIssue("exit-low", "Low exit quality", trade, "Execution", "Pre-plan partials, target and invalidation before entering the trade.", 1);
-    if (["No", "Partial"].includes(trade.ruleFollowed) || ruleBroken !== "None") addIssue("rules-broken", ruleBroken !== "None" ? ruleBroken : "Rules not fully followed", trade, "Discipline", "Only take trades that match your checklist. If rules are not met, skip the trade.", 1.35);
-    if (["Bad Risk Management", "Moved Stop Loss", "Overrisk"].includes(mistake) || ["Moved SL", "Overrisk"].includes(ruleBroken)) addIssue("risk-control", "Risk control problem", trade, "Risk", "Reduce size and never move stop loss after entry. Risk must be decided before execution.", 1.4);
+    if (["No", "Partial"].includes(trade.ruleFollowed) || brokenRules.length) addIssue("rules-broken", brokenRules[0] || "Rules not fully followed", trade, "Discipline", "Only take trades that match your checklist. If rules are not met, skip the trade.", 1.35);
+    if (["Bad Risk Management", "Moved Stop Loss", "Overrisk"].includes(primaryMistake) || brokenRules.some((rule) => ["Moved SL", "Overrisk"].includes(rule))) addIssue("risk-control", "Risk control problem", trade, "Risk", "Reduce size and never move stop loss after entry. Risk must be decided before execution.", 1.4);
     if (["C", "D"].includes(setupQuality) || ["C", "D"].includes(getTradeGrade(trade))) addIssue("setup-quality", "Weak setup quality", trade, "Setup", "Trade only A/B setups and write why the setup deserves execution before entry.", 1.2);
   });
 
@@ -4445,8 +4481,10 @@ function translateDetectorFix(value) {
 
 function getMostCommonValue(trades = [], key, fallback = "No data") {
   const counts = trades.reduce((output, trade) => {
-    const value = trade?.[key] || fallback;
-    output[value] = (output[value] || 0) + 1;
+    const values = ["emotion", "mistake", "ruleBroken"].includes(key) ? splitMultiValues(trade?.[key]) : [trade?.[key] || fallback];
+    (values.length ? values : [fallback]).forEach((value) => {
+      output[value] = (output[value] || 0) + 1;
+    });
     return output;
   }, {});
   return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || fallback;
@@ -6967,9 +7005,37 @@ function AddTradeModal({ isEditing, form, setForm, onClose, onSave, account, acc
   const riskWarnings = getRiskWarnings(form, accountBalance);
   const formErrors = getTradeFormErrors(form);
   const hasFormErrors = Object.keys(formErrors).length > 0;
+  const [customStrategies, setCustomStrategies] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(CUSTOM_STRATEGIES_KEY) || "[]");
+      return Array.isArray(saved) ? saved.filter(Boolean) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [newStrategyName, setNewStrategyName] = useState("");
+  const strategyOptions = [...new Set([...DEFAULT_STRATEGIES, ...customStrategies, form.strategy].filter(Boolean).filter((item) => !String(item).startsWith("Select")))];
 
   function updateField(key, value) {
+    if (key === "pnl") {
+      setForm({ ...form, pnl: value, tags: syncResultTag(form.tags, value) });
+      return;
+    }
+    if (key === "tags") {
+      setForm({ ...form, tags: syncResultTag(value, form.pnl) });
+      return;
+    }
     setForm({ ...form, [key]: value });
+  }
+
+  function addCustomStrategy() {
+    const name = newStrategyName.trim();
+    if (!name) return;
+    const next = [...new Set([...customStrategies, name])];
+    setCustomStrategies(next);
+    localStorage.setItem(CUSTOM_STRATEGIES_KEY, JSON.stringify(next));
+    setNewStrategyName("");
+    updateField("strategy", name);
   }
 
   return (
@@ -7022,10 +7088,12 @@ function AddTradeModal({ isEditing, form, setForm, onClose, onSave, account, acc
               <FieldError text={formErrors.date} />
             </div>
             <Field label="Trading Session">
-              <Select value={form.session} onChange={(e) => updateField("session", e.target.value)}>
-                <option value="Select trading session">Select trading session</option>
-                {TRADING_SESSIONS.map((session) => <option key={session} value={session}>{session}</option>)}
-              </Select>
+              <SegmentedChoice
+                value={form.session}
+                options={TRADING_SESSIONS}
+                onChange={(value) => updateField("session", value)}
+                tone="session"
+              />
               <FieldError text={formErrors.session} />
             </Field>
           </div>
@@ -7056,14 +7124,18 @@ function AddTradeModal({ isEditing, form, setForm, onClose, onSave, account, acc
             <div className="trade-context-card md:col-span-2">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <Field label="Strategy">
-                  <Select value={form.strategy} onChange={(e) => updateField("strategy", e.target.value)}>
-                    <option>Select strategy</option>
-                    <option>Liquidity Sweep</option>
-                    <option>ICT FVG</option>
-                    <option>Order Block</option>
-                    <option>Breaker Block</option>
-                    <option>Silver Bullet</option>
-                  </Select>
+                  <div className="space-y-3">
+                    <SegmentedChoice
+                      value={form.strategy}
+                      options={strategyOptions}
+                      onChange={(value) => updateField("strategy", value)}
+                      tone="strategy"
+                    />
+                    <div className="flex gap-2">
+                      <Input value={newStrategyName} onChange={(e) => setNewStrategyName(e.target.value)} placeholder="Add your strategy name" className="trade-context-input border-white/10 bg-black/45 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" />
+                      <button type="button" onClick={addCustomStrategy} className="rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 px-4 text-sm font-black text-fuchsia-200 transition hover:bg-fuchsia-500 hover:text-black">Add</button>
+                    </div>
+                  </div>
                   <FieldError text={formErrors.strategy} />
                 </Field>
                 <Field label="Account">
@@ -7081,16 +7153,16 @@ function AddTradeModal({ isEditing, form, setForm, onClose, onSave, account, acc
             </div>
 
             <div className="trade-context-card">
-              <Field label="Tags"><Input value={form.tags} onChange={(e) => updateField("tags", e.target.value)} placeholder="A+ Setup, NY AM, FVG" className="trade-context-input border-white/10 bg-black/45 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
+              <Field label="Tags"><Input value={syncResultTag(form.tags, form.pnl)} onChange={(e) => updateField("tags", e.target.value)} placeholder="result:win, A+ Setup, NY AM, FVG" className="trade-context-input border-white/10 bg-black/45 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
             </div>
 
-            <div className="trade-context-card"><Field label="Emotions"><Select value={form.emotion} onChange={(e) => updateField("emotion", e.target.value)}><option>Calm</option><option>Confident</option><option>Fearful</option><option>Greedy</option><option>FOMO</option><option>Revenge</option></Select></Field></div>
-            <div className="trade-context-card"><Field label="Mistake"><Select value={form.mistake} onChange={(e) => updateField("mistake", e.target.value)}><option>None</option><option>Early Entry</option><option>Late Entry</option><option>No Confirmation</option><option>Overtrading</option><option>Emotional Trade</option><option>Bad Risk Management</option><option>Moved Stop Loss</option></Select></Field></div>
+            <div className="trade-context-card"><Field label="Emotions"><MultiChoice value={form.emotion} options={EMOTION_OPTIONS} onChange={(value) => updateField("emotion", value)} tone="emotion" /></Field></div>
+            <div className="trade-context-card"><Field label="Mistakes"><MultiChoice value={form.mistake} options={MISTAKE_OPTIONS} onChange={(value) => updateField("mistake", value)} tone="mistake" allowNone /></Field></div>
             <div className="trade-context-card"><Field label="Entry Timing"><Select value={form.entryTiming} onChange={(e) => updateField("entryTiming", e.target.value)}><option>Early</option><option>On Time</option><option>Late</option></Select></Field></div>
             <div className="trade-context-card"><Field label="Confirmation"><Select value={form.confirmation} onChange={(e) => updateField("confirmation", e.target.value)}><option>Yes</option><option>No</option><option>Partial</option></Select></Field></div>
-            <div className="trade-context-card"><Field label="Rule Broken"><Select value={form.ruleBroken} onChange={(e) => updateField("ruleBroken", e.target.value)}><option>None</option><option>Moved SL</option><option>Overrisk</option><option>No confirmation</option><option>Chased price</option><option>Revenge trade</option></Select></Field></div>
+            <div className="trade-context-card"><Field label="Rules Broken"><MultiChoice value={form.ruleBroken} options={RULE_BROKEN_OPTIONS} onChange={(value) => updateField("ruleBroken", value)} tone="rule" allowNone /></Field></div>
             <div className="trade-context-card"><Field label="Market Condition"><Select value={form.marketCondition} onChange={(e) => updateField("marketCondition", e.target.value)}><option>Trending</option><option>Ranging</option><option>Choppy</option><option>News</option><option>Low Volume</option></Select></Field></div>
-            <div className="trade-context-card md:col-span-2"><Field label="Setup Quality"><Select value={form.setupQuality} onChange={(e) => updateField("setupQuality", e.target.value)}><option>A</option><option>B</option><option>C</option><option>D</option></Select></Field></div>
+            <div className="trade-context-card md:col-span-2"><Field label="Setup Quality"><SegmentedChoice value={form.setupQuality} options={SETUP_QUALITY_OPTIONS} onChange={(value) => updateField("setupQuality", value)} tone="quality" /></Field></div>
           </div>
         </div>
 
@@ -7135,15 +7207,106 @@ function AddTradeModal({ isEditing, form, setForm, onClose, onSave, account, acc
   );
 }
 
+function SegmentedChoice({ value, options = [], onChange, tone = "strategy" }) {
+  const base = "rounded-xl border px-3 py-2 text-xs font-black transition-all duration-200 hover:scale-[1.02]";
+  const toneClass = {
+    session: {
+      active: "border-fuchsia-400/70 bg-gradient-to-r from-fuchsia-500/25 to-emerald-500/15 text-fuchsia-100 shadow-[0_0_18px_rgba(217,70,239,.18)]",
+      idle: "border-white/10 bg-black/35 text-zinc-400 hover:border-fuchsia-500/35 hover:text-fuchsia-200",
+    },
+    strategy: {
+      active: "border-emerald-400/60 bg-emerald-500/15 text-emerald-200 shadow-[0_0_18px_rgba(16,185,129,.12)]",
+      idle: "border-white/10 bg-black/35 text-zinc-400 hover:border-emerald-500/35 hover:text-emerald-200",
+    },
+    quality: {
+      active: "border-fuchsia-400/70 bg-gradient-to-r from-fuchsia-500/25 to-purple-500/20 text-fuchsia-100 shadow-[0_0_18px_rgba(217,70,239,.16)]",
+      idle: "border-white/10 bg-black/35 text-zinc-400 hover:border-fuchsia-500/35 hover:text-fuchsia-200",
+    },
+  }[tone] || {
+    active: "border-fuchsia-400/70 bg-fuchsia-500/20 text-fuchsia-100",
+    idle: "border-white/10 bg-black/35 text-zinc-400 hover:border-fuchsia-500/35",
+  };
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((option) => {
+        const selected = String(value || "") === String(option);
+        return (
+          <button key={option} type="button" onClick={() => onChange?.(option)} className={`${base} ${selected ? toneClass.active : toneClass.idle}`}>
+            {option}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function MultiChoice({ value, options = [], onChange, tone = "emotion", allowNone = false }) {
+  const selectedValues = splitMultiValues(value);
+  const selectedSet = new Set(selectedValues);
+  const normalizedOptions = options.map((option) => Array.isArray(option) ? option : [option, "", ""]);
+  const toneClass = {
+    emotion: {
+      active: "border-fuchsia-400/70 bg-fuchsia-500/18 text-fuchsia-100 shadow-[0_0_18px_rgba(217,70,239,.14)]",
+      idle: "border-white/10 bg-black/35 text-zinc-400 hover:border-fuchsia-500/35 hover:text-fuchsia-200",
+      icon: "bg-fuchsia-500/15 text-fuchsia-200",
+    },
+    mistake: {
+      active: "border-red-400/55 bg-red-500/14 text-red-100 shadow-[0_0_18px_rgba(239,68,68,.10)]",
+      idle: "border-white/10 bg-black/35 text-zinc-400 hover:border-red-500/35 hover:text-red-200",
+      icon: "bg-red-500/12 text-red-200",
+    },
+    rule: {
+      active: "border-amber-400/60 bg-amber-500/14 text-amber-100 shadow-[0_0_18px_rgba(245,158,11,.10)]",
+      idle: "border-white/10 bg-black/35 text-zinc-400 hover:border-amber-500/35 hover:text-amber-200",
+      icon: "bg-amber-500/12 text-amber-200",
+    },
+  }[tone] || {
+    active: "border-fuchsia-400/70 bg-fuchsia-500/18 text-fuchsia-100",
+    idle: "border-white/10 bg-black/35 text-zinc-400 hover:border-fuchsia-500/35",
+    icon: "bg-fuchsia-500/15 text-fuchsia-200",
+  };
+
+  function toggle(option) {
+    if (option === "None" && allowNone) {
+      onChange?.("None");
+      return;
+    }
+    const next = selectedValues.filter((item) => item !== "None");
+    const exists = next.includes(option);
+    const finalValues = exists ? next.filter((item) => item !== option) : [...next, option];
+    onChange?.(finalValues.length ? joinMultiValues(finalValues) : allowNone ? "None" : "");
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {normalizedOptions.map(([label, detail, icon]) => {
+        const selected = selectedSet.has(label) || (allowNone && selectedValues.length === 0 && label === "None");
+        return (
+          <button key={label} type="button" onClick={() => toggle(label)} className={`rounded-xl border px-3 py-2 text-left text-xs font-black transition-all duration-200 hover:scale-[1.02] ${selected ? toneClass.active : toneClass.idle}`}>
+            <span className="flex items-center gap-2">
+              <span className={`flex h-6 w-6 items-center justify-center rounded-lg ${toneClass.icon}`}>{icon || (selected ? "✓" : "+")}</span>
+              <span>
+                <span className="block">{label}</span>
+                {detail && <span className="mt-0.5 block text-[10px] font-bold opacity-70">{detail}</span>}
+              </span>
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function getTradeFormErrors(form) {
   const errors = {};
-  if (!String(form.symbol || "").trim()) errors.symbol = "Symbol აუცილებელია.";
-  if (!form.date) errors.date = "Trade Date აუცილებელია.";
-  if (!form.session || String(form.session).startsWith("Select")) errors.session = "Trading Session აირჩიე.";
-  if (!form.strategy || String(form.strategy).startsWith("Select")) errors.strategy = "Strategy აირჩიე.";
-  if (!form.quantity || Number.isNaN(Number(form.quantity)) || Number(form.quantity) <= 0) errors.quantity = "Quantity უნდა იყოს 0-ზე მეტი.";
-  if (form.pnl === "" || Number.isNaN(Number(form.pnl))) errors.pnl = "P&L სწორად შეიყვანე.";
-  if (form.risk === "" || Number.isNaN(Number(form.risk)) || Number(form.risk) < 0) errors.risk = "Risk არ უნდა იყოს უარყოფითი.";
+  if (!String(form.symbol || "").trim()) errors.symbol = "Symbol is required.";
+  if (!form.date) errors.date = "Trade date is required.";
+  if (!form.session || String(form.session).startsWith("Select")) errors.session = "Choose a trading session.";
+  if (!form.strategy || String(form.strategy).startsWith("Select")) errors.strategy = "Choose or add a strategy.";
+  if (!form.quantity || Number.isNaN(Number(form.quantity)) || Number(form.quantity) <= 0) errors.quantity = "Quantity must be greater than 0.";
+  if (form.pnl === "" || Number.isNaN(Number(form.pnl))) errors.pnl = "Enter a valid P&L.";
+  if (form.risk === "" || Number.isNaN(Number(form.risk)) || Number(form.risk) < 0) errors.risk = "Risk cannot be negative.";
   return errors;
 }
 
