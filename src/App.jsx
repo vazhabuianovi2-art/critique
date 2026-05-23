@@ -5592,6 +5592,7 @@ export default function TradingJournalDashboard() {
     const recoveryHashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
     const recoveryErrorCode = recoveryHashParams.get("error_code") || recoveryHashParams.get("error");
     const recoveryErrorDescription = recoveryHashParams.get("error_description");
+    const hasRecoveryTokens = Boolean(recoveryCode || recoveryHashParams.get("access_token") || recoveryHashParams.get("refresh_token"));
 
     async function recoverPasswordSessionFromUrl() {
       if (!isRecoveryUrl) return null;
@@ -5604,6 +5605,8 @@ export default function TradingJournalDashboard() {
             : recoveryErrorDescription || "Password reset link is invalid. Send a new reset email."
         );
       }
+
+      if (!hasRecoveryTokens) return null;
 
       if (recoveryCode) {
         const { data, error } = await supabase.auth.exchangeCodeForSession(recoveryCode);
@@ -5645,7 +5648,7 @@ export default function TradingJournalDashboard() {
           setAuthPage("forgot");
           setAuthUser(null);
           setIsAuthenticated(false);
-          setAuthMessage("Password reset link expired. Send a new reset email and open the latest link.");
+          setAuthMessage(hasRecoveryTokens ? "Password reset link expired. Send a new reset email and open the latest link." : "");
           setAuthLoading(false);
           return;
         }
@@ -5732,7 +5735,7 @@ export default function TradingJournalDashboard() {
           redirectTo: getAuthRedirectUrl("/auth/reset-password"),
         });
         if (error) throw error;
-        setAuthMessage("Password reset email sent. Check your inbox and follow the secure link.");
+        setAuthMessage("Password reset email sent. Open the newest email link only. Older reset links expire automatically.");
         return { ok: true };
       }
 
