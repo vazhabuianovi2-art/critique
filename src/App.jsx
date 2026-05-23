@@ -136,6 +136,36 @@ function getProfilePhotoKey(userId) {
   return userId ? `${PROFILE_PHOTO_KEY}_${userId}` : PROFILE_PHOTO_KEY;
 }
 
+function getAccountsKey(userId) {
+  return userId ? `${ACCOUNTS_KEY}_${userId}` : ACCOUNTS_KEY;
+}
+
+function getActiveAccountKey(userId) {
+  return userId ? `${ACTIVE_ACCOUNT_KEY}_${userId}` : ACTIVE_ACCOUNT_KEY;
+}
+
+function readStoredAccounts(userId) {
+  try {
+    const savedAccounts = JSON.parse(localStorage.getItem(getAccountsKey(userId)) || "null");
+    if (Array.isArray(savedAccounts) && savedAccounts.length) {
+      return savedAccounts.map((item, index) => ({ ...defaultAccount, ...item, id: item.id || `acc-${index + 1}` }));
+    }
+    if (userId) return [];
+    const legacyAccount = JSON.parse(localStorage.getItem(ACCOUNT_KEY) || "null");
+    return legacyAccount?.id ? [{ ...defaultAccount, ...legacyAccount, id: legacyAccount.id }] : [];
+  } catch {
+    return [];
+  }
+}
+
+function readStoredActiveAccountId(userId) {
+  try {
+    return localStorage.getItem(getActiveAccountKey(userId)) || "";
+  } catch {
+    return "";
+  }
+}
+
 function getStoredProfilePhoto(user) {
   const metadataPhoto = user?.user_metadata?.profile_photo || user?.user_metadata?.avatar_url || "";
   if (metadataPhoto) return metadataPhoto;
@@ -5331,23 +5361,10 @@ export default function TradingJournalDashboard() {
     }
   });
   const [accounts, setAccounts] = useState(() => {
-    try {
-      const savedAccounts = JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || "null");
-      if (Array.isArray(savedAccounts) && savedAccounts.length) {
-        return savedAccounts.map((item, index) => ({ ...defaultAccount, ...item, id: item.id || `acc-${index + 1}` }));
-      }
-      const legacyAccount = JSON.parse(localStorage.getItem(ACCOUNT_KEY) || "null");
-      return legacyAccount?.id ? [{ ...defaultAccount, ...legacyAccount, id: legacyAccount.id }] : [];
-    } catch {
-      return [];
-    }
+    return readStoredAccounts(null);
   });
   const [activeAccountId, setActiveAccountId] = useState(() => {
-    try {
-      return localStorage.getItem(ACTIVE_ACCOUNT_KEY) || "";
-    } catch {
-      return "";
-    }
+    return readStoredActiveAccountId(null);
   });
   const [pendingAccountDraft, setPendingAccountDraft] = useState(null);
   const account = useMemo(() => {
@@ -5381,6 +5398,7 @@ export default function TradingJournalDashboard() {
   const [showFilters, setShowFilters] = useState(false);
   const importFileRef = useRef(null);
   const backupFileRef = useRef(null);
+  const accountStorageUserRef = useRef(null);
   const [filters, setFilters] = useState({ result: "All", direction: "All", strategy: "All", grade: "All", session: "All", dateFrom: "", dateTo: "", minPnl: "", maxPnl: "", emotion: "All", tag: "" });
   const [selectedCalendarDate, setSelectedCalendarDate] = useState("2026-05-15");
   const [theme, setTheme] = useState(() => {
@@ -5485,15 +5503,26 @@ export default function TradingJournalDashboard() {
     };
   }, [authUser?.id, isAuthenticated]);
   useEffect(() => {
-    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+    if (authUser?.id && accountStorageUserRef.current !== authUser.id) return;
+    const accountsKey = getAccountsKey(authUser?.id);
+    const activeKey = getActiveAccountKey(authUser?.id);
+    localStorage.setItem(accountsKey, JSON.stringify(accounts));
     if (accounts.length && !account.isPlaceholder) {
-      localStorage.setItem(ACTIVE_ACCOUNT_KEY, account.id);
-      localStorage.setItem(ACCOUNT_KEY, JSON.stringify(account));
+      localStorage.setItem(activeKey, account.id);
+      if (!authUser?.id) localStorage.setItem(ACCOUNT_KEY, JSON.stringify(account));
     } else {
-      localStorage.removeItem(ACTIVE_ACCOUNT_KEY);
-      localStorage.removeItem(ACCOUNT_KEY);
+      localStorage.removeItem(activeKey);
+      if (!authUser?.id) localStorage.removeItem(ACCOUNT_KEY);
     }
-  }, [accounts, account]);
+  }, [accounts, account, authUser?.id]);
+
+  useEffect(() => {
+    if (!authUser?.id || !isAuthenticated) return;
+    accountStorageUserRef.current = authUser.id;
+    setAccounts(readStoredAccounts(authUser.id));
+    setActiveAccountId(readStoredActiveAccountId(authUser.id));
+    setPendingAccountDraft(null);
+  }, [authUser?.id, isAuthenticated]);
 
   useEffect(() => {
     if (!supabase || !authUser?.id || !isAuthenticated) return undefined;
