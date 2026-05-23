@@ -92,6 +92,20 @@ function getEnvValue(key) {
   }
 }
 
+function getSiteOrigin() {
+  const configured = getEnvValue("VITE_SITE_URL").replace(/\/+$/, "");
+  if (configured) return configured;
+  try {
+    return window.location.origin;
+  } catch {
+    return "";
+  }
+}
+
+function getAuthRedirectUrl(path = "") {
+  return `${getSiteOrigin()}${path}`;
+}
+
 const SUPABASE_URL = getEnvValue("VITE_SUPABASE_URL");
 const SUPABASE_ANON_KEY = getEnvValue("VITE_SUPABASE_ANON_KEY") || getEnvValue("VITE_SUPABASE_KEY");
 const hasValidSupabaseUrl = /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(SUPABASE_URL);
@@ -5631,20 +5645,23 @@ export default function TradingJournalDashboard() {
         const { error } = await supabase.auth.signUp({
           email: values.email,
           password: values.password,
-          options: { data: { full_name: values.name } },
+          options: {
+            data: { full_name: values.name },
+            emailRedirectTo: getAuthRedirectUrl("/auth/login"),
+          },
         });
         if (error) throw error;
-        setAuthMessage("Registration started. Check your Gmail inbox for the confirmation email.");
+        setAuthMessage("Account created. Check your email inbox and confirm your address before signing in.");
         setAuthPage("login");
         return { ok: true, needsConfirmation: true };
       }
 
       if (mode === "forgot") {
         const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
-          redirectTo: `${window.location.origin}/auth/reset-password`,
+          redirectTo: getAuthRedirectUrl("/auth/reset-password"),
         });
         if (error) throw error;
-        setAuthMessage("Password reset email sent. Check your Gmail inbox.");
+        setAuthMessage("Password reset email sent. Check your inbox and follow the secure link.");
         return { ok: true };
       }
 
