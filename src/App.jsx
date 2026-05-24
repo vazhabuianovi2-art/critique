@@ -969,7 +969,7 @@ const THEME_STYLE_CSS = `
   .custom-select-option-emotional-trade,
   .custom-select-option-bad-risk-management,
   .custom-select-option-moved-stop-loss {
-    color: #0f172a !important;
+    color: #d4d4d8 !important;
   }
 
   .custom-select-option-none:hover,
@@ -1006,7 +1006,10 @@ const THEME_STYLE_CSS = `
 
   .custom-select-active,
   .custom-select-active span {
-    color: #ffffff !important;
+    color: #f4f4f5 !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
   }
 
   .light-theme .custom-select-active,
@@ -1016,9 +1019,9 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .custom-select-active {
-    background: rgba(217, 70, 239, 0.12) !important;
-    border: 1px solid rgba(217, 70, 239, 0.22) !important;
-    box-shadow: 0 8px 20px rgba(168, 85, 247, 0.10) !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
   }
 
   .light-theme .custom-select-option:not(.custom-select-active),
@@ -1070,12 +1073,14 @@ const THEME_STYLE_CSS = `
   .custom-select-active,
   .custom-select-active span {
     color: #f4f4f5 !important;
-    background: rgba(255,255,255,.06) !important;
-    box-shadow: inset 0 0 0 1px rgba(217,70,239,.28) !important;
+    background: transparent !important;
+    box-shadow: none !important;
   }
 
   .date-picker-popover {
     color: #f8fafc !important;
+    width: 17.5rem !important;
+    max-width: min(17.5rem, calc(100vw - 2rem)) !important;
   }
 
   .date-picker-day-current .date-picker-day-number {
@@ -2230,9 +2235,10 @@ const THEME_STYLE_CSS = `
   }
 
   .trade-context-modern .custom-select-active {
-    background: linear-gradient(135deg, rgba(217,70,239,.30), rgba(168,85,247,.16)) !important;
+    background: transparent !important;
     color: #ffffff !important;
-    border: 1px solid rgba(217,70,239,.32) !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
   }
 
   .trade-context-modern .custom-select-option-buy,
@@ -6362,7 +6368,7 @@ Skipped duplicates: ${duplicateCount}
           </button>
 
           {isAccountSwitcherOpen && (
-            <motion.div initial={{ opacity: 0, y: 8, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="account-switcher-menu absolute left-0 top-14 z-50 w-80 overflow-hidden rounded-xl border border-white/10 bg-[#070707] p-1 shadow-[0_18px_55px_rgba(0,0,0,0.90)] ring-1 ring-fuchsia-500/15">
+            <motion.div initial={{ opacity: 0, y: 8, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="account-switcher-menu absolute left-0 top-14 z-20 w-full overflow-hidden rounded-xl border border-white/10 bg-[#070707] p-1 shadow-[0_18px_55px_rgba(0,0,0,0.90)] ring-1 ring-fuchsia-500/15">
               <div className="flex items-center justify-between border-b border-white/10 px-3 py-3">
                 <div className="text-sm font-black text-white">Trading Accounts</div>
                 <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-black text-white">{accounts.length} Account{accounts.length === 1 ? "" : "s"}</span>
@@ -6373,7 +6379,7 @@ Skipped duplicates: ${duplicateCount}
                   const itemBalance = calculateAccountBalance(item, trades);
                   const isActive = String(item.id) === String(account.id);
                   return (
-                    <div key={item.id} role="button" tabIndex={0} onClick={() => { setActiveAccountId(item.id); setIsAccountSwitcherOpen(false); }} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setActiveAccountId(item.id); setIsAccountSwitcherOpen(false); } }} className={isActive ? "flex w-full cursor-pointer items-center justify-between rounded-lg border border-fuchsia-500/25 bg-fuchsia-500/12 px-3 py-3 text-left" : "flex w-full cursor-pointer items-center justify-between rounded-lg border border-transparent px-3 py-3 text-left hover:border-fuchsia-500/25 hover:bg-white/5"}>
+                    <div key={item.id} role="button" tabIndex={0} onClick={() => { setActiveAccountId(item.id); setIsAccountSwitcherOpen(false); }} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setActiveAccountId(item.id); setIsAccountSwitcherOpen(false); } }} className={isActive ? "flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-fuchsia-500/25 bg-fuchsia-500/12 px-2 py-3 text-left" : "flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-transparent px-2 py-3 text-left hover:border-fuchsia-500/25 hover:bg-white/5"}>
                       <div className="flex min-w-0 items-center gap-3">
                         <span className="text-lg">🎯</span>
                         <div className="min-w-0">
@@ -6387,7 +6393,7 @@ Skipped duplicates: ${duplicateCount}
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex shrink-0 items-center gap-1">
                         <button type="button" onClick={(event) => { event.stopPropagation(); setActiveAccountId(item.id); setIsAccountModalOpen(true); setIsAccountSwitcherOpen(false); }} className="rounded-lg border border-white/10 bg-black/40 px-2 py-1 text-[10px] font-black text-zinc-400 hover:border-fuchsia-500/50 hover:text-fuchsia-300">Edit</button>
                         <button type="button" onClick={(event) => { event.stopPropagation(); requestDeleteAccount(item.id); }} className="rounded-lg border border-red-500/25 bg-red-500/10 p-1.5 text-red-300 transition hover:border-red-400/70 hover:bg-red-500/20 hover:text-red-200" aria-label={`Delete ${item.name}`}><Trash2 size={13} /></button>
                       </div>
@@ -6798,16 +6804,16 @@ function DateFilterField({ label, value, onChange }) {
           <span className={value ? "date-picker-value text-white" : "date-picker-placeholder text-zinc-500"}>{value || "mm/dd/yyyy"}</span>
         </button>
         {isOpen && (
-          <div className="date-picker-popover relative z-[40] mt-2 w-full max-w-80 rounded-xl border border-fuchsia-500/40 bg-[#050505] p-4 shadow-[0_18px_55px_rgba(0,0,0,0.95)] ring-1 ring-fuchsia-500/20">
-            <div className="mb-4 flex items-center justify-between">
-              <button type="button" onClick={() => setViewDate(new Date(year, month - 1, 1))} className="date-picker-nav rounded-lg border border-white/10 bg-zinc-950 p-2 text-zinc-300 hover:border-fuchsia-500/50"><ChevronLeft size={16} /></button>
-              <div className="date-picker-title font-black text-white">{monthName}</div>
-              <button type="button" onClick={() => setViewDate(new Date(year, month + 1, 1))} className="date-picker-nav rounded-lg border border-white/10 bg-zinc-950 p-2 text-zinc-300 hover:border-fuchsia-500/50"><ChevronRight size={16} /></button>
+          <div className="date-picker-popover absolute left-0 top-full z-[80] mt-2 rounded-xl border border-fuchsia-500/40 bg-[#050505] p-3 shadow-[0_18px_55px_rgba(0,0,0,0.95)] ring-1 ring-fuchsia-500/20">
+            <div className="mb-3 flex items-center justify-between">
+              <button type="button" onClick={() => setViewDate(new Date(year, month - 1, 1))} className="date-picker-nav rounded-lg border border-white/10 bg-zinc-950 p-1.5 text-zinc-300 hover:border-fuchsia-500/50"><ChevronLeft size={15} /></button>
+              <div className="date-picker-title text-sm font-black text-white">{monthName}</div>
+              <button type="button" onClick={() => setViewDate(new Date(year, month + 1, 1))} className="date-picker-nav rounded-lg border border-white/10 bg-zinc-950 p-1.5 text-zinc-300 hover:border-fuchsia-500/50"><ChevronRight size={15} /></button>
             </div>
             <div className="date-picker-weekdays grid grid-cols-7 gap-1 text-center text-[10px] font-black text-zinc-500">
               {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => <div key={`${day}-${index}`} className="py-1">{day}</div>)}
             </div>
-            <div className="mt-2 grid grid-cols-7 gap-1">
+            <div className="mt-1 grid grid-cols-7 gap-1">
               {cells.map((cell) => (
                 <button
                   type="button"
@@ -6818,7 +6824,7 @@ function DateFilterField({ label, value, onChange }) {
                     pickDate(cell.key);
                   }}
                   onClick={(event) => event.stopPropagation()}
-                  className={`date-picker-day relative z-10 h-9 rounded-lg text-xs font-bold transition-all hover:bg-fuchsia-500/20 ${value === cell.key ? "date-picker-day-selected bg-fuchsia-500 text-white" : cell.isCurrentMonth ? "date-picker-day-current bg-zinc-950 text-white" : "date-picker-day-muted bg-black text-zinc-600"}`}
+                  className={`date-picker-day relative z-10 h-8 rounded-lg text-xs font-bold transition-all hover:bg-fuchsia-500/20 ${value === cell.key ? "date-picker-day-selected bg-fuchsia-500 text-white" : cell.isCurrentMonth ? "date-picker-day-current bg-zinc-950 text-white" : "date-picker-day-muted bg-black text-zinc-600"}`}
                 >
                   <span className="date-picker-day-number">
                     {cell.day}
@@ -6826,7 +6832,7 @@ function DateFilterField({ label, value, onChange }) {
                 </button>
               ))}
             </div>
-            <div className="mt-3 flex justify-between border-t border-white/10 pt-3">
+            <div className="mt-2 flex justify-between border-t border-white/10 pt-2">
               <button type="button" onClick={() => { onChange(""); setIsOpen(false); }} className="text-xs font-bold text-zinc-400 hover:text-white">Clear</button>
               <button type="button" onClick={() => setIsOpen(false)} className="text-xs font-bold text-fuchsia-300 hover:text-fuchsia-200">Done</button>
             </div>
@@ -6858,7 +6864,7 @@ function TradeCard({ trade, onView, onEdit, onRemove }) {
         <div className="flex items-start justify-between gap-3"><div><div className="text-xs font-bold uppercase tracking-wider text-zinc-500">{trade.date} • {trade.session || "No session"}</div><div className="mt-2 text-lg font-black text-white">{trade.setup}</div><div className="mt-1 text-xs text-zinc-400">{trade.accountName || "v"} • {trade.accountType || "Account"}</div></div><span className={`rounded-full border px-3 py-1 text-xs font-black ${getTradeGradeClass(grade)}`}>Grade {grade}</span></div>
         <div className="mt-4 grid grid-cols-3 gap-3"><MetricBox label="Risk" value={formatMoney(trade.risk)} tone="fuchsia" /><MetricBox label="R:R" value={`${rr.toFixed(2)}R`} tone="fuchsia" /><MetricBox label="Qty" value={trade.quantity} tone="fuchsia" /></div>
         <div className="mt-4 flex flex-wrap gap-2">{tags.length ? tags.map((tag) => <span key={tag} className="trade-tag rounded-full border border-fuchsia-500/35 bg-fuchsia-500/15 px-3 py-1.5 text-xs font-black text-fuchsia-200 shadow-[0_0_10px_rgba(217,70,239,0.16)]">#{tag}</span>) : <span className="text-xs text-zinc-500">No tags</span>}</div>
-        <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4"><div className="flex items-center gap-2 text-xs"><span className="rounded-full border border-cyan-500/25 bg-cyan-500/10 px-3 py-1.5 font-bold text-cyan-200">{trade.emotion || "No emotion"}</span><span className={trade.mistake && trade.mistake !== "None" ? "rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1.5 font-bold text-red-300" : "rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 font-bold text-emerald-300"}>{trade.mistake || "None"}</span></div><div className="flex gap-2"><button onClick={onView} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Eye size={16} /></button><button onClick={onEdit} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Edit3 size={16} /></button><button onClick={onRemove} className="rounded-lg border border-red-500/20 bg-red-500/10 p-2 text-red-400 transition hover:border-red-500/60"><Trash2 size={16} /></button></div></div>
+        <div className="mt-5 flex items-center justify-between gap-5 border-t border-white/10 pt-4"><div className="flex min-w-0 flex-wrap items-center gap-2 text-xs"><span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 font-bold text-emerald-200">{trade.emotion || "No emotion"}</span><span className={trade.mistake && trade.mistake !== "None" ? "rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1.5 font-bold text-red-300" : "rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 font-bold text-emerald-300"}>{trade.mistake || "None"}</span></div><div className="ml-auto flex shrink-0 gap-2"><button onClick={onView} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Eye size={16} /></button><button onClick={onEdit} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Edit3 size={16} /></button><button onClick={onRemove} className="rounded-lg border border-red-500/20 bg-red-500/10 p-2 text-red-400 transition hover:border-red-500/60"><Trash2 size={16} /></button></div></div>
       </div>
     </div>
   );
@@ -8068,9 +8074,9 @@ function MultiChoice({ value, options = [], onChange, tone = "emotion", allowNon
   const normalizedOptions = options.map((option) => Array.isArray(option) ? option : [option, "", ""]);
   const toneClass = {
     emotion: {
-      active: "border-fuchsia-400/70 bg-fuchsia-500/18 text-fuchsia-100 shadow-[0_0_18px_rgba(217,70,239,.14)]",
-      idle: "border-white/10 bg-black/35 text-zinc-400 hover:border-fuchsia-500/35 hover:text-fuchsia-200",
-      icon: "bg-fuchsia-500/15 text-fuchsia-200",
+      active: "border-emerald-400/60 bg-emerald-500/15 text-emerald-100 shadow-[0_0_18px_rgba(16,185,129,.12)]",
+      idle: "border-white/10 bg-black/35 text-zinc-400 hover:border-emerald-500/35 hover:text-emerald-200",
+      icon: "bg-emerald-500/12 text-emerald-200",
     },
     mistake: {
       active: "border-red-400/55 bg-red-500/14 text-red-100 shadow-[0_0_18px_rgba(239,68,68,.10)]",
@@ -11289,7 +11295,7 @@ function Select({ value, onChange, children }) {
                   event.preventDefault();
                   choose(option);
                 }}
-                className={`custom-select-option custom-select-option-${optionKey} flex min-h-9 w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-black leading-5 transition-all ${active ? "custom-select-active" : style.normal}`}
+                className={`custom-select-option custom-select-option-${optionKey} flex min-h-9 w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-black leading-5 outline-none transition-all focus:outline-none focus-visible:outline-none ${active ? "custom-select-active" : style.normal}`}
               >
                 <span>{option.label}</span>
               </button>
