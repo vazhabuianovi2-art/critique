@@ -64,6 +64,7 @@ const ROUTINE_KEY = "critique_pre_trade_routine_v1";
 const THEME_KEY = "critique_theme_mode_v1";
 const RESTORE_CACHE_PREFIX = "critique_last_successful_restore_v1";
 const USER_TRADES_KEY_PREFIX = "critique_user_trades_v2";
+const USER_TRADES_BACKUP_KEY_PREFIX = "critique_user_trades_last_nonempty_v1";
 const REMEMBER_AUTH_KEY = "critique_remember_auth_v1";
 const PROFILE_PHOTO_KEY = "critique_profile_photo_v1";
 const CUSTOM_STRATEGIES_KEY = "critique_custom_strategies_v1";
@@ -203,6 +204,25 @@ async function updatePasswordWithRetry(password, resetPayload = {}) {
   }
 
   throw lastError;
+}
+
+async function getCurrentAccessToken() {
+  if (!supabase) return "";
+  const { data } = await supabase.auth.getSession();
+  return data?.session?.access_token || "";
+}
+
+async function postSupabaseSync(action, payload = {}) {
+  const accessToken = await getCurrentAccessToken();
+  if (!accessToken) throw new Error("Login session expired. Sign in again.");
+  const response = await fetch("/api/supabase-sync", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, accessToken, ...payload }),
+  });
+  const result = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(result?.error || `Sync failed (${response.status}).`);
+  return result;
 }
 
 function BrandBolt({ className = "" }) {
@@ -5220,12 +5240,19 @@ function calculateStatistics(trades = [], startingBalance = 50000) {
 
 async function loadTradesFromSupabase(userId) {
   if (!supabase || !userId) return null;
-  const { data, error } = await supabase
-    .from("trades")
-    .select("id, created_at, trade_data")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
-  if (error) throw error;
+  let data = null;
+  try {
+    const result = await supabase
+      .from("trades")
+      .select("id, created_at, trade_data")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+    if (result.error) throw result.error;
+    data = result.data;
+  } catch {
+    const fallback = await postSupabaseSync("listTrades");
+    data = fallback?.rows || [];
+  }
   return (data || []).map((row) => ({
     ...(row.trade_data || {}),
     id: row.id,
@@ -5241,38 +5268,47 @@ async function saveTradeToSupabase(userId, trade) {
   const payload = { ...trade };
   delete payload.supabaseId;
 
-  if (trade.supabaseId || (typeof trade.id === "string" && trade.id.includes("-"))) {
-    const rowId = trade.supabaseId || trade.id;
+  try {
+    if (trade.supabaseId || (typeof trade.id === "string" && trade.id.includes("-"))) {
+      const rowId = trade.supabaseId || trade.id;
+      const { data, error } = await supabase
+        .from("trades")
+        .update({ trade_data: payload })
+        .eq("id", rowId)
+        .eq("user_id", userId)
+        .select("id")
+        .single();
+      if (error) throw error;
+      return { ...trade, id: data.id, supabaseId: data.id };
+    }
+
     const { data, error } = await supabase
       .from("trades")
-      .update({ trade_data: payload })
-      .eq("id", rowId)
-      .eq("user_id", userId)
+      .insert({ user_id: userId, trade_data: payload })
       .select("id")
       .single();
     if (error) throw error;
     return { ...trade, id: data.id, supabaseId: data.id };
+  } catch {
+    const result = await postSupabaseSync("saveTrade", { trade });
+    return result?.trade || trade;
   }
-
-  const { data, error } = await supabase
-    .from("trades")
-    .insert({ user_id: userId, trade_data: payload })
-    .select("id")
-    .single();
-  if (error) throw error;
-  return { ...trade, id: data.id, supabaseId: data.id };
 }
 
 async function deleteTradeFromSupabase(userId, trade) {
   if (!supabase || !userId || !trade) return;
   const rowId = trade.supabaseId || trade.id;
   if (!rowId || typeof rowId !== "string") return;
-  const { error } = await supabase
-    .from("trades")
-    .delete()
-    .eq("id", rowId)
-    .eq("user_id", userId);
-  if (error) throw error;
+  try {
+    const { error } = await supabase
+      .from("trades")
+      .delete()
+      .eq("id", rowId)
+      .eq("user_id", userId);
+    if (error) throw error;
+  } catch {
+    await postSupabaseSync("deleteTrade", { tradeId: rowId });
+  }
 }
 
 async function loadAccountFromSupabase(userId) {
@@ -5337,6 +5373,10 @@ function getUserTradesKey(userId) {
   return `${USER_TRADES_KEY_PREFIX}_${userId || "guest"}`;
 }
 
+function getUserTradesBackupKey(userId) {
+  return `${USER_TRADES_BACKUP_KEY_PREFIX}_${userId || "guest"}`;
+}
+
 function normalizeTradeForStorage(trade) {
   return {
     ...trade,
@@ -5349,6 +5389,8 @@ function readLocalTradesFallback(userId) {
   try {
     const userSaved = JSON.parse(localStorage.getItem(getUserTradesKey(userId)) || "[]");
     if (Array.isArray(userSaved) && userSaved.length) return userSaved.map(normalizeTradeForStorage);
+    const userBackup = JSON.parse(localStorage.getItem(getUserTradesBackupKey(userId)) || "[]");
+    if (Array.isArray(userBackup) && userBackup.length) return userBackup.map(normalizeTradeForStorage);
     if (userId) return [];
 
     const oldSaved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
@@ -5361,8 +5403,15 @@ function readLocalTradesFallback(userId) {
 function saveLocalTradesFallback(tradesToSave, userId) {
   try {
     const safeTrades = Array.isArray(tradesToSave) ? tradesToSave.map(normalizeTradeForStorage) : [];
+    const primaryKey = getUserTradesKey(userId);
+    const backupKey = getUserTradesBackupKey(userId);
+    if (userId && safeTrades.length) localStorage.setItem(backupKey, JSON.stringify(safeTrades));
+    if (userId && !safeTrades.length) {
+      const previous = JSON.parse(localStorage.getItem(primaryKey) || "[]");
+      if (Array.isArray(previous) && previous.length) localStorage.setItem(backupKey, JSON.stringify(previous.map(normalizeTradeForStorage)));
+    }
     if (!userId) localStorage.setItem(STORAGE_KEY, JSON.stringify(safeTrades));
-    if (userId) localStorage.setItem(getUserTradesKey(userId), JSON.stringify(safeTrades));
+    if (userId) localStorage.setItem(primaryKey, JSON.stringify(safeTrades));
   } catch (error) {
     console.warn("Could not save local trades fallback:", error?.message || error);
   }
@@ -5566,7 +5615,7 @@ export default function TradingJournalDashboard() {
           return;
         }
 
-        const fallbackTrades = [];
+        const fallbackTrades = cachedTrades;
 
         if (fallbackTrades.length) {
           setTrades(fallbackTrades);
@@ -5590,8 +5639,6 @@ export default function TradingJournalDashboard() {
         }
 
         setTrades([]);
-        saveLocalTradesFallback([], authUser.id);
-        saveRestoreCache(authUser.id, { trades: [], account, routine, theme });
         setDataMessage("");
       })
       .catch((error) => {
