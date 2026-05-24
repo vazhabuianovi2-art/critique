@@ -2456,7 +2456,7 @@ const THEME_STYLE_CSS = `
   .waving-hand {
     display: inline-block;
     transform-origin: 70% 70%;
-    animation: waveHand 1.35s ease-in-out infinite;
+    animation: waveHand 3.2s ease-in-out infinite;
     will-change: transform;
   }
 
@@ -2485,12 +2485,11 @@ const THEME_STYLE_CSS = `
 
   @keyframes waveHand {
     0%, 100% { transform: rotate(0deg); }
-    12% { transform: rotate(16deg); }
-    24% { transform: rotate(-9deg); }
-    36% { transform: rotate(14deg); }
-    48% { transform: rotate(-5deg); }
-    60% { transform: rotate(8deg); }
-    72% { transform: rotate(0deg); }
+    16% { transform: rotate(10deg); }
+    32% { transform: rotate(-6deg); }
+    48% { transform: rotate(8deg); }
+    64% { transform: rotate(-3deg); }
+    80% { transform: rotate(0deg); }
   }
 
   .mistake-coach-hero {
@@ -6424,15 +6423,7 @@ Skipped duplicates: ${duplicateCount}
             {dataMessage}
           </div>
         )}
-        {isInitialRemoteDataLoading ? (
-          <div className="flex min-h-[62vh] items-center justify-center">
-            <div className="rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-8 text-center shadow-[0_18px_55px_rgba(217,70,239,0.14)]">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/10 text-xl font-black text-fuchsia-300">✦</div>
-              <div className="text-2xl font-black text-white">Loading your trading data</div>
-              <div className="mt-2 text-sm font-semibold text-zinc-400">Syncing your account, trades, and balance before showing the dashboard.</div>
-            </div>
-          </div>
-        ) : tradeViewMode === "details" && viewTrade ? (
+        {tradeViewMode === "details" && viewTrade ? (
           <TradeDetailsPage
             trade={viewTrade}
             account={account}
