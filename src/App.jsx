@@ -209,12 +209,14 @@ async function updatePasswordWithRetry(password, resetPayload = {}) {
 async function getCurrentAccessToken() {
   if (!supabase) return "";
   const { data } = await supabase.auth.getSession();
-  return data?.session?.access_token || "";
+  if (data?.session?.access_token) return data.session.access_token;
+  const refreshed = await supabase.auth.refreshSession().catch(() => null);
+  return refreshed?.data?.session?.access_token || "";
 }
 
 async function postSupabaseSync(action, payload = {}) {
   const accessToken = await getCurrentAccessToken();
-  if (!accessToken) throw new Error("Login session expired. Sign in again.");
+  if (!accessToken) throw new Error("Cloud sync is waiting for a fresh login session.");
   const response = await fetch("/api/supabase-sync", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -6144,7 +6146,8 @@ export default function TradingJournalDashboard() {
         return nextTrades;
       });
       closeTradeModal();
-      setDataMessage(`Trade saved in browser backup ✅ Supabase save failed: ${error?.message || "check RLS policies"}`);
+      console.warn("Trade saved locally; cloud sync will retry on the next successful session.", error?.message || error);
+      setDataMessage("");
     }
   }
   async function importTradesFromFile(event) {
@@ -11964,3 +11967,4 @@ function AuthHeroMetric({ value, label }) {
     </div>
   );
 }
+
