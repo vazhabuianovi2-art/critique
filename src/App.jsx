@@ -4533,6 +4533,16 @@ function getEventsForDate(events = [], dateKey) {
   return (Array.isArray(events) ? events : []).filter((event) => getEconomicEventDateKey(event) === dateKey);
 }
 
+function groupEconomicEventsByDate(events = []) {
+  return (Array.isArray(events) ? events : []).reduce((map, event) => {
+    const dateKey = getEconomicEventDateKey(event);
+    if (!dateKey) return map;
+    if (!map[dateKey]) map[dateKey] = [];
+    map[dateKey].push(event);
+    return map;
+  }, {});
+}
+
 function getEventImpactTone(impact) {
   const value = String(impact || "").toLowerCase();
   if (value.includes("high")) return "red";
@@ -4547,6 +4557,22 @@ function getEventImpactClass(impact) {
   if (tone === "amber") return "border-amber-500/35 bg-amber-500/10 text-amber-300";
   if (tone === "zinc") return "border-white/10 bg-white/8 text-zinc-400";
   return "border-blue-500/35 bg-blue-500/10 text-blue-300";
+}
+
+function getEventImpactLabel(impact) {
+  const tone = getEventImpactTone(impact);
+  if (tone === "red") return "High";
+  if (tone === "amber") return "Medium";
+  if (tone === "zinc") return "Holiday";
+  return "Low";
+}
+
+function getEventImpactFolderClass(impact) {
+  const tone = getEventImpactTone(impact);
+  if (tone === "red") return "bg-red-500 shadow-[0_0_10px_rgba(248,113,113,0.35)]";
+  if (tone === "amber") return "bg-orange-400 shadow-[0_0_10px_rgba(251,146,60,0.30)]";
+  if (tone === "zinc") return "bg-zinc-500 shadow-[0_0_10px_rgba(113,113,122,0.22)]";
+  return "bg-yellow-300 shadow-[0_0_10px_rgba(250,204,21,0.28)]";
 }
 
 function getEconomicWeekLabel(value) {
@@ -7621,6 +7647,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
   const monthIndex = calendarMonth.getMonth();
   const cells = getCalendarCells(year, monthIndex);
   const grouped = groupTradesByDate(trades);
+  const eventsByDate = useMemo(() => groupEconomicEventsByDate(economicCalendar?.events || []), [economicCalendar?.events]);
   const monthName = calendarMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   const monthKey = `${year}-${String(monthIndex + 1).padStart(2, "0")}`;
   const monthStats = summarizeTrades(trades.filter((trade) => getTradeDateKey(trade).startsWith(monthKey)));
@@ -7719,6 +7746,8 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                 {week.map((cell, dayIndex) => {
                   const dayTrades = grouped[cell.key] || [];
                   const dayStats = summarizeTrades(dayTrades);
+                  const dayEvents = eventsByDate[cell.key] || [];
+                  const highImpactCount = dayEvents.filter((event) => getEventImpactTone(event.impact) === "red").length;
                   const isWeekend = dayIndex === 0 || dayIndex === 6;
                   const selected = selectedDate === cell.key;
                   const hasTrade = dayTrades.length > 0;
@@ -7729,6 +7758,13 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                         <div className={cell.isCurrentMonth ? "calendar-day-number font-black text-white" : "calendar-day-number-muted font-black text-zinc-500"}>{cell.day}</div>
                         {selected && <span className="mt-1 h-2.5 w-2.5 rounded-full bg-fuchsia-400 shadow-[0_0_14px_rgba(217,70,239,0.95)]" />}
                       </div>
+
+                      {dayEvents.length > 0 && (
+                        <div className="absolute right-3 top-9 z-10 flex items-center gap-1.5 rounded-full border border-fuchsia-500/35 bg-black/70 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-fuchsia-200 shadow-[0_0_12px_rgba(217,70,239,0.12)]">
+                          <span className={highImpactCount ? "h-1.5 w-1.5 rounded-full bg-red-400 shadow-[0_0_9px_rgba(248,113,113,0.95)]" : "h-1.5 w-1.5 rounded-full bg-fuchsia-400 shadow-[0_0_9px_rgba(217,70,239,0.85)]"} />
+                          {dayEvents.length} news
+                        </div>
+                      )}
 
                       {hasTrade ? (
                         <div className="absolute bottom-3 left-3 right-3 z-10 flex flex-col items-end gap-2">
@@ -7777,6 +7813,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
         <CalendarDayDetailsModal
           dateKey={dayModalDate}
           trades={grouped[dayModalDate] || []}
+          events={eventsByDate[dayModalDate] || []}
           onClose={() => setDayModalDate(null)}
           onAdd={() => onAdd(dayModalDate)}
         />
@@ -7785,7 +7822,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
   );
 }
 
-function CalendarDayDetailsModal({ dateKey, trades = [], onClose, onAdd }) {
+function CalendarDayDetailsModal({ dateKey, trades = [], events = [], onClose, onAdd }) {
   const stats = summarizeTrades(trades);
   const date = new Date(`${dateKey}T00:00:00`);
   const dayNumber = Number.isNaN(date.getTime()) ? "—" : date.getDate();
@@ -7826,6 +7863,27 @@ function CalendarDayDetailsModal({ dateKey, trades = [], onClose, onAdd }) {
         </div>
 
         <div className="p-5">
+          <div className="mb-5 rounded-2xl border border-fuchsia-500/25 bg-black/35 p-4 shadow-[0_0_18px_rgba(217,70,239,0.08)]">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <div className="text-xs font-black uppercase tracking-[0.22em] text-fuchsia-300">Economic Events</div>
+                <div className="mt-1 text-sm font-semibold text-zinc-500">News context for this trading day.</div>
+              </div>
+              <span className="rounded-full border border-white/10 bg-white/8 px-3 py-1 text-xs font-black text-zinc-300">
+                {events.length} event{events.length === 1 ? "" : "s"}
+              </span>
+            </div>
+            <div className="space-y-2">
+              {events.length ? (
+                events.slice(0, 6).map((event) => <EconomicEventRow key={event.id} event={event} compact />)
+              ) : (
+                <div className="rounded-xl border border-dashed border-white/10 bg-black/25 px-4 py-3 text-sm font-semibold text-zinc-500">
+                  No economic events listed for this day.
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-xl border border-fuchsia-500/45 bg-black px-4 py-2 text-sm font-black text-white">All Trades</span>
@@ -7892,9 +7950,11 @@ function CalendarMonthSummary({ monthStats, selectedDate, selectedDayStats, best
 function EconomicCalendarPanel({ economicCalendar, trades = [], onRefresh }) {
   const [weekFilter, setWeekFilter] = useState("this");
   const [presetFilter, setPresetFilter] = useState("All");
-  const [impactFilter, setImpactFilter] = useState("All");
+  const [impactFilters, setImpactFilters] = useState(["High", "Medium", "Low", "Holiday"]);
   const [currencyFilter, setCurrencyFilter] = useState("All");
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const events = Array.isArray(economicCalendar?.events) ? economicCalendar.events : [];
+  const impactOptions = ["High", "Medium", "Low", "Holiday"];
   const presetCurrencies = {
     Forex: ["USD", "EUR", "GBP", "JPY", "CHF", "CAD", "AUD", "NZD", "CNY"],
     "US Futures": ["USD"],
@@ -7907,11 +7967,11 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], onRefresh }) {
     return events.filter((event) => {
       if (weekFilter !== "all" && event.week !== weekFilter) return false;
       if (presetFilter !== "All" && !presetCurrencies[presetFilter]?.includes(event.country)) return false;
-      if (impactFilter !== "All" && event.impact !== impactFilter) return false;
+      if (!impactFilters.includes(getEventImpactLabel(event.impact))) return false;
       if (currencyFilter !== "All" && event.country !== currencyFilter) return false;
       return true;
     });
-  }, [events, weekFilter, presetFilter, impactFilter, currencyFilter]);
+  }, [events, weekFilter, presetFilter, impactFilters, currencyFilter]);
   const grouped = visibleEvents.reduce((map, event) => {
     const key = getEconomicEventDateKey(event) || "Unknown";
     if (!map[key]) map[key] = [];
@@ -7920,6 +7980,14 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], onRefresh }) {
   }, {});
   const dayKeys = Object.keys(grouped).sort();
   const newsStats = getNewsPerformanceStats(trades, visibleEvents);
+  const activeFilterCount = (presetFilter !== "All" ? 1 : 0) + (currencyFilter !== "All" ? 1 : 0) + (impactFilters.length !== impactOptions.length ? 1 : 0);
+
+  function toggleImpactFilter(impact) {
+    setImpactFilters((current) => {
+      const next = current.includes(impact) ? current.filter((item) => item !== impact) : [...current, impact];
+      return next.length ? next : current;
+    });
+  }
 
   return (
     <section className="economic-calendar-panel mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#100719] via-black to-[#050307] p-5 shadow-[0_20px_55px_rgba(217,70,239,0.10)]">
@@ -7940,6 +8008,9 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], onRefresh }) {
             </button>
           ))}
           <button onClick={() => setWeekFilter("all")} className={weekFilter === "all" ? "rounded-lg border border-fuchsia-400/70 bg-fuchsia-500/18 px-3 py-2 text-sm font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-sm font-black text-zinc-400 hover:border-fuchsia-500/45 hover:text-fuchsia-200"}>All</button>
+          <button onClick={() => setFiltersOpen((open) => !open)} className={filtersOpen ? "rounded-lg border border-fuchsia-400/70 bg-fuchsia-500/18 px-3 py-2 text-sm font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-sm font-black text-zinc-300 hover:border-fuchsia-500/45"}>
+            Filters {activeFilterCount ? <span className="ml-1 rounded-full bg-fuchsia-500 px-1.5 py-0.5 text-[10px] text-black">{activeFilterCount}</span> : null}
+          </button>
           <button onClick={onRefresh} className="rounded-lg border border-white/10 bg-black px-3 py-2 text-sm font-black text-zinc-300 hover:border-fuchsia-500/45"><RefreshCwIcon /></button>
         </div>
       </div>
@@ -7950,6 +8021,7 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], onRefresh }) {
         <EconomicMiniMetric label="Tracked Events" value={visibleEvents.length} detail={`${newsStats.rows.length} event days with trades`} tone="fuchsia" />
       </div>
 
+      {filtersOpen && (
       <div className="mt-5 rounded-xl border border-white/10 bg-black/35 p-4">
         <div className="mb-5">
           <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Quick presets</div>
@@ -7962,9 +8034,18 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], onRefresh }) {
         <div className="grid gap-4 lg:grid-cols-[1fr_2fr]">
           <div>
             <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Expected impact</div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {["All", "High", "Medium", "Low", "Holiday"].map((impact) => (
-                <button key={impact} onClick={() => setImpactFilter(impact)} className={impactFilter === impact ? "rounded-lg border border-fuchsia-400/60 bg-fuchsia-500/18 px-3 py-2 text-xs font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-xs font-black text-zinc-400 hover:border-fuchsia-500/35 hover:text-fuchsia-200"}>{impact}</button>
+            <div className="mt-3 flex flex-wrap gap-4">
+              {impactOptions.map((impact) => (
+                <label key={impact} className="flex cursor-pointer items-center gap-2 text-xs font-black text-zinc-300 transition hover:text-white">
+                  <input
+                    type="checkbox"
+                    checked={impactFilters.includes(impact)}
+                    onChange={() => toggleImpactFilter(impact)}
+                    className="h-3.5 w-3.5 rounded border-white/20 bg-black accent-fuchsia-500"
+                  />
+                  <ImpactFolderIcon impact={impact} />
+                  <span>{impact}</span>
+                </label>
               ))}
             </div>
           </div>
@@ -7978,6 +8059,7 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], onRefresh }) {
           </div>
         </div>
       </div>
+      )}
 
       <div className="mt-5 space-y-5">
         {economicCalendar?.loading && !visibleEvents.length ? (
@@ -8008,7 +8090,17 @@ function EconomicMiniMetric({ label, value, detail, tone = "emerald" }) {
   );
 }
 
+function ImpactFolderIcon({ impact }) {
+  return (
+    <span className="relative inline-flex h-3.5 w-4 shrink-0 items-end">
+      <span className={`absolute left-0 top-0 h-1.5 w-2 rounded-t-sm ${getEventImpactFolderClass(impact)}`} />
+      <span className={`relative h-3 w-4 rounded-[2px] ${getEventImpactFolderClass(impact)}`} />
+    </span>
+  );
+}
+
 function EconomicEventRow({ event, compact = false }) {
+  const impactLabel = getEventImpactLabel(event.impact);
   return (
     <div className={compact ? "rounded-xl border border-white/10 bg-black/45 p-3" : "grid gap-3 rounded-xl border border-white/10 bg-black/35 px-4 py-3 sm:grid-cols-[72px_72px_1fr_auto] sm:items-center"}>
       <div className="text-sm font-black text-zinc-400">{event.time || "All day"}</div>
@@ -8021,7 +8113,10 @@ function EconomicEventRow({ event, compact = false }) {
           </div>
         )}
       </div>
-      <span className={`w-fit rounded-full border px-2.5 py-1 text-xs font-black ${getEventImpactClass(event.impact)}`}>{event.impact}</span>
+      <span className={`flex w-fit items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-black ${getEventImpactClass(event.impact)}`}>
+        <ImpactFolderIcon impact={impactLabel} />
+        {impactLabel}
+      </span>
     </div>
   );
 }
