@@ -1523,6 +1523,9 @@ const THEME_STYLE_CSS = `
 
   .dashboard-inspiration {
     backdrop-filter: blur(10px);
+    background: rgba(14,4,22,.78) !important;
+    border-color: rgba(217,70,239,.20) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 12px 32px rgba(217,70,239,.08) !important;
   }
 
   .dashboard-dash-card::before {
@@ -2372,11 +2375,11 @@ const THEME_STYLE_CSS = `
     position: relative;
     overflow: hidden;
     width: 100%;
-    min-height: 74px;
+    min-height: 54px;
     border-radius: 1.1rem;
     padding: 0;
     isolation: isolate;
-    background: linear-gradient(135deg, rgba(0,0,0,.58), rgba(88,28,135,.18) 50%, rgba(0,0,0,.58));
+    background: linear-gradient(135deg, rgba(0,0,0,.56), rgba(88,28,135,.14) 50%, rgba(0,0,0,.54));
     border: 1px solid rgba(217,70,239,.25);
     box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 0 28px rgba(217,70,239,.10);
   }
@@ -2404,7 +2407,7 @@ const THEME_STYLE_CSS = `
   .moving-text-track {
     position: relative;
     z-index: 2;
-    height: 74px;
+    height: 54px;
   }
 
   .moving-text-slide {
@@ -6953,8 +6956,8 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
         </div>
       </div>
 
-      <div className="dashboard-hero rounded-2xl border border-fuchsia-500/35 bg-gradient-to-r from-fuchsia-950/45 via-black to-orange-950/10 p-6 shadow-[0_0_45px_rgba(168,85,247,0.13)]">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+      <div className="dashboard-hero rounded-2xl border border-fuchsia-500/35 bg-gradient-to-r from-fuchsia-950/35 via-black to-[#08040d] p-5 shadow-[0_0_38px_rgba(168,85,247,0.12)]">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div>
             <h1 className="text-3xl font-black xl:text-4xl">Welcome back, {getFirstDisplayName(profileName)}! <span className="waving-hand" aria-hidden="true">👋</span></h1>
             <p className="mt-3 flex items-center gap-2 text-base font-semibold text-zinc-400">▣ {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}</p>
@@ -6964,7 +6967,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
             <Button onClick={onStartDay} className="dashboard-start-btn border border-emerald-500/45 bg-black px-5 py-3 font-black text-white hover:bg-emerald-500/15">Start Your Day</Button>
           </div>
         </div>
-        <div className="dashboard-inspiration mt-6 rounded-xl border border-white/10 bg-gradient-to-r from-white/[0.04] via-fuchsia-500/[0.05] to-orange-500/[0.05] p-5 text-center">
+        <div className="dashboard-inspiration mt-4 rounded-xl border border-fuchsia-500/20 bg-black/30 p-3 text-center">
           <div className="text-sm font-black uppercase tracking-widest text-fuchsia-400"><span className="daily-inspiration-star">✬</span> Daily Inspiration <span className="daily-inspiration-star">✬</span></div>
           <div className="moving-text-wrap mt-2">
             <div className="moving-text-track">
