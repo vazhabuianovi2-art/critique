@@ -213,7 +213,7 @@ function BrandBolt({ className = "" }) {
       <defs>
         <linearGradient id="brand-bolt-gradient" x1="9" x2="40" y1="2" y2="62" gradientUnits="userSpaceOnUse">
           <stop stopColor="#f0abfc" />
-          <stop offset="0.42" stopColor="#d946ef" />
+          <stop offset="0.42" stopColor="#a855f7" />
           <stop offset="1" stopColor="#7c3aed" />
         </linearGradient>
       </defs>
@@ -4245,6 +4245,72 @@ const THEME_STYLE_CSS = `
     .mistake-filter-card-pro .grid {
       grid-template-columns: 1fr !important;
     }
+  }
+
+  /* Sydview-inspired violet tuning: calmer than hot magenta, still vivid on black. */
+  [class*="text-fuchsia-100"] { color: #f3e8ff !important; }
+  [class*="text-fuchsia-200"] { color: #e9d5ff !important; }
+  [class*="text-fuchsia-300"] { color: #d8b4fe !important; }
+  [class*="text-fuchsia-400"] { color: #c084fc !important; }
+  [class*="text-fuchsia-500"] { color: #a855f7 !important; }
+
+  [class*="bg-fuchsia-500"] {
+    background-color: #a855f7 !important;
+  }
+
+  button[class*="bg-fuchsia-500"],
+  .dashboard-primary-btn,
+  .journal-add-btn,
+  .view-all-button,
+  aside.fixed button.bg-fuchsia-500 {
+    background: linear-gradient(135deg, #c15cff 0%, #a855f7 52%, #8b5cf6 100%) !important;
+  }
+
+  [class*="bg-fuchsia-500/8"],
+  [class*="bg-fuchsia-500/10"],
+  [class*="bg-fuchsia-500/12"],
+  [class*="bg-fuchsia-500/15"],
+  [class*="bg-fuchsia-500/20"],
+  [class*="bg-fuchsia-500/25"] {
+    background-color: rgba(168, 85, 247, .14) !important;
+  }
+
+  [class*="bg-fuchsia-950"] {
+    background-color: rgba(30, 12, 48, .72) !important;
+  }
+
+  [class*="border-fuchsia-400"] { border-color: rgba(192, 132, 252, .74) !important; }
+  [class*="border-fuchsia-500"] { border-color: rgba(168, 85, 247, .38) !important; }
+  [class*="ring-fuchsia-500"] { --tw-ring-color: rgba(168, 85, 247, .28) !important; }
+
+  [class*="from-fuchsia-950"] {
+    --tw-gradient-from: rgba(30, 12, 48, .72) var(--tw-gradient-from-position) !important;
+    --tw-gradient-to: rgba(30, 12, 48, 0) var(--tw-gradient-to-position) !important;
+  }
+
+  [class*="via-fuchsia-500"] {
+    --tw-gradient-via: rgba(168, 85, 247, .11) var(--tw-gradient-via-position) !important;
+  }
+
+  [class*="to-fuchsia-950"] {
+    --tw-gradient-to: rgba(30, 12, 48, .46) var(--tw-gradient-to-position) !important;
+  }
+
+  [class*="shadow-fuchsia-500"] {
+    --tw-shadow-color: rgba(168, 85, 247, .26) !important;
+    --tw-shadow: var(--tw-shadow-colored) !important;
+  }
+
+  .light-theme [class*="text-fuchsia-300"],
+  .light-theme [class*="text-fuchsia-400"],
+  .light-theme [class*="text-fuchsia-500"] {
+    color: #7c3aed !important;
+  }
+
+  .light-theme button[class*="bg-fuchsia-500"],
+  .light-theme aside.fixed button.bg-fuchsia-500 {
+    background: linear-gradient(135deg, #c084fc 0%, #a855f7 54%, #8b5cf6 100%) !important;
+    color: #111827 !important;
   }
 `;
 
