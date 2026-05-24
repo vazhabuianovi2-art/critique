@@ -28,31 +28,53 @@ export default async function handler(request, response) {
     } catch {
       return response.status(400).json({ error: "Invalid request body." });
     }
-    const { accessToken, password } = body;
-    if (!accessToken || typeof accessToken !== "string") {
-      return response.status(400).json({ error: "Reset session token is missing." });
-    }
+    const { accessToken, password, tokenHash, type = "recovery" } = body;
     if (!password || typeof password !== "string" || password.length < 6) {
       return response.status(400).json({ error: "Password must be at least 6 characters." });
     }
 
     if (serviceRoleKey) {
-      const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
-        method: "GET",
-        headers: {
-          apikey: anonKey,
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      if (!userResponse.ok) {
-        const payload = await userResponse.json().catch(() => null);
-        return response.status(userResponse.status).json({
-          error: payload?.msg || payload?.message || "Reset session expired. Send a new reset email.",
+      let user = null;
+      if (tokenHash && typeof tokenHash === "string") {
+        const verifyResponse = await fetch(`${supabaseUrl}/auth/v1/verify`, {
+          method: "POST",
+          headers: {
+            apikey: anonKey,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ token_hash: tokenHash, type }),
         });
+
+        if (!verifyResponse.ok) {
+          const payload = await verifyResponse.json().catch(() => null);
+          return response.status(400).json({
+            error: payload?.msg || payload?.message || "Reset link expired. Send a new reset email and open the latest link.",
+          });
+        }
+
+        const verified = await verifyResponse.json();
+        user = verified?.user || null;
+      } else if (accessToken && typeof accessToken === "string") {
+        const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
+          method: "GET",
+          headers: {
+            apikey: anonKey,
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        if (!userResponse.ok) {
+          const payload = await userResponse.json().catch(() => null);
+          return response.status(400).json({
+            error: payload?.msg || payload?.message || "Reset session expired. Send a new reset email.",
+          });
+        }
+
+        user = await userResponse.json();
+      } else {
+        return response.status(400).json({ error: "Reset token is missing. Send a new reset email." });
       }
 
-      const user = await userResponse.json();
       const userId = user?.id;
       if (!userId) {
         return response.status(400).json({ error: "Could not identify the reset user." });
@@ -76,6 +98,10 @@ export default async function handler(request, response) {
       }
 
       return response.status(200).json({ ok: true });
+    }
+
+    if (!accessToken || typeof accessToken !== "string") {
+      return response.status(500).json({ error: "Server password updater is not configured. Add SUPABASE_SERVICE_ROLE_KEY in Vercel and redeploy." });
     }
 
     const upstream = await fetch(`${supabaseUrl}/auth/v1/user`, {

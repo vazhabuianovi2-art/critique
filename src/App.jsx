@@ -135,22 +135,52 @@ function getFriendlyAuthError(error, fallback = "Authentication failed. Try agai
   return message || fallback;
 }
 
-async function updatePasswordWithRetry(password) {
+function getPasswordResetPayloadFromUrl() {
+  try {
+    const searchParams = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    return {
+      tokenHash: searchParams.get("token_hash") || "",
+      type: searchParams.get("type") || hashParams.get("type") || "recovery",
+      code: searchParams.get("code") || "",
+      accessToken: hashParams.get("access_token") || "",
+      refreshToken: hashParams.get("refresh_token") || "",
+    };
+  } catch {
+    return { tokenHash: "", type: "recovery", code: "", accessToken: "", refreshToken: "" };
+  }
+}
+
+async function postPasswordUpdate(payload) {
+  const response = await fetch("/api/update-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (response.ok) return;
+  const result = await response.json().catch(() => null);
+  throw new Error(result?.error || `Could not update password (${response.status}).`);
+}
+
+async function updatePasswordWithRetry(password, resetPayload = {}) {
+  if (resetPayload.tokenHash || resetPayload.code || resetPayload.accessToken) {
+    await postPasswordUpdate({ ...resetPayload, password });
+    return;
+  }
+
   const { data: sessionData } = await supabase.auth.getSession();
   const accessToken = sessionData?.session?.access_token;
   if (accessToken) {
     let apiError = null;
     for (let attempt = 0; attempt < 3; attempt += 1) {
       if (attempt > 0) await wait(700 * attempt);
-      const response = await fetch("/api/update-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accessToken, password }),
-      });
-      if (response.ok) return;
-      const payload = await response.json().catch(() => null);
-      apiError = new Error(payload?.error || `Could not update password (${response.status}).`);
-      if (response.status < 500) throw apiError;
+      try {
+        await postPasswordUpdate({ accessToken, password });
+        return;
+      } catch (error) {
+        apiError = error;
+        if (!/50\d|failed to fetch|network/i.test(String(error?.message || error))) throw apiError;
+      }
     }
     if (apiError) throw apiError;
   }
@@ -5674,13 +5704,7 @@ export default function TradingJournalDashboard() {
       if (!hasRecoveryTokens) return null;
 
       if (recoveryTokenHash) {
-        const { data, error } = await supabase.auth.verifyOtp({
-          token_hash: recoveryTokenHash,
-          type: recoveryType,
-        });
-        if (error) throw error;
-        window.history.replaceState(null, "", "/auth/reset-password");
-        return data?.session || null;
+        return { resetReady: true, user: null };
       }
 
       if (recoveryCode) {
@@ -5815,6 +5839,17 @@ export default function TradingJournalDashboard() {
       }
 
       if (mode === "updatePassword") {
+        const resetPayload = getPasswordResetPayloadFromUrl();
+        if (resetPayload.tokenHash) {
+          await updatePasswordWithRetry(values.password, resetPayload);
+          window.history.replaceState(null, "", "/auth/login");
+          setPasswordRecoverySession(false);
+          setAuthMessage("Password updated successfully. You can now sign in with your new password.");
+          setAuthPage("login");
+          await supabase.auth.signOut();
+          return { ok: true };
+        }
+
         const { data: sessionData } = await supabase.auth.getSession();
         let passwordSession = sessionData?.session || null;
 
@@ -5854,7 +5889,7 @@ export default function TradingJournalDashboard() {
         if (!passwordSession) {
           throw new Error("Password reset session expired. Request a new reset link and open the latest email.");
         }
-        await updatePasswordWithRetry(values.password);
+        await updatePasswordWithRetry(values.password, resetPayload);
         setPasswordRecoverySession(false);
         setAuthMessage("Password updated successfully. You can now sign in with your new password.");
         setAuthPage("login");
