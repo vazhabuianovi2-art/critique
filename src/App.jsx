@@ -72,7 +72,8 @@ const MAX_SCREENSHOTS = 5;
 const BRAND_NAME = "TryCritique";
 const BRAND_MARK = "◉";
 const TRADING_SESSIONS = ["Asia", "London", "NY-AM", "Lunch", "NY-PM", "Pre-Market"];
-const DEFAULT_STRATEGIES = ["Liquidity Sweep", "ICT FVG", "Order Block", "Breaker Block", "Silver Bullet"];
+const LEGACY_DEFAULT_STRATEGIES = ["Liquidity Sweep", "ICT FVG", "Order Block", "Breaker Block", "Silver Bullet"];
+const DEFAULT_STRATEGIES = [];
 const EMOTION_OPTIONS = [
   ["Calm", "Focus", "◌"],
   ["Confident", "Ready", "✦"],
@@ -4329,7 +4330,7 @@ const emptyForm = {
   risk: "200",
   date: formatDateKey(new Date()),
   session: "Select trading session",
-  strategy: "Liquidity Sweep",
+  strategy: "",
   result: "Win",
   tags: "result:win",
   emotion: "Calm",
@@ -6368,7 +6369,7 @@ Skipped duplicates: ${duplicateCount}
           </button>
 
           {isAccountSwitcherOpen && (
-            <motion.div initial={{ opacity: 0, y: 8, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="account-switcher-menu absolute left-0 top-14 z-20 w-full overflow-hidden rounded-xl border border-white/10 bg-[#070707] p-1 shadow-[0_18px_55px_rgba(0,0,0,0.90)] ring-1 ring-fuchsia-500/15">
+            <motion.div initial={{ opacity: 0, y: 8, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="account-switcher-menu absolute left-0 top-14 z-50 w-80 overflow-hidden rounded-xl border border-white/10 bg-[#070707] p-1 shadow-[0_18px_55px_rgba(0,0,0,0.90)] ring-1 ring-fuchsia-500/15">
               <div className="flex items-center justify-between border-b border-white/10 px-3 py-3">
                 <div className="text-sm font-black text-white">Trading Accounts</div>
                 <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-black text-white">{accounts.length} Account{accounts.length === 1 ? "" : "s"}</span>
@@ -6379,7 +6380,7 @@ Skipped duplicates: ${duplicateCount}
                   const itemBalance = calculateAccountBalance(item, trades);
                   const isActive = String(item.id) === String(account.id);
                   return (
-                    <div key={item.id} role="button" tabIndex={0} onClick={() => { setActiveAccountId(item.id); setIsAccountSwitcherOpen(false); }} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setActiveAccountId(item.id); setIsAccountSwitcherOpen(false); } }} className={isActive ? "flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-fuchsia-500/25 bg-fuchsia-500/12 px-2 py-3 text-left" : "flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-transparent px-2 py-3 text-left hover:border-fuchsia-500/25 hover:bg-white/5"}>
+                    <div key={item.id} role="button" tabIndex={0} onClick={() => { setActiveAccountId(item.id); setIsAccountSwitcherOpen(false); }} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setActiveAccountId(item.id); setIsAccountSwitcherOpen(false); } }} className={isActive ? "flex w-full cursor-pointer items-center justify-between gap-3 rounded-lg border border-fuchsia-500/30 bg-fuchsia-500/12 px-3 py-3 text-left" : "flex w-full cursor-pointer items-center justify-between gap-3 rounded-lg border border-transparent px-3 py-3 text-left hover:border-fuchsia-500/25 hover:bg-white/5"}>
                       <div className="flex min-w-0 items-center gap-3">
                         <span className="text-lg">🎯</span>
                         <div className="min-w-0">
@@ -6393,8 +6394,8 @@ Skipped duplicates: ${duplicateCount}
                           </div>
                         </div>
                       </div>
-                      <div className="flex shrink-0 items-center gap-1">
-                        <button type="button" onClick={(event) => { event.stopPropagation(); setActiveAccountId(item.id); setIsAccountModalOpen(true); setIsAccountSwitcherOpen(false); }} className="rounded-lg border border-white/10 bg-black/40 px-2 py-1 text-[10px] font-black text-zinc-400 hover:border-fuchsia-500/50 hover:text-fuchsia-300">Edit</button>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <button type="button" onClick={(event) => { event.stopPropagation(); setActiveAccountId(item.id); setIsAccountModalOpen(true); setIsAccountSwitcherOpen(false); }} className="rounded-lg border border-white/10 bg-black/40 px-2.5 py-1.5 text-[10px] font-black text-zinc-400 hover:border-fuchsia-500/50 hover:text-fuchsia-300">Edit</button>
                         <button type="button" onClick={(event) => { event.stopPropagation(); requestDeleteAccount(item.id); }} className="rounded-lg border border-red-500/25 bg-red-500/10 p-1.5 text-red-300 transition hover:border-red-400/70 hover:bg-red-500/20 hover:text-red-200" aria-label={`Delete ${item.name}`}><Trash2 size={13} /></button>
                       </div>
                     </div>
@@ -7779,7 +7780,7 @@ function AddTradeModal({ isEditing, form, setForm, onClose, onSave, account, acc
   const [customStrategies, setCustomStrategies] = useState(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(CUSTOM_STRATEGIES_KEY) || "[]");
-      return Array.isArray(saved) ? saved.filter(Boolean) : [];
+      return Array.isArray(saved) ? saved.filter((item) => item && !LEGACY_DEFAULT_STRATEGIES.includes(item)) : [];
     } catch {
       return [];
     }
@@ -7816,7 +7817,7 @@ function AddTradeModal({ isEditing, form, setForm, onClose, onSave, account, acc
     setCustomStrategies(next);
     localStorage.setItem(CUSTOM_STRATEGIES_KEY, JSON.stringify(next));
     if (form.strategy === name) {
-      updateField("strategy", DEFAULT_STRATEGIES[0]);
+      updateField("strategy", "");
     }
   }
 
