@@ -4581,6 +4581,43 @@ function getEconomicWeekLabel(value) {
   return "This Week";
 }
 
+function formatEconomicRangeDate(dateKey) {
+  const date = new Date(`${dateKey}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return dateKey;
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function getEconomicWeekRange(events = [], week) {
+  const keys = (Array.isArray(events) ? events : [])
+    .filter((event) => event.week === week)
+    .map((event) => getEconomicEventDateKey(event))
+    .filter(Boolean)
+    .sort();
+  if (!keys.length) return "";
+  return `${formatEconomicRangeDate(keys[0])} - ${formatEconomicRangeDate(keys[keys.length - 1])}`;
+}
+
+function getEconomicCalendarWeekRangeLabel(week) {
+  const now = new Date();
+  const day = now.getDay();
+  const sunday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day);
+  const offsets = { last: -7, this: 0, next: 7 };
+  const start = new Date(sunday);
+  start.setDate(sunday.getDate() + (offsets[week] || 0));
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+  return `${formatEconomicRangeDate(formatDateKey(start))} - ${formatEconomicRangeDate(formatDateKey(end))}`;
+}
+
+function getPrimaryEventImpact(events = []) {
+  return (
+    events.find((event) => getEventImpactTone(event.impact) === "red") ||
+    events.find((event) => getEventImpactTone(event.impact) === "zinc") ||
+    events.find((event) => getEventImpactTone(event.impact) === "amber") ||
+    events[0]
+  )?.impact || "Low";
+}
+
 function getNewsPerformanceStats(trades = [], events = []) {
   const groupedTrades = groupTradesByDate(trades);
   const rows = [];
@@ -7747,7 +7784,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                   const dayTrades = grouped[cell.key] || [];
                   const dayStats = summarizeTrades(dayTrades);
                   const dayEvents = eventsByDate[cell.key] || [];
-                  const highImpactCount = dayEvents.filter((event) => getEventImpactTone(event.impact) === "red").length;
+                  const primaryEventImpact = getPrimaryEventImpact(dayEvents);
                   const isWeekend = dayIndex === 0 || dayIndex === 6;
                   const selected = selectedDate === cell.key;
                   const hasTrade = dayTrades.length > 0;
@@ -7760,9 +7797,9 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                       </div>
 
                       {dayEvents.length > 0 && (
-                        <div className="absolute right-3 top-9 z-10 flex items-center gap-1.5 rounded-full border border-fuchsia-500/35 bg-black/70 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-fuchsia-200 shadow-[0_0_12px_rgba(217,70,239,0.12)]">
-                          <span className={highImpactCount ? "h-1.5 w-1.5 rounded-full bg-red-400 shadow-[0_0_9px_rgba(248,113,113,0.95)]" : "h-1.5 w-1.5 rounded-full bg-fuchsia-400 shadow-[0_0_9px_rgba(217,70,239,0.85)]"} />
-                          {dayEvents.length} news
+                        <div className="absolute right-3 top-9 z-10 flex items-center gap-1.5 rounded-full border border-white/10 bg-black/75 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-zinc-200 shadow-[0_0_12px_rgba(217,70,239,0.12)]">
+                          <ImpactFolderIcon impact={primaryEventImpact} />
+                          {dayEvents.length}
                         </div>
                       )}
 
@@ -7832,8 +7869,8 @@ function CalendarDayDetailsModal({ dateKey, trades = [], events = [], onClose, o
   const resultLabel = stats.pnl > 0 ? "High Performer" : stats.pnl < 0 ? "Review Needed" : stats.count ? "Break Even Day" : "No Activity";
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
-      <motion.div initial={{ opacity: 0, scale: 0.96, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="calendar-day-modal-pro w-full max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-[#050505] shadow-[0_26px_90px_rgba(0,0,0,0.80)]">
+    <div className="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto bg-black/75 p-4 backdrop-blur-sm sm:items-center">
+      <motion.div initial={{ opacity: 0, scale: 0.96, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="calendar-day-modal-pro my-4 max-h-[calc(100vh-2rem)] w-full max-w-3xl overflow-y-auto rounded-2xl border border-white/10 bg-[#050505] shadow-[0_26px_90px_rgba(0,0,0,0.80)]">
         <div className="calendar-day-modal-head flex items-center justify-between gap-4 border-b border-white/10 p-5">
           <div className="flex items-center gap-4">
             <div className={resultTone === "win" ? "calendar-modal-day-badge calendar-modal-day-win" : resultTone === "loss" ? "calendar-modal-day-badge calendar-modal-day-loss" : resultTone === "be" ? "calendar-modal-day-badge calendar-modal-day-be" : "calendar-modal-day-badge calendar-modal-day-empty"}>{dayNumber}</div>
@@ -7981,6 +8018,11 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], onRefresh }) {
   const dayKeys = Object.keys(grouped).sort();
   const newsStats = getNewsPerformanceStats(trades, visibleEvents);
   const activeFilterCount = (presetFilter !== "All" ? 1 : 0) + (currencyFilter !== "All" ? 1 : 0) + (impactFilters.length !== impactOptions.length ? 1 : 0);
+  const weekRanges = useMemo(() => ({
+    last: getEconomicCalendarWeekRangeLabel("last") || getEconomicWeekRange(events, "last"),
+    this: getEconomicCalendarWeekRangeLabel("this") || getEconomicWeekRange(events, "this"),
+    next: getEconomicCalendarWeekRangeLabel("next") || getEconomicWeekRange(events, "next"),
+  }), [events]);
 
   function toggleImpactFilter(impact) {
     setImpactFilters((current) => {
@@ -8004,7 +8046,7 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], onRefresh }) {
         <div className="flex flex-wrap gap-2">
           {["last", "this", "next"].map((week) => (
             <button key={week} onClick={() => setWeekFilter(week)} className={weekFilter === week ? "rounded-lg border border-fuchsia-400/70 bg-fuchsia-500/18 px-3 py-2 text-sm font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-sm font-black text-zinc-400 hover:border-fuchsia-500/45 hover:text-fuchsia-200"}>
-              {getEconomicWeekLabel(week)}
+              {getEconomicWeekLabel(week)}{weekRanges[week] ? `: ${weekRanges[week]}` : ""}
             </button>
           ))}
           <button onClick={() => setWeekFilter("all")} className={weekFilter === "all" ? "rounded-lg border border-fuchsia-400/70 bg-fuchsia-500/18 px-3 py-2 text-sm font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-sm font-black text-zinc-400 hover:border-fuchsia-500/45 hover:text-fuchsia-200"}>All</button>
