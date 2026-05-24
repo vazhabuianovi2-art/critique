@@ -6965,8 +6965,6 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
 
       <QuickInsights insights={getDashboardInsights(trades, stats)} />
 
-      <DashboardMistakeAlert trades={trades} onOpen={onOpenMistakeDetector} />
-
       <div className="mt-8 grid grid-cols-1 items-stretch gap-6 xl:grid-cols-[2fr_1fr]">
         <div className="flex h-full min-h-0 flex-col gap-6">
           <div className="dashboard-recent-card light-card relative flex flex-1 flex-col overflow-hidden rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-6 shadow-[0_20px_55px_rgba(217,70,239,0.10)]">
