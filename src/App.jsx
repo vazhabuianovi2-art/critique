@@ -6348,7 +6348,7 @@ Skipped duplicates: ${duplicateCount}
   return (
     <div className={theme === "light" ? "light-theme min-h-screen overflow-x-hidden bg-black text-white" : "min-h-screen overflow-x-hidden bg-black text-white"}>
       <style>{THEME_STYLE_CSS}</style>
-      <aside className="fixed left-0 top-0 z-30 hidden h-full w-64 border-r border-white/10 bg-black p-5 lg:block">
+      <aside className="fixed left-0 top-0 z-[70] hidden h-full w-64 border-r border-white/10 bg-black p-5 lg:block">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 text-xl font-black"><span className="text-fuchsia-400 drop-shadow-[0_0_12px_rgba(217,70,239,0.85)]">{BRAND_MARK}</span><span className="tracking-tight">{BRAND_NAME}</span></div>
           <button
@@ -6369,7 +6369,7 @@ Skipped duplicates: ${duplicateCount}
           </button>
 
           {isAccountSwitcherOpen && (
-            <motion.div initial={{ opacity: 0, y: 8, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="account-switcher-menu absolute left-0 top-14 z-50 w-80 overflow-hidden rounded-xl border border-white/10 bg-[#070707] p-1 shadow-[0_18px_55px_rgba(0,0,0,0.90)] ring-1 ring-fuchsia-500/15">
+            <motion.div initial={{ opacity: 0, y: 8, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="account-switcher-menu absolute left-0 top-14 z-[90] w-80 overflow-hidden rounded-xl border border-white/10 bg-[#070707] p-1 shadow-[0_18px_55px_rgba(0,0,0,0.90)] ring-1 ring-fuchsia-500/15">
               <div className="flex items-center justify-between border-b border-white/10 px-3 py-3">
                 <div className="text-sm font-black text-white">Trading Accounts</div>
                 <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-black text-white">{accounts.length} Account{accounts.length === 1 ? "" : "s"}</span>
