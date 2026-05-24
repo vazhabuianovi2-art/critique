@@ -68,6 +68,7 @@ const USER_TRADES_BACKUP_KEY_PREFIX = "critique_user_trades_last_nonempty_v1";
 const REMEMBER_AUTH_KEY = "critique_remember_auth_v1";
 const PROFILE_PHOTO_KEY = "critique_profile_photo_v1";
 const CUSTOM_STRATEGIES_KEY = "critique_custom_strategies_v1";
+const ECONOMIC_CALENDAR_CACHE_KEY = "critique_economic_calendar_v1";
 const MAX_SCREENSHOTS = 5;
 const BRAND_NAME = "TryCritique";
 const BRAND_MARK = "◉";
@@ -4519,6 +4520,84 @@ function getTradeDateKey(trade) {
   return Number.isNaN(date.getTime()) ? raw : formatDateKey(date);
 }
 
+function getEconomicEventDateKey(event) {
+  if (event?.dateKey) return String(event.dateKey);
+  const raw = String(event?.date || "").trim();
+  if (/^[0-9]{4}-[0-9]{2}-[0-9]{2}/.test(raw)) return raw.slice(0, 10);
+  const date = new Date(raw);
+  return Number.isNaN(date.getTime()) ? "" : formatDateKey(date);
+}
+
+function getEventsForDate(events = [], dateKey) {
+  if (!dateKey) return [];
+  return (Array.isArray(events) ? events : []).filter((event) => getEconomicEventDateKey(event) === dateKey);
+}
+
+function getEventImpactTone(impact) {
+  const value = String(impact || "").toLowerCase();
+  if (value.includes("high")) return "red";
+  if (value.includes("medium")) return "amber";
+  if (value.includes("holiday")) return "zinc";
+  return "blue";
+}
+
+function getEventImpactClass(impact) {
+  const tone = getEventImpactTone(impact);
+  if (tone === "red") return "border-red-500/35 bg-red-500/10 text-red-300";
+  if (tone === "amber") return "border-amber-500/35 bg-amber-500/10 text-amber-300";
+  if (tone === "zinc") return "border-white/10 bg-white/8 text-zinc-400";
+  return "border-blue-500/35 bg-blue-500/10 text-blue-300";
+}
+
+function getEconomicWeekLabel(value) {
+  if (value === "last") return "Last Week";
+  if (value === "next") return "Next Week";
+  return "This Week";
+}
+
+function getNewsPerformanceStats(trades = [], events = []) {
+  const groupedTrades = groupTradesByDate(trades);
+  const rows = [];
+  const byEvent = {};
+  const byCurrency = {};
+  const byImpact = {};
+
+  (Array.isArray(events) ? events : []).forEach((event) => {
+    const dateKey = getEconomicEventDateKey(event);
+    const dayTrades = groupedTrades[dateKey] || [];
+    if (!dayTrades.length) return;
+    const stats = summarizeTrades(dayTrades);
+    const key = `${event.country}-${event.title}`;
+    if (!byEvent[key]) byEvent[key] = { name: event.title, country: event.country, impact: event.impact, count: 0, pnl: 0, trades: 0 };
+    byEvent[key].count += 1;
+    byEvent[key].pnl += stats.pnl;
+    byEvent[key].trades += stats.count;
+
+    if (!byCurrency[event.country]) byCurrency[event.country] = { name: event.country, count: 0, pnl: 0, trades: 0 };
+    byCurrency[event.country].count += 1;
+    byCurrency[event.country].pnl += stats.pnl;
+    byCurrency[event.country].trades += stats.count;
+
+    if (!byImpact[event.impact]) byImpact[event.impact] = { name: event.impact, count: 0, pnl: 0, trades: 0 };
+    byImpact[event.impact].count += 1;
+    byImpact[event.impact].pnl += stats.pnl;
+    byImpact[event.impact].trades += stats.count;
+
+    rows.push({ event, dateKey, ...stats });
+  });
+
+  rows.sort((a, b) => Number(b.pnl || 0) - Number(a.pnl || 0));
+  const sortRows = (object) => Object.values(object).sort((a, b) => Number(b.pnl || 0) - Number(a.pnl || 0));
+  return {
+    rows,
+    best: rows[0] || null,
+    worst: [...rows].sort((a, b) => Number(a.pnl || 0) - Number(b.pnl || 0))[0] || null,
+    eventRows: sortRows(byEvent),
+    currencyRows: sortRows(byCurrency),
+    impactRows: sortRows(byImpact),
+  };
+}
+
 function getTradeOrderValue(trade) {
   const createdAt = Number(trade?.createdAt || 0);
   if (createdAt) return createdAt;
@@ -5585,6 +5664,14 @@ export default function TradingJournalDashboard() {
   const [tradesLoading, setTradesLoading] = useState(false);
   const [hasLoadedRemoteTrades, setHasLoadedRemoteTrades] = useState(false);
   const [dataMessage, setDataMessage] = useState("");
+  const [economicCalendar, setEconomicCalendar] = useState(() => {
+    try {
+      const cached = JSON.parse(localStorage.getItem(ECONOMIC_CALENDAR_CACHE_KEY) || "null");
+      if (cached?.events?.length) return { events: cached.events, updatedAt: cached.updatedAt || null, loading: false, error: "" };
+    } catch {}
+    return { events: [], updatedAt: null, loading: true, error: "" };
+  });
+  const [economicCalendarRefresh, setEconomicCalendarRefresh] = useState(0);
   const [profilePhoto, setProfilePhoto] = useState(() => {
     try {
       return getStoredProfilePhoto(null);
@@ -5698,6 +5785,34 @@ export default function TradingJournalDashboard() {
     setActiveAccountId(readStoredActiveAccountId(authUser.id));
     setPendingAccountDraft(null);
   }, [authUser?.id, isAuthenticated]);
+
+  useEffect(() => {
+    let mounted = true;
+    setEconomicCalendar((current) => ({ ...current, loading: !current.events.length, error: "" }));
+
+    fetch("/api/economic-calendar?range=all")
+      .then((response) => {
+        if (!response.ok) throw new Error(`Economic calendar failed (${response.status})`);
+        return response.json();
+      })
+      .then((data) => {
+        if (!mounted) return;
+        const events = Array.isArray(data?.events) ? data.events : [];
+        const payload = { events, updatedAt: data?.updatedAt || new Date().toISOString() };
+        setEconomicCalendar({ ...payload, loading: false, error: "" });
+        try {
+          localStorage.setItem(ECONOMIC_CALENDAR_CACHE_KEY, JSON.stringify(payload));
+        } catch {}
+      })
+      .catch((error) => {
+        if (!mounted) return;
+        setEconomicCalendar((current) => ({ ...current, loading: false, error: error?.message || "Economic calendar unavailable" }));
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [economicCalendarRefresh]);
 
   useEffect(() => {
     if (!supabase || !authUser?.id || !isAuthenticated) return undefined;
@@ -6511,6 +6626,8 @@ Skipped duplicates: ${duplicateCount}
             onOpenMistakeDetector={() => setActive("Mistake Detector")}
             onOpenAccount={() => accounts.length ? setIsAccountModalOpen(true) : createNewAccount()}
             profileName={profileName}
+            economicCalendar={economicCalendar}
+            onRefreshEconomicCalendar={() => setEconomicCalendarRefresh((tick) => tick + 1)}
           />
         ) : active === "Journal" ? (
           <JournalPage
@@ -6539,9 +6656,11 @@ Skipped duplicates: ${duplicateCount}
             onAdd={() => openAddTrade(selectedCalendarDate)}
             selectedDate={selectedCalendarDate}
             setSelectedDate={setSelectedCalendarDate}
+            economicCalendar={economicCalendar}
+            onRefreshEconomicCalendar={() => setEconomicCalendarRefresh((tick) => tick + 1)}
           />
         ) : active === "Statistics" ? (
-          <SimpleStatisticsPage stats={stats} curve={curve} trades={activeTrades} onExport={() => exportTradesToCSV(activeTrades)} />
+          <SimpleStatisticsPage stats={stats} curve={curve} trades={activeTrades} onExport={() => exportTradesToCSV(activeTrades)} economicCalendar={economicCalendar} onRefreshEconomicCalendar={() => setEconomicCalendarRefresh((tick) => tick + 1)} />
         ) : active === "Mistake Detector" ? (
           <SimpleMistakeDetectorPage trades={activeTrades} />
         ) : active === "Settings" ? (
@@ -6942,7 +7061,7 @@ function ReviewBox({ title, value, tone }) {
   return <div className={`rounded-xl border p-4 ${cls}`}><div className="text-xs font-black uppercase tracking-widest text-zinc-400">{title}</div><div className="mt-2 text-sm font-semibold text-zinc-300">{value}</div></div>;
 }
 
-function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades, onAdd, onView, onStartDay, routine, selectedCalendarDate, onSelectCalendarDate, onViewAllTrades, onOpenMistakeDetector, onOpenAccount, profileName = "User" }) {
+function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades, onAdd, onView, onStartDay, routine, selectedCalendarDate, onSelectCalendarDate, onViewAllTrades, onOpenMistakeDetector, onOpenAccount, profileName = "User", economicCalendar, onRefreshEconomicCalendar }) {
   const [performanceMode, setPerformanceMode] = useState("EquityCurve");
   const quote = quotes[new Date().getDate() % quotes.length];
   const checkedCount = routineItems.filter((item) => routine.checked?.[item.id]).length;
@@ -7026,6 +7145,8 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
 
       <QuickInsights insights={getDashboardInsights(trades, stats)} />
 
+      <TodaysEventsPanel economicCalendar={economicCalendar} onRefresh={onRefreshEconomicCalendar} />
+
       <div className="mt-8 grid grid-cols-1 items-stretch gap-6 xl:grid-cols-[2fr_1fr]">
         <div className="flex h-full min-h-0 flex-col gap-6">
           <div className="dashboard-recent-card light-card relative flex flex-1 flex-col overflow-hidden rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-6 shadow-[0_20px_55px_rgba(217,70,239,0.10)]">
@@ -7098,6 +7219,36 @@ function DashboardMistakeAlert({ trades, onOpen }) {
         <span className="rounded-xl border border-red-500/35 bg-red-500/15 px-4 py-3 text-sm font-black text-red-300">Open Mistake Analysis →</span>
       </div>
     </button>
+  );
+}
+
+function TodaysEventsPanel({ economicCalendar, onRefresh }) {
+  const todayKey = formatDateKey(new Date());
+  const events = getEventsForDate(economicCalendar?.events, todayKey).slice(0, 5);
+  return (
+    <section className="mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#100719] via-black to-[#04110d] p-5 shadow-[0_18px_45px_rgba(217,70,239,0.10)]">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 text-fuchsia-300"><Calendar size={20} /></div>
+          <div>
+            <h2 className="text-xl font-black text-white">Today's Events</h2>
+            <p className="text-sm font-semibold text-zinc-400">Economic news for {todayKey}</p>
+          </div>
+        </div>
+        <button onClick={onRefresh} className="rounded-xl border border-white/10 bg-black px-3 py-2 text-sm font-black text-zinc-300 transition hover:border-fuchsia-400/60 hover:text-fuchsia-200">
+          <RefreshCwIcon /> Refresh
+        </button>
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {economicCalendar?.loading && !events.length ? (
+          <div className="rounded-xl border border-white/10 bg-black/45 p-4 text-sm font-bold text-zinc-400">Loading economic events...</div>
+        ) : events.length ? events.map((event) => (
+          <EconomicEventRow key={event.id} event={event} compact />
+        )) : (
+          <div className="rounded-xl border border-white/10 bg-black/45 p-4 text-sm font-bold text-zinc-400">No major events listed for today.</div>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -7455,7 +7606,7 @@ function getCalendarDayVisual(dayStats, isWeekend, selected) {
   return `${base} calendar-day-empty ${selected ? "calendar-day-selected" : ""}`;
 }
 
-function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate }) {
+function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCalendar, onRefreshEconomicCalendar }) {
   const initialDate = selectedDate ? new Date(`${selectedDate}T00:00:00`) : new Date(2026, 4, 1);
   const [calendarMonth, setCalendarMonth] = useState(new Date(initialDate.getFullYear(), initialDate.getMonth(), 1));
   const [dayModalDate, setDayModalDate] = useState(null);
@@ -7616,6 +7767,8 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate }) {
         </div>
       </div>
 
+      <EconomicCalendarPanel economicCalendar={economicCalendar} trades={trades} onRefresh={onRefreshEconomicCalendar} />
+
       <button onClick={() => onAdd(selectedDate)} className="fixed bottom-24 right-8 z-40 flex h-16 w-16 items-center justify-center rounded-full bg-fuchsia-500 text-3xl font-light text-black shadow-[0_0_30px_rgba(217,70,239,0.48)] transition hover:scale-105 hover:bg-fuchsia-400 lg:bottom-10">
         +
       </button>
@@ -7733,6 +7886,143 @@ function CalendarMonthSummary({ monthStats, selectedDate, selectedDayStats, best
       <CalendarSummaryCard title="Best Day" value={bestMonthDay ? formatMoney(bestMonthDay.pnl) : "$0"} text={bestMonthDay ? bestMonthDay.dateKey : "No profitable day yet"} tone="emerald" />
       <CalendarSummaryCard title="Worst Day" value={worstMonthDay ? formatMoney(worstMonthDay.pnl) : "$0"} text={worstMonthDay ? worstMonthDay.dateKey : "No losing day yet"} tone="red" />
     </section>
+  );
+}
+
+function EconomicCalendarPanel({ economicCalendar, trades = [], onRefresh }) {
+  const [weekFilter, setWeekFilter] = useState("this");
+  const [presetFilter, setPresetFilter] = useState("All");
+  const [impactFilter, setImpactFilter] = useState("All");
+  const [currencyFilter, setCurrencyFilter] = useState("All");
+  const events = Array.isArray(economicCalendar?.events) ? economicCalendar.events : [];
+  const presetCurrencies = {
+    Forex: ["USD", "EUR", "GBP", "JPY", "CHF", "CAD", "AUD", "NZD", "CNY"],
+    "US Futures": ["USD"],
+    Metals: ["USD", "CNY"],
+    Oil: ["USD", "CAD", "CNY"],
+    Crypto: ["USD"],
+  };
+  const currencies = useMemo(() => ["All", ...Array.from(new Set(events.map((event) => event.country).filter(Boolean))).sort()], [events]);
+  const visibleEvents = useMemo(() => {
+    return events.filter((event) => {
+      if (weekFilter !== "all" && event.week !== weekFilter) return false;
+      if (presetFilter !== "All" && !presetCurrencies[presetFilter]?.includes(event.country)) return false;
+      if (impactFilter !== "All" && event.impact !== impactFilter) return false;
+      if (currencyFilter !== "All" && event.country !== currencyFilter) return false;
+      return true;
+    });
+  }, [events, weekFilter, presetFilter, impactFilter, currencyFilter]);
+  const grouped = visibleEvents.reduce((map, event) => {
+    const key = getEconomicEventDateKey(event) || "Unknown";
+    if (!map[key]) map[key] = [];
+    map[key].push(event);
+    return map;
+  }, {});
+  const dayKeys = Object.keys(grouped).sort();
+  const newsStats = getNewsPerformanceStats(trades, visibleEvents);
+
+  return (
+    <section className="economic-calendar-panel mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#100719] via-black to-[#050307] p-5 shadow-[0_20px_55px_rgba(217,70,239,0.10)]">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div className="flex items-start gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 text-fuchsia-300"><TrendingUp size={22} /></div>
+          <div>
+            <h2 className="text-2xl font-black text-white">Economic Calendar</h2>
+            <p className="mt-1 text-sm font-semibold text-zinc-400">
+              ForexFactory feed · {visibleEvents.length} events · {economicCalendar?.updatedAt ? new Date(economicCalendar.updatedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "updating"}
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {["last", "this", "next"].map((week) => (
+            <button key={week} onClick={() => setWeekFilter(week)} className={weekFilter === week ? "rounded-lg border border-fuchsia-400/70 bg-fuchsia-500/18 px-3 py-2 text-sm font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-sm font-black text-zinc-400 hover:border-fuchsia-500/45 hover:text-fuchsia-200"}>
+              {getEconomicWeekLabel(week)}
+            </button>
+          ))}
+          <button onClick={() => setWeekFilter("all")} className={weekFilter === "all" ? "rounded-lg border border-fuchsia-400/70 bg-fuchsia-500/18 px-3 py-2 text-sm font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-sm font-black text-zinc-400 hover:border-fuchsia-500/45 hover:text-fuchsia-200"}>All</button>
+          <button onClick={onRefresh} className="rounded-lg border border-white/10 bg-black px-3 py-2 text-sm font-black text-zinc-300 hover:border-fuchsia-500/45"><RefreshCwIcon /></button>
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_1fr_1fr]">
+        <EconomicMiniMetric label="Best News Day" value={newsStats.best ? formatMoney(newsStats.best.pnl) : "$0"} detail={newsStats.best ? `${newsStats.best.event.country} · ${newsStats.best.event.title}` : "No trades on event days yet"} />
+        <EconomicMiniMetric label="Worst News Day" value={newsStats.worst ? formatMoney(newsStats.worst.pnl) : "$0"} detail={newsStats.worst ? `${newsStats.worst.event.country} · ${newsStats.worst.event.title}` : "No losses on event days yet"} tone="amber" />
+        <EconomicMiniMetric label="Tracked Events" value={visibleEvents.length} detail={`${newsStats.rows.length} event days with trades`} tone="fuchsia" />
+      </div>
+
+      <div className="mt-5 rounded-xl border border-white/10 bg-black/35 p-4">
+        <div className="mb-5">
+          <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Quick presets</div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {["All", "Forex", "US Futures", "Metals", "Oil", "Crypto"].map((preset) => (
+              <button key={preset} onClick={() => { setPresetFilter(preset); setCurrencyFilter("All"); }} className={presetFilter === preset ? "rounded-lg border border-fuchsia-400/60 bg-fuchsia-500/18 px-3 py-2 text-xs font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-xs font-black text-zinc-400 hover:border-fuchsia-500/35 hover:text-fuchsia-200"}>{preset}</button>
+            ))}
+          </div>
+        </div>
+        <div className="grid gap-4 lg:grid-cols-[1fr_2fr]">
+          <div>
+            <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Expected impact</div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {["All", "High", "Medium", "Low", "Holiday"].map((impact) => (
+                <button key={impact} onClick={() => setImpactFilter(impact)} className={impactFilter === impact ? "rounded-lg border border-fuchsia-400/60 bg-fuchsia-500/18 px-3 py-2 text-xs font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-xs font-black text-zinc-400 hover:border-fuchsia-500/35 hover:text-fuchsia-200"}>{impact}</button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Currencies</div>
+            <div className="mt-3 flex max-h-24 flex-wrap gap-2 overflow-y-auto pr-1">
+              {currencies.map((currency) => (
+                <button key={currency} onClick={() => setCurrencyFilter(currency)} className={currencyFilter === currency ? "rounded-lg border border-fuchsia-400/60 bg-fuchsia-500/18 px-3 py-2 text-xs font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-xs font-black text-zinc-400 hover:border-fuchsia-500/35 hover:text-fuchsia-200"}>{currency}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-5 space-y-5">
+        {economicCalendar?.loading && !visibleEvents.length ? (
+          <div className="rounded-xl border border-white/10 bg-black/40 p-5 text-sm font-bold text-zinc-400">Loading economic calendar...</div>
+        ) : dayKeys.length ? dayKeys.slice(0, 10).map((dateKey) => (
+          <div key={dateKey}>
+            <div className="mb-2 text-xs font-black uppercase tracking-widest text-zinc-500">{new Date(`${dateKey}T00:00:00`).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}</div>
+            <div className="space-y-2">
+              {grouped[dateKey].slice(0, 14).map((event) => <EconomicEventRow key={event.id} event={event} />)}
+            </div>
+          </div>
+        )) : (
+          <div className="rounded-xl border border-white/10 bg-black/40 p-5 text-sm font-bold text-zinc-400">No events match these filters.</div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function EconomicMiniMetric({ label, value, detail, tone = "emerald" }) {
+  const valueClass = tone === "amber" ? "text-amber-400" : tone === "fuchsia" ? "text-fuchsia-300" : "text-emerald-400";
+  return (
+    <div className="rounded-xl border border-white/10 bg-black/45 p-4">
+      <div className="text-xs font-black uppercase tracking-widest text-zinc-500">{label}</div>
+      <div className={`mt-2 text-2xl font-black ${valueClass}`}>{value}</div>
+      <div className="mt-1 truncate text-xs font-semibold text-zinc-400">{detail}</div>
+    </div>
+  );
+}
+
+function EconomicEventRow({ event, compact = false }) {
+  return (
+    <div className={compact ? "rounded-xl border border-white/10 bg-black/45 p-3" : "grid gap-3 rounded-xl border border-white/10 bg-black/35 px-4 py-3 sm:grid-cols-[72px_72px_1fr_auto] sm:items-center"}>
+      <div className="text-sm font-black text-zinc-400">{event.time || "All day"}</div>
+      <div className="text-sm font-black text-white">{event.country}</div>
+      <div className="min-w-0">
+        <div className="truncate text-sm font-black text-white">{event.title}</div>
+        {(event.forecast || event.previous || event.actual) && (
+          <div className="mt-1 text-xs font-semibold text-zinc-500">
+            {event.actual ? `A: ${event.actual} · ` : ""}{event.forecast ? `F: ${event.forecast} · ` : ""}{event.previous ? `P: ${event.previous}` : ""}
+          </div>
+        )}
+      </div>
+      <span className={`w-fit rounded-full border px-2.5 py-1 text-xs font-black ${getEventImpactClass(event.impact)}`}>{event.impact}</span>
+    </div>
   );
 }
 
@@ -9076,7 +9366,7 @@ function SimplePanel({ title, subtitle, children, icon }) {
   );
 }
 
-function SimpleStatisticsPage({ trades = [], onExport }) {
+function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefreshEconomicCalendar }) {
   const [rangeFilter, setRangeFilter] = useState("30 days");
   const [strategyFilter, setStrategyFilter] = useState("All");
   const [activeTab, setActiveTab] = useState("Overview");
@@ -9116,6 +9406,7 @@ function SimpleStatisticsPage({ trades = [], onExport }) {
   const bestTradeItem = [...visibleTrades].sort((a, b) => Number(b.pnl || 0) - Number(a.pnl || 0))[0];
   const smallestWinItem = [...wins].sort((a, b) => Number(a.pnl || 0) - Number(b.pnl || 0))[0];
   const weekdayRows = getWeekdayStatsRows(visibleTrades);
+  const newsStats = useMemo(() => getNewsPerformanceStats(visibleTrades, economicCalendar?.events || []), [visibleTrades, economicCalendar?.events]);
   const tabs = [
     ["Overview", BarChart3],
     ["Patterns", Calendar],
@@ -9218,10 +9509,44 @@ function SimpleStatisticsPage({ trades = [], onExport }) {
       )}
 
       {activeTab === "News" && (
-        <div className="mt-10 grid gap-6 xl:grid-cols-3">
-          <SimpleStatCard label="Main Insight" value={stats.totalPnl >= 0 ? "Profitable" : "Needs work"} detail={stats.totalPnl >= 0 ? "Your selected range is net positive." : "Your selected range is net negative."} tone={stats.totalPnl >= 0 ? "green" : "red"} />
-          <SimpleStatCard label="Best Focus" value={bestStrategy?.[0] || "Add trades"} detail="Keep measuring this setup across more trades." tone="fuchsia" />
-          <SimpleStatCard label="Next Check" value="Risk" detail="Watch drawdown and average loss before increasing size." tone="amber" />
+        <div className="mt-10">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <StatsSectionTitle title="News-Day Performance" icon={<BookOpen size={20} />} />
+            <button onClick={onRefreshEconomicCalendar} className="w-fit rounded-xl border border-white/10 bg-black px-3 py-2 text-sm font-black text-zinc-300 hover:border-fuchsia-500/45">
+              <RefreshCwIcon /> Refresh News
+            </button>
+          </div>
+          <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            <SimpleStatCard label="Best News Day" value={newsStats.best ? formatMoney(newsStats.best.pnl) : "$0"} detail={newsStats.best ? `${newsStats.best.event.country} · ${newsStats.best.event.title}` : "No trades on event days yet."} tone="green" />
+            <SimpleStatCard label="Worst News Day" value={newsStats.worst ? formatMoney(newsStats.worst.pnl) : "$0"} detail={newsStats.worst ? `${newsStats.worst.event.country} · ${newsStats.worst.event.title}` : "No losing event day yet."} tone="amber" />
+            <SimpleStatCard label="Event Days Traded" value={newsStats.rows.length} detail={`${economicCalendar?.events?.length || 0} events loaded from calendar.`} tone="fuchsia" />
+            <SimpleStatCard label="Top Currency" value={newsStats.currencyRows[0]?.name || "No data"} detail={newsStats.currencyRows[0] ? `${formatMoney(newsStats.currencyRows[0].pnl)} across ${newsStats.currencyRows[0].trades} trades` : "Trade on news days to measure."} tone="green" />
+          </div>
+
+          <div className="mt-6 grid gap-6 xl:grid-cols-2">
+            <SimplePanel title="Best News Events" subtitle="Event names that matched your strongest trading days." icon={<TrendingUp size={24} />}>
+              {newsStats.eventRows.length ? newsStats.eventRows.slice(0, 6).map((row) => (
+                <div key={`${row.country}-${row.name}`} className="mb-2 flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-black/35 px-4 py-3">
+                  <div className="min-w-0">
+                    <div className="truncate font-black text-white">{row.country} · {row.name}</div>
+                    <div className="text-xs font-semibold text-zinc-500">{row.trades} trades · {row.count} event match{row.count === 1 ? "" : "es"}</div>
+                  </div>
+                  <div className={row.pnl >= 0 ? "font-black text-emerald-400" : "font-black text-red-400"}>{formatMoney(row.pnl)}</div>
+                </div>
+              )) : <div className="text-sm font-semibold text-zinc-500">No news-day trade matches yet.</div>}
+            </SimplePanel>
+            <SimplePanel title="Currency Impact" subtitle="Which economic currencies line up with your best or worst days." icon={<Target size={24} />}>
+              {newsStats.currencyRows.length ? newsStats.currencyRows.slice(0, 8).map((row) => (
+                <div key={row.name} className="mb-2 flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-black/35 px-4 py-3">
+                  <div>
+                    <div className="font-black text-white">{row.name}</div>
+                    <div className="text-xs font-semibold text-zinc-500">{row.trades} trades on matching event days</div>
+                  </div>
+                  <div className={row.pnl >= 0 ? "font-black text-emerald-400" : "font-black text-red-400"}>{formatMoney(row.pnl)}</div>
+                </div>
+              )) : <div className="text-sm font-semibold text-zinc-500">No currency impact data yet.</div>}
+            </SimplePanel>
+          </div>
         </div>
       )}
 
