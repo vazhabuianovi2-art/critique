@@ -49,6 +49,12 @@ export default async function handler(req, res) {
     if (body.userId) params.set("client_reference_id", String(body.userId));
     params.set("metadata[source]", "trycritique");
     params.set("metadata[plan]", plan);
+    if (body.userId) params.set("metadata[user_id]", String(body.userId));
+    if (body.email) params.set("metadata[email]", String(body.email));
+    params.set("subscription_data[metadata][source]", "trycritique");
+    params.set("subscription_data[metadata][plan]", plan);
+    if (body.userId) params.set("subscription_data[metadata][user_id]", String(body.userId));
+    if (body.email) params.set("subscription_data[metadata][email]", String(body.email));
 
     const stripeResponse = await fetch(`${STRIPE_API_BASE}/checkout/sessions`, {
       method: "POST",

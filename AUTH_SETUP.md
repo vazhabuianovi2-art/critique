@@ -82,6 +82,7 @@ Add these in Vercel Project Settings -> Environment Variables for Production and
 STRIPE_SECRET_KEY=sk_live_...
 STRIPE_MONTHLY_PRICE_ID=price_...
 STRIPE_YEARLY_PRICE_ID=price_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 VITE_SITE_URL=https://trycritique.com
 ```
 
@@ -92,6 +93,15 @@ In Stripe Dashboard:
 3. Add a recurring yearly price for `$86/year`.
 4. Copy each price ID into Vercel as `STRIPE_MONTHLY_PRICE_ID` and `STRIPE_YEARLY_PRICE_ID`.
 5. Enable Customer Portal in Stripe Billing so users can manage cards, invoices, and cancellation.
-6. Redeploy Vercel after saving the variables.
+6. In Stripe Developers -> Webhooks, add endpoint `https://trycritique.com/api/stripe-webhook`.
+7. Select these events:
+   - `checkout.session.completed`
+   - `customer.subscription.created`
+   - `customer.subscription.updated`
+   - `customer.subscription.deleted`
+8. Open the new webhook endpoint, reveal the signing secret, and add it to Vercel as `STRIPE_WEBHOOK_SECRET`.
+9. Run `supabase/schema.sql` in Supabase SQL Editor so subscription status can be saved.
+10. Redeploy Vercel after saving the variables.
 
 The app uses `/api/create-checkout-session` for Stripe Checkout and `/api/create-customer-portal` for the billing portal.
+Stripe sends subscription changes to `/api/stripe-webhook`, and the app reads the saved status from `/api/billing-status` with the signed-in user's session.

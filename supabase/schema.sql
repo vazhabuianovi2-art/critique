@@ -71,3 +71,35 @@ drop policy if exists "trades_delete_own" on public.trades;
 create policy "trades_delete_own"
   on public.trades for delete
   using (auth.uid() = user_id);
+
+create table if not exists public.billing_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade,
+  email text,
+  stripe_customer_id text,
+  stripe_subscription_id text not null unique,
+  stripe_price_id text,
+  plan text,
+  status text not null default 'unknown',
+  current_period_start timestamptz,
+  current_period_end timestamptz,
+  trial_start timestamptz,
+  trial_end timestamptz,
+  cancel_at_period_end boolean not null default false,
+  canceled_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists billing_subscriptions_user_id_updated_at_idx
+  on public.billing_subscriptions (user_id, updated_at desc);
+
+create index if not exists billing_subscriptions_email_updated_at_idx
+  on public.billing_subscriptions (email, updated_at desc);
+
+alter table public.billing_subscriptions enable row level security;
+
+drop policy if exists "billing_subscriptions_select_own" on public.billing_subscriptions;
+create policy "billing_subscriptions_select_own"
+  on public.billing_subscriptions for select
+  using (auth.uid() = user_id);

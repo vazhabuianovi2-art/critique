@@ -9107,6 +9107,8 @@ function BillingPageStripe({ account, authUser }) {
   const [billingStatus, setBillingStatus] = useState("");
   const [billingError, setBillingError] = useState("");
   const [loadingPlan, setLoadingPlan] = useState("");
+  const [subscription, setSubscription] = useState(null);
+  const [statusLoading, setStatusLoading] = useState(false);
 
   const plans = [
     {
@@ -9146,8 +9148,15 @@ function BillingPageStripe({ account, authUser }) {
     "STRIPE_SECRET_KEY",
     "STRIPE_MONTHLY_PRICE_ID",
     "STRIPE_YEARLY_PRICE_ID",
+    "STRIPE_WEBHOOK_SECRET",
     "VITE_SITE_URL",
   ];
+
+  const subscriptionStatus = String(subscription?.status || "").replaceAll("_", " ");
+  const subscriptionDate = subscription?.trial_end || subscription?.current_period_end || "";
+  const subscriptionDateText = subscriptionDate
+    ? new Date(subscriptionDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
+    : "";
 
   useEffect(() => {
     const billingResult = new URLSearchParams(window.location.search).get("billing");
@@ -9155,6 +9164,36 @@ function BillingPageStripe({ account, authUser }) {
     if (billingResult === "cancelled") setBillingStatus("Checkout was cancelled. You can choose a plan whenever you are ready.");
     if (billingResult === "portal-return") setBillingStatus("Returned from the billing portal.");
   }, []);
+
+  useEffect(() => {
+    if (!authUser?.id && !authUser?.email) return undefined;
+    let cancelled = false;
+
+    async function loadBillingStatus() {
+      setStatusLoading(true);
+      try {
+        const accessToken = await getCurrentAccessToken();
+        if (!accessToken) return;
+        const response = await fetch("/api/billing-status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ accessToken }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.ok) throw new Error(data.error || "Could not load billing status.");
+        if (!cancelled) setSubscription(data.subscription || null);
+      } catch {
+        if (!cancelled) setSubscription(null);
+      } finally {
+        if (!cancelled) setStatusLoading(false);
+      }
+    }
+
+    loadBillingStatus();
+    return () => {
+      cancelled = true;
+    };
+  }, [authUser?.id, authUser?.email]);
 
   async function postBilling(path, body) {
     const response = await fetch(path, {
@@ -9325,6 +9364,18 @@ function BillingPageStripe({ account, authUser }) {
             <div className="mt-6 rounded-lg border border-white/10 bg-black/45 p-5">
               <div className="text-xs font-black uppercase tracking-[0.16em] text-zinc-500">Billing Email</div>
               <div className="mt-2 truncate text-lg font-black text-white">{authUser?.email || "No email found"}</div>
+              <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.04] p-4">
+                <div className="text-xs font-black uppercase tracking-[0.16em] text-zinc-500">Current Plan</div>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <span className="text-lg font-black capitalize text-white">
+                    {statusLoading ? "Checking..." : subscription ? `${subscription.plan || "Pro"} · ${subscriptionStatus || "active"}` : "No active plan yet"}
+                  </span>
+                  {subscription?.cancel_at_period_end && <span className="rounded-full bg-amber-500/15 px-2 py-1 text-xs font-black text-amber-200">Cancels soon</span>}
+                </div>
+                <div className="mt-1 text-sm font-semibold text-zinc-400">
+                  {subscriptionDateText ? `${subscription?.status === "trialing" ? "Trial ends" : "Current period ends"} ${subscriptionDateText}` : "Start a plan to unlock saved subscription details."}
+                </div>
+              </div>
               <button
                 onClick={openBillingPortal}
                 disabled={Boolean(loadingPlan)}
