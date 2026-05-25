@@ -343,6 +343,25 @@ const THEME_STYLE_CSS = `
     }
   }
 
+  @media (max-width: 1023px) {
+    main {
+      width: 100% !important;
+      margin-left: 0 !important;
+      padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px)) !important;
+    }
+  }
+
+  @media (max-width: 640px) {
+    main {
+      padding: .75rem !important;
+      padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    h1 {
+      overflow-wrap: anywhere;
+    }
+  }
+
   .light-theme {
     background: linear-gradient(135deg, #fbf7ff 0%, #ffffff 42%, #f8fbff 100%) !important;
     color: #0f172a !important;
@@ -3565,6 +3584,149 @@ const THEME_STYLE_CSS = `
 
   .calendar-day-result-stack {
     bottom: .75rem;
+  }
+
+  @media (max-width: 1280px) {
+    .calendar-shell-pro {
+      padding: .95rem !important;
+    }
+
+    .calendar-shell-pro > .grid {
+      min-width: 1040px !important;
+      gap: .65rem !important;
+    }
+
+    .calendar-day-simple,
+    .calendar-week-summary-pro {
+      min-height: 118px !important;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .calendar-page-pro {
+      margin: -.75rem !important;
+      padding: .75rem !important;
+    }
+
+    .calendar-hero-pro,
+    .calendar-shell-pro,
+    .calendar-selected-pro,
+    .calendar-summary-card-pro,
+    .calendar-guide-pro,
+    .economic-calendar-panel {
+      border-radius: 1.15rem !important;
+      padding: 1rem !important;
+    }
+
+    .calendar-hero-pro h1 {
+      font-size: clamp(1.9rem, 10vw, 2.75rem) !important;
+      line-height: 1 !important;
+    }
+
+    .calendar-hero-pro p {
+      font-size: .82rem !important;
+      line-height: 1.45 !important;
+    }
+
+    .calendar-shell-pro {
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x proximity;
+    }
+
+    .calendar-shell-pro > .grid {
+      min-width: 880px !important;
+      gap: .55rem !important;
+    }
+
+    .calendar-week-header {
+      padding-block: .7rem !important;
+      font-size: .64rem !important;
+    }
+
+    .calendar-day-simple,
+    .calendar-week-summary-pro {
+      min-height: 104px !important;
+      border-radius: .9rem !important;
+      padding: .65rem !important;
+    }
+
+    .calendar-day-top-row {
+      top: .65rem;
+      left: .65rem;
+      right: .65rem;
+    }
+
+    .calendar-day-result-stack {
+      left: .65rem;
+      right: .65rem;
+      bottom: .65rem;
+      gap: .35rem;
+    }
+
+    .calendar-day-number,
+    .calendar-day-number-muted {
+      height: 1.65rem !important;
+      min-width: 1.65rem !important;
+      border-radius: .65rem !important;
+      font-size: .84rem !important;
+    }
+
+    .calendar-day-event-pill {
+      max-width: 4.25rem;
+      padding: .2rem .45rem !important;
+    }
+
+    .calendar-day-modal-pro {
+      max-height: calc(100dvh - 1rem) !important;
+      border-radius: 1.1rem !important;
+    }
+
+    .calendar-day-modal-head {
+      align-items: flex-start !important;
+      padding: 1rem !important;
+    }
+
+    .calendar-modal-day-badge {
+      height: 3.15rem !important;
+      min-width: 3.15rem !important;
+      border-radius: .9rem !important;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .mobile-bottom-nav {
+      padding-bottom: calc(.5rem + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    .calendar-shell-pro > .grid {
+      min-width: 820px !important;
+    }
+
+    .calendar-week-summary-pro .text-lg {
+      font-size: .98rem !important;
+    }
+
+    .journal-stats-grid,
+    .statistics-status-strip-pro,
+    .mistake-status-strip-pro {
+      grid-template-columns: 1fr !important;
+    }
+
+    .statistics-command-main-pro,
+    .stats-hero-metric,
+    .stats-insight-card,
+    .mistake-command-main-pro,
+    .mistake-filter-card-pro,
+    .mistake-page-header-pro,
+    .rounded-2xl {
+      max-width: 100%;
+    }
+
+    .calendar-day-modal-summary {
+      margin: 1rem !important;
+      padding: 1rem !important;
+    }
   }
 
   .calendar-day-simple:hover {
