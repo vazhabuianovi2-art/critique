@@ -3555,6 +3555,18 @@ const THEME_STYLE_CSS = `
     max-width: calc(100% - 3.5rem);
   }
 
+  .calendar-day-top-row {
+    position: absolute;
+    top: .9rem;
+    left: .9rem;
+    right: .9rem;
+    z-index: 25;
+  }
+
+  .calendar-day-result-stack {
+    bottom: .75rem;
+  }
+
   .calendar-day-simple:hover {
     transform: translateY(-2px) !important;
     border-color: rgba(217,70,239,.55) !important;
@@ -7704,7 +7716,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
 
                   return (
                     <button key={cell.key} onClick={() => openDayDetails(cell.key)} className={`${getCalendarDayVisual(dayStats, isWeekend, selected)} h-[116px] rounded-xl`}>
-                      <div className="relative z-10 flex items-start justify-between gap-3">
+                      <div className="calendar-day-top-row flex items-start justify-between gap-3">
                         <div className={cell.isCurrentMonth ? "calendar-day-number font-black text-white" : "calendar-day-number-muted font-black text-zinc-500"}>{cell.day}</div>
                         <div className="flex min-w-0 items-center gap-2">
                           {dayEvents.length > 0 && (
@@ -7718,7 +7730,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                       </div>
 
                       {hasTrade ? (
-                        <div className="absolute bottom-3 left-3 right-3 z-10 flex flex-col items-end gap-2">
+                        <div className="calendar-day-result-stack absolute left-3 right-3 z-10 flex flex-col items-end gap-2">
                           <div className={dayStats.pnl > 0 ? "w-full rounded-md border border-emerald-500/45 bg-emerald-500/18 px-2 py-1 text-center text-sm font-black text-emerald-300" : dayStats.pnl < 0 ? "w-full rounded-md border border-red-500/45 bg-red-500/18 px-2 py-1 text-center text-sm font-black text-red-300" : "w-full rounded-md border border-amber-500/45 bg-amber-500/18 px-2 py-1 text-center text-sm font-black text-amber-300"}>
                             {formatMoney(dayStats.pnl)}
                           </div>
