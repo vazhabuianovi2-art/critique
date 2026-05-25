@@ -7362,7 +7362,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
         </div>
       </div>
 
-      {trades.length < 3 && (
+      {(account?.isPlaceholder || trades.length === 0) && (
         <OnboardingChecklist
           trades={trades}
           account={account}
