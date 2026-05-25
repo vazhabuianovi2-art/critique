@@ -5762,7 +5762,7 @@ if (typeof window !== "undefined" && !window.__CRITIQUE_VIDEO_STYLE_TESTS_RAN__)
 export default function TradingJournalDashboard() {
   useEffect(() => {
     document.title = BRAND_NAME;
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="black"/><circle cx="32" cy="32" r="20" fill="none" stroke="#d946ef" stroke-width="6"/><circle cx="32" cy="32" r="7" fill="#d946ef"/><path d="M32 6v10M32 48v10M6 32h10M48 32h10" stroke="#22c55e" stroke-width="4" stroke-linecap="round"/></svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="bg" x1="8" x2="58" y1="6" y2="60" gradientUnits="userSpaceOnUse"><stop stop-color="#050007"/><stop offset="0.58" stop-color="#16051f"/><stop offset="1" stop-color="#04150d"/></linearGradient><linearGradient id="bolt" x1="19" x2="46" y1="8" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="#f0abfc"/><stop offset="0.42" stop-color="#d946ef"/><stop offset="1" stop-color="#22c55e"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#bg)"/><rect x="6" y="6" width="52" height="52" rx="13" fill="none" stroke="#d946ef" stroke-opacity=".45" stroke-width="2"/><path d="M38 6 14 38h15l-5 20 27-36H34L38 6Z" fill="url(#bolt)"/><path d="M34 14 22 35h10l-3 13 13-22h-9l1-12Z" fill="#050007" fill-opacity=".68"/></svg>`;
     let link = document.querySelector("link[rel~='icon']");
     if (!link) {
       link = document.createElement("link");
