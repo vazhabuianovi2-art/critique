@@ -73,3 +73,25 @@ For Confirm sign up, keep Supabase's default `{{ .ConfirmationURL }}` link unles
 4. Click Forgot password.
 5. Open the reset link and set a new password.
 6. Sign in again.
+
+## Stripe billing setup
+
+Add these in Vercel Project Settings -> Environment Variables for Production and Preview:
+
+```text
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_MONTHLY_PRICE_ID=price_...
+STRIPE_YEARLY_PRICE_ID=price_...
+VITE_SITE_URL=https://trycritique.com
+```
+
+In Stripe Dashboard:
+
+1. Create a product named `TryCritique Pro`.
+2. Add a recurring monthly price for `$10/month`.
+3. Add a recurring yearly price for `$86/year`.
+4. Copy each price ID into Vercel as `STRIPE_MONTHLY_PRICE_ID` and `STRIPE_YEARLY_PRICE_ID`.
+5. Enable Customer Portal in Stripe Billing so users can manage cards, invoices, and cancellation.
+6. Redeploy Vercel after saving the variables.
+
+The app uses `/api/create-checkout-session` for Stripe Checkout and `/api/create-customer-portal` for the billing portal.

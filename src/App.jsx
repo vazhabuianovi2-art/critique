@@ -6742,7 +6742,7 @@ Skipped duplicates: ${duplicateCount}
             setProfilePhoto={setProfilePhoto}
           />
         ) : (
-          <BillingPagePro account={account} authUser={authUser} />
+          <BillingPageStripe account={account} authUser={authUser} />
         )}
         </div>
       </main>
@@ -9098,6 +9098,258 @@ function SettingsPage({ account, accountBalance, authUser, theme, setTheme, isSu
             <Button onClick={onSignOut} variant="outline" className="mt-5 border-red-500/35 bg-red-500/10 text-red-300"><LogOut size={16} /> Sign Out</Button>
           </CardContent>
         </Card>
+      </div>
+    </motion.div>
+  );
+}
+
+function BillingPageStripe({ account, authUser }) {
+  const [billingStatus, setBillingStatus] = useState("");
+  const [billingError, setBillingError] = useState("");
+  const [loadingPlan, setLoadingPlan] = useState("");
+
+  const plans = [
+    {
+      id: "monthly",
+      name: "Monthly",
+      price: "$10",
+      cadence: "/month",
+      daily: "$0.33/day",
+      detail: "Flexible monthly access after a 7-day free trial.",
+      badge: "Most flexible",
+    },
+    {
+      id: "yearly",
+      name: "Yearly",
+      price: "$86",
+      cadence: "/year",
+      daily: "$0.24/day",
+      detail: "Best value for traders who journal every week.",
+      badge: "Save 28%",
+      featured: true,
+    },
+  ];
+
+  const features = [
+    "Unlimited trade logging",
+    "Advanced performance statistics",
+    "Calendar and economic calendar",
+    "Mistake detector reports",
+    "Screenshot uploads",
+    "Custom strategies and tags",
+    "CSV import, export, and backup",
+    "Multiple trading accounts",
+    "Priority product updates",
+  ];
+
+  const setupItems = [
+    "STRIPE_SECRET_KEY",
+    "STRIPE_MONTHLY_PRICE_ID",
+    "STRIPE_YEARLY_PRICE_ID",
+    "VITE_SITE_URL",
+  ];
+
+  useEffect(() => {
+    const billingResult = new URLSearchParams(window.location.search).get("billing");
+    if (billingResult === "success") setBillingStatus("Subscription checkout completed. Stripe will manage the active plan.");
+    if (billingResult === "cancelled") setBillingStatus("Checkout was cancelled. You can choose a plan whenever you are ready.");
+    if (billingResult === "portal-return") setBillingStatus("Returned from the billing portal.");
+  }, []);
+
+  async function postBilling(path, body) {
+    const response = await fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || "Billing request failed");
+    }
+    return data;
+  }
+
+  async function startCheckout(plan) {
+    setBillingError("");
+    setBillingStatus("");
+    setLoadingPlan(plan);
+    try {
+      const data = await postBilling("/api/create-checkout-session", {
+        plan,
+        email: authUser?.email,
+        userId: authUser?.id,
+      });
+      window.location.href = data.url;
+    } catch (error) {
+      setBillingError(error?.message || "Could not open checkout.");
+    } finally {
+      setLoadingPlan("");
+    }
+  }
+
+  async function openBillingPortal() {
+    setBillingError("");
+    setBillingStatus("");
+    setLoadingPlan("portal");
+    try {
+      const data = await postBilling("/api/create-customer-portal", {
+        email: authUser?.email,
+      });
+      window.location.href = data.url;
+    } catch (error) {
+      setBillingError(error?.message || "Could not open billing portal.");
+    } finally {
+      setLoadingPlan("");
+    }
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="pb-10">
+      <TopCrumb page="Billing" />
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 className="text-4xl font-black tracking-tight text-white">Billing & Subscription</h1>
+            <p className="mt-2 text-lg font-semibold text-zinc-400">Start, manage, or update your TryCritique Pro plan.</p>
+          </div>
+          <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-black/70 px-4 py-2 text-sm font-black text-white">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
+            {account?.name || "Trading Account"}
+            <span className="rounded-lg bg-white/10 px-2 py-0.5 text-xs">{account?.currency || "USD"}</span>
+          </div>
+        </div>
+
+        {billingStatus && (
+          <div className="mb-5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-200">
+            {billingStatus}
+          </div>
+        )}
+        {billingError && (
+          <div className="mb-5 rounded-lg border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-sm font-bold text-amber-200">
+            {billingError}
+          </div>
+        )}
+
+        <section className="rounded-lg border border-fuchsia-500/25 bg-gradient-to-br from-[#13071e] via-black to-[#04100c] p-6 shadow-[0_18px_70px_rgba(217,70,239,0.10)]">
+          <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-fuchsia-300">
+                <Sparkles size={14} /> TryCritique Pro
+              </div>
+              <h2 className="mt-5 text-4xl font-black leading-tight text-white">Simple billing for serious trading review.</h2>
+              <p className="mt-4 max-w-xl text-base font-semibold leading-7 text-zinc-400">
+                A 7-day free trial, then clear monthly or yearly pricing. Payments are handled by Stripe Checkout and billing changes are handled in Stripe Customer Portal.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <button
+                  onClick={() => startCheckout("monthly")}
+                  disabled={Boolean(loadingPlan)}
+                  className="rounded-lg bg-fuchsia-500 px-5 py-3 text-sm font-black text-black shadow-[0_16px_36px_rgba(217,70,239,0.28)] transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {loadingPlan === "monthly" ? "Opening..." : "Start Monthly"}
+                </button>
+                <button
+                  onClick={() => startCheckout("yearly")}
+                  disabled={Boolean(loadingPlan)}
+                  className="rounded-lg border border-fuchsia-500/35 bg-fuchsia-500/10 px-5 py-3 text-sm font-black text-fuchsia-100 transition hover:border-fuchsia-300 hover:bg-fuchsia-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {loadingPlan === "yearly" ? "Opening..." : "Start Yearly"}
+                </button>
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              {plans.map((plan) => (
+                <div
+                  key={plan.id}
+                  className={`rounded-lg border p-5 ${
+                    plan.featured
+                      ? "border-fuchsia-400/45 bg-fuchsia-500/10 shadow-[0_16px_40px_rgba(217,70,239,0.15)]"
+                      : "border-white/10 bg-black/45"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-lg font-black text-white">{plan.name}</div>
+                      <div className="mt-1 text-xs font-bold text-zinc-400">{plan.detail}</div>
+                    </div>
+                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-black text-fuchsia-200">{plan.badge}</span>
+                  </div>
+                  <div className="mt-6 flex items-end gap-2">
+                    <span className="text-5xl font-black text-white">{plan.price}</span>
+                    <span className="pb-2 text-sm font-bold text-zinc-400">{plan.cadence}</span>
+                  </div>
+                  <div className="mt-2 text-sm font-bold text-emerald-300">{plan.daily}</div>
+                  <button
+                    onClick={() => startCheckout(plan.id)}
+                    disabled={Boolean(loadingPlan)}
+                    className={`mt-6 w-full rounded-lg px-4 py-3 text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                      plan.featured ? "bg-fuchsia-500 text-black hover:scale-[1.01]" : "border border-white/12 bg-black text-white hover:border-fuchsia-400/50"
+                    }`}
+                  >
+                    {loadingPlan === plan.id ? "Opening Checkout..." : `Choose ${plan.name}`}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <div className="mt-8 grid gap-8 xl:grid-cols-[1.05fr_0.95fr]">
+          <section className="rounded-lg border border-white/10 bg-[#070707] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.22)]">
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="text-emerald-300" size={28} />
+              <div>
+                <h2 className="text-2xl font-black text-white">What Pro Includes</h2>
+                <p className="mt-1 text-sm font-semibold text-zinc-400">Everything needed for the full trading review workflow.</p>
+              </div>
+            </div>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              {features.map((feature) => (
+                <div key={feature} className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-bold text-zinc-100">
+                  {feature}
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-lg border border-white/10 bg-[#070707] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.22)]">
+            <div className="flex items-center gap-3">
+              <Settings className="text-fuchsia-300" size={26} />
+              <div>
+                <h2 className="text-2xl font-black text-white">Manage Billing</h2>
+                <p className="mt-1 text-sm font-semibold text-zinc-400">Open Stripe Customer Portal after a subscription is created.</p>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-lg border border-white/10 bg-black/45 p-5">
+              <div className="text-xs font-black uppercase tracking-[0.16em] text-zinc-500">Billing Email</div>
+              <div className="mt-2 truncate text-lg font-black text-white">{authUser?.email || "No email found"}</div>
+              <button
+                onClick={openBillingPortal}
+                disabled={Boolean(loadingPlan)}
+                className="mt-5 inline-flex items-center gap-2 rounded-lg border border-white/12 bg-white/[0.06] px-5 py-3 text-sm font-black text-white transition hover:border-fuchsia-400/50 hover:bg-fuchsia-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <CreditCard size={16} />
+                {loadingPlan === "portal" ? "Opening..." : "Open Billing Portal"}
+              </button>
+            </div>
+
+            <div className="mt-6 rounded-lg border border-amber-500/25 bg-amber-500/10 p-5">
+              <div className="font-black text-amber-200">Go-live checklist</div>
+              <p className="mt-2 text-sm font-semibold leading-6 text-amber-100/80">
+                Add these values in Vercel before live checkout. Without them, the page stays safe and shows a setup message.
+              </p>
+              <div className="mt-4 grid gap-2">
+                {setupItems.map((item) => (
+                  <div key={item} className="rounded-md border border-amber-500/20 bg-black/30 px-3 py-2 font-mono text-xs font-bold text-amber-100">
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </motion.div>
   );
