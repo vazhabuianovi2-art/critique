@@ -2,6 +2,8 @@ function json(res, status, body) {
   res.status(status).json(body);
 }
 
+const STRIPE_API_BASE = "https://api.stripe.com/v1";
+
 async function readBody(req) {
   if (req.body && typeof req.body === "object") return req.body;
   const chunks = [];
@@ -33,6 +35,61 @@ async function fetchLatestSubscription(supabaseUrl, serviceRoleKey, query) {
   return Array.isArray(data) ? data[0] || null : null;
 }
 
+async function stripeGet(secretKey, path) {
+  const response = await fetch(`${STRIPE_API_BASE}${path}`, {
+    headers: { Authorization: `Bearer ${secretKey}` },
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(data?.error?.message || "Could not load Stripe billing status.");
+  return data;
+}
+
+function stripeDate(seconds) {
+  return seconds ? new Date(seconds * 1000).toISOString() : null;
+}
+
+function normalizeStripeSubscription(subscription, email) {
+  if (!subscription?.id) return null;
+  const price = subscription.items?.data?.[0]?.price;
+  const interval = price?.recurring?.interval || "";
+  const metadataPlan = subscription.metadata?.plan || "";
+
+  return {
+    email,
+    stripe_customer_id: typeof subscription.customer === "string" ? subscription.customer : subscription.customer?.id || null,
+    stripe_subscription_id: subscription.id,
+    stripe_price_id: price?.id || null,
+    plan: metadataPlan || (interval === "year" ? "yearly" : interval === "month" ? "monthly" : "Pro"),
+    status: subscription.status || "unknown",
+    current_period_start: stripeDate(subscription.current_period_start),
+    current_period_end: stripeDate(subscription.current_period_end),
+    trial_start: stripeDate(subscription.trial_start),
+    trial_end: stripeDate(subscription.trial_end),
+    cancel_at_period_end: Boolean(subscription.cancel_at_period_end),
+    canceled_at: stripeDate(subscription.canceled_at),
+  };
+}
+
+async function fetchStripeSubscriptionByEmail(secretKey, email) {
+  if (!secretKey || !email) return null;
+  const search = new URLSearchParams();
+  search.set("query", `email:'${String(email).replaceAll("'", "\\'")}'`);
+  search.set("limit", "1");
+
+  const customers = await stripeGet(secretKey, `/customers/search?${search.toString()}`);
+  const customerId = customers?.data?.[0]?.id;
+  if (!customerId) return null;
+
+  const params = new URLSearchParams();
+  params.set("customer", customerId);
+  params.set("status", "all");
+  params.set("limit", "10");
+
+  const subscriptions = await stripeGet(secretKey, `/subscriptions?${params.toString()}`);
+  const preferred = subscriptions?.data?.find((item) => ["trialing", "active"].includes(item.status)) || subscriptions?.data?.[0] || null;
+  return normalizeStripeSubscription(preferred, email);
+}
+
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
 
@@ -45,6 +102,7 @@ export default async function handler(req, res) {
     const supabaseUrl = String(process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "").replace(/\/+$/, "");
     const anonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
     if (!supabaseUrl || !anonKey || !serviceRoleKey) throw new Error("Billing status is not configured.");
 
     const body = await readBody(req);
@@ -54,12 +112,15 @@ export default async function handler(req, res) {
     const user = await getUserFromToken(supabaseUrl, anonKey, accessToken);
     if (!user?.id) return json(res, 401, { ok: false, error: "Login session expired. Sign in again." });
 
+    const email = user.email || body.email || "";
     const byUser = await fetchLatestSubscription(supabaseUrl, serviceRoleKey, `user_id=eq.${encodeURIComponent(user.id)}`);
-    const subscription = byUser || (user.email
-      ? await fetchLatestSubscription(supabaseUrl, serviceRoleKey, `email=eq.${encodeURIComponent(user.email)}`)
+    const subscription = byUser || (email
+      ? await fetchLatestSubscription(supabaseUrl, serviceRoleKey, `email=eq.${encodeURIComponent(email)}`)
       : null);
 
-    return json(res, 200, { ok: true, subscription });
+    const stripeSubscription = subscription || await fetchStripeSubscriptionByEmail(stripeSecretKey, email);
+
+    return json(res, 200, { ok: true, subscription: stripeSubscription });
   } catch (error) {
     return json(res, 500, { ok: false, error: error?.message || "Billing status failed." });
   }

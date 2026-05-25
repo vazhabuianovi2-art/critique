@@ -9177,13 +9177,16 @@ function BillingPageStripe({ account, authUser }) {
         const response = await fetch("/api/billing-status", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ accessToken }),
+          body: JSON.stringify({ accessToken, email: authUser?.email }),
         });
         const data = await response.json().catch(() => ({}));
         if (!response.ok || !data.ok) throw new Error(data.error || "Could not load billing status.");
         if (!cancelled) setSubscription(data.subscription || null);
-      } catch {
-        if (!cancelled) setSubscription(null);
+      } catch (error) {
+        if (!cancelled) {
+          setSubscription(null);
+          setBillingError(error?.message || "Could not load billing status.");
+        }
       } finally {
         if (!cancelled) setStatusLoading(false);
       }
