@@ -5396,19 +5396,8 @@ function calculateStatistics(trades = [], startingBalance = 50000) {
 
 async function loadTradesFromSupabase(userId) {
   if (!supabase || !userId) return null;
-  let data = null;
-  try {
-    const result = await supabase
-      .from("trades")
-      .select("id, created_at, trade_data")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
-    if (result.error) throw result.error;
-    data = result.data;
-  } catch {
-    const fallback = await postSupabaseSync("listTrades");
-    data = fallback?.rows || [];
-  }
+  const fallback = await postSupabaseSync("listTrades");
+  const data = fallback?.rows || [];
   return (data || []).map((row) => ({
     ...(row.trade_data || {}),
     id: row.id,
@@ -5421,61 +5410,21 @@ async function loadTradesFromSupabase(userId) {
 
 async function saveTradeToSupabase(userId, trade) {
   if (!supabase || !userId) return trade;
-  const payload = { ...trade };
-  delete payload.supabaseId;
-
-  try {
-    if (trade.supabaseId || (typeof trade.id === "string" && trade.id.includes("-"))) {
-      const rowId = trade.supabaseId || trade.id;
-      const { data, error } = await supabase
-        .from("trades")
-        .update({ trade_data: payload })
-        .eq("id", rowId)
-        .eq("user_id", userId)
-        .select("id")
-        .single();
-      if (error) throw error;
-      return { ...trade, id: data.id, supabaseId: data.id };
-    }
-
-    const { data, error } = await supabase
-      .from("trades")
-      .insert({ user_id: userId, trade_data: payload })
-      .select("id")
-      .single();
-    if (error) throw error;
-    return { ...trade, id: data.id, supabaseId: data.id };
-  } catch {
-    const result = await postSupabaseSync("saveTrade", { trade });
-    return result?.trade || trade;
-  }
+  const result = await postSupabaseSync("saveTrade", { trade });
+  return result?.trade || trade;
 }
 
 async function deleteTradeFromSupabase(userId, trade) {
   if (!supabase || !userId || !trade) return;
   const rowId = trade.supabaseId || trade.id;
   if (!rowId || typeof rowId !== "string") return;
-  try {
-    const { error } = await supabase
-      .from("trades")
-      .delete()
-      .eq("id", rowId)
-      .eq("user_id", userId);
-    if (error) throw error;
-  } catch {
-    await postSupabaseSync("deleteTrade", { tradeId: rowId });
-  }
+  await postSupabaseSync("deleteTrade", { tradeId: rowId });
 }
 
 async function loadAccountFromSupabase(userId) {
   if (!supabase || !userId) return null;
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("account_data")
-    .eq("id", userId)
-    .maybeSingle();
-  if (error) throw error;
-  const accountData = data?.account_data;
+  const result = await postSupabaseSync("loadAccount");
+  const accountData = result?.account;
   return accountData && typeof accountData === "object" && Object.keys(accountData).length ? accountData : null;
 }
 
@@ -5488,21 +5437,8 @@ async function saveAccountToSupabase(userId, account) {
 
   if (!supabase || !userId) return normalizedAccount;
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .upsert(
-      {
-        id: userId,
-        account_data: normalizedAccount,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "id" }
-    )
-    .select("account_data")
-    .single();
-
-  if (error) throw error;
-  return data?.account_data || normalizedAccount;
+  const result = await postSupabaseSync("saveAccount", { account: normalizedAccount });
+  return result?.account || normalizedAccount;
 }
 
 function getRestoreCacheKey(userId) {
@@ -5589,39 +5525,9 @@ function mergeTradesUnique(primary = [], secondary = []) {
 async function replaceTradesInSupabase(userId, tradesToRestore) {
   if (!supabase || !userId) throw new Error("Supabase/Auth არ არის მზად. თავიდან შედი ანგარიშში და მერე სცადე Restore.");
 
-  const { error: deleteError } = await supabase
-    .from("trades")
-    .delete()
-    .eq("user_id", userId);
-  if (deleteError) throw deleteError;
+  const result = await postSupabaseSync("replaceTrades", { trades: tradesToRestore });
 
-  if (!tradesToRestore.length) return [];
-
-  const rowsToInsert = tradesToRestore.map((trade, index) => {
-    const localId = Date.now() + index;
-    const tradeData = {
-      ...trade,
-      id: localId,
-      createdAt: trade.createdAt || localId,
-      screenshots: normalizeScreenshots(trade),
-      tags: normalizeTags(trade),
-    };
-    delete tradeData.supabaseId;
-
-    return {
-      user_id: userId,
-      trade_data: tradeData,
-    };
-  });
-
-  const { data: insertedRows, error: insertError } = await supabase
-    .from("trades")
-    .insert(rowsToInsert)
-    .select("id, created_at, trade_data");
-
-  if (insertError) throw insertError;
-
-  return (insertedRows || []).map((row) => ({
+  return (result?.rows || []).map((row) => ({
     ...(row.trade_data || {}),
     id: row.id,
     supabaseId: row.id,
@@ -9161,10 +9067,17 @@ function BillingPageStripe({ account, authUser }) {
     : "";
 
   useEffect(() => {
-    const billingResult = new URLSearchParams(window.location.search).get("billing");
+    const params = new URLSearchParams(window.location.search);
+    const billingResult = params.get("billing");
     if (billingResult === "success") setBillingStatus("Subscription checkout completed. Stripe will manage the active plan.");
     if (billingResult === "cancelled") setBillingStatus("Checkout was cancelled. You can choose a plan whenever you are ready.");
     if (billingResult === "portal-return") setBillingStatus("Returned from the billing portal.");
+    if (billingResult) {
+      params.delete("billing");
+      const nextSearch = params.toString();
+      const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ""}${window.location.hash}`;
+      window.history.replaceState({}, "", nextUrl);
+    }
   }, []);
 
   useEffect(() => {
@@ -9175,7 +9088,7 @@ function BillingPageStripe({ account, authUser }) {
       setStatusLoading(true);
       try {
         const accessToken = await getCurrentAccessToken();
-        if (!accessToken) return;
+        if (!accessToken && !authUser?.email) return;
         const response = await fetch("/api/billing-status", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

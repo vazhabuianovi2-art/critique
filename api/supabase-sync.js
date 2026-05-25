@@ -104,6 +104,68 @@ export default async function handler(request, response) {
       return json(response, 200, { ok: true });
     }
 
+    if (action === "loadAccount") {
+      const upstream = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=account_data&limit=1`, {
+        headers,
+      });
+      const result = await upstream.json().catch(() => null);
+      if (!upstream.ok) return json(response, upstream.status, { error: result?.message || "Could not load account profile." });
+      const row = Array.isArray(result) ? result[0] : null;
+      return json(response, 200, { account: row?.account_data || null });
+    }
+
+    if (action === "saveAccount") {
+      const account = body.account && typeof body.account === "object" ? body.account : null;
+      if (!account) return json(response, 400, { error: "Account is missing." });
+      const upstream = await fetch(`${supabaseUrl}/rest/v1/profiles?on_conflict=id&select=account_data`, {
+        method: "POST",
+        headers: { ...headers, Prefer: "resolution=merge-duplicates,return=representation" },
+        body: JSON.stringify({
+          id: userId,
+          account_data: account,
+          updated_at: new Date().toISOString(),
+        }),
+      });
+      const result = await upstream.json().catch(() => null);
+      if (!upstream.ok) return json(response, upstream.status, { error: result?.message || "Could not save account profile." });
+      const row = Array.isArray(result) ? result[0] : result;
+      return json(response, 200, { account: row?.account_data || account });
+    }
+
+    if (action === "replaceTrades") {
+      const trades = Array.isArray(body.trades) ? body.trades : [];
+      const deleteResponse = await fetch(`${supabaseUrl}/rest/v1/trades?user_id=eq.${userId}`, {
+        method: "DELETE",
+        headers,
+      });
+      if (!deleteResponse.ok) {
+        const result = await deleteResponse.json().catch(() => null);
+        return json(response, deleteResponse.status, { error: result?.message || "Could not clear old trades." });
+      }
+
+      if (!trades.length) return json(response, 200, { rows: [] });
+
+      const rowsToInsert = trades.map((trade, index) => {
+        const localId = Date.now() + index;
+        const tradeData = {
+          ...trade,
+          id: localId,
+          createdAt: trade.createdAt || localId,
+        };
+        delete tradeData.supabaseId;
+        return { user_id: userId, trade_data: tradeData };
+      });
+
+      const insertResponse = await fetch(`${supabaseUrl}/rest/v1/trades?select=id,created_at,trade_data`, {
+        method: "POST",
+        headers: { ...headers, Prefer: "return=representation" },
+        body: JSON.stringify(rowsToInsert),
+      });
+      const result = await insertResponse.json().catch(() => null);
+      if (!insertResponse.ok) return json(response, insertResponse.status, { error: result?.message || "Could not restore trades." });
+      return json(response, 200, { rows: result || [] });
+    }
+
     return json(response, 400, { error: "Unknown sync action." });
   } catch (error) {
     return json(response, 500, { error: error?.message || "Sync failed." });

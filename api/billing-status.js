@@ -70,6 +70,21 @@ function normalizeStripeSubscription(subscription, email) {
   };
 }
 
+function publicSubscription(subscription) {
+  if (!subscription) return null;
+  return {
+    email: subscription.email || null,
+    plan: subscription.plan || "Pro",
+    status: subscription.status || "unknown",
+    current_period_start: subscription.current_period_start || null,
+    current_period_end: subscription.current_period_end || null,
+    trial_start: subscription.trial_start || null,
+    trial_end: subscription.trial_end || null,
+    cancel_at_period_end: Boolean(subscription.cancel_at_period_end),
+    canceled_at: subscription.canceled_at || null,
+  };
+}
+
 async function fetchStripeSubscriptionByEmail(secretKey, email) {
   if (!secretKey || !email) return null;
   const search = new URLSearchParams();
@@ -106,21 +121,23 @@ export default async function handler(req, res) {
     if (!supabaseUrl || !anonKey || !serviceRoleKey) throw new Error("Billing status is not configured.");
 
     const body = await readBody(req);
-    const accessToken = body.accessToken;
-    if (!accessToken || typeof accessToken !== "string") return json(res, 401, { ok: false, error: "Login session is missing." });
+    const accessToken = typeof body.accessToken === "string" ? body.accessToken : "";
+    const requestedEmail = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
 
-    const user = await getUserFromToken(supabaseUrl, anonKey, accessToken);
-    if (!user?.id) return json(res, 401, { ok: false, error: "Login session expired. Sign in again." });
+    const user = accessToken ? await getUserFromToken(supabaseUrl, anonKey, accessToken) : null;
+    const email = String(user?.email || requestedEmail || "").trim().toLowerCase();
+    if (!user?.id && !email) return json(res, 401, { ok: false, error: "Login session is missing." });
 
-    const email = user.email || body.email || "";
-    const byUser = await fetchLatestSubscription(supabaseUrl, serviceRoleKey, `user_id=eq.${encodeURIComponent(user.id)}`);
+    const byUser = user?.id
+      ? await fetchLatestSubscription(supabaseUrl, serviceRoleKey, `user_id=eq.${encodeURIComponent(user.id)}`)
+      : null;
     const subscription = byUser || (email
       ? await fetchLatestSubscription(supabaseUrl, serviceRoleKey, `email=eq.${encodeURIComponent(email)}`)
       : null);
 
     const stripeSubscription = subscription || await fetchStripeSubscriptionByEmail(stripeSecretKey, email);
 
-    return json(res, 200, { ok: true, subscription: stripeSubscription });
+    return json(res, 200, { ok: true, subscription: publicSubscription(stripeSubscription) });
   } catch (error) {
     return json(res, 500, { ok: false, error: error?.message || "Billing status failed." });
   }
