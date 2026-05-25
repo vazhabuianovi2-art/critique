@@ -1440,10 +1440,15 @@ const THEME_STYLE_CSS = `
   .dashboard-activity-card,
   .dashboard-recent-list,
   .dashboard-routine-card,
-  .journal-hero,
-  .journal-sort-panel {
+  .journal-hero {
     position: relative;
     overflow: hidden;
+  }
+
+  .journal-sort-panel {
+    position: relative;
+    overflow: visible !important;
+    z-index: 25;
   }
 
   .journal-search-panel {
@@ -6793,6 +6798,7 @@ Skipped duplicates: ${duplicateCount}
             selectedCalendarDate={selectedCalendarDate}
             onSelectCalendarDate={(dateKey) => { setSelectedCalendarDate(dateKey); setActive("Calendar"); }}
             onViewAllTrades={() => setActive("Journal")}
+            onOpenJournal={() => setActive("Journal")}
             onOpenMistakeDetector={() => setActive("Mistake Detector")}
             onOpenAccount={() => accounts.length ? setIsAccountModalOpen(true) : createNewAccount()}
             profileName={profileName}
@@ -7250,7 +7256,7 @@ function ReviewBox({ title, value, tone }) {
   return <div className={`rounded-xl border p-4 ${cls}`}><div className="text-xs font-black uppercase tracking-widest text-zinc-400">{title}</div><div className="mt-2 text-sm font-semibold text-zinc-300">{value}</div></div>;
 }
 
-function OnboardingChecklist({ trades, account, onAdd, onOpenAccount, onViewAllTrades, onOpenMistakeDetector }) {
+function OnboardingChecklist({ trades, account, onOpenJournal, onOpenAccount, onViewAllTrades, onOpenMistakeDetector }) {
   const tradeCount = trades.length;
   const steps = [
     {
@@ -7263,10 +7269,10 @@ function OnboardingChecklist({ trades, account, onAdd, onOpenAccount, onViewAllT
     },
     {
       title: "First trade",
-      detail: tradeCount ? `${tradeCount} trade${tradeCount === 1 ? "" : "s"} logged. Keep building the sample.` : "Log one trade to activate real dashboard data.",
+      detail: tradeCount ? `${tradeCount} trade${tradeCount === 1 ? "" : "s"} logged. Keep building the sample.` : "Open the journal and add one trade to activate real dashboard data.",
       done: tradeCount > 0,
-      action: onAdd,
-      actionLabel: tradeCount ? "Add Another" : "Add First Trade",
+      action: onOpenJournal,
+      actionLabel: tradeCount ? "Open Journal" : "Start Journal",
       icon: <Plus size={18} />,
     },
     {
@@ -7287,7 +7293,7 @@ function OnboardingChecklist({ trades, account, onAdd, onOpenAccount, onViewAllT
           <h2 className="mt-2 text-2xl font-black text-white">Set up the trading workflow</h2>
           <p className="mt-1 max-w-2xl text-sm font-semibold text-zinc-400">These three steps make the calendar, statistics, and mistake detector useful from day one.</p>
         </div>
-        <Button onClick={onAdd} className="bg-fuchsia-500 px-5 py-3 font-black text-white shadow-[0_0_22px_rgba(217,70,239,0.22)]"><Plus size={16} /> Log Trade</Button>
+        <Button onClick={onOpenJournal} className="bg-fuchsia-500 px-5 py-3 font-black text-white shadow-[0_0_22px_rgba(217,70,239,0.22)]"><BookOpen size={16} /> Log Trades</Button>
       </div>
       <div className="mt-5 grid gap-3 lg:grid-cols-3">
         {steps.map((step) => (
@@ -7306,7 +7312,7 @@ function OnboardingChecklist({ trades, account, onAdd, onOpenAccount, onViewAllT
   );
 }
 
-function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades, onAdd, onView, onStartDay, routine, selectedCalendarDate, onSelectCalendarDate, onViewAllTrades, onOpenMistakeDetector, onOpenAccount, profileName = "User", economicCalendar, onRefreshEconomicCalendar }) {
+function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades, onAdd, onView, onStartDay, routine, selectedCalendarDate, onSelectCalendarDate, onViewAllTrades, onOpenJournal, onOpenMistakeDetector, onOpenAccount, profileName = "User", economicCalendar, onRefreshEconomicCalendar }) {
   const [performanceMode, setPerformanceMode] = useState("EquityCurve");
   const quote = quotes[new Date().getDate() % quotes.length];
   const checkedCount = routineItems.filter((item) => routine.checked?.[item.id]).length;
@@ -7334,7 +7340,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
             <p className="mt-3 flex items-center gap-2 text-base font-semibold text-zinc-400">▣ {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Button onClick={onAdd} className="dashboard-primary-btn bg-fuchsia-500 px-5 py-3 font-black text-black shadow-[0_0_24px_rgba(217,70,239,0.28)]">▣ Log Trade</Button>
+            <Button onClick={onOpenJournal} className="dashboard-primary-btn bg-fuchsia-500 px-5 py-3 font-black text-black shadow-[0_0_24px_rgba(217,70,239,0.28)]">▣ Log Trades</Button>
             <Button onClick={onStartDay} className="dashboard-start-btn border border-emerald-500/45 bg-black px-5 py-3 font-black text-white hover:bg-emerald-500/15">Start Your Day</Button>
           </div>
         </div>
@@ -7360,7 +7366,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
         <OnboardingChecklist
           trades={trades}
           account={account}
-          onAdd={onAdd}
+          onOpenJournal={onOpenJournal}
           onOpenAccount={onOpenAccount}
           onViewAllTrades={onViewAllTrades}
           onOpenMistakeDetector={onOpenMistakeDetector}
