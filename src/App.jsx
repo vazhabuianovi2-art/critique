@@ -211,7 +211,9 @@ async function updatePasswordWithRetry(password, resetPayload = {}) {
 async function getCurrentAccessToken() {
   if (!supabase) return "";
   const { data } = await supabase.auth.getSession();
-  if (data?.session?.access_token) return data.session.access_token;
+  const session = data?.session;
+  const expiresAt = session?.expires_at ? session.expires_at * 1000 : 0;
+  if (session?.access_token && expiresAt > Date.now() + 30000) return session.access_token;
   const refreshed = await supabase.auth.refreshSession().catch(() => null);
   return refreshed?.data?.session?.access_token || "";
 }
