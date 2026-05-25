@@ -74,11 +74,15 @@ create policy "trades_delete_own"
 
 create table if not exists public.billing_subscriptions (
   id uuid primary key default gen_random_uuid(),
+  provider text not null default 'dodo',
   user_id uuid references auth.users(id) on delete cascade,
   email text,
   stripe_customer_id text,
-  stripe_subscription_id text not null unique,
+  stripe_subscription_id text unique,
   stripe_price_id text,
+  dodo_customer_id text,
+  dodo_subscription_id text,
+  dodo_product_id text,
   plan text,
   status text not null default 'unknown',
   current_period_start timestamptz,
@@ -90,6 +94,19 @@ create table if not exists public.billing_subscriptions (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.billing_subscriptions
+  add column if not exists provider text not null default 'dodo',
+  add column if not exists dodo_customer_id text,
+  add column if not exists dodo_subscription_id text,
+  add column if not exists dodo_product_id text;
+
+alter table public.billing_subscriptions
+  alter column stripe_subscription_id drop not null;
+
+create unique index if not exists billing_subscriptions_dodo_subscription_id_key
+  on public.billing_subscriptions (dodo_subscription_id)
+  ;
 
 create index if not exists billing_subscriptions_user_id_updated_at_idx
   on public.billing_subscriptions (user_id, updated_at desc);

@@ -74,34 +74,40 @@ For Confirm sign up, keep Supabase's default `{{ .ConfirmationURL }}` link unles
 5. Open the reset link and set a new password.
 6. Sign in again.
 
-## Stripe billing setup
+## Dodo Payments billing setup
 
 Add these in Vercel Project Settings -> Environment Variables for Production and Preview:
 
 ```text
-STRIPE_SECRET_KEY=sk_live_...
-STRIPE_MONTHLY_PRICE_ID=price_...
-STRIPE_YEARLY_PRICE_ID=price_...
-STRIPE_WEBHOOK_SECRET=whsec_...
+DODO_PAYMENTS_API_KEY=...
+DODO_MONTHLY_PRODUCT_ID=...
+DODO_YEARLY_PRODUCT_ID=...
+DODO_PAYMENTS_WEBHOOK_KEY=...
+DODO_PAYMENTS_ENVIRONMENT=live_mode
+DODO_BUSINESS_ID=...
 VITE_SITE_URL=https://trycritique.com
 ```
 
-In Stripe Dashboard:
+In Dodo Payments Dashboard:
 
-1. Create a product named `TryCritique Pro`.
-2. Add a recurring monthly price for `$10/month`.
-3. Add a recurring yearly price for `$86/year`.
-4. Copy each price ID into Vercel as `STRIPE_MONTHLY_PRICE_ID` and `STRIPE_YEARLY_PRICE_ID`.
-5. Enable Customer Portal in Stripe Billing so users can manage cards, invoices, and cancellation.
-6. In Stripe Developers -> Webhooks, add endpoint `https://trycritique.com/api/stripe-webhook`.
-7. Select these events:
-   - `checkout.session.completed`
-   - `customer.subscription.created`
-   - `customer.subscription.updated`
-   - `customer.subscription.deleted`
-8. Open the new webhook endpoint, reveal the signing secret, and add it to Vercel as `STRIPE_WEBHOOK_SECRET`.
+1. Create a subscription product for `TryCritique Pro Monthly` at `$10/month`.
+2. Create a subscription product for `TryCritique Pro Yearly` at `$86/year`.
+3. Copy each product ID into Vercel as `DODO_MONTHLY_PRODUCT_ID` and `DODO_YEARLY_PRODUCT_ID`.
+4. In Developer -> API Keys, create a write-enabled API key and add it as `DODO_PAYMENTS_API_KEY`.
+5. In Developer -> Webhooks, add endpoint `https://trycritique.com/api/dodo-webhook`.
+6. Select subscription lifecycle events:
+   - `subscription.active`
+   - `subscription.updated`
+   - `subscription.on_hold`
+   - `subscription.renewed`
+   - `subscription.plan_changed`
+   - `subscription.cancelled`
+   - `subscription.failed`
+   - `subscription.expired`
+7. Copy the webhook signing key into Vercel as `DODO_PAYMENTS_WEBHOOK_KEY`.
+8. Copy the business ID into Vercel as `DODO_BUSINESS_ID` so the app can fall back to Dodo's email-based portal.
 9. Run `supabase/schema.sql` in Supabase SQL Editor so subscription status can be saved.
 10. Redeploy Vercel after saving the variables.
 
-The app uses `/api/create-checkout-session` for Stripe Checkout and `/api/create-customer-portal` for the billing portal.
-Stripe sends subscription changes to `/api/stripe-webhook`, and the app reads the saved status from `/api/billing-status` with the signed-in user's session.
+The app uses `/api/create-checkout-session` for Dodo Checkout and `/api/create-customer-portal` for Dodo Customer Portal.
+Dodo sends subscription changes to `/api/dodo-webhook`, and the app reads the saved status from `/api/billing-status` with the signed-in user's session.

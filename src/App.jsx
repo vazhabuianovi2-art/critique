@@ -6650,7 +6650,7 @@ Skipped duplicates: ${duplicateCount}
             setProfilePhoto={setProfilePhoto}
           />
         ) : (
-          <BillingPageStripe account={account} authUser={authUser} />
+          <BillingPageDodo account={account} authUser={authUser} />
         )}
         </div>
       </main>
@@ -9011,7 +9011,7 @@ function SettingsPage({ account, accountBalance, authUser, theme, setTheme, isSu
   );
 }
 
-function BillingPageStripe({ account, authUser }) {
+function BillingPageDodo({ account, authUser }) {
   const [billingStatus, setBillingStatus] = useState("");
   const [billingError, setBillingError] = useState("");
   const [loadingPlan, setLoadingPlan] = useState("");
@@ -9053,10 +9053,12 @@ function BillingPageStripe({ account, authUser }) {
   ];
 
   const setupItems = [
-    "STRIPE_SECRET_KEY",
-    "STRIPE_MONTHLY_PRICE_ID",
-    "STRIPE_YEARLY_PRICE_ID",
-    "STRIPE_WEBHOOK_SECRET",
+    "DODO_PAYMENTS_API_KEY",
+    "DODO_MONTHLY_PRODUCT_ID",
+    "DODO_YEARLY_PRODUCT_ID",
+    "DODO_PAYMENTS_WEBHOOK_KEY",
+    "DODO_PAYMENTS_ENVIRONMENT",
+    "DODO_BUSINESS_ID",
     "VITE_SITE_URL",
   ];
 
@@ -9069,7 +9071,7 @@ function BillingPageStripe({ account, authUser }) {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const billingResult = params.get("billing");
-    if (billingResult === "success") setBillingStatus("Subscription checkout completed. Stripe will manage the active plan.");
+    if (billingResult === "success") setBillingStatus("Subscription checkout completed. Dodo will sync the active plan shortly.");
     if (billingResult === "cancelled") setBillingStatus("Checkout was cancelled. You can choose a plan whenever you are ready.");
     if (billingResult === "portal-return") setBillingStatus("Returned from the billing portal.");
     if (billingResult) {
@@ -9195,7 +9197,7 @@ function BillingPageStripe({ account, authUser }) {
               </div>
               <h2 className="mt-5 text-4xl font-black leading-tight text-white">Simple billing for serious trading review.</h2>
               <p className="mt-4 max-w-xl text-base font-semibold leading-7 text-zinc-400">
-                A 7-day free trial, then clear monthly or yearly pricing. Payments are handled by Stripe Checkout and billing changes are handled in Stripe Customer Portal.
+                A 7-day free trial, then clear monthly or yearly pricing. Payments, taxes, and subscription changes are handled by Dodo Payments.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <button
@@ -9275,7 +9277,7 @@ function BillingPageStripe({ account, authUser }) {
               <Settings className="text-fuchsia-300" size={26} />
               <div>
                 <h2 className="text-2xl font-black text-white">Manage Billing</h2>
-                <p className="mt-1 text-sm font-semibold text-zinc-400">Open Stripe Customer Portal after a subscription is created.</p>
+                <p className="mt-1 text-sm font-semibold text-zinc-400">Open Dodo Customer Portal after a subscription is created.</p>
               </div>
             </div>
 
@@ -9556,7 +9558,7 @@ function BillingPage({ account, authUser }) {
                 <div className="mt-1 font-black text-white">{account?.name || "Trading Account"}</div>
               </div>
               <div className="rounded-2xl border border-amber-500/25 bg-amber-500/10 p-4 text-sm font-bold text-amber-200">
-                Stripe / real payment connection is not connected yet. This is a clean billing UI placeholder, ready for payment logic later.
+                Dodo / real payment connection is not connected yet. This is a clean billing UI placeholder, ready for payment logic later.
               </div>
             </div>
           </CardContent>
