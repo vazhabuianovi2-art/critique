@@ -816,13 +816,13 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .date-picker-weekdays {
-    color: #7e22ce !important;
+    color: #64748b !important;
   }
 
   .light-theme .date-picker-day-current {
-    background: #faf5ff !important;
+    background: #ffffff !important;
     color: #0f172a !important;
-    border: 1px solid rgba(168, 85, 247, 0.16) !important;
+    border: 1px solid rgba(226, 232, 240, 0.95) !important;
   }
 
   .light-theme .date-picker-day-muted {
@@ -848,21 +848,22 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .date-picker-day-current {
-    background: #faf5ff !important;
+    background: #ffffff !important;
     color: #0f172a !important;
-    border: 1px solid rgba(168, 85, 247, 0.22) !important;
+    border: 1px solid rgba(226, 232, 240, 0.95) !important;
   }
 
   .light-theme .date-picker-day-muted {
     background: #f8fafc !important;
     color: #475569 !important;
-    opacity: 0.85 !important;
+    opacity: 0.72 !important;
   }
 
   .light-theme .date-picker-day-selected {
-    background: #d946ef !important;
+    background: linear-gradient(135deg, #a855f7, #d946ef) !important;
     color: #ffffff !important;
-    box-shadow: 0 8px 20px rgba(217, 70, 239, 0.22) !important;
+    border-color: rgba(168, 85, 247, 0.70) !important;
+    box-shadow: 0 8px 20px rgba(168, 85, 247, 0.24) !important;
   }
 
   .light-theme .date-picker-day-selected .date-picker-day-number {
@@ -2364,6 +2365,52 @@ const THEME_STYLE_CSS = `
     color: #0f172a !important;
   }
 
+  .light-theme .trade-context-modern .custom-select-menu {
+    background: #ffffff !important;
+    border-color: rgba(203,213,225,.95) !important;
+    box-shadow: 0 18px 44px rgba(15,23,42,.14) !important;
+  }
+
+  .light-theme .trade-context-modern .custom-select-option {
+    background: #ffffff !important;
+    color: #111827 !important;
+  }
+
+  .light-theme .trade-context-modern .custom-select-option:hover,
+  .light-theme .trade-context-modern .custom-select-active {
+    background: #f8fafc !important;
+    color: #86198f !important;
+    border: 1px solid rgba(217,70,239,.24) !important;
+  }
+
+  .light-theme .trade-context-modern .custom-select-option-no,
+  .light-theme .trade-context-modern .custom-select-option-no span {
+    color: #dc2626 !important;
+  }
+
+  .segmented-choice-active {
+    transform: translateY(-1px);
+  }
+
+  .light-theme .segmented-choice-active {
+    background: linear-gradient(135deg, #d946ef 0%, #a855f7 100%) !important;
+    border-color: rgba(192,38,211,.72) !important;
+    color: #ffffff !important;
+    box-shadow: 0 10px 26px rgba(168,85,247,.22), 0 0 0 3px rgba(217,70,239,.10) !important;
+  }
+
+  .light-theme .segmented-choice-idle {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border-color: rgba(203,213,225,.90) !important;
+  }
+
+  .light-theme .segmented-choice-idle:hover {
+    border-color: rgba(217,70,239,.38) !important;
+    color: #86198f !important;
+    background: #faf5ff !important;
+  }
+
   .session-neon {
     border: 1px solid transparent !important;
     background: rgba(0,0,0,.18) !important;
@@ -3312,6 +3359,19 @@ const THEME_STYLE_CSS = `
     border-color: rgba(16,185,129,.26) !important;
   }
 
+  .light-theme .pretrade-routine-item .rounded-full {
+    background: #ffffff !important;
+    border-color: rgba(148,163,184,.55) !important;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,.75) !important;
+  }
+
+  .light-theme .pretrade-routine-item-checked .rounded-full {
+    background: #10b981 !important;
+    border-color: #10b981 !important;
+    color: #ffffff !important;
+    box-shadow: 0 8px 20px rgba(16,185,129,.22) !important;
+  }
+
   .light-theme .pretrade-status-card {
     background: #f8fafc !important;
     color: #111827 !important;
@@ -3631,6 +3691,36 @@ const THEME_STYLE_CSS = `
     min-height: 128px !important;
     padding: .9rem !important;
     transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease !important;
+  }
+
+  .light-theme .account-create-button {
+    background: linear-gradient(135deg, #faf5ff 0%, #ffffff 100%) !important;
+    border: 1px solid rgba(217,70,239,.28) !important;
+    color: #86198f !important;
+  }
+
+  .light-theme .account-create-button:hover {
+    background: linear-gradient(135deg, #f3e8ff 0%, #ffffff 100%) !important;
+    border-color: rgba(217,70,239,.48) !important;
+  }
+
+  .light-theme .account-create-button .account-create-icon {
+    background: linear-gradient(135deg, #d946ef, #a855f7) !important;
+    color: #ffffff !important;
+    box-shadow: 0 10px 24px rgba(168,85,247,.22) !important;
+  }
+
+  .light-theme .account-create-button .text-fuchsia-300,
+  .light-theme .account-create-button .text-zinc-400 {
+    color: #86198f !important;
+  }
+
+  .light-theme .segmented-choice-active,
+  .light-theme .segmented-choice-active.font-black {
+    background: linear-gradient(135deg, #d946ef 0%, #a855f7 100%) !important;
+    border-color: rgba(192,38,211,.72) !important;
+    color: #ffffff !important;
+    box-shadow: 0 10px 26px rgba(168,85,247,.22), 0 0 0 3px rgba(217,70,239,.10) !important;
   }
 
   .calendar-day-event-pill {
@@ -6745,8 +6835,8 @@ Skipped duplicates: ${duplicateCount}
                 })}
               </div>
 
-              <button onClick={createNewAccount} className="flex w-full items-center gap-3 border-t border-white/10 px-4 py-4 text-left transition hover:bg-fuchsia-500/10">
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-fuchsia-500/15 text-xl font-black text-fuchsia-300">+</span>
+              <button onClick={createNewAccount} className="account-create-button flex w-full items-center gap-3 border-t border-white/10 px-4 py-4 text-left transition hover:bg-fuchsia-500/10">
+                <span className="account-create-icon flex h-9 w-9 items-center justify-center rounded-lg bg-fuchsia-500/15 text-xl font-black text-fuchsia-300">+</span>
                 <span>
                   <span className="block text-sm font-black text-fuchsia-300">Create New Account</span>
                   <span className="block text-xs font-semibold text-zinc-400">Add another trading account</span>
@@ -8737,7 +8827,7 @@ function SegmentedChoice({ value, options = [], onChange, tone = "strategy" }) {
       {options.map((option) => {
         const selected = String(value || "") === String(option);
         return (
-          <button key={option} type="button" onClick={() => onChange?.(option)} className={`${base} ${selected ? toneClass.active : toneClass.idle}`}>
+          <button key={option} type="button" onClick={() => onChange?.(option)} className={`${base} ${selected ? `segmented-choice-active ${toneClass.active}` : `segmented-choice-idle ${toneClass.idle}`}`}>
             {option}
           </button>
         );
