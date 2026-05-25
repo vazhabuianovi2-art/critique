@@ -1648,12 +1648,15 @@ const THEME_STYLE_CSS = `
 
   .fullscreen-toggle-button {
     backdrop-filter: blur(14px);
-    box-shadow: 0 14px 36px rgba(0,0,0,.35), 0 0 24px rgba(217,70,239,.14);
+    background: linear-gradient(135deg, rgba(217,70,239,.18), rgba(5,5,5,.92) 48%, rgba(34,197,94,.12)) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 14px 36px rgba(0,0,0,.35), 0 0 24px rgba(217,70,239,.16);
   }
 
   .fullscreen-toggle-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 18px 44px rgba(0,0,0,.42), 0 0 30px rgba(217,70,239,.22);
+    transform: translateY(-1px) scale(1.03);
+    border-color: rgba(240,171,252,.75) !important;
+    color: #ffffff !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 18px 44px rgba(0,0,0,.42), 0 0 30px rgba(217,70,239,.25);
   }
 
   .onboarding-checklist {
@@ -1700,9 +1703,10 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .fullscreen-toggle-button {
-    background: rgba(255,255,255,.86) !important;
+    background: linear-gradient(135deg, #ffffff 0%, #faf5ff 54%, #ecfdf5 100%) !important;
     color: #86198f !important;
     border-color: rgba(168,85,247,.32) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 14px 34px rgba(126,34,206,.14), 0 0 18px rgba(217,70,239,.12) !important;
   }
 
   .light-theme .journal-metric-box {
@@ -6822,7 +6826,7 @@ Skipped duplicates: ${duplicateCount}
             setDataMessage(error?.message || "Fullscreen is not available in this browser.");
           });
         }}
-        className="fullscreen-toggle-button fixed right-4 top-4 z-[85] flex h-11 w-11 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-black/75 text-fuchsia-200 transition hover:border-fuchsia-300 hover:bg-fuchsia-500/20 hover:text-white lg:right-6 lg:top-6"
+        className="fullscreen-toggle-button fixed right-4 top-4 z-[85] flex h-11 w-11 items-center justify-center rounded-2xl border border-fuchsia-500/35 text-fuchsia-200 transition duration-200 lg:right-6 lg:top-6 lg:h-12 lg:w-12"
         title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
         aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
       >
@@ -7385,13 +7389,6 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
 
       <div className="mb-8 flex items-center justify-between gap-4">
         <TopCrumb page="Dashboard" />
-        <div className="hidden items-center gap-4 lg:flex">
-          <button onClick={onOpenAccount} className="flex items-center gap-2 rounded-xl border border-white/10 bg-zinc-950/80 px-4 py-2 text-sm font-black text-white shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
-            {account?.isPlaceholder ? "Create account" : account.name}
-            <span className="rounded-lg bg-white/10 px-2 py-0.5 text-xs">{account.currency}</span>
-          </button>
-        </div>
       </div>
 
       <div className="dashboard-hero rounded-2xl border border-fuchsia-500/35 bg-gradient-to-r from-fuchsia-950/35 via-black to-[#08040d] p-5 shadow-[0_0_38px_rgba(168,85,247,0.12)]">
@@ -7974,13 +7971,6 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="calendar-page-pro relative -m-4 min-h-screen bg-black p-4 sm:-m-6 sm:p-6 lg:-m-8 lg:p-8">
       <div className="mb-8 flex items-center justify-between gap-4">
         <TopCrumb page="Calendar" />
-        <div className="hidden items-center gap-5 lg:flex">
-          <button className="flex items-center gap-2 rounded-xl border border-white/10 bg-zinc-950/85 px-4 py-2 text-sm font-black text-white shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
-            v
-            <span className="rounded-lg bg-white/10 px-2 py-0.5 text-xs">USD</span>
-          </button>
-        </div>
       </div>
 
       <div className="calendar-hero-pro calendar-neon-panel relative overflow-hidden rounded-2xl border border-fuchsia-500/40 bg-gradient-to-r from-fuchsia-950/35 via-black to-red-950/10 p-7 shadow-[0_0_38px_rgba(217,70,239,0.20)]">
