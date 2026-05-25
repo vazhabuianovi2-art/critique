@@ -21,6 +21,18 @@ async function getUserFromToken(supabaseUrl, anonKey, accessToken) {
   return userResponse.json();
 }
 
+async function fetchLatestSubscription(supabaseUrl, serviceRoleKey, query) {
+  const response = await fetch(`${supabaseUrl}/rest/v1/billing_subscriptions?${query}&select=*&order=updated_at.desc&limit=1`, {
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+    },
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(data?.message || "Could not load billing status.");
+  return Array.isArray(data) ? data[0] || null : null;
+}
+
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
 
@@ -42,17 +54,12 @@ export default async function handler(req, res) {
     const user = await getUserFromToken(supabaseUrl, anonKey, accessToken);
     if (!user?.id) return json(res, 401, { ok: false, error: "Login session expired. Sign in again." });
 
-    const url = `${supabaseUrl}/rest/v1/billing_subscriptions?user_id=eq.${encodeURIComponent(user.id)}&select=*&order=updated_at.desc&limit=1`;
-    const response = await fetch(url, {
-      headers: {
-        apikey: serviceRoleKey,
-        Authorization: `Bearer ${serviceRoleKey}`,
-      },
-    });
-    const data = await response.json().catch(() => null);
-    if (!response.ok) throw new Error(data?.message || "Could not load billing status.");
+    const byUser = await fetchLatestSubscription(supabaseUrl, serviceRoleKey, `user_id=eq.${encodeURIComponent(user.id)}`);
+    const subscription = byUser || (user.email
+      ? await fetchLatestSubscription(supabaseUrl, serviceRoleKey, `email=eq.${encodeURIComponent(user.email)}`)
+      : null);
 
-    return json(res, 200, { ok: true, subscription: Array.isArray(data) ? data[0] || null : null });
+    return json(res, 200, { ok: true, subscription });
   } catch (error) {
     return json(res, 500, { ok: false, error: error?.message || "Billing status failed." });
   }
