@@ -1622,6 +1622,19 @@ const THEME_STYLE_CSS = `
     box-shadow: 0 18px 42px rgba(217,70,239,.10);
   }
 
+  .onboarding-checklist {
+    box-shadow: 0 18px 45px rgba(16,185,129,.08), 0 0 30px rgba(217,70,239,.08);
+  }
+
+  .onboarding-step {
+    transition: transform .22s ease, border-color .22s ease, background .22s ease;
+  }
+
+  .onboarding-step:hover {
+    transform: translateY(-1px);
+    border-color: rgba(217,70,239,.45);
+  }
+
   .journal-metric-box {
     background: linear-gradient(135deg, rgba(217,70,239,.14), rgba(88,28,135,.10) 55%, rgba(0,0,0,.22)) !important;
   }
@@ -1639,11 +1652,17 @@ const THEME_STYLE_CSS = `
   .light-theme .journal-hero,
   .light-theme .journal-search-panel,
   .light-theme .journal-sort-panel,
-  .light-theme .journal-empty {
+  .light-theme .journal-empty,
+  .light-theme .onboarding-checklist {
     background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 55%, #f8fbff 100%) !important;
     color: #0f172a !important;
     border-color: rgba(217,70,239,.28) !important;
     box-shadow: 0 18px 42px rgba(168,85,247,.10) !important;
+  }
+
+  .light-theme .onboarding-step {
+    background: rgba(255,255,255,.82) !important;
+    border-color: rgba(168,85,247,.20) !important;
   }
 
   .light-theme .journal-metric-box {
@@ -6940,6 +6959,11 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
   const strategies = ["All", ...Array.from(new Set(allTrades.map((trade) => trade.setup).filter(Boolean)))];
   const sessions = ["All", ...TRADING_SESSIONS, ...Array.from(new Set(allTrades.map((trade) => trade.session).filter(Boolean))).filter((session) => !TRADING_SESSIONS.includes(session))];
   const activeFilters = Object.entries(filters).filter(([key, value]) => value && value !== "All" && key !== "tag").length + (filters.tag ? 1 : 0);
+  const isJournalEmpty = allTrades.length === 0;
+  const resetJournalFilters = () => {
+    setSearchQuery("");
+    setFilters({ result: "All", direction: "All", strategy: "All", grade: "All", session: "All", dateFrom: "", dateTo: "", minPnl: "", maxPnl: "", emotion: "All", tag: "" });
+  };
   const sortedTrades = useMemo(() => {
     const direction = sortDirection === "asc" ? 1 : -1;
     return [...trades].sort((a, b) => {
@@ -6987,7 +7011,7 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
               <Field label="Emotions"><Select value={filters.emotion} onChange={(e) => setFilters({ ...filters, emotion: e.target.value })}><option>All</option><option>Calm</option><option>Confident</option><option>Fearful</option><option>Greedy</option></Select></Field>
             </div>
             <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
-              <Button variant="outline" onClick={() => { setSearchQuery(""); setFilters({ result: "All", direction: "All", strategy: "All", grade: "All", session: "All", dateFrom: "", dateTo: "", minPnl: "", maxPnl: "", emotion: "All", tag: "" }); }} className="border-white/15 bg-black text-white">Clear All Filters</Button>
+              <Button variant="outline" onClick={resetJournalFilters} className="border-white/15 bg-black text-white">Clear All Filters</Button>
               <span className="text-xs text-fuchsia-400">{activeFilters} active filters</span>
             </div>
           </div>
@@ -7024,7 +7048,21 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
           {sortedTrades.map((trade) => <TradeListRow key={trade.id} trade={trade} onView={() => onView(trade)} onEdit={() => onEdit(trade)} onRemove={() => onRemove(trade.id)} />)}
         </div>
       )}
-      {sortedTrades.length === 0 && <div className="journal-empty mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-zinc-950 via-black to-[#12081b] p-10 text-center text-zinc-400"><div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300"><Search size={20} /></div><div className="text-lg font-black text-white">No trades found</div><div className="mt-1 text-sm text-zinc-500">Try changing filters or add a new trade.</div></div>}
+      {sortedTrades.length === 0 && (
+        <div className="journal-empty mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-zinc-950 via-black to-[#12081b] p-8 text-center text-zinc-400 sm:p-10">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300">
+            {isJournalEmpty ? <BookOpen size={22} /> : <Search size={22} />}
+          </div>
+          <div className="text-xl font-black text-white">{isJournalEmpty ? "Your journal is ready" : "No trades match this view"}</div>
+          <div className="mx-auto mt-2 max-w-xl text-sm font-semibold text-zinc-500">
+            {isJournalEmpty ? "Add your first trade and the dashboard, calendar, statistics, and mistake detector will start learning from it." : "Clear the current search and filters, or add a new trade if this was intentional."}
+          </div>
+          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+            {!isJournalEmpty && <Button variant="outline" onClick={resetJournalFilters} className="border-white/15 bg-black text-white">Clear Filters</Button>}
+            <Button onClick={onAdd} className="bg-fuchsia-500 font-black text-white shadow-[0_0_18px_rgba(217,70,239,0.22)]"><Plus size={16} /> {isJournalEmpty ? "Add First Trade" : "Add Trade"}</Button>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -7212,6 +7250,62 @@ function ReviewBox({ title, value, tone }) {
   return <div className={`rounded-xl border p-4 ${cls}`}><div className="text-xs font-black uppercase tracking-widest text-zinc-400">{title}</div><div className="mt-2 text-sm font-semibold text-zinc-300">{value}</div></div>;
 }
 
+function OnboardingChecklist({ trades, account, onAdd, onOpenAccount, onViewAllTrades, onOpenMistakeDetector }) {
+  const tradeCount = trades.length;
+  const steps = [
+    {
+      title: "Account setup",
+      detail: account?.isPlaceholder ? "Name your trading account and starting balance." : `${account.name} is ready.`,
+      done: !account?.isPlaceholder,
+      action: onOpenAccount,
+      actionLabel: account?.isPlaceholder ? "Create Account" : "Edit Account",
+      icon: <ShieldCheck size={18} />,
+    },
+    {
+      title: "First trade",
+      detail: tradeCount ? `${tradeCount} trade${tradeCount === 1 ? "" : "s"} logged. Keep building the sample.` : "Log one trade to activate real dashboard data.",
+      done: tradeCount > 0,
+      action: onAdd,
+      actionLabel: tradeCount ? "Add Another" : "Add First Trade",
+      icon: <Plus size={18} />,
+    },
+    {
+      title: "Review patterns",
+      detail: tradeCount >= 3 ? "Statistics and mistake patterns have enough data to review." : `${Math.max(0, 3 - tradeCount)} more trade${3 - tradeCount === 1 ? "" : "s"} until stronger pattern signals.`,
+      done: tradeCount >= 3,
+      action: tradeCount >= 3 ? onOpenMistakeDetector : onViewAllTrades,
+      actionLabel: tradeCount >= 3 ? "Open Detector" : "Open Journal",
+      icon: <Target size={18} />,
+    },
+  ];
+
+  return (
+    <section className="onboarding-checklist mt-8 rounded-2xl border border-emerald-500/25 bg-gradient-to-br from-[#05110d] via-black to-[#120719] p-5">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <div className="text-xs font-black uppercase tracking-widest text-emerald-300">Launch Checklist</div>
+          <h2 className="mt-2 text-2xl font-black text-white">Set up the trading workflow</h2>
+          <p className="mt-1 max-w-2xl text-sm font-semibold text-zinc-400">These three steps make the calendar, statistics, and mistake detector useful from day one.</p>
+        </div>
+        <Button onClick={onAdd} className="bg-fuchsia-500 px-5 py-3 font-black text-white shadow-[0_0_22px_rgba(217,70,239,0.22)]"><Plus size={16} /> Log Trade</Button>
+      </div>
+      <div className="mt-5 grid gap-3 lg:grid-cols-3">
+        {steps.map((step) => (
+          <div key={step.title} className="onboarding-step rounded-xl border border-white/10 bg-black/45 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${step.done ? "border-emerald-400/45 bg-emerald-500/15 text-emerald-300" : "border-fuchsia-500/35 bg-fuchsia-500/10 text-fuchsia-300"}`}>{step.icon}</div>
+              <span className={`rounded-full border px-2.5 py-1 text-[11px] font-black uppercase tracking-wider ${step.done ? "border-emerald-400/35 bg-emerald-500/10 text-emerald-300" : "border-amber-400/35 bg-amber-500/10 text-amber-200"}`}>{step.done ? "Done" : "Next"}</span>
+            </div>
+            <h3 className="mt-4 text-base font-black text-white">{step.title}</h3>
+            <p className="mt-1 min-h-[40px] text-sm font-semibold text-zinc-500">{step.detail}</p>
+            <button onClick={step.action} className="mt-4 rounded-xl border border-white/10 bg-zinc-950 px-3 py-2 text-sm font-black text-zinc-200 transition hover:border-fuchsia-400/60 hover:text-fuchsia-200">{step.actionLabel}</button>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades, onAdd, onView, onStartDay, routine, selectedCalendarDate, onSelectCalendarDate, onViewAllTrades, onOpenMistakeDetector, onOpenAccount, profileName = "User", economicCalendar, onRefreshEconomicCalendar }) {
   const [performanceMode, setPerformanceMode] = useState("EquityCurve");
   const quote = quotes[new Date().getDate() % quotes.length];
@@ -7261,6 +7355,17 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
           </div>
         </div>
       </div>
+
+      {trades.length < 3 && (
+        <OnboardingChecklist
+          trades={trades}
+          account={account}
+          onAdd={onAdd}
+          onOpenAccount={onOpenAccount}
+          onViewAllTrades={onViewAllTrades}
+          onOpenMistakeDetector={onOpenMistakeDetector}
+        />
+      )}
 
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <DashCard title="TOTAL P&L" value={<RotatingPnlValue pnl={stats.totalPnl} balance={accountBalance.startingBalance} />} badge={stats.totalPnl >= 0 ? "↗ Positive P&L" : "↘ Negative P&L"} tone={stats.totalPnl >= 0 ? "emerald" : "amber"} icon="$" />
