@@ -331,20 +331,20 @@ const THEME_STYLE_CSS = `
     display: block !important;
   }
 
-  main {
+  main.app-main {
     width: auto !important;
     max-width: none !important;
   }
 
   @media (min-width: 1024px) {
-    main {
+    main.app-main {
       width: calc(100vw - 16rem) !important;
       margin-left: 16rem !important;
     }
   }
 
   @media (max-width: 1023px) {
-    main {
+    main.app-main {
       width: 100% !important;
       margin-left: 0 !important;
       padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px)) !important;
@@ -352,7 +352,7 @@ const THEME_STYLE_CSS = `
   }
 
   @media (max-width: 640px) {
-    main {
+    main.app-main {
       padding: .75rem !important;
       padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px)) !important;
     }
@@ -367,7 +367,7 @@ const THEME_STYLE_CSS = `
     color: #0f172a !important;
   }
 
-  .light-theme main {
+  .light-theme main.app-main {
     background: linear-gradient(135deg, #fbf7ff 0%, #ffffff 45%, #f8fbff 100%) !important;
     color: #0f172a !important;
   }
@@ -2799,7 +2799,7 @@ const THEME_STYLE_CSS = `
 
   /* Premium white mode inspired by clean SaaS dashboard styling */
   .light-theme,
-  .light-theme main,
+  .light-theme main.app-main,
   .light-theme body {
     background: radial-gradient(circle at top left, rgba(217,70,239,.10), transparent 30%), linear-gradient(135deg, #f7f8fc 0%, #ffffff 44%, #f8fafc 100%) !important;
     color: #111827 !important;
@@ -6743,7 +6743,7 @@ Skipped duplicates: ${duplicateCount}
           </button>
         </div>
       </aside>
-      <main className="min-h-screen overflow-x-hidden pb-24 p-4 sm:p-6 lg:p-8">
+      <main className="app-main min-h-screen overflow-x-hidden pb-24 p-4 sm:p-6 lg:p-8">
         <div className="w-full max-w-none">
         {dataMessage && (
           <div className="mb-5 rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-black text-red-300">
@@ -12184,6 +12184,10 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
     return <LandingPage setAuthPage={setAuthPage} theme={theme} setTheme={setTheme} />;
   }
 
+  if (["terms", "privacy", "refund", "contact"].includes(authPage)) {
+    return <LegalInfoPage page={authPage} setAuthPage={setAuthPage} theme={theme} setTheme={setTheme} />;
+  }
+
   const isLogin = authPage === "login";
   const isRegister = authPage === "register";
   const isForgot = authPage === "forgot";
@@ -12348,6 +12352,15 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
 
               {error && <div className={isForgot ? "rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm font-bold text-amber-300" : "rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-300"}>{error}</div>}
 
+              {isRegister && (
+                <p className={isLight ? "text-xs font-semibold leading-5 text-slate-500" : "text-xs font-semibold leading-5 text-zinc-500"}>
+                  By creating an account, you agree to the{" "}
+                  <button type="button" onClick={() => setAuthPage("terms")} className="font-black text-fuchsia-400 hover:text-fuchsia-300">Terms</button>
+                  {" "}and acknowledge the{" "}
+                  <button type="button" onClick={() => setAuthPage("privacy")} className="font-black text-fuchsia-400 hover:text-fuchsia-300">Privacy Policy</button>.
+                </p>
+              )}
+
               <button type="submit" disabled={authLoading} className="group flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-sm font-black text-white shadow-[0_18px_36px_rgba(217,70,239,0.24)] transition hover:scale-[1.01] hover:shadow-[0_20px_44px_rgba(217,70,239,0.34)] disabled:cursor-not-allowed disabled:opacity-60">
                 {authLoading ? "Please wait..." : isLogin ? "Sign in" : isRegister ? "Create account" : isUpdatePassword ? "Update password" : "Send reset link"}
                 <span className="transition group-hover:translate-x-1">→</span>
@@ -12390,6 +12403,126 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
             </div>
           </motion.div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+const LEGAL_PAGES = {
+  terms: {
+    label: "Terms of Service",
+    eyebrow: "Terms",
+    updated: "May 26, 2026",
+    intro: "These terms explain how TryCritique should be used and what the service is designed to provide.",
+    sections: [
+      ["Service scope", "TryCritique is a trading journal, analytics, and self-review software product. It helps users record trades, organize notes, review performance, and identify personal behavior patterns."],
+      ["No financial advice", "TryCritique does not provide investment advice, trading signals, broker services, copy trading, portfolio management, or guaranteed returns. Any trading decision remains the user's own responsibility."],
+      ["Account use", "Users are responsible for keeping their login credentials secure and for entering accurate information into their journal."],
+      ["Subscriptions", "Paid access is billed as a recurring subscription through our payment provider and Merchant of Record. Subscription status controls access to Pro features."],
+      ["Acceptable use", "Users may not abuse the service, attempt to bypass security, upload unlawful content, or use TryCritique to provide regulated financial services to others."],
+      ["Availability", "We aim to keep the service reliable, but access may occasionally be interrupted for maintenance, provider issues, or updates."],
+    ],
+  },
+  privacy: {
+    label: "Privacy Policy",
+    eyebrow: "Privacy",
+    updated: "May 26, 2026",
+    intro: "This policy summarizes what data TryCritique uses to run the product and protect your account.",
+    sections: [
+      ["Data we process", "We process account details such as email, profile information, trading journal entries, screenshots you upload, settings, and subscription status."],
+      ["How data is used", "Data is used to provide login, sync, backup, analytics, billing access, support, security, and product improvement."],
+      ["Payment data", "Card details are handled by the payment provider and are not stored by TryCritique. We store subscription status and payment-provider identifiers needed to unlock Pro access."],
+      ["Storage providers", "TryCritique uses Supabase for authentication and data sync, Vercel for hosting and serverless functions, and Dodo Payments for checkout, subscription, tax, and payment operations."],
+      ["User control", "Users can export or remove journal data from the application. Support requests for account deletion can be sent through the contact page."],
+      ["Security", "We use server-side keys only in protected server environments and avoid exposing private payment or database credentials in browser code."],
+    ],
+  },
+  refund: {
+    label: "Refund & Cancellation Policy",
+    eyebrow: "Billing",
+    updated: "May 26, 2026",
+    intro: "This policy explains how subscriptions, cancellations, and refund requests are handled.",
+    sections: [
+      ["Free trial", "If a trial is offered, the subscription may renew automatically after the trial unless it is cancelled before the trial ends."],
+      ["Cancellation", "Customers can cancel through the billing portal. Access normally remains available until the end of the current billing period unless stated otherwise."],
+      ["Refund requests", "Refund requests are reviewed based on payment-provider rules, usage, timing, and local consumer requirements. Contact support with the billing email and reason for the request."],
+      ["No guarantee of results", "TryCritique is a journaling and review tool. Refund eligibility is not based on trading performance or market outcomes."],
+      ["Payment provider", "Payments, taxes, receipts, and certain refund operations are handled by the Merchant of Record shown at checkout."],
+    ],
+  },
+  contact: {
+    label: "Contact & Support",
+    eyebrow: "Support",
+    updated: "May 26, 2026",
+    intro: "Need help with your account, subscription, or product access? Use the contact details below.",
+    sections: [
+      ["Support email", "Email: support@trycritique.com. Include your account email, a short description, and screenshots if they help explain the issue."],
+      ["Billing help", "For subscription issues, include the billing email and whether the issue is checkout, cancellation, renewal, refund, or portal access."],
+      ["Data requests", "For account deletion or data export questions, contact support from the email associated with your account."],
+      ["Response time", "We aim to respond within 2 business days during normal launch-stage support operations."],
+    ],
+  },
+};
+
+function LegalInfoPage({ page, setAuthPage, theme, setTheme }) {
+  const content = LEGAL_PAGES[page] || LEGAL_PAGES.terms;
+  const isLight = theme === "light";
+  const linkClass = isLight ? "text-slate-500 hover:text-fuchsia-600" : "text-zinc-400 hover:text-fuchsia-300";
+
+  return (
+    <div className={isLight ? "min-h-screen bg-[#f8fafc] text-slate-950" : "min-h-screen bg-black text-white"}>
+      <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-5 py-6 sm:px-8">
+        <header className="flex items-center justify-between gap-4">
+          <button onClick={() => setAuthPage("landing")} className="flex items-center gap-3 text-left">
+            <BrandBolt className="h-10 w-7 drop-shadow-[0_0_18px_rgba(217,70,239,0.75)]" />
+            <span className="text-xl font-black">{BRAND_NAME}</span>
+          </button>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className={isLight ? "rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800 shadow-sm" : "rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-zinc-300"}>
+              {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+            </button>
+            <button onClick={() => setAuthPage("login")} className="rounded-xl bg-fuchsia-500 px-4 py-2 text-sm font-black text-white shadow-[0_16px_32px_rgba(217,70,239,0.22)]">Log In</button>
+          </div>
+        </header>
+
+        <main className="mx-auto w-full max-w-4xl flex-1 py-14">
+          <div className="mb-8 flex flex-wrap gap-3 text-sm font-black">
+            {Object.entries(LEGAL_PAGES).map(([key, item]) => (
+              <button key={key} onClick={() => setAuthPage(key)} className={key === page ? "rounded-full bg-fuchsia-500 px-4 py-2 text-white" : `rounded-full border px-4 py-2 ${isLight ? "border-slate-200 bg-white text-slate-600" : "border-white/10 bg-white/[0.04] text-zinc-300"}`}>
+                {item.eyebrow}
+              </button>
+            ))}
+          </div>
+
+          <section className={isLight ? "rounded-[1.6rem] border border-slate-200 bg-white p-7 shadow-[0_24px_70px_rgba(15,23,42,0.08)] sm:p-10" : "rounded-[1.6rem] border border-white/10 bg-[#050505] p-7 shadow-[0_24px_80px_rgba(0,0,0,0.5)] sm:p-10"}>
+            <div className="text-xs font-black uppercase tracking-[0.22em] text-fuchsia-400">{content.eyebrow}</div>
+            <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">{content.label}</h1>
+            <p className={isLight ? "mt-4 text-sm font-bold text-slate-500" : "mt-4 text-sm font-bold text-zinc-500"}>Last updated: {content.updated}</p>
+            <p className={isLight ? "mt-6 max-w-3xl text-base font-semibold leading-7 text-slate-600" : "mt-6 max-w-3xl text-base font-semibold leading-7 text-zinc-400"}>{content.intro}</p>
+
+            <div className="mt-9 space-y-5">
+              {content.sections.map(([title, body]) => (
+                <div key={title} className={isLight ? "rounded-2xl border border-slate-200 bg-slate-50 p-5" : "rounded-2xl border border-white/10 bg-white/[0.035] p-5"}>
+                  <h2 className="text-lg font-black">{title}</h2>
+                  <p className={isLight ? "mt-2 text-sm font-semibold leading-7 text-slate-600" : "mt-2 text-sm font-semibold leading-7 text-zinc-400"}>{body}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className={isLight ? "mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm font-semibold leading-6 text-amber-800" : "mt-8 rounded-2xl border border-amber-500/25 bg-amber-500/10 p-5 text-sm font-semibold leading-6 text-amber-100"}>
+              These pages are launch-stage operating policies for TryCritique and should be reviewed with a qualified professional before relying on them as final legal documents.
+            </div>
+          </section>
+        </main>
+
+        <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 py-6 text-sm font-bold">
+          <span className={isLight ? "text-slate-500" : "text-zinc-500"}>© 2026 {BRAND_NAME}</span>
+          <div className="flex flex-wrap gap-4">
+            {Object.entries(LEGAL_PAGES).map(([key, item]) => (
+              <button key={key} onClick={() => setAuthPage(key)} className={linkClass}>{item.eyebrow}</button>
+            ))}
+          </div>
+        </footer>
       </div>
     </div>
   );
@@ -12735,6 +12868,9 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
                 <p className={isLight ? "mt-5 text-sm font-semibold leading-6 text-slate-600" : "mt-5 text-sm font-semibold leading-6 text-zinc-400"}>
                   Built for traders who want a simple system for tracking decisions, mistakes, risk, and progress.
                 </p>
+                <p className={isLight ? "mt-3 text-xs font-bold leading-5 text-slate-500" : "mt-3 text-xs font-bold leading-5 text-zinc-500"}>
+                  Payments are handled by Dodo Payments as Merchant of Record. TryCritique is a journal and analytics tool, not investment advice or trading signals.
+                </p>
 
                 <button type="button" onClick={() => setAuthPage("register")} className="mt-8 flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-sm font-black text-white shadow-[0_18px_36px_rgba(217,70,239,0.24)] transition hover:scale-[1.01]">
                   Start for $10/month
@@ -12818,6 +12954,24 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
             </div>
           </div>
         </section>
+
+        <footer className={isLight ? "mx-auto w-full max-w-7xl border-t border-slate-200 px-5 py-10 text-sm font-bold text-slate-500 lg:px-8" : "mx-auto w-full max-w-7xl border-t border-white/10 px-5 py-10 text-sm font-bold text-zinc-500 lg:px-8"}>
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <BrandBolt className="h-8 w-6 drop-shadow-[0_0_14px_rgba(217,70,239,0.75)]" />
+                <span className={isLight ? "text-base font-black text-slate-950" : "text-base font-black text-white"}>{BRAND_NAME}</span>
+              </div>
+              <p className="mt-2 max-w-xl leading-6">A trading journal and analytics product for self-review. No investment advice, signals, brokerage, or guaranteed returns.</p>
+            </div>
+            <div className="flex flex-wrap gap-4">
+              <button onClick={() => setAuthPage("terms")} className="hover:text-fuchsia-300">Terms</button>
+              <button onClick={() => setAuthPage("privacy")} className="hover:text-fuchsia-300">Privacy</button>
+              <button onClick={() => setAuthPage("refund")} className="hover:text-fuchsia-300">Refunds</button>
+              <button onClick={() => setAuthPage("contact")} className="hover:text-fuchsia-300">Contact</button>
+            </div>
+          </div>
+        </footer>
       </main>
     </div>
   );
