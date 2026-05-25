@@ -7678,14 +7678,19 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
       />
 
       <div className="calendar-shell-pro calendar-neon-panel mt-7 overflow-x-auto rounded-2xl border border-white/10 bg-black p-6 shadow-[0_0_34px_rgba(217,70,239,0.10)]">
-        <div className="grid min-w-[980px] grid-cols-7 gap-3">
-          {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map((day) => (
-            <div key={day} className={`calendar-week-header rounded-lg border py-3 text-center text-xs font-black tracking-widest ${day === "SUN" || day === "SAT" ? "calendar-week-header-special border-fuchsia-500/35 bg-fuchsia-500/12 text-fuchsia-300" : "border-white/10 bg-white/5 text-zinc-400"}`}>
+        <div className="grid min-w-[1120px] grid-cols-[repeat(7,minmax(0,1fr))_170px] gap-3">
+          {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN", "WEEK"].map((day) => (
+            <div key={day} className={`calendar-week-header rounded-lg border py-3 text-center text-xs font-black tracking-widest ${day === "SUN" || day === "SAT" || day === "WEEK" ? "calendar-week-header-special border-fuchsia-500/35 bg-fuchsia-500/12 text-fuchsia-300" : "border-white/10 bg-white/5 text-zinc-400"}`}>
               {day}
             </div>
           ))}
 
           {weekRows.map((week, weekIndex) => {
+            const weekStats = week.map((cell) => summarizeTrades(grouped[cell.key] || [])).reduce((summary, dayStats) => ({
+              count: summary.count + dayStats.count,
+              pnl: summary.pnl + dayStats.pnl,
+            }), { count: 0, pnl: 0 });
+
             return (
               <React.Fragment key={weekIndex}>
                 {week.map((cell) => {
@@ -7729,6 +7734,19 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                     </button>
                   );
                 })}
+                <div className="calendar-week-summary calendar-week-summary-pro relative h-[116px] overflow-hidden rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/12 p-3 shadow-[0_0_18px_rgba(217,70,239,0.12)]">
+                  <div className="absolute right-0 top-0 h-16 w-16 rounded-bl-2xl bg-fuchsia-500/12" />
+                  {weekStats.count ? (
+                    <div className="relative z-10 flex h-full flex-col items-center justify-center">
+                      <div className={weekStats.pnl >= 0 ? "text-lg font-black text-emerald-400" : "text-lg font-black text-red-400"}>{formatMoney(weekStats.pnl)}</div>
+                      <div className="calendar-trade-count mt-2 rounded-md bg-white/10 px-3 py-1 text-xs font-black text-zinc-300">
+                        {weekStats.count} trade{weekStats.count === 1 ? "" : "s"}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="relative z-10 flex h-full items-center justify-center text-sm font-bold text-zinc-500">No activity</div>
+                  )}
+                </div>
               </React.Fragment>
             );
           })}
