@@ -3551,6 +3551,10 @@ const THEME_STYLE_CSS = `
     transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease !important;
   }
 
+  .calendar-day-event-pill {
+    max-width: calc(100% - 3.5rem);
+  }
+
   .calendar-day-simple:hover {
     transform: translateY(-2px) !important;
     border-color: rgba(217,70,239,.55) !important;
@@ -4835,7 +4839,9 @@ function groupTradesByDate(trades = []) {
 
 function getCalendarCells(year, monthIndex) {
   const firstDay = new Date(year, monthIndex, 1);
-  const start = new Date(year, monthIndex, 1 - firstDay.getDay());
+  const firstWeekday = firstDay.getDay();
+  const mondayOffset = firstWeekday === 0 ? -6 : 1 - firstWeekday;
+  const start = new Date(year, monthIndex, 1 + mondayOffset);
   return Array.from({ length: 42 }, (_, index) => {
     const date = new Date(start);
     date.setDate(start.getDate() + index);
@@ -7672,44 +7678,39 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
       />
 
       <div className="calendar-shell-pro calendar-neon-panel mt-7 overflow-x-auto rounded-2xl border border-white/10 bg-black p-6 shadow-[0_0_34px_rgba(217,70,239,0.10)]">
-        <div className="grid min-w-[1120px] grid-cols-[repeat(7,minmax(0,1fr))_170px] gap-3">
-          {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT", "WEEK"].map((day) => (
-            <div key={day} className={`calendar-week-header rounded-lg border py-3 text-center text-xs font-black tracking-widest ${day === "SUN" || day === "SAT" || day === "WEEK" ? "calendar-week-header-special border-fuchsia-500/35 bg-fuchsia-500/12 text-fuchsia-300" : "border-white/10 bg-white/5 text-zinc-400"}`}>
+        <div className="grid min-w-[980px] grid-cols-7 gap-3">
+          {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map((day) => (
+            <div key={day} className={`calendar-week-header rounded-lg border py-3 text-center text-xs font-black tracking-widest ${day === "SUN" || day === "SAT" ? "calendar-week-header-special border-fuchsia-500/35 bg-fuchsia-500/12 text-fuchsia-300" : "border-white/10 bg-white/5 text-zinc-400"}`}>
               {day}
             </div>
           ))}
 
           {weekRows.map((week, weekIndex) => {
-            const weekDayStats = week.map((cell) => summarizeTrades(grouped[cell.key] || []));
-            const weekStats = weekDayStats.reduce((summary, dayStats) => ({
-              count: summary.count + dayStats.count,
-              pnl: summary.pnl + dayStats.pnl,
-            }), { count: 0, pnl: 0 });
-
             return (
               <React.Fragment key={weekIndex}>
-                {week.map((cell, dayIndex) => {
+                {week.map((cell) => {
                   const dayTrades = grouped[cell.key] || [];
                   const dayStats = summarizeTrades(dayTrades);
                   const dayEvents = eventsByDate[cell.key] || [];
                   const primaryEventImpact = getPrimaryEventImpact(dayEvents);
-                  const isWeekend = dayIndex === 0 || dayIndex === 6;
+                  const isWeekend = cell.dayIndex === 0 || cell.dayIndex === 6;
                   const selected = selectedDate === cell.key;
                   const hasTrade = dayTrades.length > 0;
 
                   return (
                     <button key={cell.key} onClick={() => openDayDetails(cell.key)} className={`${getCalendarDayVisual(dayStats, isWeekend, selected)} h-[116px] rounded-xl`}>
-                      <div className="relative z-10 flex items-start justify-between">
+                      <div className="relative z-10 flex items-start justify-between gap-3">
                         <div className={cell.isCurrentMonth ? "calendar-day-number font-black text-white" : "calendar-day-number-muted font-black text-zinc-500"}>{cell.day}</div>
-                        {selected && <span className="mt-1 h-2.5 w-2.5 rounded-full bg-fuchsia-400 shadow-[0_0_14px_rgba(217,70,239,0.95)]" />}
-                      </div>
-
-                      {dayEvents.length > 0 && (
-                        <div className="absolute right-3 top-9 z-10 flex items-center gap-1.5 rounded-full border border-white/10 bg-black/75 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-zinc-200 shadow-[0_0_12px_rgba(217,70,239,0.12)]">
-                          <ImpactFolderIcon impact={primaryEventImpact} />
-                          {dayEvents.length}
+                        <div className="flex min-w-0 items-center gap-2">
+                          {dayEvents.length > 0 && (
+                            <div className="calendar-day-event-pill flex items-center gap-1.5 rounded-full border border-white/10 bg-black/75 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-zinc-200 shadow-[0_0_12px_rgba(217,70,239,0.12)]">
+                              <ImpactFolderIcon impact={primaryEventImpact} />
+                              {dayEvents.length}
+                            </div>
+                          )}
+                          {selected && <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-fuchsia-400 shadow-[0_0_14px_rgba(217,70,239,0.95)]" />}
                         </div>
-                      )}
+                      </div>
 
                       {hasTrade ? (
                         <div className="absolute bottom-3 left-3 right-3 z-10 flex flex-col items-end gap-2">
@@ -7728,20 +7729,6 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                     </button>
                   );
                 })}
-
-                <div className="calendar-week-summary calendar-week-summary-pro relative h-[116px] overflow-hidden rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/12 p-3 shadow-[0_0_18px_rgba(217,70,239,0.12)]">
-                  <div className="absolute right-0 top-0 h-16 w-16 rounded-bl-2xl bg-fuchsia-500/12" />
-                  {weekStats.count ? (
-                    <div className="relative z-10 flex h-full flex-col items-center justify-center">
-                      <div className={weekStats.pnl >= 0 ? "text-lg font-black text-emerald-400" : "text-lg font-black text-red-400"}>{formatMoney(weekStats.pnl)}</div>
-                      <div className="calendar-trade-count mt-2 rounded-md bg-white/10 px-3 py-1 text-xs font-black text-zinc-300">
-                        {weekStats.count} trade{weekStats.count === 1 ? "" : "s"}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="relative z-10 flex h-full items-center justify-center text-sm font-bold text-zinc-500">No activity</div>
-                  )}
-                </div>
               </React.Fragment>
             );
           })}
@@ -7796,9 +7783,10 @@ function CalendarDayDetailsModal({ dateKey, trades = [], events = [], onClose, o
         </div>
 
         <div className={resultTone === "win" ? "calendar-day-modal-summary calendar-day-modal-summary-win" : resultTone === "loss" ? "calendar-day-modal-summary calendar-day-modal-summary-loss" : resultTone === "be" ? "calendar-day-modal-summary calendar-day-modal-summary-be" : "calendar-day-modal-summary calendar-day-modal-summary-empty"}>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <CalendarModalMetric value={stats.wins} label="Wins" tone="win" />
             <CalendarModalMetric value={stats.losses} label="Losses" tone="loss" />
+            <CalendarModalMetric value={stats.breakEvens || 0} label="Break Even" tone="be" />
             <CalendarModalMetric value={`${getPnlArrow(stats.pnl)} ${formatMoney(stats.pnl)}`} label="Total P&L" tone={resultTone} />
           </div>
           <div className="mt-5">
@@ -7832,7 +7820,7 @@ function CalendarDayDetailsModal({ dateKey, trades = [], events = [], onClose, o
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-xl border border-fuchsia-500/45 bg-black px-4 py-2 text-sm font-black text-white">All Trades</span>
-              <span className="rounded-xl border border-white/10 bg-black px-4 py-2 text-sm font-black text-zinc-400">By Time</span>
+              <span className="rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-2 text-sm font-black text-amber-200">Break Even: {stats.breakEvens || 0}</span>
             </div>
             <button onClick={onAdd} className="rounded-xl border border-fuchsia-500/35 bg-fuchsia-500 px-4 py-2 text-sm font-black text-black shadow-[0_0_18px_rgba(217,70,239,0.24)]">+ Add Trade</button>
           </div>
