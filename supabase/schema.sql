@@ -99,6 +99,10 @@ create index if not exists billing_subscriptions_email_updated_at_idx
 
 alter table public.billing_subscriptions enable row level security;
 
+grant usage on schema public to authenticated, service_role;
+grant select on public.billing_subscriptions to authenticated;
+grant select, insert, update, delete on public.billing_subscriptions to service_role;
+
 drop policy if exists "billing_subscriptions_select_own" on public.billing_subscriptions;
 create policy "billing_subscriptions_select_own"
   on public.billing_subscriptions for select
