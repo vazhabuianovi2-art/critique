@@ -22,6 +22,8 @@ import {
   ListChecks,
   LogIn,
   Moon,
+  Maximize2,
+  Minimize2,
   PlayCircle,
   Plus,
   Save,
@@ -245,6 +247,23 @@ function BrandBolt({ className = "" }) {
       </defs>
     </svg>
   );
+}
+
+function getFullscreenElement() {
+  if (typeof document === "undefined") return null;
+  return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
+}
+
+async function toggleAppFullscreen() {
+  if (typeof document === "undefined") return;
+  const element = document.documentElement;
+  if (getFullscreenElement()) {
+    const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+    if (exit) await exit.call(document);
+    return;
+  }
+  const request = element.requestFullscreen || element.webkitRequestFullscreen || element.msRequestFullscreen;
+  if (request) await request.call(element);
 }
 
 function formatDisplayName(value, fallback = "User") {
@@ -1627,6 +1646,16 @@ const THEME_STYLE_CSS = `
     box-shadow: 0 18px 42px rgba(217,70,239,.10);
   }
 
+  .fullscreen-toggle-button {
+    backdrop-filter: blur(14px);
+    box-shadow: 0 14px 36px rgba(0,0,0,.35), 0 0 24px rgba(217,70,239,.14);
+  }
+
+  .fullscreen-toggle-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 44px rgba(0,0,0,.42), 0 0 30px rgba(217,70,239,.22);
+  }
+
   .onboarding-checklist {
     box-shadow: 0 18px 45px rgba(16,185,129,.08), 0 0 30px rgba(217,70,239,.08);
   }
@@ -1668,6 +1697,12 @@ const THEME_STYLE_CSS = `
   .light-theme .onboarding-step {
     background: rgba(255,255,255,.82) !important;
     border-color: rgba(168,85,247,.20) !important;
+  }
+
+  .light-theme .fullscreen-toggle-button {
+    background: rgba(255,255,255,.86) !important;
+    color: #86198f !important;
+    border-color: rgba(168,85,247,.32) !important;
   }
 
   .light-theme .journal-metric-box {
@@ -5830,6 +5865,7 @@ export default function TradingJournalDashboard() {
       return "dark";
     }
   });
+  const [isFullscreen, setIsFullscreen] = useState(() => Boolean(getFullscreenElement()));
   const [authPage, setAuthPage] = useState("landing");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authUser, setAuthUser] = useState(null);
@@ -6012,6 +6048,18 @@ export default function TradingJournalDashboard() {
   }, [authUser?.id, isAuthenticated]);
   useEffect(() => { localStorage.setItem(ROUTINE_KEY, JSON.stringify(routine)); }, [routine]);
   useEffect(() => { localStorage.setItem(THEME_KEY, theme); }, [theme]);
+  useEffect(() => {
+    const updateFullscreenState = () => setIsFullscreen(Boolean(getFullscreenElement()));
+    document.addEventListener("fullscreenchange", updateFullscreenState);
+    document.addEventListener("webkitfullscreenchange", updateFullscreenState);
+    document.addEventListener("MSFullscreenChange", updateFullscreenState);
+    updateFullscreenState();
+    return () => {
+      document.removeEventListener("fullscreenchange", updateFullscreenState);
+      document.removeEventListener("webkitfullscreenchange", updateFullscreenState);
+      document.removeEventListener("MSFullscreenChange", updateFullscreenState);
+    };
+  }, []);
   useEffect(() => {
     setProfilePhoto(getStoredProfilePhoto(authUser));
   }, [authUser?.id, authUser?.user_metadata?.profile_photo, authUser?.user_metadata?.avatar_url]);
@@ -6767,6 +6815,19 @@ Skipped duplicates: ${duplicateCount}
           </button>
         </div>
       </aside>
+      <button
+        type="button"
+        onClick={() => {
+          toggleAppFullscreen().catch((error) => {
+            setDataMessage(error?.message || "Fullscreen is not available in this browser.");
+          });
+        }}
+        className="fullscreen-toggle-button fixed right-4 top-4 z-[85] flex h-11 w-11 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-black/75 text-fuchsia-200 transition hover:border-fuchsia-300 hover:bg-fuchsia-500/20 hover:text-white lg:right-6 lg:top-6"
+        title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+        aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+      >
+        {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+      </button>
       <main className="app-main min-h-screen overflow-x-hidden pb-24 p-4 sm:p-6 lg:p-8">
         <div className="w-full max-w-none">
         {dataMessage && (
