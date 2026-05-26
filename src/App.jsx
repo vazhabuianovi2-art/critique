@@ -5174,7 +5174,8 @@ function getTradeGrade(trade) {
   const pnl = Number(trade?.pnl || 0);
   const tags = normalizeTags(trade).map((tag) => tag.toLowerCase());
   const hasAPlus = tags.some((tag) => tag.includes("a+") || tag.includes("a setup"));
-  if (pnl > 0 && (rr >= 2 || hasAPlus)) return "A";
+  if (pnl > 0 && (rr >= 3 || hasAPlus)) return "A+";
+  if (pnl > 0 && rr >= 2) return "A";
   if (pnl > 0 && rr >= 1) return "B";
   if (pnl >= 0) return "C";
   return "D";
@@ -5194,11 +5195,11 @@ function getTradeDirectionClass(direction) {
   return "border-emerald-500/55 bg-emerald-600/75 text-white shadow-[0_0_10px_rgba(16,185,129,0.28)]";
 }
 
-function createTradeFromForm(form, existingId, account) {
+function createTradeFromForm(form, existingId, account, existingTrade = null) {
   const pnl = Number(form.pnl || 0);
-  const timestamp = existingId || Date.now();
+  const timestamp = Number(existingTrade?.createdAt || form.createdAt || 0) || Date.now();
   return {
-    id: existingId || timestamp,
+    id: existingId || existingTrade?.id || timestamp,
     createdAt: timestamp,
     accountId: account?.id || defaultAccount.id,
     accountName: account?.name || "v",
@@ -5235,9 +5236,9 @@ function formFromTrade(trade) {
   return {
     symbol: trade.pair || "",
     direction: trade.direction === "SELL" ? "Sell" : "Buy",
-    quantity: String(trade.quantity || ""),
-    pnl: String(trade.pnl || ""),
-    risk: String(trade.risk || ""),
+    quantity: String(trade.quantity ?? ""),
+    pnl: String(trade.pnl ?? ""),
+    risk: String(trade.risk ?? ""),
     date: trade.date || "",
     session: trade.session || "",
     strategy: trade.setup || "",
@@ -5254,8 +5255,8 @@ function formFromTrade(trade) {
     ruleBroken: trade.ruleBroken || "None",
     marketCondition: trade.marketCondition || "Trending",
     setupQuality: trade.setupQuality || getTradeGrade(trade),
-    entryQuality: String(trade.entryQuality || "3"),
-    exitQuality: String(trade.exitQuality || "3"),
+    entryQuality: String(trade.entryQuality ?? "3"),
+    exitQuality: String(trade.exitQuality ?? "3"),
     screenshots: normalizeScreenshots(trade),
   };
 }
@@ -5770,7 +5771,7 @@ function calculateStatistics(trades = [], startingBalance = 50000) {
   const avgPnl = safeTrades.length ? base.pnl / safeTrades.length : 0;
   const avgWin = wins.length ? wins.reduce((sum, trade) => sum + Number(trade.pnl), 0) / wins.length : 0;
   const avgLoss = losses.length ? Math.abs(losses.reduce((sum, trade) => sum + Number(trade.pnl), 0) / losses.length) : 0;
-  const gradeStats = { A: { count: 0, pnl: 0 }, B: { count: 0, pnl: 0 }, C: { count: 0, pnl: 0 }, D: { count: 0, pnl: 0 } };
+  const gradeStats = { "A+": { count: 0, pnl: 0 }, A: { count: 0, pnl: 0 }, B: { count: 0, pnl: 0 }, C: { count: 0, pnl: 0 }, D: { count: 0, pnl: 0 } };
   const strategyStats = {};
   const mistakeStats = {};
   const sessionStats = {};
@@ -5781,6 +5782,7 @@ function calculateStatistics(trades = [], startingBalance = 50000) {
     const strategy = trade.setup || "Manual Trade";
     const mistake = trade.mistake || "None";
     const session = trade.session || "Unknown";
+    if (!gradeStats[grade]) gradeStats[grade] = { count: 0, pnl: 0 };
     gradeStats[grade].count += 1;
     gradeStats[grade].pnl += pnl;
     if (!strategyStats[strategy]) strategyStats[strategy] = { count: 0, pnl: 0, wins: 0, losses: 0, breakEvens: 0, rrSum: 0, riskTrades: 0 };
@@ -5833,7 +5835,7 @@ function calculateStatistics(trades = [], startingBalance = 50000) {
     totalPnl: base.pnl, trades: base.count, wins: base.wins, losses: base.losses, breakEvens: base.breakEvens, decisive: base.decisive, winRate: base.winRate, breakEvenRate: base.breakEvenRate, avgPnl, avgWin, avgLoss, avgRR, score,
     grossProfit, grossLoss, profitFactor, avgWinLoss, maxDrawdown, maxDrawdownPercent, gradeStats, strategyStats, mistakeStats, sessionStats,
     metrics: {
-      winRate: { label: "Win %", description: "Winning trades divided by total trades", actual: `${base.winRate.toFixed(1)}%`, score: metricScores.winRate },
+      winRate: { label: "Win %", description: "Winning trades divided by win/loss trades. Break-even trades are tracked separately.", actual: `${base.winRate.toFixed(1)}%`, score: metricScores.winRate },
       profitFactor: { label: "Profit factor", description: "Gross profit divided by gross loss", actual: profitFactor >= 999 ? "Perfect" : profitFactor.toFixed(2), score: metricScores.profitFactor },
       avgWinLoss: { label: "Avg win/loss", description: "Average win compared to average loss", actual: avgWinLoss >= 999 ? "Perfect" : avgWinLoss.toFixed(2), score: metricScores.avgWinLoss },
       recoveryFactor: { label: "Recovery factor", description: "Net profit compared to max drawdown", actual: recoveryFactor >= 999 ? "Perfect" : recoveryFactor.toFixed(2), score: metricScores.recoveryFactor },
@@ -5990,6 +5992,7 @@ function runHelperTests() {
   console.assert(normalizeTags({ tags: "A, B, C" }).length === 3, "tags split by comma");
   console.assert(getTradeRR({ pnl: 200, risk: 100 }) === 2, "R:R works");
   console.assert(getTradeGrade({ pnl: 200, risk: 100 }) === "A", "grade works");
+  console.assert(getTradeGrade({ pnl: 300, risk: 100 }) === "A+", "A+ grade works");
   console.assert(getCalendarCells(2026, 4).length === 42, "calendar grid works");
   console.assert(getLastTradingDays(20).length === 20, "trading activity excludes weekends");
   console.assert(formatDateKey(new Date("2026-05-15T00:00:00")) === "2026-05-15", "date key format works");
@@ -5997,6 +6000,7 @@ function runHelperTests() {
   console.assert(getResultFromPnl(0) === "Break Even", "break even result works");
   console.assert(summarizeTrades([{ pnl: 100 }, { pnl: -50 }, { pnl: 0 }]).winRate === 50, "win rate excludes break even");
   console.assert(calculateStatistics([{ pnl: 100, risk: 50 }, { pnl: -50, risk: 50 }, { pnl: 0, risk: 50 }]).breakEvens === 1, "statistics counts break even");
+  console.assert(formFromTrade({ pnl: 0, risk: 0, quantity: 1 }).pnl === "0", "break-even edit keeps zero P&L");
 }
 
 if (typeof window !== "undefined" && !window.__CRITIQUE_VIDEO_STYLE_TESTS_RAN__) {
@@ -6682,7 +6686,7 @@ export default function TradingJournalDashboard() {
     const normalizedResult = getResultFromPnl(pnl);
     const normalizedTags = normalizeTags(form).filter((tag) => !String(tag).toLowerCase().startsWith("result:"));
     const existingTrade = trades.find((item) => item.id === editingTradeId);
-    const trade = createTradeFromForm({ ...form, result: normalizedResult, tags: [`result:${normalizedResult.toLowerCase().replaceAll(" ", "-")}`, ...normalizedTags].join(", "), pnl, quantity, risk }, editingTradeId || existingTrade?.id, account);
+    const trade = createTradeFromForm({ ...form, result: normalizedResult, tags: [`result:${normalizedResult.toLowerCase().replaceAll(" ", "-")}`, ...normalizedTags].join(", "), pnl, quantity, risk }, editingTradeId || existingTrade?.id, account, existingTrade);
     const tradeForSave = existingTrade?.supabaseId ? { ...trade, supabaseId: existingTrade.supabaseId } : trade;
 
     try {
@@ -11898,8 +11902,7 @@ function BestPerformanceCard({ title, value, detail, badge, icon, accent }) {
 function StatisticsPerformanceTimeline({ curve, stats }) {
   const chartData = curve.length ? curve : [{ date: "No data", pnl: 0 }];
   const lastPoint = chartData[chartData.length - 1];
-  const firstPoint = chartData[0];
-  const change = Number(lastPoint?.pnl || 0) - Number(firstPoint?.pnl || 0);
+  const change = Number(stats.totalPnl || lastPoint?.pnl || 0);
   return (
     <div className="statistics-chart-panel statistics-timeline-card group relative overflow-hidden rounded-xl border border-fuchsia-500/20 bg-gradient-to-br from-[#13081d] via-black to-[#030104] p-6 transition-all duration-300 hover:border-fuchsia-400/70 hover:shadow-[0_0_36px_rgba(217,70,239,0.20)]">
       <div className="pointer-events-none absolute right-0 top-0 h-40 w-40 rounded-bl-[4rem] bg-fuchsia-500/10 blur-xl" />
@@ -12085,13 +12088,25 @@ function StatisticsPatternsView({ stats, trades = [] }) {
     const riskTrades = dayTrades.filter((trade) => Number(trade.risk || 0) > 0);
     output[day.short] = {
       ...summary,
+      riskTrades: riskTrades.length,
       avgRR: riskTrades.length ? riskTrades.reduce((sum, trade) => sum + getTradeRR(trade), 0) / riskTrades.length : 0,
     };
     return output;
   }, {});
-  const totalTrades = stats.trades || 0;
-  const avgRR = stats.avgRR || 0;
-  const totalPnl = stats.totalPnl || 0;
+  const weekdaySummary = Object.values(weekdayStats).reduce((summary, day) => ({
+    count: summary.count + Number(day.count || 0),
+    wins: summary.wins + Number(day.wins || 0),
+    losses: summary.losses + Number(day.losses || 0),
+    breakEvens: summary.breakEvens + Number(day.breakEvens || 0),
+    pnl: summary.pnl + Number(day.pnl || 0),
+    riskTrades: summary.riskTrades + Number(day.riskTrades || 0),
+    rrSum: summary.rrSum + Number(day.avgRR || 0) * Number(day.riskTrades || 0),
+  }), { count: 0, wins: 0, losses: 0, breakEvens: 0, pnl: 0, riskTrades: 0, rrSum: 0 });
+  const weekdayDecisive = weekdaySummary.wins + weekdaySummary.losses;
+  const totalTrades = weekdaySummary.count;
+  const totalPnl = weekdaySummary.pnl;
+  const avgRR = weekdaySummary.riskTrades ? weekdaySummary.rrSum / weekdaySummary.riskTrades : 0;
+  const weekdayWinRate = weekdayDecisive ? (weekdaySummary.wins / weekdayDecisive) * 100 : 0;
   const activeDay = weekdays.map((day) => ({ ...day, summary: weekdayStats[day.short] })).filter((day) => day.summary.count > 0).sort((a, b) => Number(b.summary.pnl || 0) - Number(a.summary.pnl || 0))[0]?.short || "Mon";
   return (
     <section className="mt-10">
@@ -12109,7 +12124,7 @@ function StatisticsPatternsView({ stats, trades = [] }) {
         <div className="relative z-10 mb-6 grid grid-cols-4 gap-4">
           <PatternSummaryCard title="Total Trades" value={totalTrades} subtitle="Monday - Friday" tone="fuchsia" />
           <PatternSummaryCard title="Best Day" value={activeDay} subtitle={totalTrades ? formatMoney(weekdayStats[activeDay]?.pnl || 0) : "No trades"} tone="emerald" />
-          <PatternSummaryCard title="Win Rate" value={`${stats.winRate.toFixed(1)}%`} subtitle="Overall" tone="green" />
+          <PatternSummaryCard title="Win Rate" value={`${weekdayWinRate.toFixed(1)}%`} subtitle="Monday - Friday" tone="green" />
           <PatternSummaryCard title="Avg RR" value={avgRR.toFixed(2)} subtitle="Risk reward" tone="amber" />
         </div>
 
@@ -12131,8 +12146,8 @@ function StatisticsPatternsView({ stats, trades = [] }) {
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-400/70 to-transparent" />
           <div className="grid grid-cols-1 gap-6 text-center sm:grid-cols-2 xl:grid-cols-4">
             <PatternBottomMetric label="Total Trades" value={totalTrades} tone="fuchsia" />
-            <PatternBottomMetric label="Overall Win Rate" value={`${stats.winRate.toFixed(1)}%`} tone="emerald" />
-            <PatternBottomMetric label="Overall Avg RR" value={avgRR.toFixed(2)} tone="amber" />
+            <PatternBottomMetric label="Weekday Win Rate" value={`${weekdayWinRate.toFixed(1)}%`} tone="emerald" />
+            <PatternBottomMetric label="Weekday Avg RR" value={avgRR.toFixed(2)} tone="amber" />
             <PatternBottomMetric label="Total P&L" value={formatMoney(totalPnl)} tone="emerald" />
           </div>
         </div>
@@ -12232,7 +12247,8 @@ function StatisticsStrategiesView({ stats }) {
   const best = [...strategyRows].sort((a, b) => Number(b[1].pnl || 0) - Number(a[1].pnl || 0))[0];
   const bestName = best?.[0] || "Liquidity Sweep";
   const bestStats = best?.[1] || { count: stats.trades, wins: stats.wins, losses: stats.losses, pnl: stats.totalPnl };
-  const winRate = bestStats.count ? ((bestStats.wins || 0) / bestStats.count) * 100 : 0;
+  const bestDecisive = Number(bestStats.wins || 0) + Number(bestStats.losses || 0);
+  const winRate = bestDecisive ? ((bestStats.wins || 0) / bestDecisive) * 100 : 0;
   const avgPnl = bestStats.count ? bestStats.pnl / bestStats.count : 0;
   const bestAvgRR = bestStats.riskTrades ? bestStats.rrSum / bestStats.riskTrades : 0;
   return (
