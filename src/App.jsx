@@ -246,6 +246,11 @@ async function postSupabaseSync(action, payload = {}) {
     body: JSON.stringify({ action, accessToken, ...payload }),
   });
   const result = await response.json().catch(() => null);
+  if (result?.authExpired) {
+    const error = new Error(result?.error || "Login session expired. Sign in again.");
+    error.status = 401;
+    throw error;
+  }
   if (!response.ok) {
     const error = new Error(result?.error || `Sync failed (${response.status}).`);
     error.status = response.status;
@@ -272,7 +277,7 @@ function BrandBolt({ className = "" }) {
 
 function SafeResponsiveContainer({ children, minHeight = 240 }) {
   const hostRef = useRef(null);
-  const [isReady, setIsReady] = useState(false);
+  const [size, setSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     const host = hostRef.current;
@@ -280,7 +285,10 @@ function SafeResponsiveContainer({ children, minHeight = 240 }) {
 
     const updateReadyState = () => {
       const rect = host.getBoundingClientRect();
-      setIsReady(rect.width > 0 && rect.height > 0);
+      setSize({
+        width: Math.max(1, Math.floor(rect.width || 0)),
+        height: Math.max(1, Math.floor(rect.height || minHeight)),
+      });
     };
 
     updateReadyState();
@@ -292,11 +300,15 @@ function SafeResponsiveContainer({ children, minHeight = 240 }) {
       observer?.disconnect();
       window.removeEventListener("resize", updateReadyState);
     };
-  }, []);
+  }, [minHeight]);
 
   return (
     <div ref={hostRef} style={{ width: "100%", height: "100%", minHeight }}>
-      {isReady ? <ResponsiveContainer width="100%" height="100%">{children}</ResponsiveContainer> : null}
+      {size.width > 1 && size.height > 1 ? (
+        <ResponsiveContainer width={size.width} height={size.height} minWidth={1} minHeight={minHeight}>
+          {children}
+        </ResponsiveContainer>
+      ) : null}
     </div>
   );
 }
@@ -6423,16 +6435,13 @@ export default function TradingJournalDashboard() {
         if (localTrades.length) {
           setTrades(localTrades);
           saveRestoreCache(authUser.id, { trades: localTrades, account, routine, theme });
-          if (isSupabaseAuthExpiredError(error)) {
-            console.info("Cloud session expired; using browser backup until the next sign in.");
-          } else {
+          if (!isSupabaseAuthExpiredError(error)) {
             console.warn("Supabase trade load failed; using browser backup.", error?.message || error);
           }
           setDataMessage("");
           return;
         }
         if (isSupabaseAuthExpiredError(error)) {
-          console.info("Cloud session expired. Sign in again to resume sync.");
           setIsAuthenticated(false);
           setAuthUser(null);
           safeLocalSignOut();
@@ -6518,7 +6527,6 @@ export default function TradingJournalDashboard() {
       })
       .catch((error) => {
         if (isSupabaseAuthExpiredError(error)) {
-          console.info("Cloud session expired while loading account profile.");
           return;
         }
         console.warn("Could not load account profile from Supabase:", error?.message || error);

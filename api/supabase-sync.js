@@ -2,6 +2,10 @@ function json(response, status, body) {
   response.status(status).json(body);
 }
 
+function authExpired(response, message = "Login session expired. Sign in again.") {
+  return json(response, 200, { ok: false, authExpired: true, error: message });
+}
+
 async function readBody(request) {
   if (!request.body) return {};
   if (typeof request.body === "string") return JSON.parse(request.body || "{}");
@@ -45,13 +49,13 @@ export default async function handler(request, response) {
     const body = await readBody(request);
     const { action, accessToken } = body;
     if (!accessToken || typeof accessToken !== "string") {
-      return json(response, 401, { error: "Login session is missing." });
+      return authExpired(response, "Login session is missing.");
     }
 
     const user = await getUserFromToken(supabaseUrl, anonKey, accessToken);
     const userId = user?.id;
     if (!userId) {
-      return json(response, 401, { error: "Login session expired. Sign in again." });
+      return authExpired(response);
     }
 
     const headers = {
