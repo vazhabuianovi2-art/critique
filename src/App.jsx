@@ -7,6 +7,7 @@ import {
   BookOpen,
   Calendar,
   Camera,
+  Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -4652,6 +4653,206 @@ const THEME_STYLE_CSS = `
     color: #111827 !important;
   }
 
+  @media (max-width: 768px) {
+    main.app-main {
+      padding-left: .85rem !important;
+      padding-right: .85rem !important;
+      padding-bottom: calc(6.75rem + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    .mobile-header-pro {
+      position: sticky !important;
+      top: .75rem !important;
+      z-index: 35 !important;
+      border-radius: 1.15rem !important;
+      padding: .8rem .9rem !important;
+      box-shadow: 0 16px 34px rgba(0,0,0,.28), 0 0 22px rgba(217,70,239,.12) !important;
+    }
+
+    .mobile-add-trade-button {
+      min-height: 2.35rem !important;
+      white-space: nowrap !important;
+    }
+
+    .mobile-bottom-nav {
+      border-radius: 1.15rem 1.15rem 0 0 !important;
+      box-shadow: 0 -18px 45px rgba(0,0,0,.42), 0 -1px 0 rgba(217,70,239,.22) !important;
+    }
+
+    .mobile-nav-fab {
+      border: 1px solid rgba(255,255,255,.14) !important;
+      background: linear-gradient(135deg, #f0abfc, #d946ef 48%, #7c3aed) !important;
+      box-shadow: 0 16px 34px rgba(217,70,239,.34), 0 0 0 6px rgba(0,0,0,.65) !important;
+    }
+
+    .fullscreen-toggle-button {
+      height: 2.55rem !important;
+      width: 2.55rem !important;
+      right: .85rem !important;
+      top: .85rem !important;
+      border-radius: 1rem !important;
+    }
+
+    .dashboard-hero,
+    .dashboard-performance-card,
+    .dashboard-recent-card,
+    .dashboard-activity-card,
+    .journal-hero,
+    .journal-search-panel,
+    .journal-sort-panel,
+    .onboarding-checklist,
+    .trade-modal-panel {
+      border-radius: 1.15rem !important;
+    }
+
+    .dashboard-hero,
+    .dashboard-performance-card,
+    .dashboard-recent-card,
+    .dashboard-activity-card,
+    .journal-hero,
+    .journal-search-panel,
+    .journal-sort-panel {
+      padding: 1rem !important;
+    }
+
+    .dashboard-hero h1,
+    .journal-hero h1 {
+      font-size: clamp(1.65rem, 8vw, 2.15rem) !important;
+      line-height: 1.06 !important;
+    }
+
+    .dashboard-hero .flex.flex-wrap.gap-3,
+    .journal-hero .flex.flex-wrap.gap-2 {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      width: 100% !important;
+    }
+
+    .dashboard-hero .flex.flex-wrap.gap-3 > *,
+    .journal-hero .flex.flex-wrap.gap-2 > * {
+      justify-content: center !important;
+      min-height: 2.75rem !important;
+      width: 100% !important;
+    }
+
+    .journal-action-btn,
+    .journal-add-btn {
+      min-width: 0 !important;
+      padding-inline: .75rem !important;
+      font-size: .76rem !important;
+    }
+
+    .journal-search-panel .flex.flex-col.gap-4.lg\\:flex-row {
+      gap: .75rem !important;
+    }
+
+    .date-picker-popover,
+    .journal-search-panel .custom-select-menu,
+    .trade-modal-panel .custom-select-menu {
+      max-width: calc(100vw - 2rem) !important;
+    }
+
+    .journal-sort-panel > .flex {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: .9rem !important;
+    }
+
+    .journal-sort-panel .flex.items-center.gap-3 {
+      display: grid !important;
+      grid-template-columns: auto minmax(0, 1fr) auto !important;
+      width: 100% !important;
+    }
+
+    .journal-sort-panel .w-36 {
+      width: 100% !important;
+    }
+
+    .trade-modal-shell {
+      align-items: stretch !important;
+      padding: 0 !important;
+    }
+
+    .trade-modal-panel {
+      min-height: 100dvh !important;
+      width: 100% !important;
+      max-width: none !important;
+      border-left: 0 !important;
+      border-right: 0 !important;
+      border-radius: 0 !important;
+      padding: 1rem !important;
+    }
+
+    .trade-modal-panel .grid.md\\:grid-cols-2,
+    .trade-modal-panel .grid.md\\:grid-cols-2 > *,
+    .trade-modal-panel .md\\:col-span-2 {
+      grid-column: auto !important;
+    }
+
+    .trade-modal-panel .mt-6.flex.items-center.justify-between {
+      position: sticky !important;
+      bottom: 0 !important;
+      z-index: 20 !important;
+      margin-inline: -1rem !important;
+      padding: .9rem 1rem calc(.9rem + env(safe-area-inset-bottom, 0px)) !important;
+      background: rgba(0,0,0,.92) !important;
+      backdrop-filter: blur(16px) !important;
+    }
+
+    .trade-modal-panel .mt-6.flex.items-center.justify-between > button {
+      min-height: 2.8rem !important;
+      flex: 1 !important;
+      justify-content: center !important;
+    }
+
+    .onboarding-checklist {
+      padding: 1rem !important;
+    }
+
+    .onboarding-checklist .grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .mobile-header-pro {
+      margin-bottom: 1rem !important;
+    }
+
+    .mobile-header-pro .text-xl {
+      font-size: 1.05rem !important;
+    }
+
+    .mobile-bottom-nav {
+      padding-bottom: calc(.55rem + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    .mobile-bottom-nav button {
+      border-radius: .85rem !important;
+    }
+
+    .mobile-bottom-nav svg {
+      height: 16px !important;
+      width: 16px !important;
+    }
+
+    .mobile-bottom-nav span {
+      font-size: 8px !important;
+    }
+
+    .mobile-nav-fab {
+      top: -1.55rem !important;
+      height: 3rem !important;
+      width: 3rem !important;
+      border-radius: 1rem !important;
+    }
+
+    .dashboard-hero .flex.flex-wrap.gap-3,
+    .journal-hero .flex.flex-wrap.gap-2 {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
   @media (max-width: 1024px) {
     .mistake-page-header-pro {
       grid-template-columns: 1fr;
@@ -7181,9 +7382,9 @@ Skipped duplicates: ${duplicateCount}
 
 function MobileHeader({ onAdd }) {
   return (
-    <div className="mb-6 flex items-center justify-between rounded-2xl border border-fuchsia-500/25 bg-black p-4 lg:hidden">
+    <div className="mobile-header-pro mb-6 flex items-center justify-between rounded-2xl border border-fuchsia-500/25 bg-black p-4 lg:hidden">
       <div className="flex items-center gap-3 text-xl font-black"><span className="text-fuchsia-400 drop-shadow-[0_0_12px_rgba(217,70,239,0.85)]">{BRAND_MARK}</span><span className="tracking-tight">{BRAND_NAME}</span></div>
-      <button onClick={onAdd} className="rounded-xl bg-fuchsia-500 px-3 py-2 text-sm font-black text-white">Add Trade</button>
+      <button onClick={onAdd} className="mobile-add-trade-button inline-flex items-center gap-2 rounded-xl bg-fuchsia-500 px-3 py-2 text-sm font-black text-white shadow-[0_0_18px_rgba(217,70,239,0.25)]"><Plus size={15} /> Add</button>
     </div>
   );
 }
@@ -7197,8 +7398,8 @@ function MobileBottomNav({ active, setActive, onAdd, setTradeViewMode }) {
     [Target, "Mistake Detector"],
   ];
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-fuchsia-500/25 bg-black/95 px-2 py-2 backdrop-blur lg:hidden">
-      <button onClick={onAdd} className="absolute -top-7 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-2xl bg-fuchsia-500 text-white shadow-[0_0_28px_rgba(217,70,239,.48)]"><Plus size={24} /></button>
+    <div className="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-40 border-t border-fuchsia-500/25 bg-black/95 px-2 py-2 backdrop-blur lg:hidden">
+      <button onClick={onAdd} className="mobile-nav-fab absolute -top-7 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-2xl bg-fuchsia-500 text-white shadow-[0_0_28px_rgba(217,70,239,.48)]"><Plus size={24} /></button>
       <div className="grid grid-cols-5 gap-1">
         {items.map(([Icon, label]) => {
           const isAdd = false;
@@ -7559,6 +7760,9 @@ function OnboardingChecklist({ trades, account, onOpenJournal, onOpenAccount, on
       icon: <Target size={18} />,
     },
   ];
+  const completedSteps = steps.filter((step) => step.done).length;
+  const progress = Math.round((completedSteps / steps.length) * 100);
+  const nextStep = steps.find((step) => !step.done) || steps[steps.length - 1];
 
   return (
     <section className="onboarding-checklist mt-8 rounded-2xl border border-emerald-500/25 bg-gradient-to-br from-[#05110d] via-black to-[#120719] p-5">
@@ -7568,15 +7772,27 @@ function OnboardingChecklist({ trades, account, onOpenJournal, onOpenAccount, on
           <h2 className="mt-2 text-2xl font-black text-white">Set up the trading workflow</h2>
           <p className="mt-1 max-w-2xl text-sm font-semibold text-zinc-400">These three steps make the calendar, statistics, and mistake detector useful from day one.</p>
         </div>
-        <Button onClick={onOpenJournal} className="bg-fuchsia-500 px-5 py-3 font-black text-white shadow-[0_0_22px_rgba(217,70,239,0.22)]"><BookOpen size={16} /> Log Trades</Button>
+        <div className="flex flex-col gap-3 sm:min-w-[220px]">
+          <div className="rounded-2xl border border-white/10 bg-black/45 p-3">
+            <div className="flex items-center justify-between text-xs font-black uppercase tracking-widest text-zinc-400">
+              <span>Setup progress</span>
+              <span className="text-emerald-300">{progress}%</span>
+            </div>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
+              <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-fuchsia-400 transition-all duration-500" style={{ width: `${progress}%` }} />
+            </div>
+          </div>
+          <Button onClick={nextStep.action} className="bg-fuchsia-500 px-5 py-3 font-black text-white shadow-[0_0_22px_rgba(217,70,239,0.22)]"><BookOpen size={16} /> {nextStep.actionLabel}</Button>
+        </div>
       </div>
       <div className="mt-5 grid gap-3 lg:grid-cols-3">
-        {steps.map((step) => (
+        {steps.map((step, index) => (
           <div key={step.title} className="onboarding-step rounded-xl border border-white/10 bg-black/45 p-4">
             <div className="flex items-start justify-between gap-3">
-              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${step.done ? "border-emerald-400/45 bg-emerald-500/15 text-emerald-300" : "border-fuchsia-500/35 bg-fuchsia-500/10 text-fuchsia-300"}`}>{step.icon}</div>
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${step.done ? "border-emerald-400/45 bg-emerald-500/15 text-emerald-300" : "border-fuchsia-500/35 bg-fuchsia-500/10 text-fuchsia-300"}`}>{step.done ? <Check size={18} /> : step.icon}</div>
               <span className={`rounded-full border px-2.5 py-1 text-[11px] font-black uppercase tracking-wider ${step.done ? "border-emerald-400/35 bg-emerald-500/10 text-emerald-300" : "border-amber-400/35 bg-amber-500/10 text-amber-200"}`}>{step.done ? "Done" : "Next"}</span>
             </div>
+            <div className="mt-4 text-[11px] font-black uppercase tracking-widest text-zinc-600">Step {index + 1}</div>
             <h3 className="mt-4 text-base font-black text-white">{step.title}</h3>
             <p className="mt-1 min-h-[40px] text-sm font-semibold text-zinc-500">{step.detail}</p>
             <button onClick={step.action} className="mt-4 rounded-xl border border-white/10 bg-zinc-950 px-3 py-2 text-sm font-black text-zinc-200 transition hover:border-fuchsia-400/60 hover:text-fuchsia-200">{step.actionLabel}</button>
@@ -8709,11 +8925,11 @@ function AddTradeModal({ isEditing, form, setForm, onClose, onSave, account, acc
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/75 py-8 backdrop-blur-sm">
+    <div className="trade-modal-shell fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/75 px-3 py-8 backdrop-blur-sm sm:px-6">
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-[820px] rounded-xl border border-white/15 bg-zinc-950 p-6 shadow-2xl"
+        className="trade-modal-panel w-full max-w-[820px] rounded-xl border border-white/15 bg-zinc-950 p-6 shadow-2xl"
       >
         <div className="flex items-start justify-between">
           <div>
