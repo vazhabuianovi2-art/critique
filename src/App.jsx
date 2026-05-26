@@ -13365,8 +13365,44 @@ function LegalInfoPage({ page, setAuthPage, theme, setTheme }) {
   );
 }
 
+const DEMO_SCENES = [
+  {
+    eyebrow: "Trade Journal",
+    title: "Log every trade in seconds",
+    body: "Capture symbol, session, strategy, risk, P&L, screenshots, emotion, and execution quality in one clean workflow.",
+    stat: "+$780",
+    accent: "emerald",
+    bullets: ["Fast trade entry", "Screenshots & tags", "Risk and R:R tracking"],
+  },
+  {
+    eyebrow: "Calendar Review",
+    title: "See your trading month clearly",
+    body: "Winning days, losing days, break-even days, and news events become obvious instead of buried in notes.",
+    stat: "May",
+    accent: "fuchsia",
+    bullets: ["Daily P&L", "Weekly totals", "News-day context"],
+  },
+  {
+    eyebrow: "Advanced Analytics",
+    title: "Find your real edge",
+    body: "Analyze setups, sessions, currencies, entry quality, emotions, mistake patterns, and performance trends.",
+    stat: "78%",
+    accent: "cyan",
+    bullets: ["Best setups", "Weak sessions", "Performance timeline"],
+  },
+  {
+    eyebrow: "Mistake Detector",
+    title: "Stop repeating costly habits",
+    body: "TryCritique turns your review into a feedback loop so you know exactly what to fix before the next trading day.",
+    stat: "Fix",
+    accent: "amber",
+    bullets: ["Behavior patterns", "Loss triggers", "Actionable review"],
+  },
+];
+
 function LandingPage({ setAuthPage, theme, setTheme }) {
   const isLight = theme === "light";
+  const [isDemoOpen, setIsDemoOpen] = useState(false);
   const navItems = ["Features", "How it works", "Pricing", "FAQ"];
   const metrics = [
     ["Portfolio Value", "$247,890"],
@@ -13439,7 +13475,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
                 Start Free Trial
                 <ChevronRight size={19} />
               </button>
-              <button type="button" onClick={() => setAuthPage("login")} className={isLight ? "inline-flex h-14 items-center justify-center gap-3 rounded-xl border border-fuchsia-200 bg-white/65 px-8 text-base font-black text-slate-950 transition hover:border-fuchsia-300 hover:bg-white" : "inline-flex h-14 items-center justify-center gap-3 rounded-xl border border-white/15 bg-black/40 px-8 text-base font-black text-white transition hover:border-fuchsia-400/60 hover:bg-white/5"}>
+              <button type="button" onClick={() => setIsDemoOpen(true)} className={isLight ? "inline-flex h-14 items-center justify-center gap-3 rounded-xl border border-fuchsia-200 bg-white/65 px-8 text-base font-black text-slate-950 transition hover:border-fuchsia-300 hover:bg-white" : "inline-flex h-14 items-center justify-center gap-3 rounded-xl border border-white/15 bg-black/40 px-8 text-base font-black text-white transition hover:border-fuchsia-400/60 hover:bg-white/5"}>
                 <PlayCircle size={20} />
                 Watch Demo
               </button>
@@ -13809,7 +13845,110 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
             </div>
           </div>
         </footer>
+        {isDemoOpen && <WatchDemoModal onClose={() => setIsDemoOpen(false)} onStart={() => setAuthPage("register")} isLight={isLight} />}
       </main>
+    </div>
+  );
+}
+
+function WatchDemoModal({ onClose, onStart, isLight }) {
+  const [activeScene, setActiveScene] = useState(0);
+  const scene = DEMO_SCENES[activeScene];
+  const accentClass = {
+    emerald: "text-emerald-300 border-emerald-400/35 bg-emerald-500/10",
+    fuchsia: "text-fuchsia-300 border-fuchsia-400/35 bg-fuchsia-500/10",
+    cyan: "text-cyan-300 border-cyan-400/35 bg-cyan-500/10",
+    amber: "text-amber-300 border-amber-400/35 bg-amber-500/10",
+  }[scene.accent] || "text-fuchsia-300 border-fuchsia-400/35 bg-fuchsia-500/10";
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveScene((current) => (current + 1) % DEMO_SCENES.length);
+    }, 4200);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/82 px-4 py-6 backdrop-blur-xl">
+      <motion.div initial={{ opacity: 0, y: 18, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} className={isLight ? "w-full max-w-6xl overflow-hidden rounded-[1.6rem] border border-slate-200 bg-white text-slate-950 shadow-[0_32px_110px_rgba(15,23,42,0.28)]" : "w-full max-w-6xl overflow-hidden rounded-[1.6rem] border border-white/12 bg-[#050507] text-white shadow-[0_32px_110px_rgba(0,0,0,0.72)]"}>
+        <div className={isLight ? "flex items-center justify-between border-b border-slate-200 px-5 py-4" : "flex items-center justify-between border-b border-white/10 px-5 py-4"}>
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/12 text-fuchsia-300"><PlayCircle size={19} /></span>
+            <div>
+              <div className="text-sm font-black">TryCritique Demo</div>
+              <div className={isLight ? "text-xs font-bold text-slate-500" : "text-xs font-bold text-zinc-500"}>60-second trader-focused walkthrough</div>
+            </div>
+          </div>
+          <button type="button" onClick={onClose} className={isLight ? "rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-600 transition hover:text-slate-950" : "rounded-xl border border-white/10 bg-white/5 p-3 text-zinc-400 transition hover:text-white"} aria-label="Close demo">
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="grid lg:grid-cols-[1.18fr_.82fr]">
+          <div className={isLight ? "relative min-h-[430px] overflow-hidden bg-gradient-to-br from-slate-50 via-white to-fuchsia-50 p-6" : "relative min-h-[430px] overflow-hidden bg-gradient-to-br from-black via-[#08030d] to-[#03100c] p-6"}>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(217,70,239,0.16),transparent_28%),radial-gradient(circle_at_82%_78%,rgba(16,185,129,0.14),transparent_28%)]" />
+            <div className="relative z-10 flex h-full flex-col">
+              <div className="flex items-center justify-between">
+                <div className="flex gap-2"><span className="h-3 w-3 rounded-full bg-red-500" /><span className="h-3 w-3 rounded-full bg-amber-400" /><span className="h-3 w-3 rounded-full bg-emerald-400" /></div>
+                <span className={isLight ? "rounded-full bg-white px-3 py-1 text-xs font-black text-slate-500 shadow-sm" : "rounded-full bg-white/8 px-3 py-1 text-xs font-black text-zinc-400"}>Live product preview</span>
+              </div>
+
+              <div className="mt-7 grid flex-1 gap-5 md:grid-cols-[.9fr_1.1fr]">
+                <div className={`rounded-2xl border p-5 ${accentClass}`}>
+                  <div className="text-xs font-black uppercase tracking-[0.2em] opacity-80">{scene.eyebrow}</div>
+                  <div className="mt-8 text-5xl font-black">{scene.stat}</div>
+                  <div className={isLight ? "mt-4 text-sm font-bold text-slate-500" : "mt-4 text-sm font-bold text-zinc-400"}>Turns raw trade data into decisions you can actually use.</div>
+                </div>
+
+                <div className={isLight ? "rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm" : "rounded-2xl border border-white/10 bg-black/45 p-5"}>
+                  <div className="mb-5 flex items-center justify-between">
+                    <span className="text-sm font-black">{BRAND_NAME} Pro</span>
+                    <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-black text-emerald-300">Review mode</span>
+                  </div>
+                  <div className="space-y-3">
+                    {scene.bullets.map((bullet, index) => (
+                      <motion.div key={bullet} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.08 }} className={isLight ? "flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3" : "flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3"}>
+                        <span className="font-black">{bullet}</span>
+                        <Check size={17} className="text-emerald-300" />
+                      </motion.div>
+                    ))}
+                  </div>
+                  <div className="mt-5 h-24 overflow-hidden rounded-xl border border-fuchsia-500/20 bg-fuchsia-500/10 p-3">
+                    <div className="flex h-full items-end gap-2">
+                      {[34, 58, 42, 76, 64, 88, 72, 96].map((height, index) => (
+                        <span key={index} className="flex-1 rounded-t-md bg-gradient-to-t from-fuchsia-600 to-emerald-300" style={{ height: `${height}%` }} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 flex gap-2">
+                {DEMO_SCENES.map((item, index) => (
+                  <button key={item.eyebrow} type="button" onClick={() => setActiveScene(index)} className={index === activeScene ? "h-2 flex-1 rounded-full bg-fuchsia-400" : "h-2 flex-1 rounded-full bg-white/15"} aria-label={`Show ${item.eyebrow}`} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className={isLight ? "flex flex-col justify-between bg-white p-7" : "flex flex-col justify-between bg-black p-7"}>
+            <div>
+              <div className="text-xs font-black uppercase tracking-[0.22em] text-fuchsia-400">Why traders buy it</div>
+              <h3 className="mt-4 text-4xl font-black leading-tight">{scene.title}</h3>
+              <p className={isLight ? "mt-5 text-base font-semibold leading-7 text-slate-600" : "mt-5 text-base font-semibold leading-7 text-zinc-400"}>{scene.body}</p>
+              <div className={isLight ? "mt-7 rounded-2xl border border-slate-200 bg-slate-50 p-5" : "mt-7 rounded-2xl border border-white/10 bg-white/[0.04] p-5"}>
+                <div className="text-sm font-black">Demo voiceover</div>
+                <p className={isLight ? "mt-3 text-sm font-semibold leading-6 text-slate-600" : "mt-3 text-sm font-semibold leading-6 text-zinc-400"}>Stop guessing why you win or lose. TryCritique shows your trades, habits, risk, and mistakes in one clean review system.</p>
+              </div>
+            </div>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+              <button type="button" onClick={onStart} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-fuchsia-500 px-5 text-sm font-black text-white shadow-[0_18px_36px_rgba(217,70,239,0.24)] transition hover:bg-fuchsia-400">Start Your Journal <ChevronRight size={17} /></button>
+              <button type="button" onClick={onClose} className={isLight ? "inline-flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-black text-slate-700 transition hover:text-slate-950" : "inline-flex h-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 px-5 text-sm font-black text-zinc-300 transition hover:text-white"}>Keep browsing</button>
+            </div>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }
