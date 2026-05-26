@@ -559,10 +559,7 @@ const THEME_STYLE_CSS = `
   }
 
   .auth-animated-grid {
-    background-image: linear-gradient(rgba(217,70,239,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(217,70,239,.06) 1px, transparent 1px);
-    background-size: 48px 48px;
-    animation: authGridDrift 18s linear infinite;
-    mask-image: linear-gradient(to bottom, transparent, black 16%, black 80%, transparent);
+    display: none;
   }
 
   .auth-card-panel,
@@ -13241,17 +13238,17 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
         </div>
 
         <div className="relative hidden min-h-screen items-center justify-center overflow-hidden p-10 lg:flex">
-          <div className="auth-float-card auth-float-one absolute left-12 top-28 rounded-2xl border border-emerald-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(16,185,129,0.10)] backdrop-blur-xl">
+          <div className="auth-float-card auth-float-one absolute left-16 bottom-[30%] rounded-2xl border border-emerald-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(16,185,129,0.10)] backdrop-blur-xl">
             <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Win Rate</div>
             <div className="mt-3 text-3xl font-black text-emerald-400">87.3%</div>
             <div className="mt-1 text-xs font-bold text-emerald-300">+12.4% this month</div>
           </div>
-          <div className="auth-float-card auth-float-two absolute right-16 top-40 rounded-2xl border border-fuchsia-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(217,70,239,0.10)] backdrop-blur-xl">
+          <div className="auth-float-card auth-float-two absolute right-16 top-36 rounded-2xl border border-fuchsia-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(217,70,239,0.10)] backdrop-blur-xl">
             <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Mistake Detector</div>
             <div className="mt-3 text-xl font-black text-fuchsia-300">Active Coach</div>
             <div className="mt-1 text-xs font-bold text-zinc-400">Find → Understand → Fix</div>
           </div>
-          <div className="auth-float-card auth-float-three absolute bottom-28 right-24 rounded-2xl border border-emerald-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(16,185,129,0.10)] backdrop-blur-xl">
+          <div className="auth-float-card auth-float-three absolute left-[8%] top-[30%] rounded-2xl border border-emerald-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(16,185,129,0.10)] backdrop-blur-xl">
             <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Total P&L</div>
             <div className="mt-3 text-3xl font-black text-emerald-400">+$2,450</div>
             <div className="mt-1 text-xs font-bold text-zinc-400">Tracked from journal</div>
