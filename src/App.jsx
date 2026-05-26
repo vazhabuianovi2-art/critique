@@ -141,6 +141,22 @@ function getFriendlyAuthError(error, fallback = "Authentication failed. Try agai
   return message || fallback;
 }
 
+function isSupabaseAuthExpiredError(error) {
+  const message = String(error?.message || error || "");
+  return error?.status === 401 || /fresh login session|session expired|jwt expired|invalid token|not authenticated|401/i.test(message);
+}
+
+async function safeLocalSignOut() {
+  if (!supabase) return;
+  try {
+    await supabase.auth.signOut({ scope: "local" });
+  } catch {
+    try {
+      await supabase.auth.getSession();
+    } catch {}
+  }
+}
+
 function getPasswordResetPayloadFromUrl() {
   try {
     const searchParams = new URLSearchParams(window.location.search);
@@ -230,7 +246,11 @@ async function postSupabaseSync(action, payload = {}) {
     body: JSON.stringify({ action, accessToken, ...payload }),
   });
   const result = await response.json().catch(() => null);
-  if (!response.ok) throw new Error(result?.error || `Sync failed (${response.status}).`);
+  if (!response.ok) {
+    const error = new Error(result?.error || `Sync failed (${response.status}).`);
+    error.status = response.status;
+    throw error;
+  }
   return result;
 }
 
@@ -247,6 +267,37 @@ function BrandBolt({ className = "" }) {
         </linearGradient>
       </defs>
     </svg>
+  );
+}
+
+function SafeResponsiveContainer({ children, minHeight = 240 }) {
+  const hostRef = useRef(null);
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!host) return undefined;
+
+    const updateReadyState = () => {
+      const rect = host.getBoundingClientRect();
+      setIsReady(rect.width > 0 && rect.height > 0);
+    };
+
+    updateReadyState();
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(updateReadyState) : null;
+    observer?.observe(host);
+    window.addEventListener("resize", updateReadyState);
+
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", updateReadyState);
+    };
+  }, []);
+
+  return (
+    <div ref={hostRef} style={{ width: "100%", height: "100%", minHeight }}>
+      {isReady ? <ResponsiveContainer width="100%" height="100%">{children}</ResponsiveContainer> : null}
+    </div>
   );
 }
 
@@ -6372,12 +6423,24 @@ export default function TradingJournalDashboard() {
         if (localTrades.length) {
           setTrades(localTrades);
           saveRestoreCache(authUser.id, { trades: localTrades, account, routine, theme });
-          console.warn("Supabase trade load failed; using browser backup.", error?.message || error);
+          if (isSupabaseAuthExpiredError(error)) {
+            console.info("Cloud session expired; using browser backup until the next sign in.");
+          } else {
+            console.warn("Supabase trade load failed; using browser backup.", error?.message || error);
+          }
           setDataMessage("");
           return;
         }
-        console.warn("Supabase trade load failed and no browser backup was available.", error?.message || error);
-        setDataMessage("");
+        if (isSupabaseAuthExpiredError(error)) {
+          console.info("Cloud session expired. Sign in again to resume sync.");
+          setIsAuthenticated(false);
+          setAuthUser(null);
+          safeLocalSignOut();
+          setDataMessage("Login session expired. Sign in again to resume cloud sync.");
+        } else {
+          console.warn("Supabase trade load failed and no browser backup was available.", error?.message || error);
+          setDataMessage("");
+        }
       })
       .finally(() => {
         if (mounted) {
@@ -6454,6 +6517,10 @@ export default function TradingJournalDashboard() {
         });
       })
       .catch((error) => {
+        if (isSupabaseAuthExpiredError(error)) {
+          console.info("Cloud session expired while loading account profile.");
+          return;
+        }
         console.warn("Could not load account profile from Supabase:", error?.message || error);
       });
 
@@ -6658,7 +6725,7 @@ export default function TradingJournalDashboard() {
           setPasswordRecoverySession(false);
           setAuthMessage("Password updated successfully. You can now sign in with your new password.");
           setAuthPage("login");
-          await supabase.auth.signOut();
+          await safeLocalSignOut();
           return { ok: true };
         }
 
@@ -6705,7 +6772,7 @@ export default function TradingJournalDashboard() {
         setPasswordRecoverySession(false);
         setAuthMessage("Password updated successfully. You can now sign in with your new password.");
         setAuthPage("login");
-        await supabase.auth.signOut();
+        await safeLocalSignOut();
         return { ok: true };
       }
     } catch (error) {
@@ -6718,7 +6785,7 @@ export default function TradingJournalDashboard() {
   }
 
   async function handleSignOut() {
-    if (supabase) await supabase.auth.signOut();
+    await safeLocalSignOut();
     setIsAuthenticated(false);
     setAuthUser(null);
     setIsSidebarUserMenuOpen(false);
@@ -8181,7 +8248,7 @@ function PerformanceOverviewChart({ mode, trades, curve, stats }) {
         <div className="relative z-10 mt-2 text-sm text-zinc-400">{subtitle}</div>
       </div>
       <div className="dashboard-chart-area h-80 rounded-2xl border border-white/10 bg-black/25 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-        <ResponsiveContainer width="100%" height="100%">
+        <SafeResponsiveContainer>
           <LineChart data={chartData} margin={{ top: 16, right: 18, left: 8, bottom: 6 }}>
             <CartesianGrid strokeDasharray="4 6" stroke="rgba(148,163,184,0.16)" vertical={false} />
             <XAxis dataKey="date" stroke="#94a3b8" tickLine={false} axisLine={{ stroke: "rgba(168,85,247,0.25)" }} />
@@ -8190,7 +8257,7 @@ function PerformanceOverviewChart({ mode, trades, curve, stats }) {
             <Line type="monotone" dataKey="value" stroke={stroke} strokeWidth={4} dot={{ r: 5, fill: stroke, stroke: "#ffffff", strokeWidth: 2 }} activeDot={{ r: 8, fill: "#d946ef", stroke: "#ffffff", strokeWidth: 3 }} />
             <Line type="monotone" dataKey="value" stroke="#d946ef" strokeWidth={2} dot={false} opacity={0.22} />
           </LineChart>
-        </ResponsiveContainer>
+        </SafeResponsiveContainer>
       </div>
     </div>
   );
@@ -12145,7 +12212,7 @@ function StatisticsPerformanceTimeline({ curve, stats }) {
         </div>
       </div>
       <div className="relative z-10 mt-6 h-72 rounded-xl border border-white/10 bg-black/30 p-3">
-        <ResponsiveContainer width="100%" height="100%">
+        <SafeResponsiveContainer>
           <LineChart data={chartData} margin={{ top: 18, right: 20, left: 8, bottom: 6 }}>
             <CartesianGrid strokeDasharray="4 6" stroke="rgba(168,85,247,0.24)" vertical={false} />
             <XAxis dataKey="date" stroke="#94a3b8" tickLine={false} axisLine={{ stroke: "rgba(168,85,247,0.28)" }} />
@@ -12154,7 +12221,7 @@ function StatisticsPerformanceTimeline({ curve, stats }) {
             <Line type="monotone" dataKey="pnl" stroke="#d946ef" strokeWidth={4} dot={{ r: 5, fill: "#22c55e", stroke: "#ffffff", strokeWidth: 2 }} activeDot={{ r: 8, fill: "#d946ef", stroke: "#ffffff", strokeWidth: 3 }} />
             <Line type="monotone" dataKey="pnl" stroke="#22c55e" strokeWidth={2} dot={false} opacity={0.45} />
           </LineChart>
-        </ResponsiveContainer>
+        </SafeResponsiveContainer>
       </div>
     </div>
   );
@@ -12587,7 +12654,7 @@ function StatisticsRiskView({ stats, trades = [] }) {
             <span className="rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 px-3 py-2 text-xs font-black text-fuchsia-300">Risk control</span>
           </div>
           <div className="mt-5 h-80 rounded-xl border border-white/10 bg-black/25 p-3">
-            <ResponsiveContainer width="100%" height="100%">
+            <SafeResponsiveContainer>
               <BarChart data={chartRows} margin={{ top: 20, right: 24, left: 8, bottom: 8 }}>
                 <CartesianGrid strokeDasharray="4 6" stroke="rgba(217,70,239,.20)" vertical={false} />
                 <XAxis dataKey="date" stroke="#64748b" tickLine={false} />
@@ -12599,7 +12666,7 @@ function StatisticsRiskView({ stats, trades = [] }) {
                 <Bar dataKey="risk" fill="#d946ef" radius={[8, 8, 0, 0]} />
                 <Bar dataKey="pnl" fill="#22c55e" radius={[8, 8, 0, 0]} />
               </BarChart>
-            </ResponsiveContainer>
+            </SafeResponsiveContainer>
           </div>
         </div>
 
@@ -12632,12 +12699,12 @@ function StatisticsChartsView({ stats, curve, trades = [] }) {
     <section className="mt-10 grid grid-cols-1 gap-8 xl:grid-cols-2">
       <div className="statistics-chart-panel charts-pro-card rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-black via-[#020605] to-[#050b13] p-6">
         <div className="flex items-start justify-between"><SectionTitle title="Performance Timeline" icon={<TrendingUp size={18} />} /><span className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-xs font-black text-emerald-300">Equity</span></div>
-        <div className="mt-5 h-80 rounded-xl border border-white/10 bg-black/25 p-3"><ResponsiveContainer width="100%" height="100%"><LineChart data={curve} margin={{ top: 18, right: 20, left: 8, bottom: 6 }}><CartesianGrid strokeDasharray="4 6" stroke="rgba(16,185,129,.20)" vertical={false} /><XAxis dataKey="date" stroke="#64748b" tickLine={false} /><YAxis stroke="#64748b" tickLine={false} tickFormatter={(v) => `$${v}`} /><Tooltip contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }} formatter={(value) => [formatMoney(value), "Cumulative P&L"]} /><Line type="monotone" dataKey="pnl" stroke="#10b981" strokeWidth={4} dot={{ r: 5, fill: "#6366f1", stroke: "#ffffff", strokeWidth: 2 }} activeDot={{ r: 8, fill: "#d946ef", stroke: "#ffffff", strokeWidth: 3 }} /></LineChart></ResponsiveContainer></div>
+        <div className="mt-5 h-80 rounded-xl border border-white/10 bg-black/25 p-3"><SafeResponsiveContainer><LineChart data={curve} margin={{ top: 18, right: 20, left: 8, bottom: 6 }}><CartesianGrid strokeDasharray="4 6" stroke="rgba(16,185,129,.20)" vertical={false} /><XAxis dataKey="date" stroke="#64748b" tickLine={false} /><YAxis stroke="#64748b" tickLine={false} tickFormatter={(v) => `$${v}`} /><Tooltip contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }} formatter={(value) => [formatMoney(value), "Cumulative P&L"]} /><Line type="monotone" dataKey="pnl" stroke="#10b981" strokeWidth={4} dot={{ r: 5, fill: "#6366f1", stroke: "#ffffff", strokeWidth: 2 }} activeDot={{ r: 8, fill: "#d946ef", stroke: "#ffffff", strokeWidth: 3 }} /></LineChart></SafeResponsiveContainer></div>
       </div>
 
       <div className="statistics-chart-panel charts-pro-card rounded-2xl border border-blue-500/20 bg-gradient-to-br from-black via-[#020605] to-[#050b13] p-6">
         <div className="flex items-start justify-between"><SectionTitle title="Monthly P&L" icon={<BarChart3 size={18} />} /><span className="rounded-xl border border-blue-500/25 bg-blue-500/10 px-3 py-2 text-xs font-black text-blue-300">2026</span></div>
-        <div className="mt-5 h-80 rounded-xl border border-white/10 bg-black/25 p-3"><ResponsiveContainer width="100%" height="100%"><BarChart data={safeMonthlyData} margin={{ top: 20, right: 24, left: 8, bottom: 8 }}><CartesianGrid strokeDasharray="4 6" stroke="rgba(59,130,246,.20)" vertical={false} /><XAxis dataKey="month" stroke="#64748b" tickLine={false} /><YAxis stroke="#64748b" tickLine={false} tickFormatter={(v) => `$${v}`} /><Tooltip contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }} formatter={(value) => [formatMoney(value), "P&L"]} /><Bar dataKey="pnl" fill="#22c55e" radius={[8, 8, 0, 0]} /></BarChart></ResponsiveContainer></div>
+        <div className="mt-5 h-80 rounded-xl border border-white/10 bg-black/25 p-3"><SafeResponsiveContainer><BarChart data={safeMonthlyData} margin={{ top: 20, right: 24, left: 8, bottom: 8 }}><CartesianGrid strokeDasharray="4 6" stroke="rgba(59,130,246,.20)" vertical={false} /><XAxis dataKey="month" stroke="#64748b" tickLine={false} /><YAxis stroke="#64748b" tickLine={false} tickFormatter={(v) => `$${v}`} /><Tooltip contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }} formatter={(value) => [formatMoney(value), "P&L"]} /><Bar dataKey="pnl" fill="#22c55e" radius={[8, 8, 0, 0]} /></BarChart></SafeResponsiveContainer></div>
       </div>
 
       <div className="statistics-chart-panel charts-pro-card rounded-2xl border border-amber-500/20 bg-gradient-to-br from-black via-[#020605] to-[#120b05] p-6">
@@ -12713,7 +12780,7 @@ function DashCard({ title, value, tone, icon, badge }) {
   const isCustomValue = React.isValidElement(value);
   return <button className={`dashboard-dash-card group relative overflow-hidden rounded-xl border bg-gradient-to-br p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:scale-[1.025] hover:shadow-2xl ${s.card}`}><div className={`absolute right-0 top-0 h-24 w-24 rounded-bl-3xl ${s.glow}`} /><div className="relative z-10 flex items-start justify-between"><div><div className="text-xs font-black uppercase tracking-wider text-zinc-400">{title}</div><div className={`mt-4 text-3xl font-black ${s.value}`}>{isCustomValue ? value : <AnimatedValue value={value} />}</div></div><div className={`flex h-10 w-10 items-center justify-center rounded-xl text-lg font-black ${s.icon}`}>{icon}</div></div><div className="relative z-10 mt-3 flex items-end justify-between"><span className={`dashboard-card-badge rounded-md border px-2 py-1 text-xs font-black ${s.badge}`}>{badge}</span><svg width="86" height="34" viewBox="0 0 86 34" fill="none" className={`${s.line} opacity-90 transition-transform duration-300 group-hover:scale-110`}><path d="M2 26 C8 28, 11 12, 17 18 S27 27, 33 16 S45 13, 51 18 S61 8, 68 10 S76 5, 84 2" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" /><path d="M2 31 C11 28, 15 20, 22 22 S32 27, 38 19 S49 15, 55 20 S65 11, 72 13 S78 8, 84 7" stroke="currentColor" strokeWidth="1" opacity="0.35" fill="none" strokeLinecap="round" /></svg></div></button>;
 }
-function Chart({ curve, tall }) { return <div className={tall ? "mt-5 h-96" : "mt-5 h-72"}><ResponsiveContainer width="100%" height="100%"><LineChart data={curve}><CartesianGrid strokeDasharray="3 3" opacity={0.12} /><XAxis dataKey="date" stroke="#777" /><YAxis stroke="#777" /><Tooltip contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }} /><Line type="monotone" dataKey="pnl" stroke="#a855f7" strokeWidth={3} dot={{ r: 5 }} /></LineChart></ResponsiveContainer></div>; }
+function Chart({ curve, tall }) { return <div className={tall ? "mt-5 h-96" : "mt-5 h-72"}><SafeResponsiveContainer><LineChart data={curve}><CartesianGrid strokeDasharray="3 3" opacity={0.12} /><XAxis dataKey="date" stroke="#777" /><YAxis stroke="#777" /><Tooltip contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }} /><Line type="monotone" dataKey="pnl" stroke="#a855f7" strokeWidth={3} dot={{ r: 5 }} /></LineChart></SafeResponsiveContainer></div>; }
 function SectionTitle({ title, icon, gold }) { return <div className="flex items-center gap-3 text-xl font-black"><div className={`rounded-lg p-2 ${gold ? "bg-amber-500/20 text-amber-400" : "bg-fuchsia-500/20 text-fuchsia-400"}`}>{icon}</div>{title}</div>; }
 function TopPill({ label, value, green, red }) {
   return <div className={`calendar-top-pill rounded-xl border px-4 py-3 text-sm font-black ${green ? "calendar-top-pill-green border-emerald-500/40 bg-emerald-500/20 text-emerald-300" : red ? "calendar-top-pill-red border-red-500/40 bg-red-500/20 text-red-300" : "calendar-top-pill-neutral border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300"}`}><span className="calendar-top-pill-label mr-2 text-zinc-400">{label}</span>{value}</div>;
