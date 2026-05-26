@@ -126,7 +126,13 @@ const SUPABASE_URL = getEnvValue("VITE_SUPABASE_URL");
 const SUPABASE_ANON_KEY = getEnvValue("VITE_SUPABASE_ANON_KEY") || getEnvValue("VITE_SUPABASE_KEY");
 const hasValidSupabaseUrl = /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(SUPABASE_URL);
 const hasValidSupabaseKey = SUPABASE_ANON_KEY.length > 40;
-const supabase = hasValidSupabaseUrl && hasValidSupabaseKey ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+const supabase = hasValidSupabaseUrl && hasValidSupabaseKey ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+    detectSessionInUrl: true,
+  },
+}) : null;
 const isSupabaseReady = Boolean(supabase);
 
 function wait(ms) {
@@ -6709,9 +6715,9 @@ export default function TradingJournalDashboard() {
     async function initializeAuthSession() {
       const recoverySession = await recoverPasswordSessionFromUrl();
       if (isRecoveryUrl) return recoverySession;
-
-      const { data } = await supabase.auth.getSession();
-      return data?.session || null;
+      localStorage.removeItem(REMEMBER_AUTH_KEY);
+      await safeLocalSignOut();
+      return null;
     }
 
     initializeAuthSession().then((session) => {
@@ -9820,14 +9826,7 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
         return;
       }
     }
-    try {
-      const remembered = JSON.parse(localStorage.getItem(REMEMBER_AUTH_KEY) || "null");
-      if (remembered?.remember && String(remembered.email || "").toLowerCase() === String(authUser.email || "").toLowerCase()) {
-        localStorage.setItem(REMEMBER_AUTH_KEY, JSON.stringify({ ...remembered, password: newPassword }));
-      }
-    } catch {
-      // Login still works with the new Supabase password; this only updates the local remembered form.
-    }
+    localStorage.removeItem(REMEMBER_AUTH_KEY);
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
@@ -13054,19 +13053,10 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
   const isForgot = authPage === "forgot";
   const isUpdatePassword = authPage === "updatePassword";
   const [showPassword, setShowPassword] = useState(false);
-  const rememberedAuth = useMemo(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(REMEMBER_AUTH_KEY) || "null");
-      return saved && typeof saved === "object" ? saved : null;
-    } catch {
-      return null;
-    }
-  }, []);
-  const [rememberMe, setRememberMe] = useState(Boolean(rememberedAuth?.remember));
   const [form, setForm] = useState({
     name: "",
-    email: rememberedAuth?.email || "",
-    password: rememberedAuth?.password || "",
+    email: "",
+    password: "",
     confirm: "",
   });
   const [error, setError] = useState("");
@@ -13075,15 +13065,6 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
     setForm((current) => ({ ...current, [key]: value }));
     setError("");
   }
-
-  useEffect(() => {
-    if (!isLogin) return;
-    if (!rememberMe) {
-      localStorage.removeItem(REMEMBER_AUTH_KEY);
-      return;
-    }
-    localStorage.setItem(REMEMBER_AUTH_KEY, JSON.stringify({ remember: true, email: form.email, password: form.password }));
-  }, [form.email, form.password, isLogin, rememberMe]);
 
   async function submitAuth(event) {
     event.preventDefault();
@@ -13196,18 +13177,7 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
 
               {isLogin && (
                 <div className="flex items-center justify-between text-sm">
-                  <label className="flex items-center gap-2 font-semibold text-zinc-400">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(event) => {
-                        setRememberMe(event.target.checked);
-                        if (!event.target.checked) localStorage.removeItem(REMEMBER_AUTH_KEY);
-                      }}
-                      className="h-4 w-4 accent-fuchsia-500"
-                    />
-                    Remember me
-                  </label>
+                  <span className="font-semibold text-zinc-500">Login required on every visit</span>
                   <button type="button" onClick={() => setAuthPage("forgot")} className="font-black text-fuchsia-300 hover:text-fuchsia-200">Forgot password?</button>
                 </div>
               )}
