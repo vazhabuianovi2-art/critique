@@ -820,9 +820,9 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .date-picker-day-current {
-    background: #ffffff !important;
-    color: #0f172a !important;
-    border: 1px solid rgba(226, 232, 240, 0.95) !important;
+    background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(168, 85, 247, 0.34) !important;
   }
 
   .light-theme .date-picker-day-muted {
@@ -848,9 +848,9 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .date-picker-day-current {
-    background: #ffffff !important;
-    color: #0f172a !important;
-    border: 1px solid rgba(226, 232, 240, 0.95) !important;
+    background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(168, 85, 247, 0.42) !important;
   }
 
   .light-theme .date-picker-day-muted {
@@ -4589,6 +4589,67 @@ const THEME_STYLE_CSS = `
   .light-theme .fix-step-card {
     background: #f0fdf4 !important;
     border-color: rgba(16,185,129,.22) !important;
+  }
+
+  .light-theme .custom-select-menu,
+  .light-theme .trade-context-modern .custom-select-menu {
+    background: #ffffff !important;
+    border-color: rgba(203,213,225,.95) !important;
+    box-shadow: 0 18px 44px rgba(15,23,42,.14) !important;
+  }
+
+  .light-theme .custom-select-menu .custom-select-option,
+  .light-theme .trade-context-modern .custom-select-option {
+    background: #ffffff !important;
+    color: #111827 !important;
+    box-shadow: none !important;
+  }
+
+  .light-theme .custom-select-menu .custom-select-option span,
+  .light-theme .trade-context-modern .custom-select-option span {
+    color: inherit !important;
+  }
+
+  .light-theme .custom-select-menu .custom-select-option:hover,
+  .light-theme .custom-select-menu .custom-select-active,
+  .light-theme .trade-context-modern .custom-select-option:hover,
+  .light-theme .trade-context-modern .custom-select-active {
+    background: #f8fafc !important;
+    color: #86198f !important;
+    border-color: rgba(217,70,239,.24) !important;
+  }
+
+  .light-theme .date-picker-popover .date-picker-day-current {
+    background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%) !important;
+    color: #ffffff !important;
+    border-color: rgba(168,85,247,.42) !important;
+  }
+
+  .light-theme .date-picker-popover .date-picker-day-current .date-picker-day-number {
+    color: #ffffff !important;
+  }
+
+  .light-theme .date-picker-popover .date-picker-day-selected {
+    background: linear-gradient(135deg, #9333ea 0%, #d946ef 100%) !important;
+    color: #ffffff !important;
+    border-color: rgba(147,51,234,.74) !important;
+    box-shadow: 0 10px 24px rgba(147,51,234,.24) !important;
+  }
+
+  .light-theme .date-picker-popover .date-picker-day-muted {
+    background: #faf5ff !important;
+    color: #ffffff !important;
+    opacity: .58 !important;
+  }
+
+  .light-theme .multi-choice-active,
+  .light-theme .strategy-choice-active {
+    color: #111827 !important;
+  }
+
+  .light-theme .multi-choice-active *,
+  .light-theme .strategy-choice-active * {
+    color: #111827 !important;
   }
 
   @media (max-width: 1024px) {
@@ -8771,7 +8832,7 @@ function StrategyChoice({ value, options = [], customOptions = [], onChange, onD
             key={option}
             type="button"
             onClick={() => onChange?.(option)}
-            className={`group flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-black transition-all duration-200 hover:scale-[1.02] ${selected ? "border-emerald-400/60 bg-emerald-500/15 text-emerald-200 shadow-[0_0_18px_rgba(16,185,129,.12)]" : "border-white/10 bg-black/35 text-zinc-400 hover:border-emerald-500/35 hover:text-emerald-200"}`}
+            className={`group flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-black transition-all duration-200 hover:scale-[1.02] ${selected ? "strategy-choice-active border-emerald-400/60 bg-emerald-500/15 text-emerald-200 shadow-[0_0_18px_rgba(16,185,129,.12)]" : "border-white/10 bg-black/35 text-zinc-400 hover:border-emerald-500/35 hover:text-emerald-200"}`}
           >
             <span>{option}</span>
             {isCustom && (
@@ -8878,7 +8939,7 @@ function MultiChoice({ value, options = [], onChange, tone = "emotion", allowNon
       {normalizedOptions.map(([label, detail, icon]) => {
         const selected = selectedSet.has(label) || (allowNone && selectedValues.length === 0 && label === "None");
         return (
-          <button key={label} type="button" onClick={() => toggle(label)} className={`rounded-xl border px-3 py-2 text-left text-xs font-black transition-all duration-200 hover:scale-[1.02] ${selected ? toneClass.active : toneClass.idle}`}>
+          <button key={label} type="button" onClick={() => toggle(label)} className={`rounded-xl border px-3 py-2 text-left text-xs font-black transition-all duration-200 hover:scale-[1.02] ${selected ? `multi-choice-active ${toneClass.active}` : toneClass.idle}`}>
             <span className="flex items-center gap-2">
               <span className={`flex h-6 w-6 items-center justify-center rounded-lg ${toneClass.icon}`}>{icon || (selected ? "✓" : "+")}</span>
               <span>
