@@ -13243,12 +13243,12 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
             <div className="mt-3 text-3xl font-black text-emerald-400">87.3%</div>
             <div className="mt-1 text-xs font-bold text-emerald-300">+12.4% this month</div>
           </div>
-          <div className="auth-float-card auth-float-two absolute right-16 top-36 rounded-2xl border border-fuchsia-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(217,70,239,0.10)] backdrop-blur-xl">
+          <div className="auth-float-card auth-float-two absolute right-12 top-28 rounded-2xl border border-fuchsia-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(217,70,239,0.10)] backdrop-blur-xl">
             <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Mistake Detector</div>
             <div className="mt-3 text-xl font-black text-fuchsia-300">Active Coach</div>
             <div className="mt-1 text-xs font-bold text-zinc-400">Find → Understand → Fix</div>
           </div>
-          <div className="auth-float-card auth-float-three absolute left-[8%] top-[30%] rounded-2xl border border-emerald-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(16,185,129,0.10)] backdrop-blur-xl">
+          <div className="auth-float-card auth-float-three absolute right-[6%] top-[30%] rounded-2xl border border-emerald-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(16,185,129,0.10)] backdrop-blur-xl">
             <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Total P&L</div>
             <div className="mt-3 text-3xl font-black text-emerald-400">+$2,450</div>
             <div className="mt-1 text-xs font-bold text-zinc-400">Tracked from journal</div>
