@@ -536,6 +536,98 @@ const THEME_STYLE_CSS = `
     border-color: rgba(203, 213, 225, 0.9) !important;
   }
 
+  @keyframes authFloat {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(0, -12px, 0); }
+  }
+
+  @keyframes authGlowPulse {
+    0%, 100% { box-shadow: 0 0 28px rgba(217,70,239,.18), inset 0 1px 0 rgba(255,255,255,.08); }
+    50% { box-shadow: 0 0 54px rgba(217,70,239,.36), inset 0 1px 0 rgba(255,255,255,.12); }
+  }
+
+  @keyframes authShimmer {
+    0% { transform: translateX(-120%) rotate(8deg); opacity: 0; }
+    18% { opacity: .5; }
+    52% { opacity: .16; }
+    100% { transform: translateX(160%) rotate(8deg); opacity: 0; }
+  }
+
+  @keyframes authGridDrift {
+    0% { background-position: 0 0; }
+    100% { background-position: 48px 48px; }
+  }
+
+  .auth-animated-grid {
+    background-image: linear-gradient(rgba(217,70,239,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(217,70,239,.06) 1px, transparent 1px);
+    background-size: 48px 48px;
+    animation: authGridDrift 18s linear infinite;
+    mask-image: linear-gradient(to bottom, transparent, black 16%, black 80%, transparent);
+  }
+
+  .auth-card-panel,
+  .auth-float-card,
+  .auth-hero-metric {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .auth-card-panel::after,
+  .auth-float-card::after,
+  .auth-hero-metric::after {
+    content: "";
+    position: absolute;
+    inset: -35% auto -35% -40%;
+    width: 42%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+    animation: authShimmer 6.8s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .auth-brand-button {
+    border-radius: 1.15rem;
+    transition: transform 240ms ease, filter 240ms ease;
+  }
+
+  .auth-brand-button:hover {
+    transform: translateY(-2px);
+    filter: drop-shadow(0 0 18px rgba(217,70,239,.34));
+  }
+
+  .auth-hero-mark {
+    animation: authGlowPulse 3.8s ease-in-out infinite;
+  }
+
+  .auth-float-card {
+    animation: authFloat 7s ease-in-out infinite;
+  }
+
+  .auth-float-two {
+    animation-delay: -2.2s;
+  }
+
+  .auth-float-three {
+    animation-delay: -4.1s;
+  }
+
+  .auth-submit-button {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .auth-submit-button::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.20), transparent);
+    transform: translateX(-130%);
+    transition: transform 520ms ease;
+  }
+
+  .auth-submit-button:hover::before {
+    transform: translateX(130%);
+  }
+
   .hero-dashboard-stage {
     perspective: 1200px;
   }
@@ -13043,16 +13135,17 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
   return (
     <div className={isLight ? "auth-shell relative min-h-screen overflow-hidden bg-[#f8fafc] text-slate-950" : "auth-shell relative min-h-screen overflow-hidden bg-black text-white"}>
       <div className={isLight ? "pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(217,70,239,0.13),transparent_28%),radial-gradient(circle_at_88%_76%,rgba(16,185,129,0.12),transparent_30%),linear-gradient(135deg,#f8fafc_0%,#ffffff_48%,#f7efff_100%)]" : "pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(217,70,239,0.18),transparent_34%),radial-gradient(circle_at_84%_80%,rgba(16,185,129,0.10),transparent_28%),linear-gradient(135deg,#000_0%,#060206_45%,#12051b_100%)]"} />
+      <div className="auth-animated-grid pointer-events-none absolute inset-0 opacity-70" />
       <div className={isLight ? "pointer-events-none absolute left-1/2 top-0 h-full w-px bg-gradient-to-b from-transparent via-fuchsia-200 to-transparent" : "pointer-events-none absolute left-1/2 top-0 h-full w-px bg-gradient-to-b from-transparent via-fuchsia-500/15 to-transparent"} />
 
       <div className="relative z-10 flex min-h-screen flex-col lg:grid lg:grid-cols-[520px_1fr]">
         <div className="flex min-h-screen items-center justify-center p-6 lg:p-10">
-          <motion.div initial={{ opacity: 0, y: 16, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} className={isLight ? "w-full max-w-[430px] rounded-[2rem] border border-slate-200 bg-white/90 p-8 text-slate-950 shadow-[0_28px_90px_rgba(15,23,42,0.12),0_0_40px_rgba(217,70,239,0.10)] backdrop-blur-xl" : "w-full max-w-[480px] rounded-[1.6rem] border border-white/12 bg-[#050507]/92 p-10 shadow-[0_28px_90px_rgba(0,0,0,0.78),0_0_40px_rgba(217,70,239,0.08)] backdrop-blur-xl"}>
+          <motion.div initial={{ opacity: 0, y: 16, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} whileHover={{ y: -4 }} transition={{ duration: 0.35 }} className={isLight ? "auth-card-panel w-full max-w-[430px] rounded-[2rem] border border-slate-200 bg-white/90 p-8 text-slate-950 shadow-[0_28px_90px_rgba(15,23,42,0.12),0_0_40px_rgba(217,70,239,0.10)] backdrop-blur-xl" : "auth-card-panel w-full max-w-[480px] rounded-[1.6rem] border border-white/12 bg-[#050507]/92 p-10 shadow-[0_28px_90px_rgba(0,0,0,0.78),0_0_40px_rgba(217,70,239,0.08)] backdrop-blur-xl"}>
             <div className={isLight ? "mb-8 flex items-center justify-between" : "mb-10 flex items-center justify-center gap-4"}>
-              <div className="flex items-center gap-3">
+              <button type="button" onClick={() => setAuthPage("landing")} className="auth-brand-button flex items-center gap-3 text-left" aria-label="Go to home page">
                 <BrandBolt className="h-11 w-8 drop-shadow-[0_0_18px_rgba(217,70,239,0.95)]" />
                 <span className="text-2xl font-black tracking-tight">{BRAND_NAME}</span>
-              </div>
+              </button>
               <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className={isLight ? "rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-black text-slate-800 shadow-sm hover:border-fuchsia-300" : "absolute right-8 top-8 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-black text-zinc-300 hover:border-fuchsia-500/50 hover:text-white"}>{theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}</button>
             </div>
 
@@ -13133,9 +13226,9 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
                 </p>
               )}
 
-              <button type="submit" disabled={authLoading} className="group flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-sm font-black text-white shadow-[0_18px_36px_rgba(217,70,239,0.24)] transition hover:scale-[1.01] hover:shadow-[0_20px_44px_rgba(217,70,239,0.34)] disabled:cursor-not-allowed disabled:opacity-60">
-                {authLoading ? "Please wait..." : isLogin ? "Sign in" : isRegister ? "Create account" : isUpdatePassword ? "Update password" : "Send reset link"}
-                <span className="transition group-hover:translate-x-1">→</span>
+              <button type="submit" disabled={authLoading} className="auth-submit-button group flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-sm font-black text-white shadow-[0_18px_36px_rgba(217,70,239,0.24)] transition hover:scale-[1.01] hover:shadow-[0_20px_44px_rgba(217,70,239,0.34)] disabled:cursor-not-allowed disabled:opacity-60">
+                <span className="relative z-10">{authLoading ? "Please wait..." : isLogin ? "Sign in" : isRegister ? "Create account" : isUpdatePassword ? "Update password" : "Send reset link"}</span>
+                <span className="relative z-10 transition group-hover:translate-x-1">→</span>
               </button>
             </form>
 
@@ -13148,24 +13241,24 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
         </div>
 
         <div className="relative hidden min-h-screen items-center justify-center overflow-hidden p-10 lg:flex">
-          <div className="absolute left-12 top-28 rounded-2xl border border-emerald-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(16,185,129,0.10)] backdrop-blur-xl">
+          <div className="auth-float-card auth-float-one absolute left-12 top-28 rounded-2xl border border-emerald-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(16,185,129,0.10)] backdrop-blur-xl">
             <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Win Rate</div>
             <div className="mt-3 text-3xl font-black text-emerald-400">87.3%</div>
             <div className="mt-1 text-xs font-bold text-emerald-300">+12.4% this month</div>
           </div>
-          <div className="absolute right-16 top-40 rounded-2xl border border-fuchsia-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(217,70,239,0.10)] backdrop-blur-xl">
+          <div className="auth-float-card auth-float-two absolute right-16 top-40 rounded-2xl border border-fuchsia-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(217,70,239,0.10)] backdrop-blur-xl">
             <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Mistake Detector</div>
             <div className="mt-3 text-xl font-black text-fuchsia-300">Active Coach</div>
             <div className="mt-1 text-xs font-bold text-zinc-400">Find → Understand → Fix</div>
           </div>
-          <div className="absolute bottom-28 right-24 rounded-2xl border border-emerald-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(16,185,129,0.10)] backdrop-blur-xl">
+          <div className="auth-float-card auth-float-three absolute bottom-28 right-24 rounded-2xl border border-emerald-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(16,185,129,0.10)] backdrop-blur-xl">
             <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Total P&L</div>
             <div className="mt-3 text-3xl font-black text-emerald-400">+$2,450</div>
             <div className="mt-1 text-xs font-bold text-zinc-400">Tracked from journal</div>
           </div>
 
-          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="relative z-10 max-w-2xl text-center">
-            <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-[1.5rem] border border-fuchsia-500/30 bg-fuchsia-500/10 text-5xl text-fuchsia-300 shadow-[0_0_40px_rgba(217,70,239,0.25)]">{BRAND_MARK}</div>
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="auth-hero-panel relative z-10 max-w-2xl text-center">
+            <div className="auth-hero-mark mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-[1.5rem] border border-fuchsia-500/30 bg-fuchsia-500/10 text-5xl text-fuchsia-300">{BRAND_MARK}</div>
             <h2 className="text-6xl font-black leading-[0.95] tracking-tight text-white">Transform Your<br />Trading Journey</h2>
             <p className="mx-auto mt-8 max-w-xl text-xl font-semibold leading-8 text-zinc-400">Turn every trade into clear feedback, discipline, and measurable growth. Build consistency with data-driven insights and better psychology.</p>
             <div className="mt-10 grid grid-cols-3 gap-4">
@@ -13762,7 +13855,7 @@ function AuthField({ label, icon, children }) {
 
 function AuthHeroMetric({ value, label }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/35 p-4 backdrop-blur-xl">
+    <div className="auth-hero-metric rounded-2xl border border-white/10 bg-black/35 p-4 backdrop-blur-xl">
       <div className="text-2xl font-black text-white">{value}</div>
       <div className="mt-1 text-xs font-black uppercase tracking-widest text-zinc-500">{label}</div>
     </div>
