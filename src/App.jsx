@@ -6769,9 +6769,11 @@ export default function TradingJournalDashboard() {
         return;
       }
 
-      setAuthUser(user);
-      setIsAuthenticated(Boolean(user));
-      setAuthLoading(false);
+      if (event === "SIGNED_OUT") {
+        setAuthUser(null);
+        setIsAuthenticated(false);
+        setAuthLoading(false);
+      }
     });
 
     return () => {
@@ -6791,8 +6793,11 @@ export default function TradingJournalDashboard() {
     setAuthLoading(true);
     try {
       if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email: values.email, password: values.password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email: values.email, password: values.password });
         if (error) throw error;
+        setAuthUser(data?.user || null);
+        setIsAuthenticated(Boolean(data?.user));
+        setAuthPage("login");
         return { ok: true };
       }
 
