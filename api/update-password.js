@@ -28,7 +28,7 @@ export default async function handler(request, response) {
     } catch {
       return response.status(400).json({ error: "Invalid request body." });
     }
-    const { accessToken, password, tokenHash, type = "recovery" } = body;
+    const { accessToken, password, tokenHash, type = "recovery", email, currentPassword } = body;
     if (!password || typeof password !== "string" || password.length < 6) {
       return response.status(400).json({ error: "Password must be at least 6 characters." });
     }
@@ -54,6 +54,22 @@ export default async function handler(request, response) {
 
         const verified = await verifyResponse.json();
         user = verified?.user || null;
+      } else if (email && currentPassword) {
+        const loginResponse = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=password`, {
+          method: "POST",
+          headers: {
+            apikey: anonKey,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password: currentPassword }),
+        });
+
+        if (!loginResponse.ok) {
+          return response.status(400).json({ error: "Current password is not correct." });
+        }
+
+        const loginPayload = await loginResponse.json();
+        user = loginPayload?.user || null;
       } else if (accessToken && typeof accessToken === "string") {
         const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
           method: "GET",

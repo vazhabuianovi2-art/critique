@@ -9305,6 +9305,7 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
   const [message, setMessage] = useState("");
   const [passwordMessage, setPasswordMessage] = useState("");
   const [passwordStatus, setPasswordStatus] = useState("");
+  const [showSettingsPasswords, setShowSettingsPasswords] = useState(false);
   const [preferences, setPreferences] = useState(() => {
     try {
       const saved = JSON.parse(localStorage.getItem("critique_settings_preferences_v1") || "null") || {};
@@ -9412,17 +9413,28 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
       setPasswordMessage("Sign in again before changing password.");
       return;
     }
-    const { error: currentPasswordError } = await supabase.auth.signInWithPassword({ email: authUser.email, password: currentPassword });
-    if (currentPasswordError) {
-      setPasswordStatus("error");
-      setPasswordMessage("Current password is not correct.");
-      return;
-    }
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    if (error) {
-      setPasswordStatus("error");
-      setPasswordMessage(error.message || "Could not change password.");
-      return;
+    try {
+      await postPasswordUpdate({ email: authUser.email, currentPassword, password: newPassword });
+    } catch (apiError) {
+      const message = String(apiError?.message || apiError || "");
+      if (!/failed to fetch|networkerror|load failed|fetch/i.test(message)) {
+        setPasswordStatus("error");
+        setPasswordMessage(message || "Could not change password.");
+        return;
+      }
+      const { error: currentPasswordError } = await supabase.auth.signInWithPassword({ email: authUser.email, password: currentPassword });
+      if (currentPasswordError) {
+        setPasswordStatus("error");
+        setPasswordMessage("Current password is not correct.");
+        return;
+      }
+      try {
+        await updatePasswordWithRetry(newPassword);
+      } catch (fallbackError) {
+        setPasswordStatus("error");
+        setPasswordMessage(getFriendlyAuthError(fallbackError, "Could not change password."));
+        return;
+      }
     }
     try {
       const remembered = JSON.parse(localStorage.getItem(REMEMBER_AUTH_KEY) || "null");
@@ -9492,12 +9504,18 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
           </div>
           <div className="mt-4 flex justify-end"><Button onClick={saveName} className="bg-fuchsia-500 text-black"><Save size={16} /> Save Name</Button></div>
           <div className="my-8 h-px bg-white/10" />
-          <h3 className="text-lg font-black text-white">Change Password</h3>
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-lg font-black text-white">Change Password</h3>
+            <button type="button" onClick={() => setShowSettingsPasswords((current) => !current)} className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-black px-3 py-2 text-xs font-black text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-200" aria-label={showSettingsPasswords ? "Hide passwords" : "Show passwords"}>
+              {showSettingsPasswords ? <EyeOff size={16} /> : <Eye size={16} />}
+              {showSettingsPasswords ? "Hide" : "Show"}
+            </button>
+          </div>
           <div className="mt-5 grid gap-4">
-            <Field label="Current Password"><Input type="password" autoComplete="current-password" value={currentPassword} onChange={(event) => { setCurrentPassword(event.target.value); setPasswordMessage(""); setPasswordStatus(""); }} placeholder="Enter your current password" className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
+            <Field label="Current Password"><Input type={showSettingsPasswords ? "text" : "password"} autoComplete="current-password" value={currentPassword} onChange={(event) => { setCurrentPassword(event.target.value); setPasswordMessage(""); setPasswordStatus(""); }} placeholder="Enter your current password" className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="New Password"><Input type="password" autoComplete="new-password" value={newPassword} onChange={(event) => { setNewPassword(event.target.value); setPasswordMessage(""); setPasswordStatus(""); }} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
-              <Field label="Confirm Password"><Input type="password" autoComplete="new-password" value={confirmPassword} onChange={(event) => { setConfirmPassword(event.target.value); setPasswordMessage(""); setPasswordStatus(""); }} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
+              <Field label="New Password"><Input type={showSettingsPasswords ? "text" : "password"} autoComplete="new-password" value={newPassword} onChange={(event) => { setNewPassword(event.target.value); setPasswordMessage(""); setPasswordStatus(""); }} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
+              <Field label="Confirm Password"><Input type={showSettingsPasswords ? "text" : "password"} autoComplete="new-password" value={confirmPassword} onChange={(event) => { setConfirmPassword(event.target.value); setPasswordMessage(""); setPasswordStatus(""); }} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
             </div>
           </div>
           {passwordMessage && <div className={`mt-4 ${passwordMessageClass}`}>{passwordMessage}</div>}
