@@ -13370,14 +13370,25 @@ const DEMO_SCENES = [
     eyebrow: "Trade Journal",
     title: "Log every trade in seconds",
     body: "Capture symbol, session, strategy, risk, P&L, screenshots, emotion, and execution quality in one clean workflow.",
+    voiceover: "TryCritique gives traders a simple, comfortable workspace to log every trade without fighting spreadsheets or messy notes.",
     stat: "+$780",
     accent: "emerald",
     bullets: ["Fast trade entry", "Screenshots & tags", "Risk and R:R tracking"],
   },
   {
+    eyebrow: "Economic Calendar",
+    title: "News context without leaving your workspace",
+    body: "High-impact news and daily market context live inside the product, so traders do not need to jump between different websites before reviewing a setup.",
+    voiceover: "You also get an economic calendar inside the same workspace, so there is no need to open extra sites just to check the news around your trading day.",
+    stat: "News",
+    accent: "cyan",
+    bullets: ["Calendar in one place", "News-day performance", "Less tab switching"],
+  },
+  {
     eyebrow: "Calendar Review",
     title: "See your trading month clearly",
     body: "Winning days, losing days, break-even days, and news events become obvious instead of buried in notes.",
+    voiceover: "The calendar shows wins, losses, break-even days, weekly totals, and the real rhythm of your month at a glance.",
     stat: "May",
     accent: "fuchsia",
     bullets: ["Daily P&L", "Weekly totals", "News-day context"],
@@ -13386,17 +13397,28 @@ const DEMO_SCENES = [
     eyebrow: "Advanced Analytics",
     title: "Find your real edge",
     body: "Analyze setups, sessions, currencies, entry quality, emotions, mistake patterns, and performance trends.",
+    voiceover: "Instead of guessing, you can see which setups, sessions, emotions, and habits actually help your performance.",
     stat: "78%",
-    accent: "cyan",
+    accent: "emerald",
     bullets: ["Best setups", "Weak sessions", "Performance timeline"],
   },
   {
     eyebrow: "Mistake Detector",
     title: "Stop repeating costly habits",
     body: "TryCritique turns your review into a feedback loop so you know exactly what to fix before the next trading day.",
+    voiceover: "The mistake detector helps you find repeated behavior leaks, focus on one fix, and trade with more discipline next time.",
     stat: "Fix",
     accent: "amber",
     bullets: ["Behavior patterns", "Loss triggers", "Actionable review"],
+  },
+  {
+    eyebrow: "Affordable Pro",
+    title: "Built to be useful, not overpriced",
+    body: "For a low monthly subscription, traders get journal, calendar, analytics, review tools, and workflow structure in one product.",
+    voiceover: "And because it is affordable, TryCritique is easy to keep as part of your daily routine, not another expensive tool you stop using.",
+    stat: "$10",
+    accent: "fuchsia",
+    bullets: ["Low monthly price", "One workspace", "Built for daily review"],
   },
 ];
 
@@ -13876,7 +13898,7 @@ function WatchDemoModal({ onClose, onStart, isLight }) {
             <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/12 text-fuchsia-300"><PlayCircle size={19} /></span>
             <div>
               <div className="text-sm font-black">TryCritique Demo</div>
-              <div className={isLight ? "text-xs font-bold text-slate-500" : "text-xs font-bold text-zinc-500"}>60-second trader-focused walkthrough</div>
+              <div className={isLight ? "text-xs font-bold text-slate-500" : "text-xs font-bold text-zinc-500"}>Voiceover-ready trader sales walkthrough</div>
             </div>
           </div>
           <button type="button" onClick={onClose} className={isLight ? "rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-600 transition hover:text-slate-950" : "rounded-xl border border-white/10 bg-white/5 p-3 text-zinc-400 transition hover:text-white"} aria-label="Close demo">
@@ -13938,7 +13960,7 @@ function WatchDemoModal({ onClose, onStart, isLight }) {
               <p className={isLight ? "mt-5 text-base font-semibold leading-7 text-slate-600" : "mt-5 text-base font-semibold leading-7 text-zinc-400"}>{scene.body}</p>
               <div className={isLight ? "mt-7 rounded-2xl border border-slate-200 bg-slate-50 p-5" : "mt-7 rounded-2xl border border-white/10 bg-white/[0.04] p-5"}>
                 <div className="text-sm font-black">Demo voiceover</div>
-                <p className={isLight ? "mt-3 text-sm font-semibold leading-6 text-slate-600" : "mt-3 text-sm font-semibold leading-6 text-zinc-400"}>Stop guessing why you win or lose. TryCritique shows your trades, habits, risk, and mistakes in one clean review system.</p>
+                <p className={isLight ? "mt-3 text-sm font-semibold leading-6 text-slate-600" : "mt-3 text-sm font-semibold leading-6 text-zinc-400"}>{scene.voiceover}</p>
               </div>
             </div>
 
