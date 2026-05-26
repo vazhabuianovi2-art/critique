@@ -5012,41 +5012,96 @@ function getPrimaryEventImpact(events = []) {
   )?.impact || "Low";
 }
 
+function getTradeCurrencyCodes(trade) {
+  const raw = `${trade?.pair || ""} ${trade?.symbol || ""} ${trade?.instrument || ""}`.toUpperCase();
+  const codes = ["USD", "EUR", "GBP", "JPY", "AUD", "NZD", "CAD", "CHF", "CNY", "CNH", "HKD", "SGD", "MXN", "SEK", "NOK", "DKK", "PLN", "TRY", "ZAR", "BRL", "INR"];
+  return codes.filter((code) => raw.includes(code));
+}
+
+function getPrimaryNewsEvent(events = [], preferredCurrencies = []) {
+  const preferred = new Set(preferredCurrencies);
+  const matching = preferred.size ? events.filter((event) => preferred.has(String(event.country || "").toUpperCase())) : [];
+  const ordered = matching.length ? matching : events;
+  return (
+    ordered.find((event) => getEventImpactTone(event.impact) === "red") ||
+    ordered.find((event) => getEventImpactTone(event.impact) === "zinc") ||
+    ordered.find((event) => getEventImpactTone(event.impact) === "amber") ||
+    ordered[0] ||
+    null
+  );
+}
+
+function addNewsAggregate(bucket, key, values) {
+  if (!key) return;
+  if (!bucket[key]) bucket[key] = { ...values, count: 0, pnl: 0, trades: 0 };
+  bucket[key].count += Number(values.count || 0);
+  bucket[key].pnl += Number(values.pnl || 0);
+  bucket[key].trades += Number(values.trades || 0);
+}
+
 function getNewsPerformanceStats(trades = [], events = []) {
   const groupedTrades = groupTradesByDate(trades);
+  const eventsByDate = (Array.isArray(events) ? events : []).reduce((groups, event) => {
+    const dateKey = getEconomicEventDateKey(event);
+    if (!dateKey) return groups;
+    if (!groups[dateKey]) groups[dateKey] = [];
+    groups[dateKey].push(event);
+    return groups;
+  }, {});
   const rows = [];
   const byEvent = {};
   const byCurrency = {};
   const byImpact = {};
 
-  (Array.isArray(events) ? events : []).forEach((event) => {
-    const dateKey = getEconomicEventDateKey(event);
-    const dayTrades = groupedTrades[dateKey] || [];
-    if (!dayTrades.length) return;
+  Object.entries(groupedTrades).forEach(([dateKey, dayTrades]) => {
+    const dayEvents = eventsByDate[dateKey] || [];
+    if (!dayEvents.length || !dayTrades.length) return;
+    const dayCurrencies = Array.from(new Set(dayTrades.flatMap(getTradeCurrencyCodes)));
+    const event = getPrimaryNewsEvent(dayEvents, dayCurrencies);
+    if (!event) return;
     const stats = summarizeTrades(dayTrades);
-    const key = `${event.country}-${event.title}`;
-    if (!byEvent[key]) byEvent[key] = { name: event.title, country: event.country, impact: event.impact, count: 0, pnl: 0, trades: 0 };
-    byEvent[key].count += 1;
-    byEvent[key].pnl += stats.pnl;
-    byEvent[key].trades += stats.count;
+    const eventKey = `${event.country}-${event.title}`;
+    addNewsAggregate(byEvent, eventKey, {
+      name: event.title,
+      country: event.country,
+      impact: event.impact,
+      count: 1,
+      pnl: stats.pnl,
+      trades: stats.count,
+    });
 
-    if (!byCurrency[event.country]) byCurrency[event.country] = { name: event.country, count: 0, pnl: 0, trades: 0 };
-    byCurrency[event.country].count += 1;
-    byCurrency[event.country].pnl += stats.pnl;
-    byCurrency[event.country].trades += stats.count;
+    const impactKey = event.impact || getPrimaryEventImpact(dayEvents);
+    addNewsAggregate(byImpact, impactKey, {
+      name: impactKey,
+      count: 1,
+      pnl: stats.pnl,
+      trades: stats.count,
+    });
 
-    if (!byImpact[event.impact]) byImpact[event.impact] = { name: event.impact, count: 0, pnl: 0, trades: 0 };
-    byImpact[event.impact].count += 1;
-    byImpact[event.impact].pnl += stats.pnl;
-    byImpact[event.impact].trades += stats.count;
+    dayTrades.forEach((trade) => {
+      const tradeCurrencies = getTradeCurrencyCodes(trade);
+      const eventCurrencies = new Set(dayEvents.map((item) => String(item.country || "").toUpperCase()).filter(Boolean));
+      const matchedCurrencies = tradeCurrencies.filter((currency) => eventCurrencies.has(currency));
+      const currencyKeys = matchedCurrencies.length ? matchedCurrencies : [String(event.country || "").toUpperCase()].filter(Boolean);
+      Array.from(new Set(currencyKeys)).forEach((currency) => {
+        addNewsAggregate(byCurrency, currency, {
+          name: currency,
+          count: 1,
+          pnl: Number(trade.pnl || 0),
+          trades: 1,
+        });
+      });
+    });
 
-    rows.push({ event, dateKey, ...stats });
+    rows.push({ event, dateKey, events: dayEvents, eventCount: dayEvents.length, ...stats });
   });
 
   rows.sort((a, b) => Number(b.pnl || 0) - Number(a.pnl || 0));
   const sortRows = (object) => Object.values(object).sort((a, b) => Number(b.pnl || 0) - Number(a.pnl || 0));
   return {
     rows,
+    totalEventCount: (Array.isArray(events) ? events : []).length,
+    totalNewsTrades: rows.reduce((total, row) => total + Number(row.count || 0), 0),
     best: rows[0] || null,
     worst: [...rows].sort((a, b) => Number(a.pnl || 0) - Number(b.pnl || 0))[0] || null,
     eventRows: sortRows(byEvent),
@@ -9195,6 +9250,48 @@ function SettingsPanel({ icon, title, subtitle, children, className = "" }) {
   );
 }
 
+const FALLBACK_TIMEZONE_OPTIONS = [
+  "Africa/Abidjan", "Africa/Accra", "Africa/Addis_Ababa", "Africa/Algiers", "Africa/Cairo", "Africa/Casablanca", "Africa/Johannesburg", "Africa/Lagos", "Africa/Nairobi",
+  "America/Anchorage", "America/Argentina/Buenos_Aires", "America/Bogota", "America/Caracas", "America/Chicago", "America/Denver", "America/Los_Angeles", "America/Mexico_City", "America/New_York", "America/Panama", "America/Santiago", "America/Sao_Paulo", "America/Toronto", "America/Vancouver",
+  "Asia/Almaty", "Asia/Amman", "Asia/Ashgabat", "Asia/Baghdad", "Asia/Baku", "Asia/Bangkok", "Asia/Beirut", "Asia/Dhaka", "Asia/Dubai", "Asia/Ho_Chi_Minh", "Asia/Hong_Kong", "Asia/Jakarta", "Asia/Jerusalem", "Asia/Karachi", "Asia/Kathmandu", "Asia/Kolkata", "Asia/Kuala_Lumpur", "Asia/Kuwait", "Asia/Manila", "Asia/Riyadh", "Asia/Seoul", "Asia/Shanghai", "Asia/Singapore", "Asia/Tashkent", "Asia/Tbilisi", "Asia/Tehran", "Asia/Tokyo", "Asia/Yerevan",
+  "Australia/Adelaide", "Australia/Brisbane", "Australia/Melbourne", "Australia/Perth", "Australia/Sydney",
+  "Europe/Amsterdam", "Europe/Athens", "Europe/Berlin", "Europe/Brussels", "Europe/Bucharest", "Europe/Budapest", "Europe/Istanbul", "Europe/Kyiv", "Europe/Lisbon", "Europe/London", "Europe/Madrid", "Europe/Moscow", "Europe/Paris", "Europe/Prague", "Europe/Rome", "Europe/Stockholm", "Europe/Vienna", "Europe/Warsaw", "Europe/Zurich",
+  "Pacific/Auckland", "Pacific/Honolulu",
+];
+
+function getTimezoneOffsetLabel(timeZone) {
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", { timeZone, timeZoneName: "shortOffset" }).formatToParts(new Date());
+    return parts.find((part) => part.type === "timeZoneName")?.value || "";
+  } catch {
+    return "";
+  }
+}
+
+function normalizeTimezoneValue(value) {
+  if (!value) return "Asia/Tbilisi";
+  if (String(value).includes("(")) {
+    if (String(value).includes("Tbilisi")) return "Asia/Tbilisi";
+    if (String(value).includes("Eastern")) return "America/New_York";
+    if (String(value).includes("London")) return "Europe/London";
+    if (String(value).includes("Central Europe")) return "Europe/Berlin";
+  }
+  return String(value);
+}
+
+function getTimezoneOptions() {
+  const supported = typeof Intl !== "undefined" && typeof Intl.supportedValuesOf === "function" ? Intl.supportedValuesOf("timeZone") : FALLBACK_TIMEZONE_OPTIONS;
+  const preferred = ["Asia/Tbilisi", "America/New_York", "Europe/London", "Europe/Berlin", "Asia/Dubai", "Asia/Tokyo", "Asia/Singapore", "Australia/Sydney"];
+  return Array.from(new Set([...preferred, ...supported]))
+    .filter(Boolean)
+    .map((value) => {
+      const city = value.split("/").pop().replace(/_/g, " ");
+      const region = value.split("/")[0].replace(/_/g, " ");
+      const offset = getTimezoneOffsetLabel(value);
+      return { value, label: `${city} (${region}${offset ? `, ${offset}` : ""})` };
+    });
+}
+
 function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, isSupabaseReady, onOpenAccount, onBackup, onRestore, onSignOut, profilePhoto, setProfilePhoto }) {
   const profileName = getUserDisplayName(authUser, account?.isPlaceholder ? "User" : account?.name || "User");
   const profileInitials = profileName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join("") || "U";
@@ -9208,11 +9305,13 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
   const [message, setMessage] = useState("");
   const [preferences, setPreferences] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("critique_settings_preferences_v1") || "null") || { currency: account?.currency || "USD", timezone: "Asia/Tbilisi (GMT+4)", weekStartsOn: "Monday" };
+      const saved = JSON.parse(localStorage.getItem("critique_settings_preferences_v1") || "null") || {};
+      return { currency: saved.currency || account?.currency || "USD", timezone: normalizeTimezoneValue(saved.timezone || "Asia/Tbilisi"), weekStartsOn: saved.weekStartsOn || "Monday" };
     } catch {
-      return { currency: account?.currency || "USD", timezone: "Asia/Tbilisi (GMT+4)", weekStartsOn: "Monday" };
+      return { currency: account?.currency || "USD", timezone: "Asia/Tbilisi", weekStartsOn: "Monday" };
     }
   });
+  const timezoneOptions = useMemo(() => getTimezoneOptions(), []);
   const [notifications, setNotifications] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("critique_notification_settings_v1") || "null") || { tradeEmail: true, tradePush: true, weeklyReports: true, goals: true, marketing: false };
@@ -9296,14 +9395,16 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
       setMessage("Supabase is not connected.");
       return;
     }
-    if (!authUser?.email || !currentPassword) {
-      setMessage("Enter your current password first.");
+    if (!authUser?.email) {
+      setMessage("Sign in again before changing password.");
       return;
     }
-    const { error: currentPasswordError } = await supabase.auth.signInWithPassword({ email: authUser.email, password: currentPassword });
-    if (currentPasswordError) {
-      setMessage("Current password is not correct.");
-      return;
+    if (currentPassword) {
+      const { error: currentPasswordError } = await supabase.auth.signInWithPassword({ email: authUser.email, password: currentPassword });
+      if (currentPasswordError) {
+        setMessage("Current password is not correct.");
+        return;
+      }
     }
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) {
@@ -9316,8 +9417,15 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
     setMessage("Password changed successfully.");
   }
 
+  function savePreferences() {
+    const next = { ...preferences, timezone: normalizeTimezoneValue(preferences.timezone) };
+    setPreferences(next);
+    localStorage.setItem("critique_settings_preferences_v1", JSON.stringify(next));
+    setMessage("Trading preferences saved.");
+  }
+
   const toggleNotification = (key) => setNotifications((current) => ({ ...current, [key]: !current[key] }));
-  const canChangePassword = Boolean(currentPassword) && newPassword.length >= 6 && newPassword === confirmPassword;
+  const canChangePassword = newPassword.length >= 6 && newPassword === confirmPassword;
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
@@ -9361,13 +9469,13 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
           <div className="my-8 h-px bg-white/10" />
           <h3 className="text-lg font-black text-white">Change Password</h3>
           <div className="mt-5 grid gap-4">
-            <Field label="Current Password"><Input type="password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
+            <Field label="Current Password"><Input type="password" autoComplete="current-password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} placeholder="Optional if you are already signed in" className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="New Password"><Input type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
-              <Field label="Confirm Password"><Input type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
+              <Field label="New Password"><Input type="password" autoComplete="new-password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
+              <Field label="Confirm Password"><Input type="password" autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
             </div>
           </div>
-          <div className="mt-4 flex justify-end"><Button onClick={changePassword} disabled={!canChangePassword} variant="outline" className="border-white/15 bg-black text-white disabled:cursor-not-allowed disabled:opacity-45"><Save size={16} /> Change Password</Button></div>
+          <div className="mt-4 flex justify-end"><Button onClick={changePassword} variant="outline" className={canChangePassword ? "border-fuchsia-500/55 bg-fuchsia-500/10 text-fuchsia-100" : "border-white/15 bg-black text-white"}><Save size={16} /> Change Password</Button></div>
         </SettingsPanel>
 
         <div className="space-y-6">
@@ -9378,10 +9486,10 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
             <div className="mt-7 space-y-5">
               <Field label="Default Account"><Select value={account?.name || "Trading Account"} onChange={onOpenAccount}><option>{account?.name || "Trading Account"}</option></Select></Field>
               <Field label="Currency"><Select value={preferences.currency} onChange={(event) => setPreferences((current) => ({ ...current, currency: event.target.value }))}><option value="USD">USD ($)</option><option value="EUR">EUR</option><option value="GBP">GBP</option></Select></Field>
-              <Field label="Timezone"><Select value={preferences.timezone} onChange={(event) => setPreferences((current) => ({ ...current, timezone: event.target.value }))}><option>Asia/Tbilisi (GMT+4)</option><option>Eastern Time (GMT-4)</option><option>London (GMT+0)</option><option>Central Europe (GMT+1)</option></Select></Field>
+              <Field label="Timezone"><Select value={normalizeTimezoneValue(preferences.timezone)} onChange={(event) => setPreferences((current) => ({ ...current, timezone: event.target.value }))}>{timezoneOptions.map((zone) => <option key={zone.value} value={zone.value}>{zone.label}</option>)}</Select></Field>
               <Field label="Week Starts On"><Select value={preferences.weekStartsOn} onChange={(event) => setPreferences((current) => ({ ...current, weekStartsOn: event.target.value }))}><option>Monday</option><option>Sunday</option></Select></Field>
             </div>
-            <div className="mt-5 flex justify-end"><Button className="bg-fuchsia-500 text-black"><Save size={16} /> Save Preferences</Button></div>
+            <div className="mt-5 flex justify-end"><Button onClick={savePreferences} className="bg-fuchsia-500 text-black"><Save size={16} /> Save Preferences</Button></div>
           </SettingsPanel>
         </div>
       </div>
@@ -10372,7 +10480,7 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
           <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             <SimpleStatCard label="Best News Day" value={newsStats.best ? formatMoney(newsStats.best.pnl) : "$0"} detail={newsStats.best ? `${newsStats.best.event.country} · ${newsStats.best.event.title}` : "No trades on event days yet."} tone="green" />
             <SimpleStatCard label="Worst News Day" value={newsStats.worst ? formatMoney(newsStats.worst.pnl) : "$0"} detail={newsStats.worst ? `${newsStats.worst.event.country} · ${newsStats.worst.event.title}` : "No losing event day yet."} tone="amber" />
-            <SimpleStatCard label="Event Days Traded" value={newsStats.rows.length} detail={`${economicCalendar?.events?.length || 0} events loaded from calendar.`} tone="fuchsia" />
+            <SimpleStatCard label="Event Days Traded" value={newsStats.rows.length} detail={`${newsStats.totalNewsTrades || 0} trades on ${newsStats.totalEventCount || 0} loaded events.`} tone="fuchsia" />
             <SimpleStatCard label="Top Currency" value={newsStats.currencyRows[0]?.name || "No data"} detail={newsStats.currencyRows[0] ? `${formatMoney(newsStats.currencyRows[0].pnl)} across ${newsStats.currencyRows[0].trades} trades` : "Trade on news days to measure."} tone="green" />
           </div>
 
