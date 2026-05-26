@@ -25,6 +25,7 @@ import {
   Moon,
   Maximize2,
   Minimize2,
+  PauseCircle,
   PlayCircle,
   Plus,
   Save,
@@ -41,6 +42,7 @@ import {
   Upload,
   User,
   UserPlus,
+  Volume2,
   X,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13875,6 +13877,8 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
 
 function WatchDemoModal({ onClose, onStart, isLight }) {
   const [activeScene, setActiveScene] = useState(0);
+  const [isVoicePlaying, setIsVoicePlaying] = useState(false);
+  const [voiceStatus, setVoiceStatus] = useState("Ready for voice preview");
   const scene = DEMO_SCENES[activeScene];
   const accentClass = {
     emerald: "text-emerald-300 border-emerald-400/35 bg-emerald-500/10",
@@ -13883,11 +13887,81 @@ function WatchDemoModal({ onClose, onStart, isLight }) {
     amber: "text-amber-300 border-amber-400/35 bg-amber-500/10",
   }[scene.accent] || "text-fuchsia-300 border-fuchsia-400/35 bg-fuchsia-500/10";
 
+  const stopVoiceover = () => {
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+    setIsVoicePlaying(false);
+    setVoiceStatus("Voice preview stopped");
+  };
+
+  const playSceneVoice = (sceneIndex) => {
+    if (!("speechSynthesis" in window)) {
+      setIsVoicePlaying(false);
+      setVoiceStatus("Voice playback is not supported in this browser");
+      return;
+    }
+
+    const currentScene = DEMO_SCENES[sceneIndex];
+    if (!currentScene) {
+      setIsVoicePlaying(false);
+      setVoiceStatus("Voice preview complete");
+      return;
+    }
+
+    setActiveScene(sceneIndex);
+    setVoiceStatus(`Playing ${currentScene.eyebrow}`);
+
+    const utterance = new SpeechSynthesisUtterance(currentScene.voiceover);
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoice = voices.find((voice) => voice.lang?.toLowerCase().startsWith("en") && /female|samantha|zira|jenny|aria/i.test(voice.name)) || voices.find((voice) => voice.lang?.toLowerCase().startsWith("en"));
+    if (preferredVoice) utterance.voice = preferredVoice;
+    utterance.rate = 0.92;
+    utterance.pitch = 0.96;
+    utterance.volume = 1;
+    utterance.onend = () => {
+      const nextScene = sceneIndex + 1;
+      if (nextScene < DEMO_SCENES.length) {
+        window.setTimeout(() => playSceneVoice(nextScene), 260);
+      } else {
+        setIsVoicePlaying(false);
+        setVoiceStatus("Voice preview complete");
+      }
+    };
+    utterance.onerror = () => {
+      setIsVoicePlaying(false);
+      setVoiceStatus("Voice preview could not play");
+    };
+
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const startVoiceover = () => {
+    setIsVoicePlaying(true);
+    playSceneVoice(activeScene);
+  };
+
   useEffect(() => {
+    if (isVoicePlaying) return undefined;
     const timer = window.setInterval(() => {
       setActiveScene((current) => (current + 1) % DEMO_SCENES.length);
     }, 4200);
     return () => window.clearInterval(timer);
+  }, [isVoicePlaying]);
+
+  useEffect(() => {
+    const loadVoices = () => {
+      if ("speechSynthesis" in window) window.speechSynthesis.getVoices();
+    };
+    loadVoices();
+    if ("speechSynthesis" in window) window.speechSynthesis.onvoiceschanged = loadVoices;
+    return () => {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.onvoiceschanged = null;
+      }
+    };
   }, []);
 
   return (
@@ -13898,7 +13972,7 @@ function WatchDemoModal({ onClose, onStart, isLight }) {
             <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/12 text-fuchsia-300"><PlayCircle size={19} /></span>
             <div>
               <div className="text-sm font-black">TryCritique Demo</div>
-              <div className={isLight ? "text-xs font-bold text-slate-500" : "text-xs font-bold text-zinc-500"}>Voiceover-ready trader sales walkthrough</div>
+              <div className={isLight ? "text-xs font-bold text-slate-500" : "text-xs font-bold text-zinc-500"}>{voiceStatus}</div>
             </div>
           </div>
           <button type="button" onClick={onClose} className={isLight ? "rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-600 transition hover:text-slate-950" : "rounded-xl border border-white/10 bg-white/5 p-3 text-zinc-400 transition hover:text-white"} aria-label="Close demo">
@@ -13947,7 +14021,7 @@ function WatchDemoModal({ onClose, onStart, isLight }) {
 
               <div className="mt-5 flex gap-2">
                 {DEMO_SCENES.map((item, index) => (
-                  <button key={item.eyebrow} type="button" onClick={() => setActiveScene(index)} className={index === activeScene ? "h-2 flex-1 rounded-full bg-fuchsia-400" : "h-2 flex-1 rounded-full bg-white/15"} aria-label={`Show ${item.eyebrow}`} />
+                  <button key={item.eyebrow} type="button" onClick={() => { stopVoiceover(); setActiveScene(index); }} className={index === activeScene ? "h-2 flex-1 rounded-full bg-fuchsia-400" : "h-2 flex-1 rounded-full bg-white/15"} aria-label={`Show ${item.eyebrow}`} />
                 ))}
               </div>
             </div>
@@ -13959,14 +14033,20 @@ function WatchDemoModal({ onClose, onStart, isLight }) {
               <h3 className="mt-4 text-4xl font-black leading-tight">{scene.title}</h3>
               <p className={isLight ? "mt-5 text-base font-semibold leading-7 text-slate-600" : "mt-5 text-base font-semibold leading-7 text-zinc-400"}>{scene.body}</p>
               <div className={isLight ? "mt-7 rounded-2xl border border-slate-200 bg-slate-50 p-5" : "mt-7 rounded-2xl border border-white/10 bg-white/[0.04] p-5"}>
-                <div className="text-sm font-black">Demo voiceover</div>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-sm font-black">Demo voiceover</div>
+                  <button type="button" onClick={isVoicePlaying ? stopVoiceover : startVoiceover} className={isVoicePlaying ? "inline-flex items-center gap-2 rounded-full border border-amber-400/35 bg-amber-500/10 px-3 py-1.5 text-xs font-black text-amber-300 transition hover:bg-amber-500/18" : "inline-flex items-center gap-2 rounded-full border border-fuchsia-400/35 bg-fuchsia-500/10 px-3 py-1.5 text-xs font-black text-fuchsia-300 transition hover:bg-fuchsia-500/18"}>
+                    {isVoicePlaying ? <PauseCircle size={14} /> : <Volume2 size={14} />}
+                    {isVoicePlaying ? "Stop" : "Play voice"}
+                  </button>
+                </div>
                 <p className={isLight ? "mt-3 text-sm font-semibold leading-6 text-slate-600" : "mt-3 text-sm font-semibold leading-6 text-zinc-400"}>{scene.voiceover}</p>
               </div>
             </div>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              <button type="button" onClick={onStart} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-fuchsia-500 px-5 text-sm font-black text-white shadow-[0_18px_36px_rgba(217,70,239,0.24)] transition hover:bg-fuchsia-400">Start Your Journal <ChevronRight size={17} /></button>
-              <button type="button" onClick={onClose} className={isLight ? "inline-flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-black text-slate-700 transition hover:text-slate-950" : "inline-flex h-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 px-5 text-sm font-black text-zinc-300 transition hover:text-white"}>Keep browsing</button>
+              <button type="button" onClick={() => { stopVoiceover(); onStart(); }} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-fuchsia-500 px-5 text-sm font-black text-white shadow-[0_18px_36px_rgba(217,70,239,0.24)] transition hover:bg-fuchsia-400">Start Your Journal <ChevronRight size={17} /></button>
+              <button type="button" onClick={() => { stopVoiceover(); onClose(); }} className={isLight ? "inline-flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-black text-slate-700 transition hover:text-slate-950" : "inline-flex h-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 px-5 text-sm font-black text-zinc-300 transition hover:text-white"}>Keep browsing</button>
             </div>
           </div>
         </div>
