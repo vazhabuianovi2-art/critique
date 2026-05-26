@@ -9303,6 +9303,8 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState("");
+  const [passwordStatus, setPasswordStatus] = useState("");
   const [preferences, setPreferences] = useState(() => {
     try {
       const saved = JSON.parse(localStorage.getItem("critique_settings_preferences_v1") || "null") || {};
@@ -9383,38 +9385,58 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
 
   async function changePassword() {
     setMessage("");
+    setPasswordMessage("");
+    setPasswordStatus("");
+    if (!currentPassword) {
+      setPasswordStatus("error");
+      setPasswordMessage("Current password is required.");
+      return;
+    }
     if (newPassword.length < 6) {
-      setMessage("New password must be at least 6 characters.");
+      setPasswordStatus("error");
+      setPasswordMessage("New password must be at least 6 characters.");
       return;
     }
     if (newPassword !== confirmPassword) {
-      setMessage("Password confirmation does not match.");
+      setPasswordStatus("error");
+      setPasswordMessage("Repeat password is not written correctly.");
       return;
     }
     if (!supabase) {
-      setMessage("Supabase is not connected.");
+      setPasswordStatus("error");
+      setPasswordMessage("Supabase is not connected.");
       return;
     }
     if (!authUser?.email) {
-      setMessage("Sign in again before changing password.");
+      setPasswordStatus("error");
+      setPasswordMessage("Sign in again before changing password.");
       return;
     }
-    if (currentPassword) {
-      const { error: currentPasswordError } = await supabase.auth.signInWithPassword({ email: authUser.email, password: currentPassword });
-      if (currentPasswordError) {
-        setMessage("Current password is not correct.");
-        return;
-      }
+    const { error: currentPasswordError } = await supabase.auth.signInWithPassword({ email: authUser.email, password: currentPassword });
+    if (currentPasswordError) {
+      setPasswordStatus("error");
+      setPasswordMessage("Current password is not correct.");
+      return;
     }
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) {
-      setMessage(error.message || "Could not change password.");
+      setPasswordStatus("error");
+      setPasswordMessage(error.message || "Could not change password.");
       return;
+    }
+    try {
+      const remembered = JSON.parse(localStorage.getItem(REMEMBER_AUTH_KEY) || "null");
+      if (remembered?.remember && String(remembered.email || "").toLowerCase() === String(authUser.email || "").toLowerCase()) {
+        localStorage.setItem(REMEMBER_AUTH_KEY, JSON.stringify({ ...remembered, password: newPassword }));
+      }
+    } catch {
+      // Login still works with the new Supabase password; this only updates the local remembered form.
     }
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
-    setMessage("Password changed successfully.");
+    setPasswordStatus("success");
+    setPasswordMessage("Password changed successfully. You can sign in with the new password now.");
   }
 
   function savePreferences() {
@@ -9425,7 +9447,10 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
   }
 
   const toggleNotification = (key) => setNotifications((current) => ({ ...current, [key]: !current[key] }));
-  const canChangePassword = newPassword.length >= 6 && newPassword === confirmPassword;
+  const canChangePassword = Boolean(currentPassword) && newPassword.length >= 6 && newPassword === confirmPassword;
+  const passwordMessageClass = passwordStatus === "success"
+    ? "rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm font-black text-emerald-300"
+    : "rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-black text-red-300";
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
@@ -9469,12 +9494,13 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
           <div className="my-8 h-px bg-white/10" />
           <h3 className="text-lg font-black text-white">Change Password</h3>
           <div className="mt-5 grid gap-4">
-            <Field label="Current Password"><Input type="password" autoComplete="current-password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} placeholder="Optional if you are already signed in" className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
+            <Field label="Current Password"><Input type="password" autoComplete="current-password" value={currentPassword} onChange={(event) => { setCurrentPassword(event.target.value); setPasswordMessage(""); setPasswordStatus(""); }} placeholder="Enter your current password" className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="New Password"><Input type="password" autoComplete="new-password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
-              <Field label="Confirm Password"><Input type="password" autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
+              <Field label="New Password"><Input type="password" autoComplete="new-password" value={newPassword} onChange={(event) => { setNewPassword(event.target.value); setPasswordMessage(""); setPasswordStatus(""); }} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
+              <Field label="Confirm Password"><Input type="password" autoComplete="new-password" value={confirmPassword} onChange={(event) => { setConfirmPassword(event.target.value); setPasswordMessage(""); setPasswordStatus(""); }} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
             </div>
           </div>
+          {passwordMessage && <div className={`mt-4 ${passwordMessageClass}`}>{passwordMessage}</div>}
           <div className="mt-4 flex justify-end"><Button onClick={changePassword} variant="outline" className={canChangePassword ? "border-fuchsia-500/55 bg-fuchsia-500/10 text-fuchsia-100" : "border-white/15 bg-black text-white"}><Save size={16} /> Change Password</Button></div>
         </SettingsPanel>
 
