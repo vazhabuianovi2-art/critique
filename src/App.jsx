@@ -6981,7 +6981,7 @@ export default function TradingJournalDashboard() {
         return;
       }
 
-      if ((event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") && isPublicAuthPath()) {
+      if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") && isPublicAuthPath()) {
         setAuthLoading(false);
         return;
       }
@@ -13292,18 +13292,19 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
   const isForgot = authPage === "forgot";
   const isUpdatePassword = authPage === "updatePassword";
   const [showPassword, setShowPassword] = useState(false);
+  const rememberedEmail = (() => {
+    try {
+      return localStorage.getItem(REMEMBER_EMAIL_KEY) || "";
+    } catch {
+      return "";
+    }
+  })();
   const [form, setForm] = useState({
     name: "",
-    email: (() => {
-      try {
-        return localStorage.getItem(REMEMBER_EMAIL_KEY) || "";
-      } catch {
-        return "";
-      }
-    })(),
+    email: rememberedEmail,
     password: "",
     confirm: "",
-    remember: true,
+    remember: Boolean(rememberedEmail),
   });
   const [error, setError] = useState("");
 
