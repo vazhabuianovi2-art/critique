@@ -6519,6 +6519,8 @@ export default function TradingJournalDashboard() {
   const [accountDeleteTarget, setAccountDeleteTarget] = useState(null);
   const [isSidebarUserMenuOpen, setIsSidebarUserMenuOpen] = useState(false);
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
+  const [isTradeSaving, setIsTradeSaving] = useState(false);
+  const tradeSavingRef = useRef(false);
   const [isRoutineOpen, setIsRoutineOpen] = useState(false);
   const [routine, setRoutine] = useState(() => {
     try {
@@ -7194,16 +7196,22 @@ export default function TradingJournalDashboard() {
       createNewAccount();
       return;
     }
+    tradeSavingRef.current = false;
+    setIsTradeSaving(false);
     setEditingTradeId(null);
     setForm({ ...emptyForm, date: typeof dateOverride === "string" ? dateOverride : formatDateKey(new Date()), screenshots: [] });
     setIsTradeModalOpen(true);
   }
   function openEditTrade(trade) {
+    tradeSavingRef.current = false;
+    setIsTradeSaving(false);
     setEditingTradeId(trade.id);
     setForm(formFromTrade(trade));
     setIsTradeModalOpen(true);
   }
   function closeTradeModal() {
+    tradeSavingRef.current = false;
+    setIsTradeSaving(false);
     setEditingTradeId(null);
     setForm({ ...emptyForm, screenshots: [] });
     setIsTradeModalOpen(false);
@@ -7219,6 +7227,9 @@ export default function TradingJournalDashboard() {
     const quantity = Number(form.quantity);
     const risk = Number(form.risk);
     if (required.some((item) => !item || String(item).startsWith("Select")) || Number.isNaN(pnl) || Number.isNaN(quantity) || quantity <= 0 || Number.isNaN(risk) || risk < 0) return;
+    if (tradeSavingRef.current) return;
+    tradeSavingRef.current = true;
+    setIsTradeSaving(true);
     const normalizedResult = getResultFromPnl(pnl);
     const normalizedTags = normalizeTags(form).filter((tag) => !String(tag).toLowerCase().startsWith("result:"));
     const existingTrade = trades.find((item) => item.id === editingTradeId);
@@ -7246,6 +7257,9 @@ export default function TradingJournalDashboard() {
       closeTradeModal();
       console.warn("Trade saved locally; cloud sync will retry on the next successful session.", error?.message || error);
       setDataMessage("");
+    } finally {
+      tradeSavingRef.current = false;
+      setIsTradeSaving(false);
     }
   }
   async function importTradesFromFile(event) {
@@ -7674,7 +7688,7 @@ Skipped duplicates: ${duplicateCount}
       <MobileBottomNav active={active} setActive={setActive} onAdd={openAddTrade} setTradeViewMode={setTradeViewMode} />
       <input ref={importFileRef} type="file" accept=".csv,text/csv" onChange={importTradesFromFile} className="hidden" />
       <input ref={backupFileRef} type="file" accept=".json,application/json" onChange={restoreBackupFromFile} className="hidden" />
-      {isTradeModalOpen && <AddTradeModal isEditing={Boolean(editingTradeId)} form={form} setForm={setForm} onClose={closeTradeModal} onSave={saveTrade} account={account} accountBalance={accountBalance} />}
+      {isTradeModalOpen && <AddTradeModal isEditing={Boolean(editingTradeId)} isSaving={isTradeSaving} form={form} setForm={setForm} onClose={closeTradeModal} onSave={saveTrade} account={account} accountBalance={accountBalance} />}
       {importPreview && <ImportPreviewModal preview={importPreview} onConfirm={confirmImportTrades} onClose={() => setImportPreview(null)} />}
       {isRoutineOpen && <PreTradeRoutineModal routine={routine} setRoutine={setRoutine} onClose={() => setIsRoutineOpen(false)} />}
       {isAccountModalOpen && <AccountModal account={account} accountBalance={accountBalance} onSaveAccount={handleSaveAccountSettings} onClose={closeAccountModal} />}
@@ -9209,7 +9223,7 @@ function CalendarGuide() {
   );
 }
 
-function AddTradeModal({ isEditing, form, setForm, onClose, onSave, account, accountBalance }) {
+function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, onSave, account, accountBalance }) {
   const rr = Number(form.risk) ? (Number(form.pnl || 0) / Number(form.risk)).toFixed(2) : "—";
   const screenshots = normalizeScreenshots(form);
   const previewGrade = getTradeGrade(createTradeFromForm(form, 1, account));
@@ -9423,7 +9437,7 @@ function AddTradeModal({ isEditing, form, setForm, onClose, onSave, account, acc
 
         <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
           <Button variant="ghost" onClick={onClose} className="text-white hover:bg-white/10">Cancel</Button>
-          <Button onClick={onSave} disabled={hasFormErrors} className="bg-fuchsia-500 text-black hover:bg-fuchsia-400 disabled:cursor-not-allowed disabled:opacity-40"><Plus size={16} /> {isEditing ? "Update Trade" : "Save Trade"}</Button>
+          <Button onClick={onSave} disabled={hasFormErrors || isSaving} className="bg-fuchsia-500 text-black hover:bg-fuchsia-400 disabled:cursor-not-allowed disabled:opacity-40">{isSaving ? <RefreshCwIcon /> : <Plus size={16} />} {isSaving ? "Saving..." : isEditing ? "Update Trade" : "Save Trade"}</Button>
         </div>
       </motion.div>
     </div>
