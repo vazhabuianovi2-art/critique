@@ -245,15 +245,39 @@ async function getCurrentAccessToken() {
   return refreshed?.data?.session?.access_token || "";
 }
 
+async function refreshCurrentSession() {
+  if (!supabase) return null;
+  const { data, error } = await supabase.auth.refreshSession();
+  if (error) return null;
+  return data?.session || null;
+}
+
 async function postSupabaseSync(action, payload = {}) {
-  const accessToken = await getCurrentAccessToken();
+  async function sendWithToken(token) {
+    const response = await fetch("/api/supabase-sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, accessToken: token, ...payload }),
+    });
+    const result = await response.json().catch(() => null);
+    return { response, result };
+  }
+
+  let accessToken = await getCurrentAccessToken();
+  if (!accessToken) {
+    const refreshed = await refreshCurrentSession();
+    accessToken = refreshed?.access_token || "";
+  }
   if (!accessToken) throw new Error("Cloud sync is waiting for a fresh login session.");
-  const response = await fetch("/api/supabase-sync", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action, accessToken, ...payload }),
-  });
-  const result = await response.json().catch(() => null);
+
+  let { response, result } = await sendWithToken(accessToken);
+  if (result?.authExpired || response.status === 401) {
+    const refreshed = await refreshCurrentSession();
+    if (refreshed?.access_token) {
+      ({ response, result } = await sendWithToken(refreshed.access_token));
+    }
+  }
+
   if (result?.authExpired) {
     const error = new Error(result?.error || "Login session expired. Sign in again.");
     error.status = 401;
@@ -6259,7 +6283,12 @@ function getRestoreCacheKey(userId) {
 
 function saveRestoreCache(userId, payload) {
   try {
-    localStorage.setItem(getRestoreCacheKey(userId), JSON.stringify({ ...payload, cachedAt: new Date().toISOString() }));
+    const cachePayload = { ...payload, cachedAt: new Date().toISOString() };
+    const compactPayload = {
+      ...cachePayload,
+      trades: Array.isArray(cachePayload.trades) ? cachePayload.trades.map(stripHeavyTradeFields) : cachePayload.trades,
+    };
+    setJsonStorageItem(getRestoreCacheKey(userId), cachePayload, compactPayload);
   } catch (error) {
     console.warn("Could not cache restored backup:", error?.message || error);
   }
@@ -6289,6 +6318,36 @@ function normalizeTradeForStorage(trade) {
   };
 }
 
+function stripHeavyTradeFields(trade) {
+  const normalized = normalizeTradeForStorage(trade);
+  return {
+    ...normalized,
+    screenshots: [],
+    screenshot: "",
+    screenshotUrl: "",
+  };
+}
+
+function isStorageQuotaError(error) {
+  return /quota|exceeded|storage/i.test(String(error?.name || error?.message || error || ""));
+}
+
+function setJsonStorageItem(key, value, compactValue = value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch (error) {
+    if (!isStorageQuotaError(error)) throw error;
+    try {
+      localStorage.setItem(key, JSON.stringify(compactValue));
+      return true;
+    } catch (compactError) {
+      console.warn("Could not save browser backup:", compactError?.message || compactError);
+      return false;
+    }
+  }
+}
+
 function readLocalTradesFallback(userId) {
   try {
     const userSaved = JSON.parse(localStorage.getItem(getUserTradesKey(userId)) || "[]");
@@ -6307,15 +6366,19 @@ function readLocalTradesFallback(userId) {
 function saveLocalTradesFallback(tradesToSave, userId) {
   try {
     const safeTrades = Array.isArray(tradesToSave) ? tradesToSave.map(normalizeTradeForStorage) : [];
+    const compactTrades = safeTrades.map(stripHeavyTradeFields);
     const primaryKey = getUserTradesKey(userId);
     const backupKey = getUserTradesBackupKey(userId);
-    if (userId && safeTrades.length) localStorage.setItem(backupKey, JSON.stringify(safeTrades));
+    if (userId && safeTrades.length) setJsonStorageItem(backupKey, safeTrades, compactTrades);
     if (userId && !safeTrades.length) {
       const previous = JSON.parse(localStorage.getItem(primaryKey) || "[]");
-      if (Array.isArray(previous) && previous.length) localStorage.setItem(backupKey, JSON.stringify(previous.map(normalizeTradeForStorage)));
+      if (Array.isArray(previous) && previous.length) {
+        const previousSafe = previous.map(normalizeTradeForStorage);
+        setJsonStorageItem(backupKey, previousSafe, previousSafe.map(stripHeavyTradeFields));
+      }
     }
-    if (!userId) localStorage.setItem(STORAGE_KEY, JSON.stringify(safeTrades));
-    if (userId) localStorage.setItem(primaryKey, JSON.stringify(safeTrades));
+    if (!userId) setJsonStorageItem(STORAGE_KEY, safeTrades, compactTrades);
+    if (userId) setJsonStorageItem(primaryKey, safeTrades, compactTrades);
   } catch (error) {
     console.warn("Could not save local trades fallback:", error?.message || error);
   }
@@ -6545,7 +6608,7 @@ export default function TradingJournalDashboard() {
         setTrades([]);
         setDataMessage("");
       })
-      .catch((error) => {
+      .catch(async (error) => {
         if (!mounted) return;
         const localTrades = readLocalTradesFallback(authUser.id);
         if (localTrades.length) {
@@ -6558,6 +6621,14 @@ export default function TradingJournalDashboard() {
           return;
         }
         if (isSupabaseAuthExpiredError(error)) {
+          const refreshed = await refreshCurrentSession().catch(() => null);
+          if (!mounted) return;
+          if (refreshed?.user) {
+            setAuthUser(refreshed.user);
+            setIsAuthenticated(true);
+            setDataMessage("");
+            return;
+          }
           setIsAuthenticated(false);
           setAuthUser(null);
           safeLocalSignOut();
@@ -6737,7 +6808,11 @@ export default function TradingJournalDashboard() {
       const recoverySession = await recoverPasswordSessionFromUrl();
       if (isRecoveryUrl) return recoverySession;
       const { data } = await supabase.auth.getSession();
-      return data?.session || null;
+      const session = data?.session || null;
+      const expiresAt = session?.expires_at ? session.expires_at * 1000 : 0;
+      if (session?.user && (!expiresAt || expiresAt > Date.now() + 30000)) return session;
+      const refreshed = await refreshCurrentSession().catch(() => null);
+      return refreshed || session || null;
     }
 
     initializeAuthSession().then((session) => {
