@@ -7784,6 +7784,7 @@ Skipped duplicates: ${duplicateCount}
             initialSubscription={billingSubscription}
             gateMessage={billingGateMessage}
             requireActivation
+            onSignOut={handleSignOut}
             onSubscriptionChange={setBillingSubscription}
             onSubscriptionRefresh={() => setBillingRefreshTick((tick) => tick + 1)}
           />
@@ -7872,6 +7873,7 @@ Skipped duplicates: ${duplicateCount}
             account={account}
             authUser={authUser}
             initialSubscription={billingSubscription}
+            onSignOut={handleSignOut}
             onSubscriptionChange={setBillingSubscription}
             onSubscriptionRefresh={() => setBillingRefreshTick((tick) => tick + 1)}
           />
@@ -10411,7 +10413,7 @@ function SettingsPage({ account, accountBalance, authUser, theme, setTheme, isSu
   );
 }
 
-function BillingPageDodo({ account, authUser, initialSubscription = null, gateMessage = "", requireActivation = false, onSubscriptionChange, onSubscriptionRefresh }) {
+function BillingPageDodo({ account, authUser, initialSubscription = null, gateMessage = "", requireActivation = false, onSignOut, onSubscriptionChange, onSubscriptionRefresh }) {
   const [billingStatus, setBillingStatus] = useState("");
   const [billingError, setBillingError] = useState("");
   const [loadingPlan, setLoadingPlan] = useState("");
@@ -10573,6 +10575,14 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="pb-10">
+      {requireActivation && !statusLoading && (
+        <AccessSuspendedOverlay
+          subscription={subscription}
+          loadingPlan={loadingPlan}
+          onStartCheckout={startCheckout}
+          onSignOut={onSignOut}
+        />
+      )}
       <TopCrumb page="Billing" />
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -10742,6 +10752,106 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
         </div>
       </div>
     </motion.div>
+  );
+}
+
+function getAccessSuspendedCopy(subscription) {
+  const status = String(subscription?.status || "").toLowerCase();
+  const expiredDate = subscription?.trial_end || subscription?.current_period_end || subscription?.canceled_at || "";
+  const expiredText = expiredDate
+    ? new Date(expiredDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
+    : "";
+
+  if (!subscription) {
+    return {
+      title: "Activate Pro",
+      detail: "Start a subscription to unlock your trading workspace.",
+      badge: "Subscription required",
+    };
+  }
+
+  if (status === "trialing" || status === "on_trial") {
+    return {
+      title: "Trial Expired",
+      detail: expiredText ? `Your trial ended on ${expiredText}. Subscribe to regain access.` : "Your trial ended. Subscribe to regain access.",
+      badge: "Trial ended",
+    };
+  }
+
+  return {
+    title: "Access Suspended",
+    detail: expiredText ? `Expired on ${expiredText}. Reactivate your subscription to continue.` : "Reactivate your subscription to continue.",
+    badge: "Payment required",
+  };
+}
+
+function AccessSuspendedOverlay({ subscription, loadingPlan, onStartCheckout, onSignOut }) {
+  const copy = getAccessSuspendedCopy(subscription);
+  const perks = [
+    [Database, "Data safe"],
+    [ShieldCheck, "Account secure"],
+    [Sparkles, "Instant restore"],
+  ];
+
+  return (
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/86 p-5 backdrop-blur-md">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(127,29,29,0.20),transparent_34%),radial-gradient(circle_at_75%_75%,rgba(217,70,239,0.10),transparent_30%)]" />
+      <motion.div
+        initial={{ opacity: 0, y: 16, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        className="relative w-full max-w-md overflow-hidden rounded-xl border border-red-500/25 bg-[#070303] shadow-[0_30px_95px_rgba(0,0,0,0.82)] ring-1 ring-fuchsia-500/10"
+      >
+        <div className="bg-gradient-to-b from-red-950/35 via-black to-black px-6 pb-6 pt-8 text-center">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl border border-red-500/25 bg-red-500/10 text-red-300 shadow-[0_0_34px_rgba(239,68,68,0.16)]">
+            <Lock size={34} strokeWidth={2.2} />
+          </div>
+          <span className="absolute left-[calc(50%+26px)] top-[102px] flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-black text-white shadow-[0_0_18px_rgba(239,68,68,0.45)]">!</span>
+          <div className="mt-5 inline-flex rounded-full border border-red-500/25 bg-red-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-red-200">
+            {copy.badge}
+          </div>
+          <h2 className="mt-4 text-3xl font-black text-white">{copy.title}</h2>
+          <p className="mx-auto mt-2 max-w-sm text-sm font-semibold leading-6 text-zinc-400">{copy.detail}</p>
+        </div>
+
+        <div className="border-t border-white/10 bg-black px-6 py-5">
+          <div className="grid grid-cols-3 gap-2">
+            {perks.map(([Icon, label]) => (
+              <div key={label} className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-4 text-center">
+                <span className="mx-auto flex h-9 w-9 items-center justify-center rounded-full border border-fuchsia-500/25 bg-black text-fuchsia-300">
+                  <Icon size={17} />
+                </span>
+                <div className="mt-3 text-[11px] font-black text-zinc-400">{label}</div>
+              </div>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onStartCheckout?.("monthly")}
+            disabled={Boolean(loadingPlan)}
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-fuchsia-300/60 bg-fuchsia-500 px-4 py-3 text-sm font-black text-black shadow-[0_0_28px_rgba(217,70,239,0.35)] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <CreditCard size={16} />
+            {loadingPlan === "monthly" ? "Opening checkout..." : "Reactivate Monthly"}
+          </button>
+          <button
+            type="button"
+            onClick={() => onStartCheckout?.("yearly")}
+            disabled={Boolean(loadingPlan)}
+            className="mt-3 w-full rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-black text-fuchsia-100 transition hover:border-fuchsia-400/45 hover:bg-fuchsia-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loadingPlan === "yearly" ? "Opening checkout..." : "Choose Yearly"}
+          </button>
+          <button
+            type="button"
+            onClick={onSignOut}
+            className="mt-4 w-full text-sm font-bold text-zinc-500 transition hover:text-zinc-200"
+          >
+            Sign out
+          </button>
+        </div>
+      </motion.div>
+    </div>
   );
 }
 
