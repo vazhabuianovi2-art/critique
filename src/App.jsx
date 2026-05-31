@@ -71,6 +71,7 @@ const RESTORE_CACHE_PREFIX = "critique_last_successful_restore_v1";
 const USER_TRADES_KEY_PREFIX = "critique_user_trades_v2";
 const USER_TRADES_BACKUP_KEY_PREFIX = "critique_user_trades_last_nonempty_v1";
 const REMEMBER_AUTH_KEY = "critique_remember_auth_v1";
+const REMEMBER_EMAIL_KEY = "critique_remember_email_v1";
 const PROFILE_PHOTO_KEY = "critique_profile_photo_v1";
 const CUSTOM_STRATEGIES_KEY = "critique_custom_strategies_v1";
 const ECONOMIC_CALENDAR_CACHE_KEY = "critique_economic_calendar_v1";
@@ -6738,11 +6739,6 @@ export default function TradingJournalDashboard() {
       if (isRecoveryUrl) return recoverySession;
       const { data } = await supabase.auth.getSession();
       const session = data?.session || null;
-      const shouldRemember = localStorage.getItem(REMEMBER_AUTH_KEY) !== "false";
-      if (session && !shouldRemember) {
-        await safeLocalSignOut();
-        return null;
-      }
       if (session?.user && localStorage.getItem(REMEMBER_AUTH_KEY) !== "true") {
         localStorage.setItem(REMEMBER_AUTH_KEY, "true");
       }
@@ -6806,10 +6802,6 @@ export default function TradingJournalDashboard() {
       }
 
       if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") && user) {
-        if (event === "INITIAL_SESSION" && localStorage.getItem(REMEMBER_AUTH_KEY) === "false") {
-          safeLocalSignOut();
-          return;
-        }
         setAuthUser(user);
         setIsAuthenticated(true);
         setAuthLoading(false);
@@ -6835,7 +6827,12 @@ export default function TradingJournalDashboard() {
       if (mode === "login") {
         const { data, error } = await supabase.auth.signInWithPassword({ email: values.email, password: values.password });
         if (error) throw error;
-        localStorage.setItem(REMEMBER_AUTH_KEY, values.remember === false ? "false" : "true");
+        localStorage.setItem(REMEMBER_AUTH_KEY, "true");
+        if (values.remember === false) {
+          localStorage.removeItem(REMEMBER_EMAIL_KEY);
+        } else {
+          localStorage.setItem(REMEMBER_EMAIL_KEY, String(values.email || ""));
+        }
         setAuthUser(data?.user || null);
         setIsAuthenticated(Boolean(data?.user));
         setAuthPage("login");
@@ -13102,7 +13099,13 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
     name: "",
-    email: "",
+    email: (() => {
+      try {
+        return localStorage.getItem(REMEMBER_EMAIL_KEY) || "";
+      } catch {
+        return "";
+      }
+    })(),
     password: "",
     confirm: "",
     remember: true,
@@ -13205,12 +13208,12 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
               )}
 
               <AuthField label="Email address" icon="✉">
-                <Input value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="Enter your email" className={authInputClass} />
+                <Input type="email" autoComplete="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="Enter your email" className={authInputClass} />
               </AuthField>
 
               {!isForgot && (
                 <AuthField label={isUpdatePassword ? "New password" : "Password"} icon="🔒">
-                  <Input type={showPassword ? "text" : "password"} value={form.password} onChange={(e) => update("password", e.target.value)} placeholder="Enter your password" className={authPasswordInputClass} />
+                  <Input type={showPassword ? "text" : "password"} autoComplete={isUpdatePassword || isRegister ? "new-password" : "current-password"} value={form.password} onChange={(e) => update("password", e.target.value)} placeholder="Enter your password" className={authPasswordInputClass} />
                   <button type="button" onClick={() => setShowPassword((current) => !current)} className={isLight ? "absolute right-3 top-[35px] text-slate-400 hover:text-slate-950" : "absolute right-3 top-[35px] text-zinc-500 hover:text-white"} aria-label={showPassword ? "Hide password" : "Show password"}>
                     {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                   </button>
@@ -13219,7 +13222,7 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
 
               {(isRegister || isUpdatePassword) && (
                 <AuthField label="Confirm password" icon="🔐">
-                  <Input type={showPassword ? "text" : "password"} value={form.confirm} onChange={(e) => update("confirm", e.target.value)} placeholder="Repeat your password" className={authInputClass} />
+                  <Input type={showPassword ? "text" : "password"} autoComplete="new-password" value={form.confirm} onChange={(e) => update("confirm", e.target.value)} placeholder="Repeat your password" className={authInputClass} />
                 </AuthField>
               )}
 
