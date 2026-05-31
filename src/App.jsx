@@ -288,6 +288,29 @@ async function getCurrentAccessToken() {
   return refreshed?.data?.session?.access_token || "";
 }
 
+function isSubscriptionAccessActive(subscription) {
+  if (!subscription) return false;
+  const status = String(subscription.status || "").toLowerCase();
+  if (["active", "trialing", "on_trial"].includes(status)) return true;
+  const periodEnd = subscription.current_period_end || subscription.trial_end;
+  const periodEndMs = periodEnd ? new Date(periodEnd).getTime() : 0;
+  return Boolean(subscription.cancel_at_period_end && periodEndMs && periodEndMs > Date.now());
+}
+
+async function fetchBillingSubscription(authUser) {
+  if (!authUser?.id && !authUser?.email) return null;
+  const accessToken = await getCurrentAccessToken();
+  if (!accessToken && !authUser?.email) return null;
+  const response = await fetch("/api/billing-status", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ accessToken, email: authUser?.email }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.ok) throw new Error(data.error || "Could not load billing status.");
+  return data.subscription || null;
+}
+
 async function refreshCurrentSession() {
   if (!supabase) return null;
   const { data, error } = await supabase.auth.refreshSession();
@@ -6613,6 +6636,10 @@ export default function TradingJournalDashboard() {
   const [passwordRecoverySession, setPasswordRecoverySession] = useState(false);
   const [tradesLoading, setTradesLoading] = useState(false);
   const [hasLoadedRemoteTrades, setHasLoadedRemoteTrades] = useState(false);
+  const [billingSubscription, setBillingSubscription] = useState(null);
+  const [billingLoading, setBillingLoading] = useState(false);
+  const [billingGateMessage, setBillingGateMessage] = useState("");
+  const [billingRefreshTick, setBillingRefreshTick] = useState(0);
   const [dataMessage, setDataMessage] = useState("");
   const [economicCalendar, setEconomicCalendar] = useState(() => {
     try {
@@ -6631,6 +6658,54 @@ export default function TradingJournalDashboard() {
   });
   const profileName = getUserDisplayName(authUser, account?.isPlaceholder ? "User" : account.name || "User");
   const profileInitial = String(profileName || authUser?.email || "U").trim().charAt(0).toUpperCase();
+  const hasBillingAccess = useMemo(() => isSubscriptionAccessActive(billingSubscription), [billingSubscription]);
+  const shouldGateForBilling = Boolean(isAuthenticated && !billingLoading && !hasBillingAccess);
+
+  useEffect(() => {
+    if (!isAuthenticated || (!authUser?.id && !authUser?.email)) {
+      setBillingSubscription(null);
+      setBillingLoading(false);
+      setBillingGateMessage("");
+      return undefined;
+    }
+
+    let cancelled = false;
+    async function loadBillingStatus() {
+      setBillingLoading(true);
+      setBillingGateMessage("");
+      try {
+        let subscription = await fetchBillingSubscription(authUser);
+        const params = new URLSearchParams(window.location.search);
+        const returnedFromCheckout = params.get("billing") === "success";
+
+        for (let attempt = 0; returnedFromCheckout && !isSubscriptionAccessActive(subscription) && attempt < 4; attempt += 1) {
+          await wait(1200 + attempt * 900);
+          if (cancelled) return;
+          subscription = await fetchBillingSubscription(authUser);
+        }
+
+        if (!cancelled) setBillingSubscription(subscription);
+      } catch (error) {
+        if (!cancelled) {
+          setBillingSubscription(null);
+          setBillingGateMessage(error?.message || "Could not check subscription status.");
+        }
+      } finally {
+        if (!cancelled) setBillingLoading(false);
+      }
+    }
+
+    loadBillingStatus();
+    return () => {
+      cancelled = true;
+    };
+  }, [authUser?.id, authUser?.email, isAuthenticated, billingRefreshTick]);
+
+  useEffect(() => {
+    if (!shouldGateForBilling || active === "Billing") return;
+    setTradeViewMode(null);
+    setActive("Billing");
+  }, [active, shouldGateForBilling]);
 
   useEffect(() => {
     function syncAuthPageFromBrowserPath() {
@@ -7258,6 +7333,12 @@ export default function TradingJournalDashboard() {
   }, [activeTrades, stats.winRate]);
 
   function openAddTrade(dateOverride) {
+    if (shouldGateForBilling) {
+      setActive("Billing");
+      setTradeViewMode(null);
+      setDataMessage("");
+      return;
+    }
     if (!accounts.length) {
       setDataMessage("Create your first trading account before logging trades.");
       createNewAccount();
@@ -7270,6 +7351,12 @@ export default function TradingJournalDashboard() {
     setIsTradeModalOpen(true);
   }
   function openEditTrade(trade) {
+    if (shouldGateForBilling) {
+      setActive("Billing");
+      setTradeViewMode(null);
+      setDataMessage("");
+      return;
+    }
     tradeSavingRef.current = false;
     setIsTradeSaving(false);
     setEditingTradeId(trade.id);
@@ -7284,6 +7371,11 @@ export default function TradingJournalDashboard() {
     setIsTradeModalOpen(false);
   }
   async function saveTrade() {
+    if (shouldGateForBilling) {
+      setActive("Billing");
+      setTradeViewMode(null);
+      return;
+    }
     if (!accounts.length || account.isPlaceholder) {
       setDataMessage("Create your first trading account before saving trades.");
       createNewAccount();
@@ -7515,6 +7607,18 @@ Skipped duplicates: ${duplicateCount}
     );
   }
 
+  if (billingLoading && !billingSubscription) {
+    return (
+      <div className={theme === "light" ? "light-theme flex min-h-screen items-center justify-center bg-black text-white" : "flex min-h-screen items-center justify-center bg-black text-white"}>
+        <style>{THEME_STYLE_CSS}</style>
+        <div className="rounded-2xl border border-fuchsia-500/25 bg-black p-6 text-center shadow-[0_0_35px_rgba(217,70,239,0.16)]">
+          <div className="text-3xl text-fuchsia-400">{BRAND_MARK}</div>
+          <div className="mt-3 text-sm font-black text-zinc-300">Checking subscription access...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={theme === "light" ? "light-theme min-h-screen overflow-x-hidden bg-black text-white" : "min-h-screen overflow-x-hidden bg-black text-white"}>
       <style>{THEME_STYLE_CSS}</style>
@@ -7585,7 +7689,7 @@ Skipped duplicates: ${duplicateCount}
         </div>
         <div className="mt-6 space-y-2">
           {nav.map(([Icon, label]) => (
-            <button key={label} onClick={() => { setActive(label); setTradeViewMode(null); }} className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-[1.035] hover:border hover:border-fuchsia-500/30 hover:shadow-[0_0_22px_rgba(217,70,239,0.18)]" : ""} ${active === label && !tradeViewMode ? "bg-fuchsia-500 text-black font-black" : "text-zinc-300 hover:bg-white/5"}`}>
+            <button key={label} onClick={() => { setActive(shouldGateForBilling ? "Billing" : label); setTradeViewMode(null); }} className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-[1.035] hover:border hover:border-fuchsia-500/30 hover:shadow-[0_0_22px_rgba(217,70,239,0.18)]" : ""} ${active === label && !tradeViewMode ? "bg-fuchsia-500 text-black font-black" : "text-zinc-300 hover:bg-white/5"}`}>
               <Icon size={18} /> {label}
             </button>
           ))}
@@ -7599,7 +7703,7 @@ Skipped duplicates: ${duplicateCount}
             >
               <button
                 onClick={() => {
-                  setActive("Settings");
+                  setActive(shouldGateForBilling ? "Billing" : "Settings");
                   setTradeViewMode(null);
                   setIsSidebarUserMenuOpen(false);
                 }}
@@ -7667,7 +7771,17 @@ Skipped duplicates: ${duplicateCount}
             {dataMessage}
           </div>
         )}
-        {tradeViewMode === "details" && viewTrade ? (
+        {shouldGateForBilling ? (
+          <BillingPageDodo
+            account={account}
+            authUser={authUser}
+            initialSubscription={billingSubscription}
+            gateMessage={billingGateMessage}
+            requireActivation
+            onSubscriptionChange={setBillingSubscription}
+            onSubscriptionRefresh={() => setBillingRefreshTick((tick) => tick + 1)}
+          />
+        ) : tradeViewMode === "details" && viewTrade ? (
           <TradeDetailsPage
             trade={viewTrade}
             account={account}
@@ -7748,11 +7862,17 @@ Skipped duplicates: ${duplicateCount}
             setProfilePhoto={setProfilePhoto}
           />
         ) : (
-          <BillingPageDodo account={account} authUser={authUser} />
+          <BillingPageDodo
+            account={account}
+            authUser={authUser}
+            initialSubscription={billingSubscription}
+            onSubscriptionChange={setBillingSubscription}
+            onSubscriptionRefresh={() => setBillingRefreshTick((tick) => tick + 1)}
+          />
         )}
         </div>
       </main>
-      <MobileBottomNav active={active} setActive={setActive} onAdd={openAddTrade} setTradeViewMode={setTradeViewMode} />
+      <MobileBottomNav active={active} setActive={setActive} onAdd={openAddTrade} setTradeViewMode={setTradeViewMode} lockedToBilling={shouldGateForBilling} />
       <input ref={importFileRef} type="file" accept=".csv,text/csv" onChange={importTradesFromFile} className="hidden" />
       <input ref={backupFileRef} type="file" accept=".json,application/json" onChange={restoreBackupFromFile} className="hidden" />
       {isTradeModalOpen && <AddTradeModal isEditing={Boolean(editingTradeId)} isSaving={isTradeSaving} form={form} setForm={setForm} onClose={closeTradeModal} onSave={saveTrade} account={account} accountBalance={accountBalance} />}
@@ -7806,7 +7926,7 @@ function MobileHeader({ onAdd }) {
   );
 }
 
-function MobileBottomNav({ active, setActive, onAdd, setTradeViewMode }) {
+function MobileBottomNav({ active, setActive, onAdd, setTradeViewMode, lockedToBilling = false }) {
   const items = [
     [LayoutDashboard, "Dashboard"],
     [BookOpen, "Journal"],
@@ -7826,7 +7946,7 @@ function MobileBottomNav({ active, setActive, onAdd, setTradeViewMode }) {
               key={label}
               onClick={() => {
                 setTradeViewMode(null);
-                setActive(label);
+                setActive(lockedToBilling ? "Billing" : label);
               }}
               className={isAdd ? "mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-fuchsia-500 text-white shadow-[0_0_22px_rgba(217,70,239,.38)]" : selected ? "flex flex-col items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 px-1 py-2 text-fuchsia-300 transition-all duration-200 hover:scale-110" : `flex flex-col items-center justify-center rounded-xl px-1 py-2 text-zinc-500 transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-110 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" : "hover:text-zinc-300"}`}
             >
@@ -10285,11 +10405,11 @@ function SettingsPage({ account, accountBalance, authUser, theme, setTheme, isSu
   );
 }
 
-function BillingPageDodo({ account, authUser }) {
+function BillingPageDodo({ account, authUser, initialSubscription = null, gateMessage = "", requireActivation = false, onSubscriptionChange, onSubscriptionRefresh }) {
   const [billingStatus, setBillingStatus] = useState("");
   const [billingError, setBillingError] = useState("");
   const [loadingPlan, setLoadingPlan] = useState("");
-  const [subscription, setSubscription] = useState(null);
+  const [subscription, setSubscription] = useState(initialSubscription);
   const [statusLoading, setStatusLoading] = useState(false);
 
   const plans = [
@@ -10343,11 +10463,16 @@ function BillingPageDodo({ account, authUser }) {
     : "";
 
   useEffect(() => {
+    setSubscription(initialSubscription || null);
+  }, [initialSubscription]);
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const billingResult = params.get("billing");
     if (billingResult === "success") setBillingStatus("Subscription checkout completed. Dodo will sync the active plan shortly.");
     if (billingResult === "cancelled") setBillingStatus("Checkout was cancelled. You can choose a plan whenever you are ready.");
     if (billingResult === "portal-return") setBillingStatus("Returned from the billing portal.");
+    if (billingResult === "success" || billingResult === "portal-return") onSubscriptionRefresh?.();
     if (billingResult) {
       params.delete("billing");
       const nextSearch = params.toString();
@@ -10372,10 +10497,14 @@ function BillingPageDodo({ account, authUser }) {
         });
         const data = await response.json().catch(() => ({}));
         if (!response.ok || !data.ok) throw new Error(data.error || "Could not load billing status.");
-        if (!cancelled) setSubscription(data.subscription || null);
+        if (!cancelled) {
+          setSubscription(data.subscription || null);
+          onSubscriptionChange?.(data.subscription || null);
+        }
       } catch (error) {
         if (!cancelled) {
           setSubscription(null);
+          onSubscriptionChange?.(null);
           setBillingError(error?.message || "Could not load billing status.");
         }
       } finally {
@@ -10455,6 +10584,16 @@ function BillingPageDodo({ account, authUser }) {
         {billingStatus && (
           <div className="mb-5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-200">
             {billingStatus}
+          </div>
+        )}
+        {requireActivation && (
+          <div className="mb-5 rounded-lg border border-fuchsia-500/35 bg-fuchsia-500/10 px-4 py-3 text-sm font-bold text-fuchsia-100">
+            Activate a Pro subscription to unlock the dashboard, journal, calendar, statistics, and mistake detector. You can start with the 7-day trial.
+          </div>
+        )}
+        {gateMessage && (
+          <div className="mb-5 rounded-lg border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-sm font-bold text-amber-200">
+            {gateMessage}
           </div>
         )}
         {billingError && (
