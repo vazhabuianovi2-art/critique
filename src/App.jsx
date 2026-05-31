@@ -70,7 +70,6 @@ const THEME_KEY = "critique_theme_mode_v1";
 const RESTORE_CACHE_PREFIX = "critique_last_successful_restore_v1";
 const USER_TRADES_KEY_PREFIX = "critique_user_trades_v2";
 const USER_TRADES_BACKUP_KEY_PREFIX = "critique_user_trades_last_nonempty_v1";
-const REMEMBER_AUTH_KEY = "critique_remember_auth_v1";
 const REMEMBER_EMAIL_KEY = "critique_remember_email_v1";
 const PROFILE_PHOTO_KEY = "critique_profile_photo_v1";
 const CUSTOM_STRATEGIES_KEY = "critique_custom_strategies_v1";
@@ -6738,11 +6737,7 @@ export default function TradingJournalDashboard() {
       const recoverySession = await recoverPasswordSessionFromUrl();
       if (isRecoveryUrl) return recoverySession;
       const { data } = await supabase.auth.getSession();
-      const session = data?.session || null;
-      if (session?.user && localStorage.getItem(REMEMBER_AUTH_KEY) !== "true") {
-        localStorage.setItem(REMEMBER_AUTH_KEY, "true");
-      }
-      return session;
+      return data?.session || null;
     }
 
     initializeAuthSession().then((session) => {
@@ -6827,7 +6822,6 @@ export default function TradingJournalDashboard() {
       if (mode === "login") {
         const { data, error } = await supabase.auth.signInWithPassword({ email: values.email, password: values.password });
         if (error) throw error;
-        localStorage.setItem(REMEMBER_AUTH_KEY, "true");
         if (values.remember === false) {
           localStorage.removeItem(REMEMBER_EMAIL_KEY);
         } else {
@@ -6932,7 +6926,6 @@ export default function TradingJournalDashboard() {
 
   async function handleSignOut() {
     await safeLocalSignOut();
-    localStorage.removeItem(REMEMBER_AUTH_KEY);
     setIsAuthenticated(false);
     setAuthUser(null);
     setIsSidebarUserMenuOpen(false);
@@ -9870,7 +9863,6 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
         return;
       }
     }
-    localStorage.removeItem(REMEMBER_AUTH_KEY);
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
@@ -13194,7 +13186,7 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
               </div>
             )}
 
-            <form onSubmit={submitAuth} className="mt-8 space-y-5">
+            <form onSubmit={submitAuth} className="mt-8 space-y-5" autoComplete="on">
               {isUpdatePassword && !passwordRecoverySession && (
                 <div className="rounded-2xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm font-bold leading-6 text-amber-300">
                   Open the reset link from your email to create a new password.
@@ -13203,17 +13195,17 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
 
               {isRegister && (
                 <AuthField label="Full name" icon="👤">
-                  <Input value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Enter your name" className={authInputClass} />
+                  <Input id="auth-name" name="name" autoComplete="name" value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Enter your name" className={authInputClass} />
                 </AuthField>
               )}
 
               <AuthField label="Email address" icon="✉">
-                <Input type="email" autoComplete="email" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="Enter your email" className={authInputClass} />
+                <Input id="auth-email" name="email" type="email" autoComplete="username" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="Enter your email" className={authInputClass} />
               </AuthField>
 
               {!isForgot && (
                 <AuthField label={isUpdatePassword ? "New password" : "Password"} icon="🔒">
-                  <Input type={showPassword ? "text" : "password"} autoComplete={isUpdatePassword || isRegister ? "new-password" : "current-password"} value={form.password} onChange={(e) => update("password", e.target.value)} placeholder="Enter your password" className={authPasswordInputClass} />
+                  <Input id="auth-password" name={isUpdatePassword || isRegister ? "new-password" : "password"} type={showPassword ? "text" : "password"} autoComplete={isUpdatePassword || isRegister ? "new-password" : "current-password"} value={form.password} onChange={(e) => update("password", e.target.value)} placeholder="Enter your password" className={authPasswordInputClass} />
                   <button type="button" onClick={() => setShowPassword((current) => !current)} className={isLight ? "absolute right-3 top-[35px] text-slate-400 hover:text-slate-950" : "absolute right-3 top-[35px] text-zinc-500 hover:text-white"} aria-label={showPassword ? "Hide password" : "Show password"}>
                     {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                   </button>
@@ -13222,7 +13214,7 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
 
               {(isRegister || isUpdatePassword) && (
                 <AuthField label="Confirm password" icon="🔐">
-                  <Input type={showPassword ? "text" : "password"} autoComplete="new-password" value={form.confirm} onChange={(e) => update("confirm", e.target.value)} placeholder="Repeat your password" className={authInputClass} />
+                  <Input id="auth-confirm-password" name="confirm-password" type={showPassword ? "text" : "password"} autoComplete="new-password" value={form.confirm} onChange={(e) => update("confirm", e.target.value)} placeholder="Repeat your password" className={authInputClass} />
                 </AuthField>
               )}
 
