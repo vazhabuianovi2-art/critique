@@ -70,6 +70,7 @@ const THEME_KEY = "critique_theme_mode_v1";
 const RESTORE_CACHE_PREFIX = "critique_last_successful_restore_v1";
 const USER_TRADES_KEY_PREFIX = "critique_user_trades_v2";
 const USER_TRADES_BACKUP_KEY_PREFIX = "critique_user_trades_last_nonempty_v1";
+const DELETED_TRADES_KEY_PREFIX = "critique_deleted_trades_v1";
 const REMEMBER_EMAIL_KEY = "critique_remember_email_v1";
 const PROFILE_PHOTO_KEY = "critique_profile_photo_v1";
 const CUSTOM_STRATEGIES_KEY = "critique_custom_strategies_v1";
@@ -6310,6 +6311,48 @@ function getUserTradesBackupKey(userId) {
   return `${USER_TRADES_BACKUP_KEY_PREFIX}_${userId || "guest"}`;
 }
 
+function getDeletedTradesKey(userId) {
+  return `${DELETED_TRADES_KEY_PREFIX}_${userId || "guest"}`;
+}
+
+function getTradeDurableId(trade) {
+  return trade?.supabaseId || trade?.id || "";
+}
+
+function readDeletedTradeIds(userId) {
+  try {
+    const value = JSON.parse(localStorage.getItem(getDeletedTradesKey(userId)) || "[]");
+    return new Set(Array.isArray(value) ? value.map(String) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveDeletedTradeIds(userId, ids) {
+  try {
+    localStorage.setItem(getDeletedTradesKey(userId), JSON.stringify([...ids].map(String)));
+  } catch (error) {
+    console.warn("Could not save deleted trade markers:", error?.message || error);
+  }
+}
+
+function markTradeDeleted(userId, trade) {
+  const durableId = getTradeDurableId(trade);
+  if (!durableId) return;
+  const ids = readDeletedTradeIds(userId);
+  ids.add(String(durableId));
+  saveDeletedTradeIds(userId, ids);
+}
+
+function filterDeletedTrades(tradesToFilter, userId) {
+  const deletedIds = readDeletedTradeIds(userId);
+  if (!deletedIds.size) return tradesToFilter;
+  return (tradesToFilter || []).filter((trade) => {
+    const durableId = getTradeDurableId(trade);
+    return !durableId || !deletedIds.has(String(durableId));
+  });
+}
+
 function normalizeTradeForStorage(trade) {
   return {
     ...trade,
@@ -6351,13 +6394,13 @@ function setJsonStorageItem(key, value, compactValue = value) {
 function readLocalTradesFallback(userId) {
   try {
     const userSaved = JSON.parse(localStorage.getItem(getUserTradesKey(userId)) || "[]");
-    if (Array.isArray(userSaved) && userSaved.length) return userSaved.map(normalizeTradeForStorage);
+    if (Array.isArray(userSaved) && userSaved.length) return filterDeletedTrades(userSaved.map(normalizeTradeForStorage), userId);
     const userBackup = JSON.parse(localStorage.getItem(getUserTradesBackupKey(userId)) || "[]");
-    if (Array.isArray(userBackup) && userBackup.length) return userBackup.map(normalizeTradeForStorage);
+    if (Array.isArray(userBackup) && userBackup.length) return filterDeletedTrades(userBackup.map(normalizeTradeForStorage), userId);
     if (userId) return [];
 
     const oldSaved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    return Array.isArray(oldSaved) ? oldSaved.map(normalizeTradeForStorage) : [];
+    return Array.isArray(oldSaved) ? filterDeletedTrades(oldSaved.map(normalizeTradeForStorage), userId) : [];
   } catch {
     return [];
   }
@@ -6547,7 +6590,7 @@ export default function TradingJournalDashboard() {
     setHasLoadedRemoteTrades(false);
     setDataMessage("");
     const cachedRestore = readRestoreCache(authUser.id);
-    const cachedTrades = mergeTradesUnique(readLocalTradesFallback(authUser.id), Array.isArray(cachedRestore?.trades) ? cachedRestore.trades : []);
+    const cachedTrades = filterDeletedTrades(mergeTradesUnique(readLocalTradesFallback(authUser.id), Array.isArray(cachedRestore?.trades) ? cachedRestore.trades : []), authUser.id);
     if (cachedTrades.length) {
       setTrades(cachedTrades);
     } else {
@@ -6558,8 +6601,18 @@ export default function TradingJournalDashboard() {
       .then(async (rows) => {
         if (!mounted || !Array.isArray(rows)) return;
 
-        if (rows.length) {
-          const serverTrades = mergeTradesUnique(rows, []);
+        const visibleRows = filterDeletedTrades(rows, authUser.id);
+        const deletedRemoteRows = rows.filter((row) => !visibleRows.some((visibleRow) => getTradeDurableId(visibleRow) === getTradeDurableId(row)));
+        if (deletedRemoteRows.length) {
+          deletedRemoteRows.forEach((row) => {
+            deleteTradeFromSupabase(authUser.id, row).catch((deleteError) => {
+              console.warn("Could not finish cloud delete for a locally deleted trade:", deleteError?.message || deleteError);
+            });
+          });
+        }
+
+        if (visibleRows.length) {
+          const serverTrades = mergeTradesUnique(visibleRows, []);
           const mergedTrades = mergeTradesUnique(serverTrades, cachedTrades);
           setTrades(mergedTrades);
           saveLocalTradesFallback(mergedTrades, authUser.id);
@@ -7329,19 +7382,20 @@ Skipped duplicates: ${duplicateCount}
   }
   async function deleteTrade(id) {
     const tradeToDelete = trades.find((trade) => trade.id === id);
+    if (!tradeToDelete) return;
+    const nextTrades = trades.filter((trade) => trade.id !== id);
+    markTradeDeleted(authUser?.id, tradeToDelete);
+    setTrades(nextTrades);
+    saveLocalTradesFallback(nextTrades, authUser?.id);
+    if (authUser?.id) saveRestoreCache(authUser.id, { trades: nextTrades, account, routine, theme });
+    setViewTrade(null);
+    setTradeViewMode(null);
     try {
       setDataMessage("");
       await deleteTradeFromSupabase(authUser?.id, tradeToDelete);
-      setTrades((current) => {
-        const nextTrades = current.filter((trade) => trade.id !== id);
-        saveLocalTradesFallback(nextTrades, authUser?.id);
-        if (authUser?.id) saveRestoreCache(authUser.id, { trades: nextTrades, account, routine, theme });
-        return nextTrades;
-      });
-      setViewTrade(null);
-      setTradeViewMode(null);
     } catch (error) {
-      setDataMessage(error?.message || "Could not delete trade from Supabase.");
+      console.warn("Trade removed locally; cloud delete will retry on the next sync.", error?.message || error);
+      setDataMessage("Trade removed from the site. Cloud sync will finish after the session refreshes.");
     }
   }
   function openTradeDetails(trade) {
