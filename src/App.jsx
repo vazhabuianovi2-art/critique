@@ -130,8 +130,8 @@ const hasValidSupabaseUrl = /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(SUPABAS
 const hasValidSupabaseKey = SUPABASE_ANON_KEY.length > 40;
 const supabase = hasValidSupabaseUrl && hasValidSupabaseKey ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
-    autoRefreshToken: false,
-    persistSession: false,
+    autoRefreshToken: true,
+    persistSession: true,
     detectSessionInUrl: true,
   },
 }) : null;
@@ -6736,9 +6736,17 @@ export default function TradingJournalDashboard() {
     async function initializeAuthSession() {
       const recoverySession = await recoverPasswordSessionFromUrl();
       if (isRecoveryUrl) return recoverySession;
-      localStorage.removeItem(REMEMBER_AUTH_KEY);
-      await safeLocalSignOut();
-      return null;
+      const { data } = await supabase.auth.getSession();
+      const session = data?.session || null;
+      const shouldRemember = localStorage.getItem(REMEMBER_AUTH_KEY) !== "false";
+      if (session && !shouldRemember) {
+        await safeLocalSignOut();
+        return null;
+      }
+      if (session?.user && localStorage.getItem(REMEMBER_AUTH_KEY) !== "true") {
+        localStorage.setItem(REMEMBER_AUTH_KEY, "true");
+      }
+      return session;
     }
 
     initializeAuthSession().then((session) => {
@@ -6794,6 +6802,17 @@ export default function TradingJournalDashboard() {
         setAuthUser(null);
         setIsAuthenticated(false);
         setAuthLoading(false);
+        return;
+      }
+
+      if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") && user) {
+        if (event === "INITIAL_SESSION" && localStorage.getItem(REMEMBER_AUTH_KEY) === "false") {
+          safeLocalSignOut();
+          return;
+        }
+        setAuthUser(user);
+        setIsAuthenticated(true);
+        setAuthLoading(false);
       }
     });
 
@@ -6816,6 +6835,7 @@ export default function TradingJournalDashboard() {
       if (mode === "login") {
         const { data, error } = await supabase.auth.signInWithPassword({ email: values.email, password: values.password });
         if (error) throw error;
+        localStorage.setItem(REMEMBER_AUTH_KEY, values.remember === false ? "false" : "true");
         setAuthUser(data?.user || null);
         setIsAuthenticated(Boolean(data?.user));
         setAuthPage("login");
@@ -6915,6 +6935,7 @@ export default function TradingJournalDashboard() {
 
   async function handleSignOut() {
     await safeLocalSignOut();
+    localStorage.removeItem(REMEMBER_AUTH_KEY);
     setIsAuthenticated(false);
     setAuthUser(null);
     setIsSidebarUserMenuOpen(false);
@@ -13084,6 +13105,7 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
     email: "",
     password: "",
     confirm: "",
+    remember: true,
   });
   const [error, setError] = useState("");
 
@@ -13203,7 +13225,15 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
 
               {isLogin && (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="font-semibold text-zinc-500">Login required on every visit</span>
+                  <label className={isLight ? "flex cursor-pointer items-center gap-2 font-bold text-slate-600" : "flex cursor-pointer items-center gap-2 font-bold text-zinc-400"}>
+                    <input
+                      type="checkbox"
+                      checked={form.remember}
+                      onChange={(event) => update("remember", event.target.checked)}
+                      className="h-4 w-4 rounded border-fuchsia-400 bg-black text-fuchsia-500 focus:ring-fuchsia-500"
+                    />
+                    Remember me
+                  </label>
                   <button type="button" onClick={() => setAuthPage("forgot")} className="font-black text-fuchsia-300 hover:text-fuchsia-200">Forgot password?</button>
                 </div>
               )}
