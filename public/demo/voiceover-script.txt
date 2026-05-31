@@ -1,22 +1,23 @@
 TryCritique demo voiceover script
+Direction: calm male voice, steady pace, confident but not aggressive.
 
 Scene 1 - Trade Journal
-TryCritique gives traders a simple, comfortable workspace to log every trade without fighting spreadsheets or messy notes.
+TryCritique gives traders a calm, simple workspace to record every trade clearly, without messy spreadsheets or scattered notes.
 
 Scene 2 - Economic Calendar
-You also get an economic calendar inside the same workspace, so there is no need to open extra sites just to check the news around your trading day.
+The economic calendar is built into the same workspace, so you can review market news without opening extra tabs before or after a trade.
 
 Scene 3 - Calendar Review
-The calendar shows wins, losses, break-even days, weekly totals, and the real rhythm of your month at a glance.
+The calendar gives you a clean view of your month, showing winning days, losing days, break-even days, and weekly totals at a glance.
 
 Scene 4 - Advanced Analytics
-Instead of guessing, you can see which setups, sessions, emotions, and habits actually help your performance.
+Instead of guessing, you can see which setups, sessions, emotions, and habits are actually helping your performance improve.
 
 Scene 5 - Mistake Detector
-The mistake detector helps you find repeated behavior leaks, focus on one fix, and trade with more discipline next time.
+The mistake detector helps you notice repeated behavior leaks, choose one clear fix, and come back to the next session with more discipline.
 
 Scene 6 - Affordable Pro
-And because it is affordable, TryCritique is easy to keep as part of your daily routine, not another expensive tool you stop using.
+Because TryCritique is affordable, it can become part of your daily routine: one focused workspace for journaling, calendar context, analytics, and review.
 
 Full read
-TryCritique gives traders a simple, comfortable workspace to log every trade without fighting spreadsheets or messy notes. You also get an economic calendar inside the same workspace, so there is no need to open extra sites just to check the news around your trading day. The calendar shows wins, losses, break-even days, weekly totals, and the real rhythm of your month at a glance. Instead of guessing, you can see which setups, sessions, emotions, and habits actually help your performance. The mistake detector helps you find repeated behavior leaks, focus on one fix, and trade with more discipline next time. And because it is affordable, TryCritique is easy to keep as part of your daily routine, not another expensive tool you stop using.
+TryCritique gives traders a calm, simple workspace to record every trade clearly, without messy spreadsheets or scattered notes. The economic calendar is built into the same workspace, so you can review market news without opening extra tabs before or after a trade. The calendar gives you a clean view of your month, showing winning days, losing days, break-even days, and weekly totals at a glance. Instead of guessing, you can see which setups, sessions, emotions, and habits are actually helping your performance improve. The mistake detector helps you notice repeated behavior leaks, choose one clear fix, and come back to the next session with more discipline. Because TryCritique is affordable, it can become part of your daily routine: one focused workspace for journaling, calendar context, analytics, and review.

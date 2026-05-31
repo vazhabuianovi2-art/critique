@@ -13559,7 +13559,7 @@ const DEMO_SCENES = [
     eyebrow: "Trade Journal",
     title: "Log every trade in seconds",
     body: "Capture symbol, session, strategy, risk, P&L, screenshots, emotion, and execution quality in one clean workflow.",
-    voiceover: "TryCritique gives traders a simple, comfortable workspace to log every trade without fighting spreadsheets or messy notes.",
+    voiceover: "TryCritique gives traders a calm, simple workspace to record every trade clearly, without messy spreadsheets or scattered notes.",
     stat: "+$780",
     accent: "emerald",
     bullets: ["Fast trade entry", "Screenshots & tags", "Risk and R:R tracking"],
@@ -13568,7 +13568,7 @@ const DEMO_SCENES = [
     eyebrow: "Economic Calendar",
     title: "News context without leaving your workspace",
     body: "High-impact news and daily market context live inside the product, so traders do not need to jump between different websites before reviewing a setup.",
-    voiceover: "You also get an economic calendar inside the same workspace, so there is no need to open extra sites just to check the news around your trading day.",
+    voiceover: "The economic calendar is built into the same workspace, so you can review market news without opening extra tabs before or after a trade.",
     stat: "News",
     accent: "cyan",
     bullets: ["Calendar in one place", "News-day performance", "Less tab switching"],
@@ -13577,7 +13577,7 @@ const DEMO_SCENES = [
     eyebrow: "Calendar Review",
     title: "See your trading month clearly",
     body: "Winning days, losing days, break-even days, and news events become obvious instead of buried in notes.",
-    voiceover: "The calendar shows wins, losses, break-even days, weekly totals, and the real rhythm of your month at a glance.",
+    voiceover: "The calendar gives you a clean view of your month, showing winning days, losing days, break-even days, and weekly totals at a glance.",
     stat: "May",
     accent: "fuchsia",
     bullets: ["Daily P&L", "Weekly totals", "News-day context"],
@@ -13586,7 +13586,7 @@ const DEMO_SCENES = [
     eyebrow: "Advanced Analytics",
     title: "Find your real edge",
     body: "Analyze setups, sessions, currencies, entry quality, emotions, mistake patterns, and performance trends.",
-    voiceover: "Instead of guessing, you can see which setups, sessions, emotions, and habits actually help your performance.",
+    voiceover: "Instead of guessing, you can see which setups, sessions, emotions, and habits are actually helping your performance improve.",
     stat: "78%",
     accent: "emerald",
     bullets: ["Best setups", "Weak sessions", "Performance timeline"],
@@ -13595,7 +13595,7 @@ const DEMO_SCENES = [
     eyebrow: "Mistake Detector",
     title: "Stop repeating costly habits",
     body: "TryCritique turns your review into a feedback loop so you know exactly what to fix before the next trading day.",
-    voiceover: "The mistake detector helps you find repeated behavior leaks, focus on one fix, and trade with more discipline next time.",
+    voiceover: "The mistake detector helps you notice repeated behavior leaks, choose one clear fix, and come back to the next session with more discipline.",
     stat: "Fix",
     accent: "amber",
     bullets: ["Behavior patterns", "Loss triggers", "Actionable review"],
@@ -13604,7 +13604,7 @@ const DEMO_SCENES = [
     eyebrow: "Affordable Pro",
     title: "Built to be useful, not overpriced",
     body: "For a low monthly subscription, traders get journal, calendar, analytics, review tools, and workflow structure in one product.",
-    voiceover: "And because it is affordable, TryCritique is easy to keep as part of your daily routine, not another expensive tool you stop using.",
+    voiceover: "Because TryCritique is affordable, it can become part of your daily routine: one focused workspace for journaling, calendar context, analytics, and review.",
     stat: "$10",
     accent: "fuchsia",
     bullets: ["Low monthly price", "One workspace", "Built for daily review"],
@@ -14097,14 +14097,18 @@ function WatchDemoModal({ onClose, onStart, isLight }) {
     }
 
     setActiveScene(sceneIndex);
-    setVoiceStatus(`Playing ${currentScene.eyebrow}`);
+    setVoiceStatus(`Playing calm male voice · ${currentScene.eyebrow}`);
 
     const utterance = new SpeechSynthesisUtterance(currentScene.voiceover);
     const voices = window.speechSynthesis.getVoices();
-    const preferredVoice = voices.find((voice) => voice.lang?.toLowerCase().startsWith("en") && /female|samantha|zira|jenny|aria/i.test(voice.name)) || voices.find((voice) => voice.lang?.toLowerCase().startsWith("en"));
+    const englishVoices = voices.filter((voice) => voice.lang?.toLowerCase().startsWith("en"));
+    const preferredVoice =
+      englishVoices.find((voice) => /david|guy|mark|george|daniel|alex|james|richard|thomas|matthew|brian|male/i.test(voice.name)) ||
+      englishVoices.find((voice) => !/female|samantha|zira|jenny|aria|susan|victoria|karen|moira|tessa/i.test(voice.name)) ||
+      englishVoices[0];
     if (preferredVoice) utterance.voice = preferredVoice;
-    utterance.rate = 0.92;
-    utterance.pitch = 0.96;
+    utterance.rate = 0.86;
+    utterance.pitch = 0.82;
     utterance.volume = 1;
     utterance.onend = () => {
       const nextScene = sceneIndex + 1;
