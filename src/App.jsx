@@ -154,6 +154,12 @@ function getPathForAuthPage(page) {
   return paths[page] || "/";
 }
 
+function isPublicAuthPath() {
+  if (typeof window === "undefined") return false;
+  const path = window.location.pathname.replace(/\/+$/, "") || "/";
+  return path === "/" || path === "/auth/login" || path === "/auth/register" || path === "/auth/forgot";
+}
+
 const SUPABASE_URL = getEnvValue("VITE_SUPABASE_URL");
 const SUPABASE_ANON_KEY = getEnvValue("VITE_SUPABASE_ANON_KEY") || getEnvValue("VITE_SUPABASE_KEY");
 const hasValidSupabaseUrl = /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(SUPABASE_URL);
@@ -6910,6 +6916,7 @@ export default function TradingJournalDashboard() {
     async function initializeAuthSession() {
       const recoverySession = await recoverPasswordSessionFromUrl();
       if (isRecoveryUrl) return recoverySession;
+      if (isPublicAuthPath()) return null;
       const { data } = await supabase.auth.getSession();
       const session = data?.session || null;
       const expiresAt = session?.expires_at ? session.expires_at * 1000 : 0;
@@ -6974,6 +6981,11 @@ export default function TradingJournalDashboard() {
         return;
       }
 
+      if ((event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") && isPublicAuthPath()) {
+        setAuthLoading(false);
+        return;
+      }
+
       if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") && user) {
         setAuthUser(user);
         setIsAuthenticated(true);
@@ -7007,7 +7019,7 @@ export default function TradingJournalDashboard() {
         }
         setAuthUser(data?.user || null);
         setIsAuthenticated(Boolean(data?.user));
-        setAuthPage("login");
+        setAuthPage("landing", "replace");
         return { ok: true };
       }
 
