@@ -125,6 +125,35 @@ function getAuthRedirectUrl(path = "") {
   return `${getSiteOrigin()}${String(path || "").startsWith("/") ? path : `/${path}`}`;
 }
 
+function getAuthPageFromPath() {
+  if (typeof window === "undefined") return "landing";
+  const path = window.location.pathname.replace(/\/+$/, "") || "/";
+  if (path === "/auth/login") return "login";
+  if (path === "/auth/register") return "register";
+  if (path === "/auth/forgot") return "forgot";
+  if (path === "/auth/reset-password") return "updatePassword";
+  if (path === "/terms") return "terms";
+  if (path === "/privacy") return "privacy";
+  if (path === "/refund") return "refund";
+  if (path === "/contact") return "contact";
+  return "landing";
+}
+
+function getPathForAuthPage(page) {
+  const paths = {
+    landing: "/",
+    login: "/auth/login",
+    register: "/auth/register",
+    forgot: "/auth/forgot",
+    updatePassword: "/auth/reset-password",
+    terms: "/terms",
+    privacy: "/privacy",
+    refund: "/refund",
+    contact: "/contact",
+  };
+  return paths[page] || "/";
+}
+
 const SUPABASE_URL = getEnvValue("VITE_SUPABASE_URL");
 const SUPABASE_ANON_KEY = getEnvValue("VITE_SUPABASE_ANON_KEY") || getEnvValue("VITE_SUPABASE_KEY");
 const hasValidSupabaseUrl = /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(SUPABASE_URL);
@@ -6552,7 +6581,18 @@ export default function TradingJournalDashboard() {
     }
   });
   const [isFullscreen, setIsFullscreen] = useState(() => Boolean(getFullscreenElement()));
-  const [authPage, setAuthPage] = useState("landing");
+  const [authPage, setAuthPageState] = useState(() => getAuthPageFromPath());
+  function setAuthPage(nextPage, navigationMode = "push") {
+    const page = typeof nextPage === "function" ? nextPage(authPage) : nextPage;
+    setAuthPageState(page);
+    if (typeof window !== "undefined") {
+      const nextPath = getPathForAuthPage(page);
+      if (window.location.pathname !== nextPath) {
+        const method = navigationMode === "replace" ? "replaceState" : "pushState";
+        window.history[method](null, "", nextPath);
+      }
+    }
+  }
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authUser, setAuthUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -6578,6 +6618,14 @@ export default function TradingJournalDashboard() {
   });
   const profileName = getUserDisplayName(authUser, account?.isPlaceholder ? "User" : account.name || "User");
   const profileInitial = String(profileName || authUser?.email || "U").trim().charAt(0).toUpperCase();
+
+  useEffect(() => {
+    function syncAuthPageFromBrowserPath() {
+      if (!isAuthenticated) setAuthPageState(getAuthPageFromPath());
+    }
+    window.addEventListener("popstate", syncAuthPageFromBrowserPath);
+    return () => window.removeEventListener("popstate", syncAuthPageFromBrowserPath);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (authLoading || tradesLoading) return;
@@ -13621,7 +13669,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
     ["Risk", "1.2%"],
   ];
   const goHome = () => {
-    window.history.replaceState(null, "", window.location.pathname);
+    window.history.replaceState(null, "", "/");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
