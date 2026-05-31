@@ -291,10 +291,16 @@ async function getCurrentAccessToken() {
 function isSubscriptionAccessActive(subscription) {
   if (!subscription) return false;
   const status = String(subscription.status || "").toLowerCase();
-  if (["active", "trialing", "on_trial"].includes(status)) return true;
-  const periodEnd = subscription.current_period_end || subscription.trial_end;
-  const periodEndMs = periodEnd ? new Date(periodEnd).getTime() : 0;
-  return Boolean(subscription.cancel_at_period_end && periodEndMs && periodEndMs > Date.now());
+  const now = Date.now();
+  const trialEndMs = subscription.trial_end ? new Date(subscription.trial_end).getTime() : 0;
+  const periodEndMs = subscription.current_period_end ? new Date(subscription.current_period_end).getTime() : 0;
+  const hasFutureTrial = Boolean(trialEndMs && trialEndMs > now);
+  const hasFuturePaidPeriod = Boolean(periodEndMs && periodEndMs > now);
+
+  if (["trialing", "on_trial"].includes(status)) return hasFutureTrial || hasFuturePaidPeriod;
+  if (status === "active") return periodEndMs ? hasFuturePaidPeriod : true;
+  if (subscription.cancel_at_period_end) return hasFuturePaidPeriod;
+  return false;
 }
 
 async function fetchBillingSubscription(authUser) {
