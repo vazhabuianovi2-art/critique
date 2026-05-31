@@ -154,6 +154,13 @@ function getPathForAuthPage(page) {
   return paths[page] || "/";
 }
 
+function enterAppRoute() {
+  if (typeof window === "undefined") return;
+  if (window.location.pathname !== "/dashboard") {
+    window.history.replaceState(null, "", "/dashboard");
+  }
+}
+
 function isPublicAuthPath() {
   if (typeof window === "undefined") return false;
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
@@ -7017,9 +7024,9 @@ export default function TradingJournalDashboard() {
         } else {
           localStorage.setItem(REMEMBER_EMAIL_KEY, String(values.email || ""));
         }
+        enterAppRoute();
         setAuthUser(data?.user || null);
         setIsAuthenticated(Boolean(data?.user));
-        setAuthPage("landing", "replace");
         return { ok: true };
       }
 
