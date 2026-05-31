@@ -317,6 +317,19 @@ async function fetchBillingSubscription(authUser) {
   return data.subscription || null;
 }
 
+async function postAdminEntitlements(action, payload = {}) {
+  const accessToken = await getCurrentAccessToken();
+  if (!accessToken) throw new Error("Login session is missing.");
+  const response = await fetch("/api/admin-entitlements", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, accessToken, ...payload }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.ok) throw new Error(data.error || "Admin request failed.");
+  return data;
+}
+
 async function refreshCurrentSession() {
   if (!supabase) return null;
   const { data, error } = await supabase.auth.refreshSession();
@@ -6646,6 +6659,7 @@ export default function TradingJournalDashboard() {
   const [billingLoading, setBillingLoading] = useState(false);
   const [billingGateMessage, setBillingGateMessage] = useState("");
   const [billingRefreshTick, setBillingRefreshTick] = useState(0);
+  const [hasAdminAccess, setHasAdminAccess] = useState(false);
   const [dataMessage, setDataMessage] = useState("");
   const [economicCalendar, setEconomicCalendar] = useState(() => {
     try {
@@ -6664,8 +6678,27 @@ export default function TradingJournalDashboard() {
   });
   const profileName = getUserDisplayName(authUser, account?.isPlaceholder ? "User" : account.name || "User");
   const profileInitial = String(profileName || authUser?.email || "U").trim().charAt(0).toUpperCase();
-  const hasBillingAccess = useMemo(() => isSubscriptionAccessActive(billingSubscription), [billingSubscription]);
+  const navItems = useMemo(() => hasAdminAccess ? [...nav, [ShieldCheck, "Admin"]] : nav, [hasAdminAccess]);
+  const hasBillingAccess = useMemo(() => hasAdminAccess || isSubscriptionAccessActive(billingSubscription), [hasAdminAccess, billingSubscription]);
   const shouldGateForBilling = Boolean(isAuthenticated && !billingLoading && !hasBillingAccess);
+
+  useEffect(() => {
+    if (!isAuthenticated || !authUser?.email) {
+      setHasAdminAccess(false);
+      return undefined;
+    }
+    let cancelled = false;
+    postAdminEntitlements("status")
+      .then((data) => {
+        if (!cancelled) setHasAdminAccess(Boolean(data.isAdmin));
+      })
+      .catch(() => {
+        if (!cancelled) setHasAdminAccess(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [authUser?.email, isAuthenticated]);
 
   useEffect(() => {
     if (!isAuthenticated || (!authUser?.id && !authUser?.email)) {
@@ -7694,7 +7727,7 @@ Skipped duplicates: ${duplicateCount}
           )}
         </div>
         <div className="mt-6 space-y-2">
-          {nav.map(([Icon, label]) => (
+          {navItems.map(([Icon, label]) => (
             <button key={label} onClick={() => { setActive(shouldGateForBilling ? "Billing" : label); setTradeViewMode(null); }} className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-[1.035] hover:border hover:border-fuchsia-500/30 hover:shadow-[0_0_22px_rgba(217,70,239,0.18)]" : ""} ${active === label && !tradeViewMode ? "bg-fuchsia-500 text-black font-black" : "text-zinc-300 hover:bg-white/5"}`}>
               <Icon size={18} /> {label}
             </button>
@@ -7868,6 +7901,8 @@ Skipped duplicates: ${duplicateCount}
             profilePhoto={profilePhoto}
             setProfilePhoto={setProfilePhoto}
           />
+        ) : active === "Admin" && hasAdminAccess ? (
+          <AdminAccessPage />
         ) : (
           <BillingPageDodo
             account={account}
@@ -10408,6 +10443,130 @@ function SettingsPage({ account, accountBalance, authUser, theme, setTheme, isSu
             <Button onClick={onSignOut} variant="outline" className="mt-5 border-red-500/35 bg-red-500/10 text-red-300"><LogOut size={16} /> Sign Out</Button>
           </CardContent>
         </Card>
+      </div>
+    </motion.div>
+  );
+}
+
+function AdminAccessPage() {
+  const [email, setEmail] = useState("");
+  const [grants, setGrants] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  async function loadGrants() {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await postAdminEntitlements("list");
+      setGrants(Array.isArray(data.grants) ? data.grants : []);
+    } catch (loadError) {
+      setError(loadError?.message || "Could not load admin access list.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadGrants();
+  }, []);
+
+  async function grantAccess(event) {
+    event.preventDefault();
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    if (!normalizedEmail || !normalizedEmail.includes("@")) {
+      setError("Enter a valid user email.");
+      return;
+    }
+    setLoading(true);
+    setMessage("");
+    setError("");
+    try {
+      await postAdminEntitlements("grant", { email: normalizedEmail });
+      setEmail("");
+      setMessage(`${normalizedEmail} now has free Pro access.`);
+      await loadGrants();
+    } catch (grantError) {
+      setError(grantError?.message || "Could not grant free Pro access.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function revokeAccess(targetEmail) {
+    setLoading(true);
+    setMessage("");
+    setError("");
+    try {
+      await postAdminEntitlements("revoke", { email: targetEmail });
+      setMessage(`${targetEmail} free Pro access was revoked.`);
+      await loadGrants();
+    } catch (revokeError) {
+      setError(revokeError?.message || "Could not revoke free Pro access.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="pb-10">
+      <TopCrumb page="Admin" />
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-8">
+          <h1 className="text-4xl font-black tracking-tight text-white">Admin Access</h1>
+          <p className="mt-2 text-lg font-semibold text-zinc-400">Give trusted users free Pro access without Dodo checkout.</p>
+        </div>
+
+        {message && <div className="mb-5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-200">{message}</div>}
+        {error && <div className="mb-5 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200">{error}</div>}
+
+        <section className="rounded-lg border border-fuchsia-500/25 bg-gradient-to-br from-[#12061a] via-black to-[#04100c] p-6">
+          <div className="flex items-center gap-3">
+            <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/10 text-fuchsia-300"><ShieldCheck size={24} /></span>
+            <div>
+              <h2 className="text-2xl font-black text-white">Grant Free Pro</h2>
+              <p className="mt-1 text-sm font-semibold text-zinc-400">The email gets an admin subscription until Dec 31, 2099.</p>
+            </div>
+          </div>
+          <form onSubmit={grantAccess} className="mt-6 grid gap-3 md:grid-cols-[1fr_auto]">
+            <Input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="friend@example.com" className="border-white/10 bg-black text-white" />
+            <Button disabled={loading} className="bg-fuchsia-500 text-black hover:bg-fuchsia-400"><UserPlus size={16} /> {loading ? "Saving..." : "Grant Access"}</Button>
+          </form>
+        </section>
+
+        <section className="mt-8 rounded-lg border border-white/10 bg-[#070707] p-6">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-2xl font-black text-white">Free Access List</h2>
+              <p className="mt-1 text-sm font-semibold text-zinc-400">Admin-created Pro access rows.</p>
+            </div>
+            <Button type="button" onClick={loadGrants} disabled={loading} variant="outline" className="border-white/10 bg-white/[0.04] text-white">{loading ? "Loading..." : "Refresh"}</Button>
+          </div>
+
+          <div className="mt-6 overflow-hidden rounded-lg border border-white/10">
+            <div className="grid grid-cols-[1fr_130px_150px_120px] gap-3 border-b border-white/10 bg-white/[0.04] px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-zinc-500">
+              <div>Email</div>
+              <div>Status</div>
+              <div>Access Until</div>
+              <div className="text-right">Action</div>
+            </div>
+            {grants.length ? grants.map((grant) => (
+              <div key={grant.id || grant.email} className="grid grid-cols-[1fr_130px_150px_120px] items-center gap-3 border-b border-white/10 px-4 py-4 text-sm last:border-b-0">
+                <div className="truncate font-black text-white">{grant.email}</div>
+                <div className={String(grant.status).toLowerCase() === "active" ? "font-black text-emerald-300" : "font-black text-red-300"}>{grant.status || "unknown"}</div>
+                <div className="font-semibold text-zinc-400">{grant.current_period_end ? new Date(grant.current_period_end).toLocaleDateString() : "-"}</div>
+                <div className="text-right">
+                  <button type="button" onClick={() => revokeAccess(grant.email)} disabled={loading || String(grant.status).toLowerCase() !== "active"} className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-black text-red-200 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-45">
+                    Revoke
+                  </button>
+                </div>
+              </div>
+            )) : (
+              <div className="px-4 py-10 text-center text-sm font-bold text-zinc-500">No free access grants yet.</div>
+            )}
+          </div>
+        </section>
       </div>
     </motion.div>
   );
