@@ -6326,7 +6326,10 @@ function mergeTradesUnique(primary = [], secondary = []) {
   const seen = new Set();
   [...primary, ...secondary].forEach((trade) => {
     const normalized = normalizeTradeForStorage(trade);
-    const key = getTradeDuplicateKey(normalized);
+    const durableId = normalized.supabaseId || normalized.id;
+    const key = durableId
+      ? `id:${String(durableId)}`
+      : `trade:${getTradeDuplicateKey(normalized)}|created:${String(normalized.createdAt || "")}`;
     if (seen.has(key)) return;
     seen.add(key);
     output.push(normalized);
@@ -6494,9 +6497,25 @@ export default function TradingJournalDashboard() {
 
         if (rows.length) {
           const serverTrades = mergeTradesUnique(rows, []);
-          setTrades(serverTrades);
-          saveLocalTradesFallback(serverTrades, authUser.id);
-          saveRestoreCache(authUser.id, { trades: serverTrades, account, routine, theme });
+          const mergedTrades = mergeTradesUnique(serverTrades, cachedTrades);
+          setTrades(mergedTrades);
+          saveLocalTradesFallback(mergedTrades, authUser.id);
+          saveRestoreCache(authUser.id, { trades: mergedTrades, account, routine, theme });
+
+          if (mergedTrades.length > serverTrades.length) {
+            try {
+              const reSavedTrades = await replaceTradesInSupabase(authUser.id, mergedTrades);
+              if (!mounted) return;
+              const finalTrades = reSavedTrades.length ? reSavedTrades : mergedTrades;
+              setTrades(finalTrades);
+              saveLocalTradesFallback(finalTrades, authUser.id);
+              saveRestoreCache(authUser.id, { trades: finalTrades, account, routine, theme });
+              setDataMessage(`Recovered ${finalTrades.length - serverTrades.length} browser-saved trade${finalTrades.length - serverTrades.length === 1 ? "" : "s"} and synced them to cloud.`);
+            } catch (syncError) {
+              if (!mounted) return;
+              console.warn("Could not re-sync recovered browser trades:", syncError?.message || syncError);
+            }
+          }
           return;
         }
 

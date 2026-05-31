@@ -78,19 +78,32 @@ export default async function handler(request, response) {
       if (!trade) return json(response, 400, { error: "Trade is missing." });
       const payload = { ...trade };
       delete payload.supabaseId;
-      const rowId = trade.supabaseId || (typeof trade.id === "string" && trade.id.includes("-") ? trade.id : "");
+      const rowId = trade.supabaseId || "";
 
-      const url = rowId
-        ? `${supabaseUrl}/rest/v1/trades?id=eq.${rowId}&user_id=eq.${userId}&select=id`
-        : `${supabaseUrl}/rest/v1/trades?select=id`;
-      const upstream = await fetch(url, {
-        method: rowId ? "PATCH" : "POST",
+      const saveNewTrade = async () => fetch(`${supabaseUrl}/rest/v1/trades?select=id`, {
+        method: "POST",
         headers: { ...headers, Prefer: "return=representation" },
-        body: JSON.stringify(rowId ? { trade_data: payload } : { user_id: userId, trade_data: payload }),
+        body: JSON.stringify({ user_id: userId, trade_data: payload }),
       });
+
+      let upstream = rowId
+        ? await fetch(`${supabaseUrl}/rest/v1/trades?id=eq.${rowId}&user_id=eq.${userId}&select=id`, {
+            method: "PATCH",
+            headers: { ...headers, Prefer: "return=representation" },
+            body: JSON.stringify({ trade_data: payload }),
+          })
+        : await saveNewTrade();
       const result = await upstream.json().catch(() => null);
       if (!upstream.ok) return json(response, upstream.status, { error: result?.message || "Could not save trade." });
-      const savedId = Array.isArray(result) ? result[0]?.id : result?.id;
+
+      let savedId = Array.isArray(result) ? result[0]?.id : result?.id;
+      if (rowId && !savedId) {
+        upstream = await saveNewTrade();
+        const inserted = await upstream.json().catch(() => null);
+        if (!upstream.ok) return json(response, upstream.status, { error: inserted?.message || "Could not save trade." });
+        savedId = Array.isArray(inserted) ? inserted[0]?.id : inserted?.id;
+      }
+
       return json(response, 200, { trade: { ...trade, id: savedId || trade.id, supabaseId: savedId || trade.supabaseId } });
     }
 
