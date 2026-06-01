@@ -5241,7 +5241,6 @@ const nav = [
   [Calendar, "Calendar"],
   [BarChart3, "Statistics"],
   [Target, "Mistake Detector"],
-  [LifeBuoy, "Support"],
 ];
 
 const quotes = [
