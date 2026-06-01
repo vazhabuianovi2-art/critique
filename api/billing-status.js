@@ -71,10 +71,13 @@ export default async function handler(req, res) {
     const email = String(user?.email || requestedEmail || "").trim().toLowerCase();
     if (!user?.id && !email) return json(res, 401, { ok: false, error: "Login session is missing." });
 
+    const adminGrant = email
+      ? await fetchLatestSubscription(supabaseUrl, serviceRoleKey, `provider=eq.admin&email=eq.${encodeURIComponent(email)}`)
+      : null;
     const byUser = user?.id
       ? await fetchLatestSubscription(supabaseUrl, serviceRoleKey, `user_id=eq.${encodeURIComponent(user.id)}`)
       : null;
-    const subscription = byUser || (email
+    const subscription = adminGrant || byUser || (email
       ? await fetchLatestSubscription(supabaseUrl, serviceRoleKey, `email=eq.${encodeURIComponent(email)}`)
       : null);
 
