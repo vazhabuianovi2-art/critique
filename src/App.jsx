@@ -8579,21 +8579,42 @@ function TodaysEventsPanel({ economicCalendar, onRefresh }) {
   const todayKey = formatDateKey(new Date());
   const impactOptions = ["High", "Medium", "Low", "Holiday"];
   const [impactFilters, setImpactFilters] = useState(impactOptions);
+  const [currencyFilters, setCurrencyFilters] = useState(["All"]);
+  const baseCurrencyOptions = ["AUD", "CAD", "CHF", "CNY", "EUR", "GBP", "JPY", "NZD", "USD"];
+  const currencyOptions = useMemo(() => {
+    const todayEvents = getEventsForDate(economicCalendar?.events, todayKey);
+    const dynamic = todayEvents.map((event) => String(event.country || "").toUpperCase()).filter((currency) => currency && currency !== "ALL");
+    return Array.from(new Set([...baseCurrencyOptions, ...dynamic])).sort();
+  }, [economicCalendar?.events, todayKey]);
   const events = useMemo(() => {
     const impactOrder = { High: 0, Medium: 1, Low: 2, Holiday: 3 };
+    const selectedCurrencies = new Set(currencyFilters.filter((currency) => currency !== "All"));
     return getEventsForDate(economicCalendar?.events, todayKey)
       .filter((event) => impactFilters.includes(getEventImpactLabel(event.impact)))
+      .filter((event) => !selectedCurrencies.size || selectedCurrencies.has(String(event.country || "").toUpperCase()))
       .sort((a, b) => {
         const impactDiff = (impactOrder[getEventImpactLabel(a.impact)] ?? 9) - (impactOrder[getEventImpactLabel(b.impact)] ?? 9);
         if (impactDiff) return impactDiff;
         return String(a.time || "").localeCompare(String(b.time || ""));
       });
-  }, [economicCalendar?.events, todayKey, impactFilters]);
+  }, [economicCalendar?.events, todayKey, impactFilters, currencyFilters]);
 
   function toggleImpactFilter(impact) {
     setImpactFilters((current) => {
       const next = current.includes(impact) ? current.filter((item) => item !== impact) : [...current, impact];
       return next.length ? next : current;
+    });
+  }
+
+  function toggleCurrencyFilter(currency) {
+    if (currency === "All") {
+      setCurrencyFilters(["All"]);
+      return;
+    }
+    setCurrencyFilters((current) => {
+      const active = current.includes("All") ? [] : current;
+      const next = active.includes(currency) ? active.filter((item) => item !== currency) : [...active, currency];
+      return next.length ? next : ["All"];
     });
   }
 
@@ -8612,20 +8633,34 @@ function TodaysEventsPanel({ economicCalendar, onRefresh }) {
         </button>
       </div>
       <div className="mt-5 rounded-xl border border-white/10 bg-black/35 p-4">
-        <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Expected impact</div>
-        <div className="mt-3 flex flex-wrap gap-4">
-          {impactOptions.map((impact) => (
-            <label key={impact} className="flex cursor-pointer items-center gap-2 text-xs font-black text-zinc-300 transition hover:text-white">
-              <input
-                type="checkbox"
-                checked={impactFilters.includes(impact)}
-                onChange={() => toggleImpactFilter(impact)}
-                className="h-3.5 w-3.5 rounded border-white/20 bg-black accent-fuchsia-500"
-              />
-              <ImpactFolderIcon impact={impact} />
-              <span>{impact}</span>
-            </label>
-          ))}
+        <div className="grid gap-4 lg:grid-cols-[1fr_2fr]">
+          <div>
+            <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Expected impact</div>
+            <div className="mt-3 flex flex-wrap gap-4">
+              {impactOptions.map((impact) => (
+                <label key={impact} className="flex cursor-pointer items-center gap-2 text-xs font-black text-zinc-300 transition hover:text-white">
+                  <input
+                    type="checkbox"
+                    checked={impactFilters.includes(impact)}
+                    onChange={() => toggleImpactFilter(impact)}
+                    className="h-3.5 w-3.5 rounded border-white/20 bg-black accent-fuchsia-500"
+                  />
+                  <ImpactFolderIcon impact={impact} />
+                  <span>{impact}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Currencies</div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {["All", ...currencyOptions].map((currency) => (
+                <button key={currency} onClick={() => toggleCurrencyFilter(currency)} className={currencyFilters.includes(currency) ? "rounded-lg border border-fuchsia-400/60 bg-fuchsia-500/18 px-3 py-2 text-xs font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-xs font-black text-zinc-400 hover:border-fuchsia-500/35 hover:text-fuchsia-200"}>
+                  {currency}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
       <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">

@@ -2,9 +2,6 @@ const FEEDS = {
   this: "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
 };
 
-const TRADINGVIEW_EVENTS_URL = "https://economic-calendar.tradingview.com/events";
-const TRADINGVIEW_COUNTRIES = "US,EU,GB,JP,CA,AU,NZ,CH,CN";
-
 const ADJACENT_WEEK_OFFSETS = {
   last: -7,
   next: 7,
@@ -14,30 +11,33 @@ const feedCache = {};
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const FALLBACK_EVENTS_BY_WEEK = {
   last: [
-    { day: 1, time: "All day", country: "USD", impact: "Holiday", title: "Memorial Day" },
-    { day: 1, time: "All day", country: "GBP", impact: "Holiday", title: "Bank Holiday" },
-    { day: 2, time: "08:30", country: "USD", impact: "Medium", title: "Core Durable Goods Orders m/m" },
-    { day: 2, time: "08:30", country: "USD", impact: "Medium", title: "Durable Goods Orders m/m" },
-    { day: 2, time: "09:00", country: "USD", impact: "Low", title: "HPI m/m" },
-    { day: 2, time: "09:00", country: "USD", impact: "Low", title: "S&P/CS Composite-20 HPI y/y" },
-    { day: 2, time: "10:00", country: "USD", impact: "High", title: "CB Consumer Confidence" },
-    { day: 2, time: "10:00", country: "USD", impact: "Medium", title: "New Home Sales" },
-    { day: 2, time: "10:00", country: "USD", impact: "Low", title: "Richmond Manufacturing Index" },
-    { day: 2, time: "10:30", country: "USD", impact: "Low", title: "Dallas Fed Manufacturing Index" },
-    { day: 3, time: "08:15", country: "USD", impact: "Low", title: "ADP Weekly Employment Change" },
+    { day: 1, time: "All day", country: "USD", impact: "Holiday", title: "Bank Holiday" },
+    { day: 2, time: "09:00", country: "USD", impact: "Low", title: "HPI m/m", actual: "0.1%", forecast: "0.1%", previous: "-0.1%" },
+    { day: 2, time: "09:00", country: "USD", impact: "Low", title: "S&P/CS Composite-20 HPI y/y", actual: "0.8%", forecast: "0.9%", previous: "0.9%" },
+    { day: 2, time: "10:00", country: "USD", impact: "Medium", title: "CB Consumer Confidence", actual: "93.1", forecast: "91.9", previous: "93.8" },
+    { day: 3, time: "04:00", country: "USD", impact: "Low", title: "FOMC Member Logan Speaks" },
+    { day: 3, time: "08:15", country: "USD", impact: "Low", title: "ADP Weekly Employment Change", actual: "35.8K", previous: "40.8K" },
+    { day: 3, time: "10:00", country: "USD", impact: "Low", title: "Richmond Manufacturing Index", actual: "13", forecast: "4", previous: "3" },
+    { day: 3, time: "15:55", country: "USD", impact: "Low", title: "FOMC Member Cook Speaks" },
     { day: 3, time: "16:30", country: "USD", impact: "Low", title: "API Weekly Statistical Bulletin" },
-    { day: 4, time: "08:30", country: "USD", impact: "High", title: "Prelim GDP q/q" },
-    { day: 4, time: "08:30", country: "USD", impact: "High", title: "Unemployment Claims" },
-    { day: 4, time: "10:00", country: "USD", impact: "Medium", title: "Pending Home Sales m/m" },
-    { day: 4, time: "10:30", country: "USD", impact: "Low", title: "Natural Gas Storage" },
-    { day: 5, time: "08:30", country: "USD", impact: "High", title: "Core PCE Price Index m/m" },
-    { day: 5, time: "08:30", country: "USD", impact: "Medium", title: "Goods Trade Balance" },
-    { day: 5, time: "08:30", country: "USD", impact: "Medium", title: "Personal Income m/m" },
-    { day: 5, time: "08:30", country: "USD", impact: "Medium", title: "Personal Spending m/m" },
-    { day: 5, time: "08:30", country: "USD", impact: "Low", title: "Prelim Wholesale Inventories m/m" },
-    { day: 5, time: "09:45", country: "USD", impact: "Medium", title: "Chicago PMI" },
-    { day: 5, time: "10:00", country: "USD", impact: "Medium", title: "Revised UoM Consumer Sentiment" },
-    { day: 5, time: "10:00", country: "USD", impact: "Low", title: "Revised UoM Inflation Expectations" },
+    { day: 3, time: "20:00", country: "USD", impact: "Low", title: "FOMC Member Jefferson Speaks" },
+    { day: 3, time: "22:25", country: "USD", impact: "Low", title: "FOMC Member Goolsbee Speaks" },
+    { day: 4, time: "08:30", country: "USD", impact: "High", title: "Core PCE Price Index m/m", actual: "0.2%", forecast: "0.3%", previous: "0.3%" },
+    { day: 4, time: "08:30", country: "USD", impact: "High", title: "Prelim GDP q/q", actual: "1.6%", forecast: "2.0%", previous: "0.7%" },
+    { day: 4, time: "08:30", country: "USD", impact: "Medium", title: "Prelim GDP Price Index q/q", actual: "3.5%", forecast: "3.6%", previous: "3.8%" },
+    { day: 4, time: "08:30", country: "USD", impact: "Medium", title: "Unemployment Claims", actual: "215K", forecast: "211K", previous: "210K" },
+    { day: 4, time: "08:30", country: "USD", impact: "Low", title: "Core Durable Goods Orders m/m", actual: "1.1%", forecast: "0.5%", previous: "1.1%" },
+    { day: 4, time: "08:30", country: "USD", impact: "Low", title: "Durable Goods Orders m/m", actual: "7.9%", forecast: "4.0%", previous: "1.3%" },
+    { day: 4, time: "08:30", country: "USD", impact: "Low", title: "Personal Income m/m", actual: "0.0%", forecast: "0.4%", previous: "0.5%" },
+    { day: 4, time: "08:30", country: "USD", impact: "Low", title: "Personal Spending m/m", actual: "0.5%", forecast: "0.5%", previous: "1.0%" },
+    { day: 4, time: "08:55", country: "USD", impact: "Low", title: "FOMC Member Williams Speaks" },
+    { day: 4, time: "10:00", country: "USD", impact: "Medium", title: "New Home Sales", actual: "622K", forecast: "661K", previous: "663K" },
+    { day: 4, time: "10:15", country: "USD", impact: "Low", title: "FOMC Member Musalem Speaks" },
+    { day: 4, time: "10:30", country: "USD", impact: "Low", title: "Natural Gas Storage", actual: "92B", forecast: "96B", previous: "101B" },
+    { day: 4, time: "12:00", country: "USD", impact: "Low", title: "Crude Oil Inventories", actual: "-3.3M", forecast: "-3.8M", previous: "-7.9M" },
+    { day: 4, time: "13:10", country: "USD", impact: "Low", title: "FOMC Member Musalem Speaks" },
+    { day: 4, time: "14:00", country: "USD", impact: "Medium", title: "Treasury Sec Bessent Speaks" },
+    { day: 4, time: "15:00", country: "USD", impact: "Low", title: "FOMC Member Barkin Speaks" },
   ],
   this: [
     { day: 1, time: "08:30", country: "USD", impact: "Medium", title: "Durable Goods Orders" },
@@ -140,98 +140,6 @@ function normalizeEvent(event, week) {
   };
 }
 
-function getWeekBounds(week) {
-  const today = new Date();
-  const sunday = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - today.getUTCDay(), 0, 0, 0));
-  const offset = week === "last" ? -7 : week === "next" ? 7 : 0;
-  const start = new Date(sunday);
-  start.setUTCDate(sunday.getUTCDate() + offset);
-  const end = new Date(start);
-  end.setUTCDate(start.getUTCDate() + 7);
-  return { start, end };
-}
-
-function getDateKeyInTimeZone(date, timeZone = "America/New_York") {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(date);
-  const year = parts.find((part) => part.type === "year")?.value || "1970";
-  const month = parts.find((part) => part.type === "month")?.value || "01";
-  const day = parts.find((part) => part.type === "day")?.value || "01";
-  return `${year}-${month}-${day}`;
-}
-
-function formatCalendarValue(value, unit = "", scale = "") {
-  if (value === null || value === undefined || value === "") return "";
-  const text = String(value);
-  if (unit === "%") return `${text}%`;
-  if (unit && unit !== "points") return `${unit}${text}${scale || ""}`;
-  return `${text}${scale || ""}`;
-}
-
-function normalizeTradingViewEvent(event, week) {
-  const parsed = new Date(event?.date || "");
-  const date = Number.isNaN(parsed.getTime()) ? new Date() : parsed;
-  const title = String(event?.title || event?.indicator || "Economic Event");
-  const indicator = String(event?.indicator || "");
-  const currency = String(event?.currency || event?.country || "All").toUpperCase();
-  const isHoliday = /holiday/i.test(title) || /holiday/i.test(indicator);
-  const importance = Number(event?.importance ?? -1);
-  const impact = isHoliday ? "Holiday" : importance >= 1 ? "High" : importance === 0 ? "Medium" : "Low";
-  const dateKey = isHoliday ? date.toISOString().slice(0, 10) : getDateKeyInTimeZone(date);
-  const time = isHoliday
-    ? "All day"
-    : date.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-        timeZone: "America/New_York",
-      });
-
-  return {
-    id: `tv-${week}-${event?.id || `${currency}-${date.toISOString()}-${title}`}`,
-    title,
-    country: currency,
-    impact,
-    forecast: formatCalendarValue(event?.forecast, event?.unit, event?.scale),
-    previous: formatCalendarValue(event?.previous, event?.unit, event?.scale),
-    actual: formatCalendarValue(event?.actual, event?.unit, event?.scale),
-    date: date.toISOString(),
-    dateKey,
-    time,
-    week,
-    source: "TradingView",
-  };
-}
-
-async function fetchTradingViewFeed(week) {
-  const { start, end } = getWeekBounds(week);
-  const url = `${TRADINGVIEW_EVENTS_URL}?countries=${encodeURIComponent(TRADINGVIEW_COUNTRIES)}&from=${encodeURIComponent(start.toISOString())}&to=${encodeURIComponent(end.toISOString())}`;
-  const response = await fetch(url, {
-    headers: {
-      "accept": "application/json,text/plain,*/*",
-      "origin": "https://www.tradingview.com",
-      "referer": "https://www.tradingview.com/",
-      "user-agent": "Mozilla/5.0 TryCritique Economic Calendar",
-    },
-  });
-  if (!response.ok) {
-    throw new Error(`TradingView feed failed: ${week} ${response.status}`);
-  }
-  const payload = await response.json();
-  const rows = Array.isArray(payload?.result) ? payload.result : [];
-  const normalized = rows
-    .map((event) => normalizeTradingViewEvent(event, week))
-    .filter((event) => event.dateKey >= start.toISOString().slice(0, 10) && event.dateKey < end.toISOString().slice(0, 10));
-  if (!normalized.length) {
-    throw new Error(`TradingView feed returned no events: ${week}`);
-  }
-  return normalized;
-}
-
 async function fetchFeed(week) {
   const cached = feedCache[week];
   if (cached?.events?.length && Date.now() - cached.cachedAt < CACHE_TTL_MS) {
@@ -239,7 +147,7 @@ async function fetchFeed(week) {
   }
 
   if (week === "last" || week === "next") {
-    const normalized = await fetchTradingViewFeed(week);
+    const normalized = createFallbackWeekEvents(week);
     feedCache[week] = { events: normalized, cachedAt: Date.now() };
     return normalized;
   }
