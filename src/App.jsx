@@ -20,8 +20,10 @@ import {
   Lock,
   Mail,
   LayoutDashboard,
+  LifeBuoy,
   ListChecks,
   LogIn,
+  MessageSquare,
   Moon,
   Maximize2,
   Minimize2,
@@ -30,6 +32,7 @@ import {
   Plus,
   Save,
   Search,
+  Send,
   Settings,
   ShieldCheck,
   Sparkles,
@@ -332,6 +335,19 @@ async function postAdminEntitlements(action, payload = {}) {
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok || !data.ok) throw new Error(data.error || "Admin request failed.");
+  return data;
+}
+
+async function postSupportReports(action, payload = {}) {
+  const accessToken = await getCurrentAccessToken();
+  if (!accessToken) throw new Error("Login session is missing.");
+  const response = await fetch("/api/support-reports", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, accessToken, ...payload }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.ok) throw new Error(data.error || "Support request failed.");
   return data;
 }
 
@@ -5225,6 +5241,7 @@ const nav = [
   [Calendar, "Calendar"],
   [BarChart3, "Statistics"],
   [Target, "Mistake Detector"],
+  [LifeBuoy, "Support"],
 ];
 
 const quotes = [
@@ -6768,7 +6785,7 @@ export default function TradingJournalDashboard() {
   }, [authUser?.id, authUser?.email, isAuthenticated, billingRefreshTick]);
 
   useEffect(() => {
-    if (!shouldGateForBilling || active === "Billing") return;
+    if (!shouldGateForBilling || active === "Billing" || active === "Support" || active === "Admin") return;
     setTradeViewMode(null);
     setActive("Billing");
   }, [active, shouldGateForBilling]);
@@ -7755,7 +7772,7 @@ Skipped duplicates: ${duplicateCount}
         </div>
         <div className="mt-6 space-y-2">
           {navItems.map(([Icon, label]) => (
-            <button key={label} onClick={() => { setActive(shouldGateForBilling ? "Billing" : label); setTradeViewMode(null); }} className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-[1.035] hover:border hover:border-fuchsia-500/30 hover:shadow-[0_0_22px_rgba(217,70,239,0.18)]" : ""} ${active === label && !tradeViewMode ? "bg-fuchsia-500 text-black font-black" : "text-zinc-300 hover:bg-white/5"}`}>
+            <button key={label} onClick={() => { setActive(shouldGateForBilling && label !== "Support" ? "Billing" : label); setTradeViewMode(null); }} className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-[1.035] hover:border hover:border-fuchsia-500/30 hover:shadow-[0_0_22px_rgba(217,70,239,0.18)]" : ""} ${active === label && !tradeViewMode ? "bg-fuchsia-500 text-black font-black" : "text-zinc-300 hover:bg-white/5"}`}>
               <Icon size={18} /> {label}
             </button>
           ))}
@@ -7913,6 +7930,8 @@ Skipped duplicates: ${duplicateCount}
           <SimpleStatisticsPage stats={stats} curve={curve} trades={activeTrades} onExport={() => exportTradesToCSV(activeTrades)} economicCalendar={economicCalendar} onRefreshEconomicCalendar={() => setEconomicCalendarRefresh((tick) => tick + 1)} />
         ) : active === "Mistake Detector" ? (
           <SimpleMistakeDetectorPage trades={activeTrades} />
+        ) : active === "Support" ? (
+          <SupportCenterPage authUser={authUser} />
         ) : active === "Settings" ? (
           <SettingsPagePro
             account={account}
@@ -8003,11 +8022,12 @@ function MobileBottomNav({ active, setActive, onAdd, setTradeViewMode, lockedToB
     [Calendar, "Calendar"],
     [BarChart3, "Statistics"],
     [Target, "Mistake Detector"],
+    [LifeBuoy, "Support"],
   ];
   return (
     <div className="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-40 border-t border-fuchsia-500/25 bg-black/95 px-2 py-2 backdrop-blur lg:hidden">
       <button onClick={onAdd} className="mobile-nav-fab absolute -top-7 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-2xl bg-fuchsia-500 text-white shadow-[0_0_28px_rgba(217,70,239,.48)]"><Plus size={24} /></button>
-      <div className="grid grid-cols-5 gap-1">
+      <div className="grid grid-cols-6 gap-1">
         {items.map(([Icon, label]) => {
           const isAdd = false;
           const selected = active === label;
@@ -8016,12 +8036,12 @@ function MobileBottomNav({ active, setActive, onAdd, setTradeViewMode, lockedToB
               key={label}
               onClick={() => {
                 setTradeViewMode(null);
-                setActive(lockedToBilling ? "Billing" : label);
+                setActive(lockedToBilling && label !== "Support" ? "Billing" : label);
               }}
               className={isAdd ? "mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-fuchsia-500 text-white shadow-[0_0_22px_rgba(217,70,239,.38)]" : selected ? "flex flex-col items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 px-1 py-2 text-fuchsia-300 transition-all duration-200 hover:scale-110" : `flex flex-col items-center justify-center rounded-xl px-1 py-2 text-zinc-500 transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-110 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" : "hover:text-zinc-300"}`}
             >
               <Icon size={18} />
-              <span className="mt-1 text-[9px] font-black leading-tight">{label === "Mistake Detector" ? "Mistake" : label}</span>
+              <span className="mt-1 text-[8px] font-black leading-tight">{label === "Mistake Detector" ? "Mistake" : label}</span>
             </button>
           );
         })}
@@ -10551,6 +10571,264 @@ function SettingsPage({ account, accountBalance, authUser, theme, setTheme, isSu
   );
 }
 
+function SupportCenterPage({ authUser }) {
+  const reportTypes = ["Bug", "Feature Request", "Billing", "Account", "Design", "Performance", "Other"];
+  const priorities = ["Low", "Medium", "High", "Urgent"];
+  const [form, setForm] = useState({
+    type: "Bug",
+    priority: "Medium",
+    title: "",
+    message: "",
+  });
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  async function loadMine() {
+    try {
+      const data = await postSupportReports("mine");
+      setReports(Array.isArray(data.reports) ? data.reports : []);
+    } catch (loadError) {
+      setReports([]);
+      console.warn("Could not load support reports:", loadError?.message || loadError);
+    }
+  }
+
+  useEffect(() => {
+    loadMine();
+  }, []);
+
+  function updateForm(key, value) {
+    setForm((current) => ({ ...current, [key]: value }));
+  }
+
+  async function submitReport(event) {
+    event.preventDefault();
+    setLoading(true);
+    setMessage("");
+    setError("");
+    try {
+      const payload = {
+        ...form,
+        name: getUserDisplayName(authUser, ""),
+        email: authUser?.email || "",
+        page: typeof window !== "undefined" ? window.location.href : "",
+        browser: typeof navigator !== "undefined" ? navigator.userAgent : "",
+      };
+      const data = await postSupportReports("create", payload);
+      setReports((current) => [data.report, ...current].filter(Boolean));
+      setForm({ type: "Bug", priority: "Medium", title: "", message: "" });
+      setMessage("Report sent. Thank you, this is exactly how the product gets sharper.");
+    } catch (submitError) {
+      setError(submitError?.message || "Could not send report.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="pb-10">
+      <TopCrumb page="Support" />
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-8 grid gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 px-3 py-1 text-xs font-black uppercase tracking-[0.16em] text-fuchsia-200">
+              <LifeBuoy size={14} /> Product feedback
+            </div>
+            <h1 className="mt-4 text-4xl font-black tracking-tight text-white">Support Center</h1>
+            <p className="mt-2 max-w-2xl text-lg font-semibold leading-7 text-zinc-400">
+              Tell us what is broken, confusing, missing, or worth improving. Every report is saved and reviewed.
+            </p>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              ["Fast triage", "Bug reports"],
+              ["Roadmap", "Feature ideas"],
+              ["Account help", "Billing & access"],
+            ].map(([title, text]) => (
+              <div key={title} className="rounded-2xl border border-white/10 bg-black/50 p-4">
+                <div className="text-sm font-black text-white">{title}</div>
+                <div className="mt-1 text-xs font-semibold text-zinc-500">{text}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {message && <div className="mb-5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-200">{message}</div>}
+        {error && <div className="mb-5 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200">{error}</div>}
+
+        <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
+          <form onSubmit={submitReport} className="rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12061a] via-black to-[#04100c] p-6 shadow-[0_20px_60px_rgba(217,70,239,0.12)]">
+            <div className="flex items-center gap-3">
+              <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/10 text-fuchsia-300"><MessageSquare size={24} /></span>
+              <div>
+                <h2 className="text-2xl font-black text-white">Send a report</h2>
+                <p className="mt-1 text-sm font-semibold text-zinc-400">Add enough detail so we can reproduce or understand it.</p>
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <label className="block">
+                <span className="text-sm font-black text-zinc-300">Type</span>
+                <select value={form.type} onChange={(event) => updateForm("type", event.target.value)} className="mt-2 w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-sm font-black text-white outline-none transition focus:border-fuchsia-400">
+                  {reportTypes.map((type) => <option key={type} value={type}>{type}</option>)}
+                </select>
+              </label>
+              <label className="block">
+                <span className="text-sm font-black text-zinc-300">Priority</span>
+                <select value={form.priority} onChange={(event) => updateForm("priority", event.target.value)} className="mt-2 w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-sm font-black text-white outline-none transition focus:border-fuchsia-400">
+                  {priorities.map((priority) => <option key={priority} value={priority}>{priority}</option>)}
+                </select>
+              </label>
+            </div>
+
+            <label className="mt-5 block">
+              <span className="text-sm font-black text-zinc-300">Short title</span>
+              <Input value={form.title} onChange={(event) => updateForm("title", event.target.value)} placeholder="Example: Calendar next week shows wrong news" className="mt-2 border-white/10 bg-black text-white" />
+            </label>
+
+            <label className="mt-5 block">
+              <span className="text-sm font-black text-zinc-300">Details</span>
+              <Textarea value={form.message} onChange={(event) => updateForm("message", event.target.value)} placeholder="What happened? What did you expect? Which page were you on?" className="mt-2 min-h-[180px] border-white/10 bg-black text-white" />
+            </label>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs font-semibold text-zinc-500">Your email and current page are attached automatically.</p>
+              <Button type="submit" disabled={loading} className="bg-fuchsia-500 text-black hover:bg-fuchsia-400">
+                <Send size={16} /> {loading ? "Sending..." : "Send Report"}
+              </Button>
+            </div>
+          </form>
+
+          <section className="rounded-2xl border border-white/10 bg-[#070707] p-6">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-2xl font-black text-white">Your reports</h2>
+                <p className="mt-1 text-sm font-semibold text-zinc-400">Recent feedback from this account.</p>
+              </div>
+              <Button type="button" onClick={loadMine} variant="outline" className="border-white/10 bg-white/[0.04] text-white">Refresh</Button>
+            </div>
+            <div className="mt-5 space-y-3">
+              {reports.length ? reports.slice(0, 8).map((report) => (
+                <SupportReportCard key={report.id} report={report} compact />
+              )) : (
+                <div className="rounded-xl border border-white/10 bg-black/40 p-5 text-sm font-bold text-zinc-500">No reports yet.</div>
+              )}
+            </div>
+          </section>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function SupportReportCard({ report, compact = false, onStatusChange, loading = false }) {
+  const status = String(report?.status || "open").toLowerCase();
+  const statusClass = status === "resolved"
+    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
+    : status === "in_progress"
+      ? "border-sky-500/30 bg-sky-500/10 text-sky-200"
+      : status === "closed"
+        ? "border-zinc-500/30 bg-zinc-500/10 text-zinc-300"
+        : "border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-200";
+  return (
+    <div className="rounded-xl border border-white/10 bg-black/45 p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1 text-[11px] font-black uppercase tracking-wider text-zinc-400">{report?.type || "Report"}</span>
+            <span className={`rounded-lg border px-2 py-1 text-[11px] font-black uppercase tracking-wider ${statusClass}`}>{String(report?.status || "open").replaceAll("_", " ")}</span>
+            <span className="text-[11px] font-bold text-zinc-500">{report?.priority || "Medium"}</span>
+          </div>
+          <h3 className="mt-3 truncate text-lg font-black text-white">{report?.title}</h3>
+          <p className={`${compact ? "line-clamp-2" : ""} mt-2 text-sm font-semibold leading-6 text-zinc-400`}>{report?.message}</p>
+          {!compact && report?.admin_note && <p className="mt-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm font-semibold text-emerald-100">{report.admin_note}</p>}
+          <div className="mt-3 text-xs font-semibold text-zinc-600">{report?.email || "unknown"} - {report?.created_at ? new Date(report.created_at).toLocaleString() : ""}</div>
+        </div>
+        {onStatusChange && (
+          <select value={status} disabled={loading} onChange={(event) => onStatusChange(report, event.target.value)} className="rounded-lg border border-white/10 bg-black px-3 py-2 text-xs font-black text-white outline-none">
+            <option value="open">open</option>
+            <option value="in_progress">in progress</option>
+            <option value="resolved">resolved</option>
+            <option value="closed">closed</option>
+          </select>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AdminSupportInbox() {
+  const [reports, setReports] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function loadReports(nextStatus = statusFilter) {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await postSupportReports("list", { status: nextStatus });
+      setReports(Array.isArray(data.reports) ? data.reports : []);
+    } catch (loadError) {
+      setError(loadError?.message || "Could not load support inbox.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadReports(statusFilter);
+  }, []);
+
+  async function updateReportStatus(report, status) {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await postSupportReports("update", { id: report.id, status, adminNote: report.admin_note || "" });
+      const saved = data.report;
+      setReports((current) => current.map((item) => item.id === report.id ? { ...item, ...saved } : item));
+    } catch (updateError) {
+      setError(updateError?.message || "Could not update support report.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function changeStatusFilter(nextStatus) {
+    setStatusFilter(nextStatus);
+    loadReports(nextStatus);
+  }
+
+  return (
+    <section className="mt-8 rounded-lg border border-white/10 bg-[#070707] p-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h2 className="text-2xl font-black text-white">Support Inbox</h2>
+          <p className="mt-1 text-sm font-semibold text-zinc-400">Reports, bugs, and product ideas from users.</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {["all", "open", "in_progress", "resolved", "closed"].map((status) => (
+            <button key={status} type="button" onClick={() => changeStatusFilter(status)} className={statusFilter === status ? "rounded-lg border border-fuchsia-400/60 bg-fuchsia-500/18 px-3 py-2 text-xs font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-xs font-black text-zinc-400 hover:border-fuchsia-500/35 hover:text-fuchsia-200"}>
+              {status.replaceAll("_", " ")}
+            </button>
+          ))}
+          <Button type="button" onClick={() => loadReports()} disabled={loading} variant="outline" className="border-white/10 bg-white/[0.04] text-white">{loading ? "Loading..." : "Refresh"}</Button>
+        </div>
+      </div>
+      {error && <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200">{error}</div>}
+      <div className="mt-5 grid gap-3">
+        {reports.length ? reports.map((report) => (
+          <SupportReportCard key={report.id} report={report} onStatusChange={updateReportStatus} loading={loading} />
+        )) : (
+          <div className="rounded-xl border border-white/10 bg-black/40 p-8 text-center text-sm font-bold text-zinc-500">No support reports found.</div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function AdminAccessPage() {
   const [email, setEmail] = useState("");
   const [grants, setGrants] = useState([]);
@@ -10687,6 +10965,8 @@ function AdminAccessPage() {
             )}
           </div>
         </section>
+
+        <AdminSupportInbox />
       </div>
     </motion.div>
   );

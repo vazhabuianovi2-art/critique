@@ -124,3 +124,41 @@ drop policy if exists "billing_subscriptions_select_own" on public.billing_subsc
 create policy "billing_subscriptions_select_own"
   on public.billing_subscriptions for select
   using (auth.uid() = user_id);
+
+create table if not exists public.support_reports (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete set null,
+  email text,
+  name text,
+  type text not null default 'Bug',
+  priority text not null default 'Medium',
+  status text not null default 'open',
+  title text not null,
+  message text not null,
+  page text,
+  browser text,
+  admin_note text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists support_reports_user_id_created_at_idx
+  on public.support_reports (user_id, created_at desc);
+
+create index if not exists support_reports_status_created_at_idx
+  on public.support_reports (status, created_at desc);
+
+alter table public.support_reports enable row level security;
+
+grant select, insert on public.support_reports to authenticated;
+grant select, insert, update, delete on public.support_reports to service_role;
+
+drop policy if exists "support_reports_select_own" on public.support_reports;
+create policy "support_reports_select_own"
+  on public.support_reports for select
+  using (auth.uid() = user_id);
+
+drop policy if exists "support_reports_insert_own" on public.support_reports;
+create policy "support_reports_insert_own"
+  on public.support_reports for insert
+  with check (auth.uid() = user_id);
