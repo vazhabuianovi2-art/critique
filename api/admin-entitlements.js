@@ -24,6 +24,10 @@ function normalizeEmail(email) {
   return String(email || "").trim().toLowerCase();
 }
 
+function getUserEmail(user) {
+  return normalizeEmail(user?.email || user?.user?.email || user?.data?.user?.email);
+}
+
 async function getUserFromToken(supabaseUrl, anonKey, accessToken) {
   const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
     headers: {
@@ -112,15 +116,15 @@ export default async function handler(req, res) {
     const body = await readBody(req);
     const accessToken = typeof body.accessToken === "string" ? body.accessToken : "";
     const user = accessToken ? await getUserFromToken(supabaseUrl, anonKey, accessToken) : null;
-    const requesterEmail = normalizeEmail(user?.email);
+    const requesterEmail = getUserEmail(user);
     const adminEmails = getAdminEmails();
     const isAdmin = Boolean(requesterEmail && adminEmails.includes(requesterEmail));
 
     if (body.action === "status") {
-      return json(res, 200, { ok: true, isAdmin });
+      return json(res, 200, { ok: true, isAdmin, requesterEmail });
     }
 
-    if (!isAdmin) return json(res, 403, { ok: false, error: "Admin access required." });
+    if (!isAdmin) return json(res, 403, { ok: false, error: `Admin access required${requesterEmail ? ` for ${requesterEmail}` : ""}.` });
 
     const headers = {
       apikey: serviceRoleKey,
