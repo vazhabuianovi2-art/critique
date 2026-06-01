@@ -57,7 +57,7 @@ async function getUserFromToken(supabaseUrl, anonKey, accessToken) {
 }
 
 async function fetchExistingAdminGrant(supabaseUrl, headers, email) {
-  const query = `provider=eq.admin&email=eq.${encodeURIComponent(email)}&select=id&order=updated_at.desc&limit=1`;
+  const query = `provider=eq.admin&email=eq.${encodeURIComponent(email)}&select=*&order=updated_at.desc&limit=1`;
   const response = await fetch(`${supabaseUrl}/rest/v1/billing_subscriptions?${query}`, { headers });
   const data = await response.json().catch(() => null);
   if (!response.ok) throw new Error(data?.message || "Could not check existing admin access.");
@@ -88,14 +88,17 @@ async function grantAdminAccess(supabaseUrl, headers, email) {
     updated_at: new Date().toISOString(),
   };
 
-  const response = await fetch(`${supabaseUrl}/rest/v1/billing_subscriptions${existing?.id ? `?id=eq.${existing.id}` : "?select=id"}`, {
+  const response = await fetch(`${supabaseUrl}/rest/v1/billing_subscriptions${existing?.id ? `?id=eq.${existing.id}&select=*` : "?select=*"}`, {
     method: existing?.id ? "PATCH" : "POST",
     headers: { ...headers, Prefer: "return=representation" },
     body: JSON.stringify(payload),
   });
   const data = await response.json().catch(() => null);
   if (!response.ok) throw new Error(data?.message || "Could not grant free Pro access.");
-  return Array.isArray(data) ? data[0] || payload : data || payload;
+  const saved = Array.isArray(data) ? data[0] || null : data || null;
+  const verified = await fetchExistingAdminGrant(supabaseUrl, headers, email);
+  if (!verified) throw new Error("Free Pro access was not saved. Check billing_subscriptions table permissions.");
+  return verified || saved || payload;
 }
 
 async function revokeAdminAccess(supabaseUrl, headers, email) {

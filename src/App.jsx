@@ -10489,10 +10489,13 @@ function AdminAccessPage() {
     setMessage("");
     setError("");
     try {
-      await postAdminEntitlements("grant", { email: normalizedEmail });
+      const grantResult = await postAdminEntitlements("grant", { email: normalizedEmail });
       setEmail("");
       setMessage(`${normalizedEmail} now has free Pro access.`);
-      await loadGrants();
+      const data = await postAdminEntitlements("list");
+      const nextGrants = Array.isArray(data.grants) ? data.grants : [];
+      const savedGrant = grantResult?.grant;
+      setGrants(nextGrants.some((grant) => String(grant.email).toLowerCase() === normalizedEmail) || !savedGrant ? nextGrants : [savedGrant, ...nextGrants]);
     } catch (grantError) {
       setError(grantError?.message || "Could not grant free Pro access.");
     } finally {
