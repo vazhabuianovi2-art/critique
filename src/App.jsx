@@ -10633,6 +10633,7 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
   ];
 
   const subscriptionStatus = String(subscription?.status || "").replaceAll("_", " ");
+  const isAdminGrantedPlan = String(subscription?.provider || "").toLowerCase() === "admin";
   const subscriptionDate = subscription?.trial_end || subscription?.current_period_end || "";
   const subscriptionDateText = subscriptionDate
     ? new Date(subscriptionDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
@@ -10780,6 +10781,24 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
             {gateMessage}
           </div>
         )}
+        {isAdminGrantedPlan && (
+          <div className="mb-5 overflow-hidden rounded-xl border border-emerald-400/35 bg-gradient-to-r from-emerald-500/15 via-fuchsia-500/10 to-black px-5 py-4 shadow-[0_0_34px_rgba(16,185,129,0.14)]">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-400/35 bg-emerald-400/10 text-emerald-300">
+                  <ShieldCheck size={24} />
+                </span>
+                <div>
+                  <div className="text-lg font-black text-white">Admin Pro Active</div>
+                  <div className="text-sm font-semibold text-emerald-100/80">Free access granted by TryCritique admin. Dodo payment is not required for this account.</div>
+                </div>
+              </div>
+              <span className="rounded-full border border-emerald-400/35 bg-emerald-400/10 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-200">
+                Free Pro
+              </span>
+            </div>
+          </div>
+        )}
         {billingError && (
           <div className="mb-5 rounded-lg border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-sm font-bold text-amber-200">
             {billingError}
@@ -10885,21 +10904,26 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
                 <div className="text-xs font-black uppercase tracking-[0.16em] text-zinc-500">Current Plan</div>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <span className="text-lg font-black capitalize text-white">
-                    {statusLoading ? "Checking..." : subscription ? `${subscription.plan || "Pro"} · ${subscriptionStatus || "active"}` : "No active plan yet"}
+                    {statusLoading ? "Checking..." : subscription ? `${isAdminGrantedPlan ? "Admin Pro" : subscription.plan || "Pro"} - ${subscriptionStatus || "active"}` : "No active plan yet"}
                   </span>
+                  {isAdminGrantedPlan && <span className="rounded-full bg-emerald-500/15 px-2 py-1 text-xs font-black text-emerald-200">Free admin access</span>}
                   {subscription?.cancel_at_period_end && <span className="rounded-full bg-amber-500/15 px-2 py-1 text-xs font-black text-amber-200">Cancels soon</span>}
                 </div>
                 <div className="mt-1 text-sm font-semibold text-zinc-400">
-                  {subscriptionDateText ? `${subscription?.status === "trialing" ? "Trial ends" : "Current period ends"} ${subscriptionDateText}` : "Start a plan to unlock saved subscription details."}
+                  {isAdminGrantedPlan
+                    ? `Access granted until ${subscriptionDateText || "admin removes it"}`
+                    : subscriptionDateText
+                      ? `${subscription?.status === "trialing" ? "Trial ends" : "Current period ends"} ${subscriptionDateText}`
+                      : "Start a plan to unlock saved subscription details."}
                 </div>
               </div>
               <button
                 onClick={openBillingPortal}
-                disabled={Boolean(loadingPlan)}
+                disabled={Boolean(loadingPlan) || isAdminGrantedPlan}
                 className="mt-5 inline-flex items-center gap-2 rounded-lg border border-white/12 bg-white/[0.06] px-5 py-3 text-sm font-black text-white transition hover:border-fuchsia-400/50 hover:bg-fuchsia-500/10 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <CreditCard size={16} />
-                {loadingPlan === "portal" ? "Opening..." : "Open Billing Portal"}
+                {isAdminGrantedPlan ? "Billing portal not needed" : loadingPlan === "portal" ? "Opening..." : "Open Billing Portal"}
               </button>
             </div>
 
