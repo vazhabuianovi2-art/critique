@@ -5508,10 +5508,15 @@ function getPrimaryNewsEvent(events = [], preferredCurrencies = []) {
 
 function addNewsAggregate(bucket, key, values) {
   if (!key) return;
-  if (!bucket[key]) bucket[key] = { ...values, count: 0, pnl: 0, trades: 0 };
+  if (!bucket[key]) bucket[key] = { ...values, count: 0, pnl: 0, trades: 0, wins: 0, losses: 0, breakEvens: 0, grossWin: 0, grossLoss: 0 };
   bucket[key].count += Number(values.count || 0);
   bucket[key].pnl += Number(values.pnl || 0);
   bucket[key].trades += Number(values.trades || 0);
+  bucket[key].wins += Number(values.wins || 0);
+  bucket[key].losses += Number(values.losses || 0);
+  bucket[key].breakEvens += Number(values.breakEvens || 0);
+  bucket[key].grossWin += Number(values.grossWin || 0);
+  bucket[key].grossLoss += Number(values.grossLoss || 0);
 }
 
 function getNewsPerformanceStats(trades = [], events = []) {
@@ -5543,6 +5548,11 @@ function getNewsPerformanceStats(trades = [], events = []) {
       count: 1,
       pnl: stats.pnl,
       trades: stats.count,
+      wins: stats.wins,
+      losses: stats.losses,
+      breakEvens: stats.breakEvens || 0,
+      grossWin: dayTrades.reduce((total, trade) => total + Math.max(0, Number(trade.pnl || 0)), 0),
+      grossLoss: dayTrades.reduce((total, trade) => total + Math.min(0, Number(trade.pnl || 0)), 0),
     });
 
     const impactKey = event.impact || getPrimaryEventImpact(dayEvents);
@@ -5551,9 +5561,15 @@ function getNewsPerformanceStats(trades = [], events = []) {
       count: 1,
       pnl: stats.pnl,
       trades: stats.count,
+      wins: stats.wins,
+      losses: stats.losses,
+      breakEvens: stats.breakEvens || 0,
+      grossWin: dayTrades.reduce((total, trade) => total + Math.max(0, Number(trade.pnl || 0)), 0),
+      grossLoss: dayTrades.reduce((total, trade) => total + Math.min(0, Number(trade.pnl || 0)), 0),
     });
 
     dayTrades.forEach((trade) => {
+      const tradePnl = Number(trade.pnl || 0);
       const tradeCurrencies = getTradeCurrencyCodes(trade);
       const eventCurrencies = new Set(dayEvents.map((item) => String(item.country || "").toUpperCase()).filter(Boolean));
       const matchedCurrencies = tradeCurrencies.filter((currency) => eventCurrencies.has(currency));
@@ -5562,8 +5578,13 @@ function getNewsPerformanceStats(trades = [], events = []) {
         addNewsAggregate(byCurrency, currency, {
           name: currency,
           count: 1,
-          pnl: Number(trade.pnl || 0),
+          pnl: tradePnl,
           trades: 1,
+          wins: tradePnl > 0 ? 1 : 0,
+          losses: tradePnl < 0 ? 1 : 0,
+          breakEvens: tradePnl === 0 ? 1 : 0,
+          grossWin: Math.max(0, tradePnl),
+          grossLoss: Math.min(0, tradePnl),
         });
       });
     });
@@ -11633,12 +11654,25 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
             </SimplePanel>
             <SimplePanel title="Currency Impact" subtitle="Which economic currencies line up with your best or worst days." icon={<Target size={24} />}>
               {newsStats.currencyRows.length ? newsStats.currencyRows.slice(0, 8).map((row) => (
-                <div key={row.name} className="mb-2 flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-black/35 px-4 py-3">
-                  <div>
-                    <div className="font-black text-white">{row.name}</div>
-                    <div className="text-xs font-semibold text-zinc-500">{row.trades} trades on matching event days</div>
+                <div key={row.name} className="mb-3 rounded-xl border border-white/10 bg-black/35 px-4 py-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="font-black text-white">{row.name}</div>
+                      <div className="text-xs font-semibold text-zinc-500">{row.trades} trades on matching event days</div>
+                    </div>
+                    <div className={row.pnl >= 0 ? "font-black text-emerald-400" : "font-black text-red-400"}>{formatMoney(row.pnl)}</div>
                   </div>
-                  <div className={row.pnl >= 0 ? "font-black text-emerald-400" : "font-black text-red-400"}>{formatMoney(row.pnl)}</div>
+                  <div className="mt-3 grid gap-2 text-xs font-black sm:grid-cols-3">
+                    <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-emerald-200">
+                      Won {formatMoney(row.grossWin || 0)}
+                    </div>
+                    <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-red-200">
+                      Lost {formatMoney(Math.abs(row.grossLoss || 0))}
+                    </div>
+                    <div className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-zinc-300">
+                      {row.wins || 0}W / {row.losses || 0}L / {row.breakEvens || 0}BE
+                    </div>
+                  </div>
                 </div>
               )) : <div className="text-sm font-semibold text-zinc-500">No currency impact data yet.</div>}
             </SimplePanel>
