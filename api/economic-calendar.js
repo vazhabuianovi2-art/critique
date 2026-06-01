@@ -9,8 +9,7 @@ const ADJACENT_WEEK_OFFSETS = {
   next: 7,
 };
 
-let cachedThisWeek = null;
-let cachedAt = 0;
+const feedCache = {};
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const FALLBACK_EVENTS_BY_WEEK = {
   last: [
@@ -55,31 +54,29 @@ const FALLBACK_EVENTS_BY_WEEK = {
     { day: 5, time: "All day", country: "GBP", impact: "Holiday", title: "Bank Holiday" },
   ],
   next: [
-    { day: 0, time: "16:30", country: "USD", impact: "Low", title: "FOMC Member Waller Speaks" },
-    { day: 1, time: "17:45", country: "USD", impact: "Low", title: "Final Manufacturing PMI" },
-    { day: 1, time: "18:00", country: "USD", impact: "High", title: "ISM Manufacturing PMI", previous: "52.7" },
-    { day: 1, time: "18:00", country: "USD", impact: "Medium", title: "ISM Manufacturing Prices", previous: "84.6" },
-    { day: 1, time: "18:00", country: "USD", impact: "Low", title: "Construction Spending m/m", previous: "0.6%" },
-    { day: 2, time: "18:00", country: "USD", impact: "Medium", title: "JOLTS Job Openings", previous: "6.87M" },
-    { day: 2, time: "Tentative", country: "USD", impact: "Low", title: "RCM/TIPP Economic Optimism", previous: "42.6" },
-    { day: 2, time: "All day", country: "USD", impact: "Low", title: "Wards Total Vehicle Sales", previous: "15.9M" },
-    { day: 3, time: "00:30", country: "USD", impact: "Low", title: "API Weekly Statistical Bulletin" },
-    { day: 3, time: "16:15", country: "USD", impact: "High", title: "ADP Non-Farm Employment Change", previous: "109K" },
-    { day: 3, time: "17:45", country: "USD", impact: "Low", title: "Final Services PMI" },
-    { day: 3, time: "18:00", country: "USD", impact: "High", title: "ISM Services PMI", previous: "53.6" },
-    { day: 3, time: "18:00", country: "USD", impact: "Low", title: "Factory Orders m/m", previous: "1.5%" },
-    { day: 3, time: "18:30", country: "USD", impact: "Low", title: "Crude Oil Inventories" },
-    { day: 3, time: "22:00", country: "USD", impact: "Low", title: "Beige Book" },
-    { day: 4, time: "15:30", country: "USD", impact: "Low", title: "Challenger Job Cuts y/y", previous: "-20.9%" },
-    { day: 4, time: "16:30", country: "USD", impact: "Medium", title: "Unemployment Claims" },
-    { day: 4, time: "All day", country: "USD", impact: "Low", title: "Revised Nonfarm Productivity q/q", previous: "0.8%" },
-    { day: 4, time: "All day", country: "USD", impact: "Low", title: "Revised Unit Labor Costs q/q", previous: "2.3%" },
-    { day: 4, time: "18:30", country: "USD", impact: "Low", title: "Natural Gas Storage" },
-    { day: 5, time: "16:30", country: "USD", impact: "High", title: "Average Hourly Earnings m/m", previous: "0.2%" },
-    { day: 5, time: "16:30", country: "USD", impact: "High", title: "Non-Farm Employment Change", previous: "115K" },
-    { day: 5, time: "16:30", country: "USD", impact: "High", title: "Unemployment Rate", previous: "4.3%" },
-    { day: 5, time: "23:00", country: "USD", impact: "Low", title: "Consumer Credit m/m", previous: "24.9B" },
-    { day: 6, time: "Tentative", country: "USD", impact: "Low", title: "Treasury Currency Report" },
+    { day: 0, time: "All day", country: "All", impact: "Medium", title: "OPEC-JMMC Meetings" },
+    { day: 0, time: "All day", country: "All", impact: "Medium", title: "OPEC Meetings" },
+    { day: 2, time: "06:00", country: "USD", impact: "Low", title: "NFIB Small Business Index", previous: "95.9" },
+    { day: 2, time: "08:15", country: "USD", impact: "Low", title: "ADP Weekly Employment Change", previous: "35.8K" },
+    { day: 2, time: "08:30", country: "USD", impact: "Low", title: "Trade Balance", previous: "-60.3B" },
+    { day: 2, time: "10:00", country: "USD", impact: "Low", title: "Existing Home Sales", previous: "4.02M" },
+    { day: 2, time: "All day", country: "USD", impact: "Low", title: "Final Wholesale Inventories m/m", previous: "0.5%" },
+    { day: 2, time: "16:30", country: "USD", impact: "Low", title: "API Weekly Statistical Bulletin" },
+    { day: 3, time: "08:30", country: "USD", impact: "High", title: "Core CPI m/m", previous: "0.4%" },
+    { day: 3, time: "08:30", country: "USD", impact: "High", title: "Core CPI y/y", previous: "2.8%" },
+    { day: 3, time: "08:30", country: "USD", impact: "High", title: "CPI m/m", previous: "0.6%" },
+    { day: 3, time: "08:30", country: "USD", impact: "High", title: "CPI y/y", previous: "3.8%" },
+    { day: 3, time: "10:30", country: "USD", impact: "Low", title: "Crude Oil Inventories" },
+    { day: 3, time: "13:01", country: "USD", impact: "Low", title: "10-y Bond Auction", previous: "4.47|2.4" },
+    { day: 3, time: "14:00", country: "USD", impact: "Low", title: "Federal Budget Balance", previous: "215.0B" },
+    { day: 4, time: "08:30", country: "USD", impact: "High", title: "Core PPI m/m", previous: "1.0%" },
+    { day: 4, time: "08:30", country: "USD", impact: "High", title: "PPI m/m", previous: "1.4%" },
+    { day: 4, time: "08:30", country: "USD", impact: "Medium", title: "Unemployment Claims" },
+    { day: 4, time: "10:30", country: "USD", impact: "Low", title: "Natural Gas Storage" },
+    { day: 4, time: "13:01", country: "USD", impact: "Low", title: "30-y Bond Auction", previous: "5.05|2.3" },
+    { day: 5, time: "10:00", country: "USD", impact: "Medium", title: "Prelim UoM Consumer Sentiment", previous: "48.2" },
+    { day: 5, time: "10:00", country: "USD", impact: "Medium", title: "Prelim UoM Inflation Expectations", previous: "4.5%" },
+    { day: 5, time: "Tentative", country: "USD", impact: "Low", title: "Treasury Currency Report" },
   ],
 };
 
@@ -115,7 +112,10 @@ function normalizeEvent(event, week) {
   const sourceDate = String(event?.date || "");
   const parsed = new Date(sourceDate);
   const dateKey = sourceDate.slice(0, 10);
-  const time = Number.isNaN(parsed.getTime())
+  const explicitTime = String(event?.time || "");
+  const time = explicitTime === "All day" || explicitTime === "Tentative"
+    ? explicitTime
+    : Number.isNaN(parsed.getTime())
     ? ""
     : parsed.toLocaleTimeString("en-US", {
         hour: "2-digit",
@@ -141,8 +141,9 @@ function normalizeEvent(event, week) {
 }
 
 async function fetchFeed(week) {
-  if (week === "this" && cachedThisWeek && Date.now() - cachedAt < CACHE_TTL_MS) {
-    return cachedThisWeek;
+  const cached = feedCache[week];
+  if (cached?.events?.length && Date.now() - cached.cachedAt < CACHE_TTL_MS) {
+    return cached.events;
   }
 
   const response = await fetch(FEEDS[week], {
@@ -156,10 +157,7 @@ async function fetchFeed(week) {
   }
   const rows = await response.json();
   const normalized = Array.isArray(rows) ? rows.map((event) => normalizeEvent(event, week)) : [];
-  if (week === "this" && normalized.length) {
-    cachedThisWeek = normalized;
-    cachedAt = Date.now();
-  }
+  if (normalized.length) feedCache[week] = { events: normalized, cachedAt: Date.now() };
   return normalized;
 }
 
@@ -173,16 +171,14 @@ export default async function handler(req, res) {
     const fetched = {};
     const errors = {};
 
-    try {
-      fetched.this = await fetchFeed("this");
-    } catch (error) {
-      errors.this = error?.message || "Feed failed";
-      fetched.this = cachedThisWeek?.length ? cachedThisWeek : createFallbackWeekEvents("this");
-    }
-
-    if (weeks.includes("this")) fetched.this = fetched.this || [];
-    if (weeks.includes("last")) fetched.last = createFallbackWeekEvents("last");
-    if (weeks.includes("next")) fetched.next = createFallbackWeekEvents("next");
+    await Promise.all(weeks.map(async (week) => {
+      try {
+        fetched[week] = await fetchFeed(week);
+      } catch (error) {
+        errors[week] = error?.message || "Feed failed";
+        fetched[week] = feedCache[week]?.events?.length ? feedCache[week].events : createFallbackWeekEvents(week);
+      }
+    }));
 
     const events = weeks
       .flatMap((week) => fetched[week] || [])
@@ -192,7 +188,7 @@ export default async function handler(req, res) {
       throw new Error(Object.values(errors)[0] || "No economic calendar events available");
     }
 
-    res.setHeader("Cache-Control", "s-maxage=86400, stale-while-revalidate=21600");
+    res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate=900");
     res.status(200).json({
       ok: true,
       source: "ForexFactory",
