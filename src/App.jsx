@@ -339,14 +339,31 @@ async function postAdminEntitlements(action, payload = {}) {
 }
 
 async function postSupportReports(action, payload = {}) {
-  const accessToken = await getCurrentAccessToken();
+  async function sendWithToken(token) {
+    const response = await fetch("/api/support-reports", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, accessToken: token, ...payload }),
+    });
+    const data = await response.json().catch(() => ({}));
+    return { response, data };
+  }
+
+  let accessToken = await getCurrentAccessToken();
+  if (!accessToken) {
+    const refreshed = await refreshCurrentSession();
+    accessToken = refreshed?.access_token || "";
+  }
   if (!accessToken) throw new Error("Login session is missing.");
-  const response = await fetch("/api/support-reports", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action, accessToken, ...payload }),
-  });
-  const data = await response.json().catch(() => ({}));
+
+  let { response, data } = await sendWithToken(accessToken);
+  if (response.status === 401) {
+    const refreshed = await refreshCurrentSession();
+    if (refreshed?.access_token) {
+      ({ response, data } = await sendWithToken(refreshed.access_token));
+    }
+  }
+
   if (!response.ok || !data.ok) throw new Error(data.error || "Support request failed.");
   return data;
 }
