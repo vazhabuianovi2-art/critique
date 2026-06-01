@@ -8942,6 +8942,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
   const initialDate = selectedDate ? new Date(`${selectedDate}T00:00:00`) : new Date(2026, 4, 1);
   const [calendarMonth, setCalendarMonth] = useState(new Date(initialDate.getFullYear(), initialDate.getMonth(), 1));
   const [dayModalDate, setDayModalDate] = useState(null);
+  const [selectedNewsCurrencies, setSelectedNewsCurrencies] = useState(["All"]);
 
   useEffect(() => {
     if (!selectedDate) return;
@@ -8953,7 +8954,13 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
   const monthIndex = calendarMonth.getMonth();
   const cells = getCalendarCells(year, monthIndex);
   const grouped = groupTradesByDate(trades);
-  const eventsByDate = useMemo(() => groupEconomicEventsByDate(economicCalendar?.events || []), [economicCalendar?.events]);
+  const calendarEvents = useMemo(() => {
+    const selected = new Set(selectedNewsCurrencies.filter((currency) => currency !== "All"));
+    const events = economicCalendar?.events || [];
+    if (!selected.size) return events;
+    return events.filter((event) => selected.has(String(event.country || "").toUpperCase()));
+  }, [economicCalendar?.events, selectedNewsCurrencies]);
+  const eventsByDate = useMemo(() => groupEconomicEventsByDate(calendarEvents), [calendarEvents]);
   const monthName = calendarMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   const monthKey = `${year}-${String(monthIndex + 1).padStart(2, "0")}`;
   const monthStats = summarizeTrades(trades.filter((trade) => getTradeDateKey(trade).startsWith(monthKey)));
@@ -9101,7 +9108,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
         </div>
       </div>
 
-      <EconomicCalendarPanel economicCalendar={economicCalendar} trades={trades} onRefresh={onRefreshEconomicCalendar} />
+      <EconomicCalendarPanel economicCalendar={economicCalendar} trades={trades} selectedCurrencies={selectedNewsCurrencies} onSelectedCurrenciesChange={setSelectedNewsCurrencies} onRefresh={onRefreshEconomicCalendar} />
 
       <button onClick={() => onAdd(selectedDate)} className="fixed bottom-24 right-8 z-40 flex h-16 w-16 items-center justify-center rounded-full bg-fuchsia-500 text-3xl font-light text-black shadow-[0_0_30px_rgba(217,70,239,0.48)] transition hover:scale-105 hover:bg-fuchsia-400 lg:bottom-10">
         +
@@ -9246,31 +9253,23 @@ function CalendarMonthSummary({ monthStats, selectedDate, selectedDayStats, best
   );
 }
 
-function EconomicCalendarPanel({ economicCalendar, trades = [], onRefresh }) {
+function EconomicCalendarPanel({ economicCalendar, trades = [], selectedCurrencies = ["All"], onSelectedCurrenciesChange, onRefresh }) {
   const [weekFilter, setWeekFilter] = useState("this");
-  const [presetFilter, setPresetFilter] = useState("All");
   const [impactFilters, setImpactFilters] = useState(["High", "Medium", "Low", "Holiday"]);
-  const [currencyFilter, setCurrencyFilter] = useState("All");
   const [filtersOpen, setFiltersOpen] = useState(true);
   const events = Array.isArray(economicCalendar?.events) ? economicCalendar.events : [];
   const impactOptions = ["High", "Medium", "Low", "Holiday"];
-  const presetCurrencies = {
-    Forex: ["USD", "EUR", "GBP", "JPY", "CHF", "CAD", "AUD", "NZD", "CNY"],
-    "US Futures": ["USD"],
-    Metals: ["USD", "CNY"],
-    Oil: ["USD", "CAD", "CNY"],
-    Crypto: ["USD"],
-  };
-  const currencies = useMemo(() => ["All", ...Array.from(new Set(events.map((event) => event.country).filter(Boolean))).sort()], [events]);
+  const normalizedSelectedCurrencies = selectedCurrencies.includes("All") || !selectedCurrencies.length ? ["All"] : selectedCurrencies;
+  const currencies = useMemo(() => Array.from(new Set(events.map((event) => String(event.country || "").toUpperCase()).filter((country) => country && country !== "ALL"))).sort(), [events]);
   const visibleEvents = useMemo(() => {
+    const selectedCurrencySet = new Set(normalizedSelectedCurrencies.filter((currency) => currency !== "All"));
     return events.filter((event) => {
       if (weekFilter !== "all" && event.week !== weekFilter) return false;
-      if (presetFilter !== "All" && !presetCurrencies[presetFilter]?.includes(event.country)) return false;
       if (!impactFilters.includes(getEventImpactLabel(event.impact))) return false;
-      if (currencyFilter !== "All" && event.country !== currencyFilter) return false;
+      if (selectedCurrencySet.size && !selectedCurrencySet.has(String(event.country || "").toUpperCase())) return false;
       return true;
     });
-  }, [events, weekFilter, presetFilter, impactFilters, currencyFilter]);
+  }, [events, weekFilter, impactFilters, normalizedSelectedCurrencies]);
   const grouped = visibleEvents.reduce((map, event) => {
     const key = getEconomicEventDateKey(event) || "Unknown";
     if (!map[key]) map[key] = [];
@@ -9279,7 +9278,7 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], onRefresh }) {
   }, {});
   const dayKeys = Object.keys(grouped).sort();
   const newsStats = getNewsPerformanceStats(trades, visibleEvents);
-  const activeFilterCount = (presetFilter !== "All" ? 1 : 0) + (currencyFilter !== "All" ? 1 : 0) + (impactFilters.length !== impactOptions.length ? 1 : 0);
+  const activeFilterCount = (normalizedSelectedCurrencies.includes("All") ? 0 : normalizedSelectedCurrencies.length) + (impactFilters.length !== impactOptions.length ? 1 : 0);
   const weekRanges = useMemo(() => ({
     last: getEconomicCalendarWeekRangeLabel("last") || getEconomicWeekRange(events, "last"),
     this: getEconomicCalendarWeekRangeLabel("this") || getEconomicWeekRange(events, "this"),
@@ -9291,6 +9290,16 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], onRefresh }) {
       const next = current.includes(impact) ? current.filter((item) => item !== impact) : [...current, impact];
       return next.length ? next : current;
     });
+  }
+
+  function toggleCurrencyFilter(currency) {
+    if (currency === "All") {
+      onSelectedCurrenciesChange?.(["All"]);
+      return;
+    }
+    const current = normalizedSelectedCurrencies.includes("All") ? [] : normalizedSelectedCurrencies;
+    const next = current.includes(currency) ? current.filter((item) => item !== currency) : [...current, currency];
+    onSelectedCurrenciesChange?.(next.length ? next : ["All"]);
   }
 
   return (
@@ -9327,14 +9336,6 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], onRefresh }) {
 
       {filtersOpen && (
       <div className="mt-5 rounded-xl border border-white/10 bg-black/35 p-4">
-        <div className="mb-5">
-          <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Quick presets</div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {["All", "Forex", "US Futures", "Metals", "Oil", "Crypto"].map((preset) => (
-              <button key={preset} onClick={() => { setPresetFilter(preset); setCurrencyFilter("All"); }} className={presetFilter === preset ? "rounded-lg border border-fuchsia-400/60 bg-fuchsia-500/18 px-3 py-2 text-xs font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-xs font-black text-zinc-400 hover:border-fuchsia-500/35 hover:text-fuchsia-200"}>{preset}</button>
-            ))}
-          </div>
-        </div>
         <div className="grid gap-4 lg:grid-cols-[1fr_2fr]">
           <div>
             <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Expected impact</div>
@@ -9356,8 +9357,8 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], onRefresh }) {
           <div>
             <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Currencies</div>
             <div className="mt-3 flex max-h-24 flex-wrap gap-2 overflow-y-auto pr-1">
-              {currencies.map((currency) => (
-                <button key={currency} onClick={() => setCurrencyFilter(currency)} className={currencyFilter === currency ? "rounded-lg border border-fuchsia-400/60 bg-fuchsia-500/18 px-3 py-2 text-xs font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-xs font-black text-zinc-400 hover:border-fuchsia-500/35 hover:text-fuchsia-200"}>{currency}</button>
+              {["All", ...currencies].map((currency) => (
+                <button key={currency} onClick={() => toggleCurrencyFilter(currency)} className={normalizedSelectedCurrencies.includes(currency) ? "rounded-lg border border-fuchsia-400/60 bg-fuchsia-500/18 px-3 py-2 text-xs font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-xs font-black text-zinc-400 hover:border-fuchsia-500/35 hover:text-fuchsia-200"}>{currency}</button>
               ))}
             </div>
           </div>
