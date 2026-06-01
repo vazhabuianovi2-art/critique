@@ -28,6 +28,23 @@ function getUserEmail(user) {
   return normalizeEmail(user?.email || user?.user?.email || user?.data?.user?.email);
 }
 
+function decodeJwtPayload(token) {
+  try {
+    const payload = String(token || "").split(".")[1];
+    if (!payload) return null;
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), "=");
+    return JSON.parse(Buffer.from(padded, "base64").toString("utf8"));
+  } catch {
+    return null;
+  }
+}
+
+function getTokenEmail(accessToken) {
+  const payload = decodeJwtPayload(accessToken);
+  return normalizeEmail(payload?.email || payload?.user_metadata?.email);
+}
+
 async function getUserFromToken(supabaseUrl, anonKey, accessToken) {
   const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
     headers: {
@@ -116,7 +133,7 @@ export default async function handler(req, res) {
     const body = await readBody(req);
     const accessToken = typeof body.accessToken === "string" ? body.accessToken : "";
     const user = accessToken ? await getUserFromToken(supabaseUrl, anonKey, accessToken) : null;
-    const requesterEmail = getUserEmail(user);
+    const requesterEmail = getUserEmail(user) || getTokenEmail(accessToken);
     const adminEmails = getAdminEmails();
     const isAdmin = Boolean(requesterEmail && adminEmails.includes(requesterEmail));
 
