@@ -10478,9 +10478,8 @@ function AdminAccessPage() {
     loadGrants();
   }, []);
 
-  async function grantAccess(event) {
-    event.preventDefault();
-    const normalizedEmail = String(email || "").trim().toLowerCase();
+  async function grantEmailAccess(targetEmail, { clearInput = false } = {}) {
+    const normalizedEmail = String(targetEmail || "").trim().toLowerCase();
     if (!normalizedEmail || !normalizedEmail.includes("@")) {
       setError("Enter a valid user email.");
       return;
@@ -10490,7 +10489,7 @@ function AdminAccessPage() {
     setError("");
     try {
       const grantResult = await postAdminEntitlements("grant", { email: normalizedEmail });
-      setEmail("");
+      if (clearInput) setEmail("");
       setMessage(`${normalizedEmail} now has free Pro access.`);
       const data = await postAdminEntitlements("list");
       const nextGrants = Array.isArray(data.grants) ? data.grants : [];
@@ -10501,6 +10500,11 @@ function AdminAccessPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function grantAccess(event) {
+    event.preventDefault();
+    await grantEmailAccess(email, { clearInput: true });
   }
 
   async function revokeAccess(targetEmail) {
@@ -10560,18 +10564,28 @@ function AdminAccessPage() {
               <div>Access Until</div>
               <div className="text-right">Action</div>
             </div>
-            {grants.length ? grants.map((grant) => (
+            {grants.length ? grants.map((grant) => {
+              const isActiveGrant = String(grant.status).toLowerCase() === "active";
+              return (
               <div key={grant.id || grant.email} className="grid grid-cols-[1fr_130px_150px_120px] items-center gap-3 border-b border-white/10 px-4 py-4 text-sm last:border-b-0">
                 <div className="truncate font-black text-white">{grant.email}</div>
-                <div className={String(grant.status).toLowerCase() === "active" ? "font-black text-emerald-300" : "font-black text-red-300"}>{grant.status || "unknown"}</div>
-                <div className="font-semibold text-zinc-400">{grant.current_period_end ? new Date(grant.current_period_end).toLocaleDateString() : "-"}</div>
+                <div className={isActiveGrant ? "font-black text-emerald-300" : "font-black text-red-300"}>{grant.status || "unknown"}</div>
+                <div className="font-semibold text-zinc-400">{isActiveGrant && grant.current_period_end ? new Date(grant.current_period_end).toLocaleDateString() : "-"}</div>
                 <div className="text-right">
-                  <button type="button" onClick={() => revokeAccess(grant.email)} disabled={loading || String(grant.status).toLowerCase() !== "active"} className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-black text-red-200 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-45">
-                    Revoke
+                  <button
+                    type="button"
+                    onClick={() => isActiveGrant ? revokeAccess(grant.email) : grantEmailAccess(grant.email)}
+                    disabled={loading}
+                    className={isActiveGrant
+                      ? "rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-black text-red-200 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-45"
+                      : "rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs font-black text-emerald-200 transition hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-45"}
+                  >
+                    {isActiveGrant ? "Revoke" : "Restore"}
                   </button>
                 </div>
               </div>
-            )) : (
+              );
+            }) : (
               <div className="px-4 py-10 text-center text-sm font-bold text-zinc-500">No free access grants yet.</div>
             )}
           </div>
