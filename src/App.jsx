@@ -10544,7 +10544,7 @@ function AdminAccessPage() {
           </div>
           <form onSubmit={grantAccess} className="mt-6 grid gap-3 md:grid-cols-[1fr_auto]">
             <Input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="friend@example.com" className="border-white/10 bg-black text-white" />
-            <Button disabled={loading} className="bg-fuchsia-500 text-black hover:bg-fuchsia-400"><UserPlus size={16} /> {loading ? "Saving..." : "Grant Access"}</Button>
+            <Button type="submit" disabled={loading} className="bg-fuchsia-500 text-black hover:bg-fuchsia-400"><UserPlus size={16} /> {loading ? "Saving..." : "Grant Access"}</Button>
           </form>
         </section>
 
