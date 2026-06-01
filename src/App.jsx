@@ -7805,6 +7805,22 @@ Skipped duplicates: ${duplicateCount}
                 <CreditCard size={17} className="text-zinc-400" strokeWidth={2.2} />
                 Billing
               </button>
+              <button
+                onClick={() => {
+                  setActive("Support");
+                  setTradeViewMode(null);
+                  setIsSidebarUserMenuOpen(false);
+                }}
+                className="flex w-full items-center gap-4 rounded-lg px-3 py-3 text-left text-sm font-bold text-white transition hover:bg-fuchsia-500/10 hover:text-fuchsia-200"
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/10 text-fuchsia-300 shadow-[0_0_18px_rgba(217,70,239,0.12)]">
+                  <LifeBuoy size={16} strokeWidth={2.2} />
+                </span>
+                <span>
+                  <span className="block leading-tight">Support</span>
+                  <span className="block text-[11px] font-semibold text-zinc-500">Report bugs or ideas</span>
+                </span>
+              </button>
               <div className="my-3 h-px bg-white/10" />
               <button
                 onClick={handleSignOut}
@@ -7853,7 +7869,7 @@ Skipped duplicates: ${duplicateCount}
             {dataMessage}
           </div>
         )}
-        {shouldGateForBilling ? (
+        {shouldGateForBilling && active !== "Support" && active !== "Admin" ? (
           <BillingPageDodo
             account={account}
             authUser={authUser}
