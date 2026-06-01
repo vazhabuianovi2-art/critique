@@ -9351,8 +9351,12 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], selectedCurrenci
   const [filtersOpen, setFiltersOpen] = useState(true);
   const events = Array.isArray(economicCalendar?.events) ? economicCalendar.events : [];
   const impactOptions = ["High", "Medium", "Low", "Holiday"];
+  const baseCurrencyOptions = ["AUD", "CAD", "CHF", "CNY", "EUR", "GBP", "JPY", "NZD", "USD"];
   const normalizedSelectedCurrencies = selectedCurrencies.includes("All") || !selectedCurrencies.length ? ["All"] : selectedCurrencies;
-  const currencies = useMemo(() => Array.from(new Set(events.map((event) => String(event.country || "").toUpperCase()).filter((country) => country && country !== "ALL"))).sort(), [events]);
+  const currencies = useMemo(() => {
+    const dynamic = events.map((event) => String(event.country || "").toUpperCase()).filter((country) => country && country !== "ALL");
+    return Array.from(new Set([...baseCurrencyOptions, ...dynamic])).sort();
+  }, [events]);
   const visibleEvents = useMemo(() => {
     const selectedCurrencySet = new Set(normalizedSelectedCurrencies.filter((currency) => currency !== "All"));
     return events.filter((event) => {

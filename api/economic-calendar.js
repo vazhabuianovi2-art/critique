@@ -251,7 +251,7 @@ async function fetchFeed(week) {
   }
 
   if (week === "last" || week === "next") {
-    const normalized = await fetchTradingViewFeed(week);
+    const normalized = createFallbackWeekEvents(week);
     feedCache[week] = { events: normalized, cachedAt: Date.now() };
     return normalized;
   }
