@@ -9331,7 +9331,7 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], selectedCurrenci
           <div>
             <h2 className="text-2xl font-black text-white">Economic Calendar</h2>
             <p className="mt-1 text-sm font-semibold text-zinc-400">
-              ForexFactory feed · {visibleEvents.length} events · {economicCalendar?.updatedAt ? new Date(economicCalendar.updatedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "updating"}
+              Live economic feed · {visibleEvents.length} events · {economicCalendar?.updatedAt ? new Date(economicCalendar.updatedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "updating"}
             </p>
           </div>
         </div>

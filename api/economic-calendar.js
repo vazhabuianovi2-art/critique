@@ -1,8 +1,9 @@
 const FEEDS = {
-  last: "https://nfs.faireconomy.media/ff_calendar_lastweek.json",
   this: "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
-  next: "https://nfs.faireconomy.media/ff_calendar_nextweek.json",
 };
+
+const TRADINGVIEW_EVENTS_URL = "https://economic-calendar.tradingview.com/events";
+const TRADINGVIEW_COUNTRIES = "US,EU,GB,JP,CA,AU,NZ,CH,CN";
 
 const ADJACENT_WEEK_OFFSETS = {
   last: -7,
@@ -139,10 +140,108 @@ function normalizeEvent(event, week) {
   };
 }
 
+function getWeekBounds(week) {
+  const today = new Date();
+  const sunday = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - today.getUTCDay(), 0, 0, 0));
+  const offset = week === "last" ? -7 : week === "next" ? 7 : 0;
+  const start = new Date(sunday);
+  start.setUTCDate(sunday.getUTCDate() + offset);
+  const end = new Date(start);
+  end.setUTCDate(start.getUTCDate() + 7);
+  return { start, end };
+}
+
+function getDateKeyInTimeZone(date, timeZone = "America/New_York") {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value || "1970";
+  const month = parts.find((part) => part.type === "month")?.value || "01";
+  const day = parts.find((part) => part.type === "day")?.value || "01";
+  return `${year}-${month}-${day}`;
+}
+
+function formatCalendarValue(value, unit = "", scale = "") {
+  if (value === null || value === undefined || value === "") return "";
+  const text = String(value);
+  if (unit === "%") return `${text}%`;
+  if (unit && unit !== "points") return `${unit}${text}${scale || ""}`;
+  return `${text}${scale || ""}`;
+}
+
+function normalizeTradingViewEvent(event, week) {
+  const parsed = new Date(event?.date || "");
+  const date = Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+  const title = String(event?.title || event?.indicator || "Economic Event");
+  const indicator = String(event?.indicator || "");
+  const currency = String(event?.currency || event?.country || "All").toUpperCase();
+  const isHoliday = /holiday/i.test(title) || /holiday/i.test(indicator);
+  const importance = Number(event?.importance ?? -1);
+  const impact = isHoliday ? "Holiday" : importance >= 1 ? "High" : importance === 0 ? "Medium" : "Low";
+  const dateKey = isHoliday ? date.toISOString().slice(0, 10) : getDateKeyInTimeZone(date);
+  const time = isHoliday
+    ? "All day"
+    : date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "America/New_York",
+      });
+
+  return {
+    id: `tv-${week}-${event?.id || `${currency}-${date.toISOString()}-${title}`}`,
+    title,
+    country: currency,
+    impact,
+    forecast: formatCalendarValue(event?.forecast, event?.unit, event?.scale),
+    previous: formatCalendarValue(event?.previous, event?.unit, event?.scale),
+    actual: formatCalendarValue(event?.actual, event?.unit, event?.scale),
+    date: date.toISOString(),
+    dateKey,
+    time,
+    week,
+    source: "TradingView",
+  };
+}
+
+async function fetchTradingViewFeed(week) {
+  const { start, end } = getWeekBounds(week);
+  const url = `${TRADINGVIEW_EVENTS_URL}?countries=${encodeURIComponent(TRADINGVIEW_COUNTRIES)}&from=${encodeURIComponent(start.toISOString())}&to=${encodeURIComponent(end.toISOString())}`;
+  const response = await fetch(url, {
+    headers: {
+      "accept": "application/json,text/plain,*/*",
+      "origin": "https://www.tradingview.com",
+      "referer": "https://www.tradingview.com/",
+      "user-agent": "Mozilla/5.0 TryCritique Economic Calendar",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`TradingView feed failed: ${week} ${response.status}`);
+  }
+  const payload = await response.json();
+  const rows = Array.isArray(payload?.result) ? payload.result : [];
+  const normalized = rows
+    .map((event) => normalizeTradingViewEvent(event, week))
+    .filter((event) => event.dateKey >= start.toISOString().slice(0, 10) && event.dateKey < end.toISOString().slice(0, 10));
+  if (!normalized.length) {
+    throw new Error(`TradingView feed returned no events: ${week}`);
+  }
+  return normalized;
+}
+
 async function fetchFeed(week) {
   const cached = feedCache[week];
   if (cached?.events?.length && Date.now() - cached.cachedAt < CACHE_TTL_MS) {
     return cached.events;
+  }
+
+  if (week === "last" || week === "next") {
+    const normalized = await fetchTradingViewFeed(week);
+    feedCache[week] = { events: normalized, cachedAt: Date.now() };
+    return normalized;
   }
 
   const response = await fetch(FEEDS[week], {
@@ -190,7 +289,7 @@ export default async function handler(req, res) {
     res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate=900");
     res.status(200).json({
       ok: true,
-      source: "ForexFactory",
+      source: "Live economic calendar",
       updatedAt: new Date().toISOString(),
       count: events.length,
       errors,
