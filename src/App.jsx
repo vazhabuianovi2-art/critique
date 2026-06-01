@@ -8577,7 +8577,26 @@ function DashboardMistakeAlert({ trades, onOpen }) {
 
 function TodaysEventsPanel({ economicCalendar, onRefresh }) {
   const todayKey = formatDateKey(new Date());
-  const events = getEventsForDate(economicCalendar?.events, todayKey).slice(0, 5);
+  const impactOptions = ["High", "Medium", "Low", "Holiday"];
+  const [impactFilters, setImpactFilters] = useState(impactOptions);
+  const events = useMemo(() => {
+    const impactOrder = { High: 0, Medium: 1, Low: 2, Holiday: 3 };
+    return getEventsForDate(economicCalendar?.events, todayKey)
+      .filter((event) => impactFilters.includes(getEventImpactLabel(event.impact)))
+      .sort((a, b) => {
+        const impactDiff = (impactOrder[getEventImpactLabel(a.impact)] ?? 9) - (impactOrder[getEventImpactLabel(b.impact)] ?? 9);
+        if (impactDiff) return impactDiff;
+        return String(a.time || "").localeCompare(String(b.time || ""));
+      });
+  }, [economicCalendar?.events, todayKey, impactFilters]);
+
+  function toggleImpactFilter(impact) {
+    setImpactFilters((current) => {
+      const next = current.includes(impact) ? current.filter((item) => item !== impact) : [...current, impact];
+      return next.length ? next : current;
+    });
+  }
+
   return (
     <section className="mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#100719] via-black to-[#04110d] p-5 shadow-[0_18px_45px_rgba(217,70,239,0.10)]">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -8591,6 +8610,23 @@ function TodaysEventsPanel({ economicCalendar, onRefresh }) {
         <button onClick={onRefresh} className="rounded-xl border border-white/10 bg-black px-3 py-2 text-sm font-black text-zinc-300 transition hover:border-fuchsia-400/60 hover:text-fuchsia-200">
           <RefreshCwIcon /> Refresh
         </button>
+      </div>
+      <div className="mt-5 rounded-xl border border-white/10 bg-black/35 p-4">
+        <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Expected impact</div>
+        <div className="mt-3 flex flex-wrap gap-4">
+          {impactOptions.map((impact) => (
+            <label key={impact} className="flex cursor-pointer items-center gap-2 text-xs font-black text-zinc-300 transition hover:text-white">
+              <input
+                type="checkbox"
+                checked={impactFilters.includes(impact)}
+                onChange={() => toggleImpactFilter(impact)}
+                className="h-3.5 w-3.5 rounded border-white/20 bg-black accent-fuchsia-500"
+              />
+              <ImpactFolderIcon impact={impact} />
+              <span>{impact}</span>
+            </label>
+          ))}
+        </div>
       </div>
       <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {economicCalendar?.loading && !events.length ? (
