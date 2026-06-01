@@ -6653,7 +6653,7 @@ export default function TradingJournalDashboard() {
   const backupFileRef = useRef(null);
   const accountStorageUserRef = useRef(null);
   const [filters, setFilters] = useState({ result: "All", direction: "All", strategy: "All", grade: "All", session: "All", dateFrom: "", dateTo: "", minPnl: "", maxPnl: "", emotion: "All", tag: "" });
-  const [selectedCalendarDate, setSelectedCalendarDate] = useState("2026-05-15");
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState(() => formatDateKey(new Date()));
   const [theme, setTheme] = useState(() => {
     try {
       return localStorage.getItem(THEME_KEY) || "light";
@@ -8960,7 +8960,7 @@ function getCalendarDayVisual(dayStats, isWeekend, selected) {
 }
 
 function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCalendar, onRefreshEconomicCalendar }) {
-  const initialDate = selectedDate ? new Date(`${selectedDate}T00:00:00`) : new Date(2026, 4, 1);
+  const initialDate = selectedDate ? new Date(`${selectedDate}T00:00:00`) : new Date();
   const [calendarMonth, setCalendarMonth] = useState(new Date(initialDate.getFullYear(), initialDate.getMonth(), 1));
   const [dayModalDate, setDayModalDate] = useState(null);
   const [selectedNewsCurrencies, setSelectedNewsCurrencies] = useState(["All"]);
