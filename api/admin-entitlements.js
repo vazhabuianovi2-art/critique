@@ -10,11 +10,14 @@ async function readBody(req) {
   return raw ? JSON.parse(raw) : {};
 }
 
+const OWNER_ADMIN_EMAILS = ["vazhabuianovi2@gmail.com"];
+
 function getAdminEmails() {
-  return String(process.env.ADMIN_EMAILS || "")
+  const configuredEmails = String(process.env.ADMIN_EMAILS || "")
     .split(",")
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean);
+  return Array.from(new Set([...OWNER_ADMIN_EMAILS, ...configuredEmails]));
 }
 
 function normalizeEmail(email) {
