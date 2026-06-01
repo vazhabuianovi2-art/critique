@@ -77,6 +77,7 @@ const CUSTOM_STRATEGIES_KEY = "critique_custom_strategies_v1";
 const ECONOMIC_CALENDAR_CACHE_KEY = "critique_economic_calendar_v1";
 const MAX_SCREENSHOTS = 5;
 const BRAND_NAME = "TryCritique";
+const OWNER_ADMIN_EMAILS = ["vazhabuianovi2@gmail.com"];
 const BRAND_MARK = "◉";
 const TRADING_SESSIONS = ["Asia", "London", "NY-AM", "Lunch", "NY-PM", "Pre-Market"];
 const LEGACY_DEFAULT_STRATEGIES = ["Liquidity Sweep", "ICT FVG", "Order Block", "Breaker Block", "Silver Bullet"];
@@ -165,6 +166,10 @@ function isPublicAuthPath() {
   if (typeof window === "undefined") return false;
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
   return path === "/" || path === "/auth/login" || path === "/auth/register" || path === "/auth/forgot";
+}
+
+function isOwnerAdminEmail(email) {
+  return OWNER_ADMIN_EMAILS.includes(String(email || "").trim().toLowerCase());
 }
 
 const SUPABASE_URL = getEnvValue("VITE_SUPABASE_URL");
@@ -6678,8 +6683,9 @@ export default function TradingJournalDashboard() {
   });
   const profileName = getUserDisplayName(authUser, account?.isPlaceholder ? "User" : account.name || "User");
   const profileInitial = String(profileName || authUser?.email || "U").trim().charAt(0).toUpperCase();
-  const navItems = useMemo(() => hasAdminAccess ? [...nav, [ShieldCheck, "Admin"]] : nav, [hasAdminAccess]);
-  const hasBillingAccess = useMemo(() => hasAdminAccess || isSubscriptionAccessActive(billingSubscription), [hasAdminAccess, billingSubscription]);
+  const canUseAdminTools = hasAdminAccess || isOwnerAdminEmail(authUser?.email);
+  const navItems = useMemo(() => canUseAdminTools ? [...nav, [ShieldCheck, "Admin"]] : nav, [canUseAdminTools]);
+  const hasBillingAccess = useMemo(() => canUseAdminTools || isSubscriptionAccessActive(billingSubscription), [canUseAdminTools, billingSubscription]);
   const shouldGateForBilling = Boolean(isAuthenticated && !billingLoading && !hasBillingAccess);
 
   useEffect(() => {
@@ -7901,7 +7907,7 @@ Skipped duplicates: ${duplicateCount}
             profilePhoto={profilePhoto}
             setProfilePhoto={setProfilePhoto}
           />
-        ) : active === "Admin" && hasAdminAccess ? (
+        ) : active === "Admin" && canUseAdminTools ? (
           <AdminAccessPage />
         ) : (
           <BillingPageDodo
