@@ -81,6 +81,8 @@ const ECONOMIC_CALENDAR_CACHE_KEY = "critique_economic_calendar_v1";
 const MAX_SCREENSHOTS = 5;
 const BRAND_NAME = "TryCritique";
 const OWNER_ADMIN_EMAILS = ["vazhabuianovi2@gmail.com"];
+const TAWK_TO_PROPERTY_ID = "6a1ecbced0b6e01c2e34b60c";
+const TAWK_TO_WIDGET_ID = "1jq44o7ki";
 const BRAND_MARK = "◉";
 const TRADING_SESSIONS = ["Asia", "London", "NY-AM", "Lunch", "NY-PM", "Pre-Market"];
 const LEGACY_DEFAULT_STRATEGIES = ["Liquidity Sweep", "ICT FVG", "Order Block", "Breaker Block", "Silver Bullet"];
@@ -7980,7 +7982,7 @@ Skipped duplicates: ${duplicateCount}
         </div>
       </main>
       <MobileBottomNav active={active} setActive={setActive} onAdd={openAddTrade} setTradeViewMode={setTradeViewMode} lockedToBilling={shouldGateForBilling} />
-      <FloatingSupportWidget authUser={authUser} />
+      <TawkToWidget authUser={authUser} />
       <input ref={importFileRef} type="file" accept=".csv,text/csv" onChange={importTradesFromFile} className="hidden" />
       <input ref={backupFileRef} type="file" accept=".json,application/json" onChange={restoreBackupFromFile} className="hidden" />
       {isTradeModalOpen && <AddTradeModal isEditing={Boolean(editingTradeId)} isSaving={isTradeSaving} form={form} setForm={setForm} onClose={closeTradeModal} onSave={saveTrade} account={account} accountBalance={accountBalance} />}
@@ -10587,6 +10589,44 @@ function SettingsPage({ account, accountBalance, authUser, theme, setTheme, isSu
       </div>
     </motion.div>
   );
+}
+
+function TawkToWidget({ authUser }) {
+  useEffect(() => {
+    if (!TAWK_TO_PROPERTY_ID || !TAWK_TO_WIDGET_ID || typeof window === "undefined") return;
+
+    window.Tawk_API = window.Tawk_API || {};
+    window.Tawk_LoadStart = window.Tawk_LoadStart || new Date();
+
+    if (document.getElementById("tawk-to-widget-script")) return;
+
+    const script = document.createElement("script");
+    const firstScript = document.getElementsByTagName("script")[0];
+    script.id = "tawk-to-widget-script";
+    script.async = true;
+    script.src = `https://embed.tawk.to/${TAWK_TO_PROPERTY_ID}/${TAWK_TO_WIDGET_ID}`;
+    script.charset = "UTF-8";
+    script.setAttribute("crossorigin", "*");
+    firstScript?.parentNode?.insertBefore(script, firstScript);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !authUser) return;
+
+    const visitor = {
+      name: authUser.user_metadata?.full_name || authUser.email || BRAND_NAME,
+      email: authUser.email || undefined,
+    };
+
+    window.Tawk_API = window.Tawk_API || {};
+    window.Tawk_API.visitor = visitor;
+
+    if (typeof window.Tawk_API.setAttributes === "function" && visitor.email) {
+      window.Tawk_API.setAttributes(visitor, () => {});
+    }
+  }, [authUser?.id, authUser?.email, authUser?.user_metadata?.full_name]);
+
+  return null;
 }
 
 function FloatingSupportWidget({ authUser }) {
