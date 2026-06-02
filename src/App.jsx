@@ -339,7 +339,7 @@ async function postAdminEntitlements(action, payload = {}) {
 }
 
 async function postSupportReports(action, payload = {}) {
-  const canSendWithoutSession = ["create", "mine", "send_message"].includes(action);
+  const canSendWithoutSession = ["create", "mine", "send_message", "mark_read"].includes(action);
 
   async function sendWithToken(token) {
     const response = await fetch("/api/support-reports", {
@@ -7790,7 +7790,7 @@ Skipped duplicates: ${duplicateCount}
         </div>
         <div className="mt-6 space-y-2">
           {navItems.map(([Icon, label]) => (
-            <button key={label} onClick={() => { setActive(shouldGateForBilling && label !== "Support" ? "Billing" : label); setTradeViewMode(null); }} className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-[1.035] hover:border hover:border-fuchsia-500/30 hover:shadow-[0_0_22px_rgba(217,70,239,0.18)]" : ""} ${active === label && !tradeViewMode ? "bg-fuchsia-500 text-black font-black" : "text-zinc-300 hover:bg-white/5"}`}>
+            <button key={label} onClick={() => { setActive(shouldGateForBilling ? "Billing" : label); setTradeViewMode(null); }} className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-[1.035] hover:border hover:border-fuchsia-500/30 hover:shadow-[0_0_22px_rgba(217,70,239,0.18)]" : ""} ${active === label && !tradeViewMode ? "bg-fuchsia-500 text-black font-black" : "text-zinc-300 hover:bg-white/5"}`}>
               <Icon size={18} /> {label}
             </button>
           ))}
@@ -7823,22 +7823,6 @@ Skipped duplicates: ${duplicateCount}
               >
                 <CreditCard size={17} className="text-zinc-400" strokeWidth={2.2} />
                 Billing
-              </button>
-              <button
-                onClick={() => {
-                  setActive("Support");
-                  setTradeViewMode(null);
-                  setIsSidebarUserMenuOpen(false);
-                }}
-                className="flex w-full items-center gap-4 rounded-lg px-3 py-3 text-left text-sm font-bold text-white transition hover:bg-fuchsia-500/10 hover:text-fuchsia-200"
-              >
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/10 text-fuchsia-300 shadow-[0_0_18px_rgba(217,70,239,0.12)]">
-                  <LifeBuoy size={16} strokeWidth={2.2} />
-                </span>
-                <span>
-                  <span className="block leading-tight">Support</span>
-                  <span className="block text-[11px] font-semibold text-zinc-500">Report bugs or ideas</span>
-                </span>
               </button>
               <div className="my-3 h-px bg-white/10" />
               <button
@@ -7996,6 +7980,7 @@ Skipped duplicates: ${duplicateCount}
         </div>
       </main>
       <MobileBottomNav active={active} setActive={setActive} onAdd={openAddTrade} setTradeViewMode={setTradeViewMode} lockedToBilling={shouldGateForBilling} />
+      <FloatingSupportWidget authUser={authUser} />
       <input ref={importFileRef} type="file" accept=".csv,text/csv" onChange={importTradesFromFile} className="hidden" />
       <input ref={backupFileRef} type="file" accept=".json,application/json" onChange={restoreBackupFromFile} className="hidden" />
       {isTradeModalOpen && <AddTradeModal isEditing={Boolean(editingTradeId)} isSaving={isTradeSaving} form={form} setForm={setForm} onClose={closeTradeModal} onSave={saveTrade} account={account} accountBalance={accountBalance} />}
@@ -8056,12 +8041,11 @@ function MobileBottomNav({ active, setActive, onAdd, setTradeViewMode, lockedToB
     [Calendar, "Calendar"],
     [BarChart3, "Statistics"],
     [Target, "Mistake Detector"],
-    [LifeBuoy, "Support"],
   ];
   return (
     <div className="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-40 border-t border-fuchsia-500/25 bg-black/95 px-2 py-2 backdrop-blur lg:hidden">
       <button onClick={onAdd} className="mobile-nav-fab absolute -top-7 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-2xl bg-fuchsia-500 text-white shadow-[0_0_28px_rgba(217,70,239,.48)]"><Plus size={24} /></button>
-      <div className="grid grid-cols-6 gap-1">
+      <div className="grid grid-cols-5 gap-1">
         {items.map(([Icon, label]) => {
           const isAdd = false;
           const selected = active === label;
@@ -8070,7 +8054,7 @@ function MobileBottomNav({ active, setActive, onAdd, setTradeViewMode, lockedToB
               key={label}
               onClick={() => {
                 setTradeViewMode(null);
-                setActive(lockedToBilling && label !== "Support" ? "Billing" : label);
+                setActive(lockedToBilling ? "Billing" : label);
               }}
               className={isAdd ? "mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-fuchsia-500 text-white shadow-[0_0_22px_rgba(217,70,239,.38)]" : selected ? "flex flex-col items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 px-1 py-2 text-fuchsia-300 transition-all duration-200 hover:scale-110" : `flex flex-col items-center justify-center rounded-xl px-1 py-2 text-zinc-500 transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-110 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" : "hover:text-zinc-300"}`}
             >
@@ -10602,6 +10586,192 @@ function SettingsPage({ account, accountBalance, authUser, theme, setTheme, isSu
         </Card>
       </div>
     </motion.div>
+  );
+}
+
+function FloatingSupportWidget({ authUser }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [reports, setReports] = useState([]);
+  const [activeReportId, setActiveReportId] = useState("");
+  const [draft, setDraft] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const supportEmail = authUser?.email || "";
+  const activeReport = reports.find((report) => report.id === activeReportId) || reports[0] || null;
+  const supportMessages = activeReport ? getSupportMessages(activeReport) : [];
+  const unreadCount = reports.reduce((total, report) => total + Number(report.user_unread_count || 0), 0);
+
+  async function loadSupportThread({ markRead = false } = {}) {
+    try {
+      const data = await postSupportReports("mine", { email: supportEmail });
+      const nextReports = Array.isArray(data.reports) ? data.reports : [];
+      setReports(nextReports);
+      setActiveReportId((current) => current || nextReports[0]?.id || "");
+      if (markRead) {
+        nextReports.filter((report) => Number(report.user_unread_count || 0) > 0).forEach((report) => {
+          postSupportReports("mark_read", { id: report.id, email: supportEmail }).catch(() => {});
+        });
+        setReports((current) => current.map((report) => ({ ...report, user_unread_count: 0 })));
+      }
+    } catch (loadError) {
+      console.warn("Could not load support chat:", loadError?.message || loadError);
+    }
+  }
+
+  useEffect(() => {
+    loadSupportThread();
+  }, [supportEmail]);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => loadSupportThread(), 45000);
+    return () => window.clearInterval(interval);
+  }, [supportEmail]);
+
+  function openWidget() {
+    setIsOpen(true);
+    loadSupportThread({ markRead: true });
+  }
+
+  async function sendChatMessage(textOverride = "") {
+    const text = String(textOverride || draft).trim();
+    if (!text) return;
+    setLoading(true);
+    setError("");
+    try {
+      let data;
+      if (activeReport) {
+        data = await postSupportReports("send_message", {
+          id: activeReport.id,
+          text,
+          name: getUserDisplayName(authUser, ""),
+          email: supportEmail || activeReport.email || "",
+        });
+      } else {
+        data = await postSupportReports("create", {
+          type: "Question",
+          priority: "Medium",
+          title: text.length > 70 ? `${text.slice(0, 67)}...` : text,
+          message: text.length < 10 ? `${text} - support question` : text,
+          name: getUserDisplayName(authUser, ""),
+          email: supportEmail,
+          page: typeof window !== "undefined" ? window.location.href : "",
+          browser: typeof navigator !== "undefined" ? navigator.userAgent : "",
+        });
+      }
+      const saved = data.report;
+      if (saved?.id) {
+        setReports((current) => {
+          const exists = current.some((report) => report.id === saved.id);
+          return exists ? current.map((report) => report.id === saved.id ? { ...report, ...saved, user_unread_count: 0 } : report) : [{ ...saved, user_unread_count: 0 }, ...current];
+        });
+        setActiveReportId(saved.id);
+      }
+      setDraft("");
+    } catch (chatError) {
+      setError(chatError?.message || "Could not send message.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleChatKeyDown(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      sendChatMessage();
+    }
+  }
+
+  return (
+    <div className="fixed bottom-20 right-4 z-[90] sm:bottom-6 sm:right-6">
+      {!isOpen && (
+        <div className="flex flex-col items-end gap-3">
+          <div className="hidden flex-col items-end gap-2 sm:flex">
+            <div className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-zinc-900 shadow-[0_18px_45px_rgba(0,0,0,0.35)]">Hi! How can we help?</div>
+            <button type="button" onClick={() => { openWidget(); sendChatMessage("I have a question"); }} className="rounded-xl border border-violet-400/30 bg-white px-4 py-2 text-sm font-semibold text-violet-600 shadow-lg transition hover:-translate-y-0.5 hover:border-violet-500">
+              I have a question
+            </button>
+            <button type="button" onClick={() => { openWidget(); sendChatMessage("Tell me more about TryCritique"); }} className="rounded-xl border border-violet-400/30 bg-white px-4 py-2 text-sm font-semibold text-violet-600 shadow-lg transition hover:-translate-y-0.5 hover:border-violet-500">
+              Tell me more
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={openWidget}
+            className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white shadow-[0_18px_45px_rgba(139,92,246,0.45)] transition hover:scale-105"
+            aria-label="Open customer support chat"
+          >
+            <MessageSquare size={30} fill="currentColor" className="drop-shadow" />
+            {unreadCount > 0 && <span className="absolute -right-1 -top-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-black text-white">{unreadCount}</span>}
+          </button>
+        </div>
+      )}
+
+      {isOpen && (
+        <motion.div initial={{ opacity: 0, y: 16, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="w-[calc(100vw-2rem)] max-w-[390px] overflow-hidden rounded-3xl border border-violet-500/25 bg-white text-zinc-900 shadow-[0_28px_90px_rgba(0,0,0,0.55)]">
+          <div className="flex items-center justify-between bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 py-4 text-white">
+            <button type="button" onClick={() => setIsOpen(false)} className="rounded-full p-1 transition hover:bg-white/15" aria-label="Close support chat">
+              <ChevronLeft size={22} />
+            </button>
+            <div className="text-lg font-black">Customer Support</div>
+            <button type="button" onClick={() => loadSupportThread({ markRead: true })} className="rounded-full p-1 transition hover:bg-white/15" aria-label="Refresh support chat">
+              <ListChecks size={21} />
+            </button>
+          </div>
+
+          <div className="h-[430px] overflow-y-auto bg-zinc-50 px-5 py-5">
+            <div className="mb-5 flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-200 text-xl">👋</div>
+              <div>
+                <div className="mb-1 text-xs font-semibold text-zinc-500">Customer Support</div>
+                <div className="rounded-2xl bg-violet-500 px-4 py-3 text-sm font-bold text-white shadow-md">Hi! How can we help?</div>
+              </div>
+            </div>
+
+            {!supportMessages.length && (
+              <div className="mb-5 flex flex-col items-end gap-2">
+                {["I have a question", "Report a problem", "Billing help"].map((quickText) => (
+                  <button key={quickText} type="button" onClick={() => sendChatMessage(quickText)} disabled={loading} className="rounded-xl border border-violet-400/40 bg-white px-4 py-2 text-sm font-semibold text-violet-600 shadow-sm transition hover:bg-violet-50 disabled:opacity-60">
+                    {quickText}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="space-y-3">
+              {supportMessages.map((message) => {
+                const isAdminMessage = String(message.sender || "user").toLowerCase() === "admin";
+                return (
+                  <div key={message.id || `${message.sender}-${message.created_at}`} className={isAdminMessage ? "flex justify-start" : "flex justify-end"}>
+                    <div className={isAdminMessage ? "max-w-[82%] rounded-2xl bg-violet-500 px-4 py-3 text-sm font-semibold leading-6 text-white shadow-md" : "max-w-[82%] rounded-2xl border border-violet-300 bg-white px-4 py-3 text-sm font-semibold leading-6 text-violet-700 shadow-sm"}>
+                      {message.text}
+                      {message.created_at && <div className={isAdminMessage ? "mt-1 text-[10px] text-violet-100/80" : "mt-1 text-[10px] text-violet-400"}>{new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {error && <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-bold text-red-600">{error}</div>}
+          </div>
+
+          <div className="border-t border-zinc-200 bg-white p-4">
+            <div className="flex items-end gap-2">
+              <Textarea
+                value={draft}
+                onChange={(event) => setDraft(event.target.value)}
+                onKeyDown={handleChatKeyDown}
+                placeholder="Type here and press enter..."
+                className="min-h-[44px] resize-none border-0 bg-transparent text-sm text-zinc-900 shadow-none outline-none focus-visible:ring-0"
+              />
+              <button type="button" onClick={() => sendChatMessage()} disabled={loading || !draft.trim()} className="mb-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-violet-500 text-white transition hover:bg-violet-600 disabled:bg-zinc-300">
+                <Send size={18} />
+              </button>
+            </div>
+            <div className="mt-2 text-center text-[11px] font-semibold text-zinc-400">Powered by TryCritique</div>
+          </div>
+        </motion.div>
+      )}
+    </div>
   );
 }
 

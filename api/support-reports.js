@@ -207,6 +207,30 @@ export default async function handler(req, res) {
       return json(res, 200, { ok: true, report: Array.isArray(data) ? data[0] : data, message });
     }
 
+    if (action === "mark_read") {
+      const id = String(body.id || "");
+      if (!id) return json(res, 400, { ok: false, error: "Report id is required." });
+
+      const lookupResponse = await fetch(`${supabaseUrl}/rest/v1/support_reports?id=eq.${encodeURIComponent(id)}&select=*&limit=1`, { headers });
+      const rows = await supabaseJson(lookupResponse, "Could not load support report.");
+      const report = Array.isArray(rows) ? rows[0] : null;
+      if (!report) return json(res, 404, { ok: false, error: "Support report not found." });
+
+      const reportEmail = normalizeEmail(report.email);
+      const readerEmail = requesterEmail || normalizeEmail(body.email);
+      const canUserRead = Boolean(user?.id && report.user_id === user.id) || Boolean(readerEmail && reportEmail && readerEmail === reportEmail);
+      if (!isAdmin && !canUserRead) return json(res, 403, { ok: false, error: "You cannot update this report." });
+
+      const payload = isAdmin ? { admin_unread_count: 0 } : { user_unread_count: 0 };
+      const response = await fetch(`${supabaseUrl}/rest/v1/support_reports?id=eq.${encodeURIComponent(id)}&select=*`, {
+        method: "PATCH",
+        headers: { ...headers, Prefer: "return=representation" },
+        body: JSON.stringify(payload),
+      });
+      const data = await supabaseJson(response, "Could not update support report.");
+      return json(res, 200, { ok: true, report: Array.isArray(data) ? data[0] : data });
+    }
+
     if (!isAdmin) return json(res, 403, { ok: false, error: "Admin access required." });
 
     if (action === "list") {
