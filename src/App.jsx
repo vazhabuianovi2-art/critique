@@ -3,7 +3,6 @@ import { createClient } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
 import {
   BarChart3,
-  Bell,
   BookOpen,
   Calendar,
   Camera,
@@ -10434,16 +10433,7 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
     }
   });
   const timezoneOptions = useMemo(() => getTimezoneOptions(), []);
-  const [notifications, setNotifications] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("critique_notification_settings_v1") || "null") || { tradeEmail: true, tradePush: true, weeklyReports: true, goals: true, marketing: false };
-    } catch {
-      return { tradeEmail: true, tradePush: true, weeklyReports: true, goals: true, marketing: false };
-    }
-  });
-
   useEffect(() => { localStorage.setItem("critique_settings_preferences_v1", JSON.stringify(preferences)); }, [preferences]);
-  useEffect(() => { localStorage.setItem("critique_notification_settings_v1", JSON.stringify(notifications)); }, [notifications]);
 
   async function uploadProfilePhoto(event) {
     const file = event.target.files?.[0];
@@ -10569,7 +10559,6 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
     setMessage("Trading preferences saved.");
   }
 
-  const toggleNotification = (key) => setNotifications((current) => ({ ...current, [key]: !current[key] }));
   const canChangePassword = Boolean(currentPassword) && newPassword.length >= 6 && newPassword === confirmPassword;
   const passwordMessageClass = passwordStatus === "success"
     ? "rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm font-black text-emerald-300"
@@ -10648,15 +10637,6 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
           </SettingsPanel>
         </div>
       </div>
-
-      <SettingsPanel icon={<Bell size={25} />} title="Notifications" subtitle="Choose what notifications you want to receive" className="mt-6">
-        <div className="mt-7 space-y-5">
-          {[["tradeEmail", "Trade Confirmations (Email)", "Get email notifications when trades are executed"], ["tradePush", "Trade Confirmations (Push)", "Get push notifications when trades are executed"], ["weeklyReports", "Weekly Reports", "Receive weekly performance summaries"], ["goals", "Goal Achievements", "Celebrate when you reach your goals"], ["marketing", "Marketing Updates", "Product updates and trading tips"]].map(([key, title, detail]) => (
-            <div key={key} className="flex items-center justify-between gap-4"><div><div className="font-black text-white">{title}</div><div className="text-sm font-semibold text-zinc-400">{detail}</div></div><SettingsToggle checked={Boolean(notifications[key])} onClick={() => toggleNotification(key)} /></div>
-          ))}
-        </div>
-        <div className="mt-6 flex justify-end"><Button className="bg-fuchsia-500 text-black"><Save size={16} /> Save Notifications</Button></div>
-      </SettingsPanel>
 
       <SettingsPanel icon={<Database size={25} />} title="Trading Accounts" subtitle="Manage your trading accounts and view account statistics. Each account keeps its trades separate." className="mt-6">
         <button onClick={onOpenAccount} className="mt-7 flex w-full items-center justify-between rounded-lg border border-fuchsia-500 bg-fuchsia-950/20 px-5 py-4 text-left">
