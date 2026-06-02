@@ -518,13 +518,17 @@ function getActiveAccountKey(userId) {
   return userId ? `${ACTIVE_ACCOUNT_KEY}_${userId}` : ACTIVE_ACCOUNT_KEY;
 }
 
-function readStoredAccounts(userId) {
+function readStoredAccounts(userId, includeLegacy = !userId) {
   try {
     const savedAccounts = JSON.parse(localStorage.getItem(getAccountsKey(userId)) || "null");
     if (Array.isArray(savedAccounts) && savedAccounts.length) {
       return savedAccounts.map((item, index) => ({ ...defaultAccount, ...item, id: item.id || `acc-${index + 1}` }));
     }
-    if (userId) return [];
+    if (userId && !includeLegacy) return [];
+    const legacyAccounts = JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || "null");
+    if (Array.isArray(legacyAccounts) && legacyAccounts.length) {
+      return legacyAccounts.map((item, index) => ({ ...defaultAccount, ...item, id: item.id || `acc-${index + 1}` }));
+    }
     const legacyAccount = JSON.parse(localStorage.getItem(ACCOUNT_KEY) || "null");
     return legacyAccount?.id ? [{ ...defaultAccount, ...legacyAccount, id: legacyAccount.id }] : [];
   } catch {
@@ -6612,13 +6616,13 @@ function setJsonStorageItem(key, value, compactValue = value) {
   }
 }
 
-function readLocalTradesFallback(userId) {
+function readLocalTradesFallback(userId, includeLegacy = !userId) {
   try {
     const userSaved = JSON.parse(localStorage.getItem(getUserTradesKey(userId)) || "[]");
     if (Array.isArray(userSaved) && userSaved.length) return filterDeletedTrades(userSaved.map(normalizeTradeForStorage), userId);
     const userBackup = JSON.parse(localStorage.getItem(getUserTradesBackupKey(userId)) || "[]");
     if (Array.isArray(userBackup) && userBackup.length) return filterDeletedTrades(userBackup.map(normalizeTradeForStorage), userId);
-    if (userId) return [];
+    if (userId && !includeLegacy) return [];
 
     const oldSaved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
     return Array.isArray(oldSaved) ? filterDeletedTrades(oldSaved.map(normalizeTradeForStorage), userId) : [];
@@ -6906,7 +6910,8 @@ export default function TradingJournalDashboard() {
     setHasLoadedRemoteTrades(false);
     setDataMessage("");
     const cachedRestore = readRestoreCache(authUser.id);
-    const cachedTrades = filterDeletedTrades(mergeTradesUnique(readLocalTradesFallback(authUser.id), Array.isArray(cachedRestore?.trades) ? cachedRestore.trades : []), authUser.id);
+    const browserTrades = mergeTradesUnique(Array.isArray(trades) ? trades : [], readLocalTradesFallback(authUser.id, true));
+    const cachedTrades = filterDeletedTrades(mergeTradesUnique(browserTrades, Array.isArray(cachedRestore?.trades) ? cachedRestore.trades : []), authUser.id);
     if (cachedTrades.length) {
       setTrades(cachedTrades);
     } else {
@@ -6979,7 +6984,7 @@ export default function TradingJournalDashboard() {
       })
       .catch(async (error) => {
         if (!mounted) return;
-        const localTrades = readLocalTradesFallback(authUser.id);
+        const localTrades = mergeTradesUnique(Array.isArray(trades) ? trades : [], readLocalTradesFallback(authUser.id, true));
         if (localTrades.length) {
           setTrades(localTrades);
           saveRestoreCache(authUser.id, { trades: localTrades, account, routine, theme });
@@ -7056,8 +7061,13 @@ export default function TradingJournalDashboard() {
     }
     setHasLoadedRemoteAccount(false);
     accountStorageUserRef.current = authUser.id;
-    setAccounts(readStoredAccounts(authUser.id));
-    setActiveAccountId(readStoredActiveAccountId(authUser.id));
+    const storedAccounts = readStoredAccounts(authUser.id, true);
+    setAccounts((current) => mergeAccountsUnique(current, storedAccounts));
+    setActiveAccountId((current) => {
+      const savedActiveId = readStoredActiveAccountId(authUser.id) || current;
+      const mergedAccounts = mergeAccountsUnique(accounts, storedAccounts);
+      return mergedAccounts.some((item) => String(item.id) === String(savedActiveId)) ? savedActiveId : mergedAccounts[0]?.id || "";
+    });
     setPendingAccountDraft(null);
   }, [authUser?.id, isAuthenticated]);
 
@@ -7096,7 +7106,7 @@ export default function TradingJournalDashboard() {
     loadAccountBundleFromSupabase(authUser.id)
       .then((profileBundle) => {
         if (!mounted) return;
-        const localAccounts = readStoredAccounts(authUser.id);
+        const localAccounts = mergeAccountsUnique(accounts, readStoredAccounts(authUser.id, true));
         const mergedAccounts = mergeAccountsUnique(localAccounts, profileBundle.accounts);
         const savedActiveId = readStoredActiveAccountId(authUser.id);
         const nextActiveId = mergedAccounts.some((item) => String(item.id) === String(profileBundle.activeAccountId))
