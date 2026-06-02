@@ -11267,104 +11267,6 @@ function SupportReportCard({
   );
 }
 
-function AdminSupportInbox() {
-  const [reports, setReports] = useState([]);
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [replyDrafts, setReplyDrafts] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  async function loadReports(nextStatus = statusFilter) {
-    setLoading(true);
-    setError("");
-    try {
-      const data = await postSupportReports("list", { status: nextStatus });
-      setReports(Array.isArray(data.reports) ? data.reports : []);
-    } catch (loadError) {
-      setError(loadError?.message || "Could not load support inbox.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadReports(statusFilter);
-  }, []);
-
-  async function updateReportStatus(report, status) {
-    setLoading(true);
-    setError("");
-    try {
-      const data = await postSupportReports("update", { id: report.id, status, adminNote: report.admin_note || "" });
-      const saved = data.report;
-      setReports((current) => current.map((item) => item.id === report.id ? { ...item, ...saved } : item));
-    } catch (updateError) {
-      setError(updateError?.message || "Could not update support report.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function sendAdminReply(report) {
-    const text = String(replyDrafts[report.id] || "").trim();
-    if (!text) return;
-    setLoading(true);
-    setError("");
-    try {
-      const data = await postSupportReports("send_message", { id: report.id, text });
-      const saved = data.report;
-      setReports((current) => current.map((item) => item.id === report.id ? { ...item, ...saved } : item));
-      setReplyDrafts((current) => ({ ...current, [report.id]: "" }));
-    } catch (replyError) {
-      setError(replyError?.message || "Could not save admin reply.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function changeStatusFilter(nextStatus) {
-    setStatusFilter(nextStatus);
-    loadReports(nextStatus);
-  }
-
-  return (
-    <section className="mt-8 rounded-lg border border-white/10 bg-[#070707] p-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h2 className="text-2xl font-black text-white">Support Inbox</h2>
-          <p className="mt-1 text-sm font-semibold text-zinc-400">Reports, bugs, and product ideas from users.</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {["all", "open", "in_progress", "resolved", "closed"].map((status) => (
-            <button key={status} type="button" onClick={() => changeStatusFilter(status)} className={statusFilter === status ? "rounded-lg border border-fuchsia-400/60 bg-fuchsia-500/18 px-3 py-2 text-xs font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-xs font-black text-zinc-400 hover:border-fuchsia-500/35 hover:text-fuchsia-200"}>
-              {status.replaceAll("_", " ")}
-            </button>
-          ))}
-          <Button type="button" onClick={() => loadReports()} disabled={loading} variant="outline" className="border-white/10 bg-white/[0.04] text-white">{loading ? "Loading..." : "Refresh"}</Button>
-        </div>
-      </div>
-      {error && <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200">{error}</div>}
-      <div className="mt-5 grid gap-3">
-        {reports.length ? reports.map((report) => (
-          <SupportReportCard
-            key={report.id}
-            report={report}
-            onStatusChange={updateReportStatus}
-            loading={loading}
-            unreadCount={Number(report.admin_unread_count || 0)}
-            replyValue={replyDrafts[report.id] || ""}
-            onReplyChange={(value) => setReplyDrafts((current) => ({ ...current, [report.id]: value }))}
-            onReplySend={() => sendAdminReply(report)}
-            replyButtonLabel="Reply to Sender"
-          />
-        )) : (
-          <div className="rounded-xl border border-white/10 bg-black/40 p-8 text-center text-sm font-bold text-zinc-500">No support reports found.</div>
-        )}
-      </div>
-    </section>
-  );
-}
-
 function AdminAccessPage() {
   const [email, setEmail] = useState("");
   const [grants, setGrants] = useState([]);
@@ -11502,7 +11404,6 @@ function AdminAccessPage() {
           </div>
         </section>
 
-        <AdminSupportInbox />
       </div>
     </motion.div>
   );
