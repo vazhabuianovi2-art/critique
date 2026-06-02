@@ -540,6 +540,66 @@ function readStoredActiveAccountId(userId) {
   }
 }
 
+function normalizeAccountForStorage(account, fallbackId = `acc-${Date.now()}`) {
+  return {
+    ...defaultAccount,
+    ...(account || {}),
+    id: account?.id || fallbackId,
+    name: String(account?.name || "").trim() || defaultAccount.name,
+    balance: Number(account?.balance ?? defaultAccount.balance ?? 0),
+    isPlaceholder: false,
+  };
+}
+
+function normalizeAccountsList(accountsToNormalize = []) {
+  const seen = new Set();
+  return (Array.isArray(accountsToNormalize) ? accountsToNormalize : [])
+    .filter((item) => item && typeof item === "object" && !item.isPlaceholder)
+    .map((item, index) => normalizeAccountForStorage(item, item.id || `acc-${index + 1}`))
+    .filter((item) => {
+      const key = String(item.id);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+
+function mergeAccountsUnique(primary = [], secondary = []) {
+  return normalizeAccountsList([...primary, ...secondary]);
+}
+
+function buildAccountBundle(accountsToSave = [], activeId = "") {
+  const normalizedAccounts = normalizeAccountsList(accountsToSave);
+  const activeAccount = normalizedAccounts.find((item) => String(item.id) === String(activeId)) || normalizedAccounts[0] || null;
+  return {
+    schemaVersion: 2,
+    account: activeAccount,
+    accounts: normalizedAccounts,
+    activeAccountId: activeAccount?.id || "",
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function parseAccountBundle(accountData) {
+  if (!accountData || typeof accountData !== "object") return { accounts: [], activeAccountId: "" };
+  if (Array.isArray(accountData.accounts)) {
+    const accounts = normalizeAccountsList(accountData.accounts);
+    const activeAccountId = accounts.some((item) => String(item.id) === String(accountData.activeAccountId))
+      ? accountData.activeAccountId
+      : accounts[0]?.id || "";
+    return { accounts, activeAccountId };
+  }
+  if (accountData.account && typeof accountData.account === "object") {
+    const accounts = normalizeAccountsList([accountData.account]);
+    return { accounts, activeAccountId: accounts[0]?.id || "" };
+  }
+  if (accountData.id || accountData.name || accountData.balance) {
+    const accounts = normalizeAccountsList([accountData]);
+    return { accounts, activeAccountId: accounts[0]?.id || "" };
+  }
+  return { accounts: [], activeAccountId: "" };
+}
+
 function getStoredProfilePhoto(user) {
   const metadataPhoto = user?.user_metadata?.profile_photo || user?.user_metadata?.avatar_url || "";
   if (metadataPhoto) return metadataPhoto;
@@ -6409,7 +6469,8 @@ async function loadAccountFromSupabase(userId) {
   if (!supabase || !userId) return null;
   const result = await postSupabaseSync("loadAccount");
   const accountData = result?.account;
-  return accountData && typeof accountData === "object" && Object.keys(accountData).length ? accountData : null;
+  const bundle = parseAccountBundle(accountData);
+  return bundle.accounts[0] || null;
 }
 
 async function saveAccountToSupabase(userId, account) {
@@ -6423,6 +6484,19 @@ async function saveAccountToSupabase(userId, account) {
 
   const result = await postSupabaseSync("saveAccount", { account: normalizedAccount });
   return result?.account || normalizedAccount;
+}
+
+async function loadAccountBundleFromSupabase(userId) {
+  if (!supabase || !userId) return { accounts: [], activeAccountId: "" };
+  const result = await postSupabaseSync("loadAccountBundle");
+  return parseAccountBundle(result?.accountData);
+}
+
+async function saveAccountBundleToSupabase(userId, accountsToSave, activeId) {
+  const accountData = buildAccountBundle(accountsToSave, activeId);
+  if (!supabase || !userId || !accountData.accounts.length) return accountData;
+  const result = await postSupabaseSync("saveAccountBundle", { accountData });
+  return result?.accountData || accountData;
 }
 
 function getRestoreCacheKey(userId) {
@@ -6718,6 +6792,7 @@ export default function TradingJournalDashboard() {
   const [passwordRecoverySession, setPasswordRecoverySession] = useState(false);
   const [tradesLoading, setTradesLoading] = useState(false);
   const [hasLoadedRemoteTrades, setHasLoadedRemoteTrades] = useState(false);
+  const [hasLoadedRemoteAccount, setHasLoadedRemoteAccount] = useState(false);
   const [billingSubscription, setBillingSubscription] = useState(null);
   const [billingLoading, setBillingLoading] = useState(false);
   const [billingGateMessage, setBillingGateMessage] = useState("");
@@ -6958,7 +7033,28 @@ export default function TradingJournalDashboard() {
   }, [accounts, account, authUser?.id]);
 
   useEffect(() => {
-    if (!authUser?.id || !isAuthenticated) return;
+    if (!supabase || !authUser?.id || !isAuthenticated || !hasLoadedRemoteAccount) return undefined;
+    const cloudAccounts = normalizeAccountsList(accounts);
+    if (!cloudAccounts.length) return undefined;
+
+    const timeoutId = window.setTimeout(() => {
+      saveAccountBundleToSupabase(authUser.id, cloudAccounts, activeAccountId)
+        .catch((error) => {
+          if (!isSupabaseAuthExpiredError(error)) {
+            console.warn("Could not sync trading accounts to Supabase:", error?.message || error);
+          }
+        });
+    }, 700);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [accounts, activeAccountId, authUser?.id, hasLoadedRemoteAccount, isAuthenticated]);
+
+  useEffect(() => {
+    if (!authUser?.id || !isAuthenticated) {
+      setHasLoadedRemoteAccount(false);
+      return;
+    }
+    setHasLoadedRemoteAccount(false);
     accountStorageUserRef.current = authUser.id;
     setAccounts(readStoredAccounts(authUser.id));
     setActiveAccountId(readStoredActiveAccountId(authUser.id));
@@ -6997,20 +7093,28 @@ export default function TradingJournalDashboard() {
     if (!supabase || !authUser?.id || !isAuthenticated) return undefined;
     let mounted = true;
 
-    loadAccountFromSupabase(authUser.id)
-      .then((profileAccount) => {
-        if (!mounted || !profileAccount) return;
-        setAccounts((current) => {
-          const normalized = { ...defaultAccount, ...profileAccount, id: profileAccount.id || activeAccountId || defaultAccount.id, balance: Number(profileAccount.balance || defaultAccount.balance) };
-          const exists = current.some((item) => String(item.id) === String(normalized.id));
-          return exists ? current.map((item) => String(item.id) === String(normalized.id) ? normalized : item) : [normalized, ...current];
-        });
+    loadAccountBundleFromSupabase(authUser.id)
+      .then((profileBundle) => {
+        if (!mounted) return;
+        const localAccounts = readStoredAccounts(authUser.id);
+        const mergedAccounts = mergeAccountsUnique(localAccounts, profileBundle.accounts);
+        const savedActiveId = readStoredActiveAccountId(authUser.id);
+        const nextActiveId = mergedAccounts.some((item) => String(item.id) === String(profileBundle.activeAccountId))
+          ? profileBundle.activeAccountId
+          : mergedAccounts.some((item) => String(item.id) === String(savedActiveId))
+            ? savedActiveId
+            : mergedAccounts[0]?.id || "";
+        setAccounts(mergedAccounts);
+        setActiveAccountId(nextActiveId);
       })
       .catch((error) => {
         if (isSupabaseAuthExpiredError(error)) {
           return;
         }
         console.warn("Could not load account profile from Supabase:", error?.message || error);
+      })
+      .finally(() => {
+        if (mounted) setHasLoadedRemoteAccount(true);
       });
 
     return () => {

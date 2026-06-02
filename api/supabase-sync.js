@@ -131,6 +131,16 @@ export default async function handler(request, response) {
       return json(response, 200, { account: row?.account_data || null });
     }
 
+    if (action === "loadAccountBundle") {
+      const upstream = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=account_data&limit=1`, {
+        headers,
+      });
+      const result = await upstream.json().catch(() => null);
+      if (!upstream.ok) return json(response, upstream.status, { error: result?.message || "Could not load account profile." });
+      const row = Array.isArray(result) ? result[0] : null;
+      return json(response, 200, { accountData: row?.account_data || null });
+    }
+
     if (action === "saveAccount") {
       const account = body.account && typeof body.account === "object" ? body.account : null;
       if (!account) return json(response, 400, { error: "Account is missing." });
@@ -147,6 +157,24 @@ export default async function handler(request, response) {
       if (!upstream.ok) return json(response, upstream.status, { error: result?.message || "Could not save account profile." });
       const row = Array.isArray(result) ? result[0] : result;
       return json(response, 200, { account: row?.account_data || account });
+    }
+
+    if (action === "saveAccountBundle") {
+      const accountData = body.accountData && typeof body.accountData === "object" ? body.accountData : null;
+      if (!accountData) return json(response, 400, { error: "Account data is missing." });
+      const upstream = await fetch(`${supabaseUrl}/rest/v1/profiles?on_conflict=id&select=account_data`, {
+        method: "POST",
+        headers: { ...headers, Prefer: "resolution=merge-duplicates,return=representation" },
+        body: JSON.stringify({
+          id: userId,
+          account_data: accountData,
+          updated_at: new Date().toISOString(),
+        }),
+      });
+      const result = await upstream.json().catch(() => null);
+      if (!upstream.ok) return json(response, upstream.status, { error: result?.message || "Could not save account profile." });
+      const row = Array.isArray(result) ? result[0] : result;
+      return json(response, 200, { accountData: row?.account_data || accountData });
     }
 
     if (action === "replaceTrades") {
