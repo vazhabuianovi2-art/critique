@@ -14600,6 +14600,7 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
     password: "",
     confirm: "",
     remember: Boolean(rememberedEmail),
+    agreedToTerms: false,
   });
   const [error, setError] = useState("");
 
@@ -14618,8 +14619,20 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
       setError("Password must be at least 6 characters.");
       return;
     }
+    if ((isRegister || isUpdatePassword) && !/[A-Z]/.test(String(form.password || ""))) {
+      setError("Password needs at least one uppercase letter.");
+      return;
+    }
+    if ((isRegister || isUpdatePassword) && !/\d/.test(String(form.password || ""))) {
+      setError("Password needs at least one number.");
+      return;
+    }
     if ((isRegister || isUpdatePassword) && form.password !== form.confirm) {
       setError("Passwords do not match.");
+      return;
+    }
+    if (isRegister && !form.agreedToTerms) {
+      setError("Please agree to the Terms of Service and Privacy Policy.");
       return;
     }
     setError("");
@@ -14651,6 +14664,14 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
     : isLight
       ? "mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold leading-6 text-emerald-700"
       : "mt-6 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm font-bold leading-6 text-emerald-300";
+  const passwordValue = String(form.password || "");
+  const passwordRules = [
+    { id: "length", label: "Minimum 6 characters", valid: passwordValue.length >= 6 },
+    { id: "uppercase", label: "At least one uppercase letter", valid: /[A-Z]/.test(passwordValue) },
+    { id: "number", label: "At least one number", valid: /\d/.test(passwordValue) },
+  ];
+  const shouldShowPasswordRules = (isRegister || isUpdatePassword) && passwordValue.length > 0 && passwordRules.some((rule) => !rule.valid);
+  const canSubmitAuth = !authLoading && (!isRegister || form.agreedToTerms);
 
   return (
     <div className={isLight ? "auth-shell relative min-h-screen overflow-hidden bg-[#f8fafc] text-slate-950" : "auth-shell relative min-h-screen overflow-hidden bg-black text-white"}>
@@ -14711,6 +14732,20 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
                 </AuthField>
               )}
 
+              {shouldShowPasswordRules && (
+                <div className={isLight ? "rounded-2xl border border-red-200 bg-red-50 px-4 py-3" : "rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3"}>
+                  <div className={isLight ? "text-xs font-black uppercase tracking-[0.14em] text-red-600" : "text-xs font-black uppercase tracking-[0.14em] text-red-300"}>Password requirements</div>
+                  <div className="mt-2 grid gap-1.5">
+                    {passwordRules.filter((rule) => !rule.valid).map((rule) => (
+                      <div key={rule.id} className={isLight ? "flex items-center gap-2 text-sm font-bold text-red-700" : "flex items-center gap-2 text-sm font-bold text-red-200"}>
+                        <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
+                        {rule.label}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {(isRegister || isUpdatePassword) && (
                 <AuthField label="Confirm password" icon="🔐">
                   <Input id="auth-confirm-password" name="confirm-password" type={showPassword ? "text" : "password"} autoComplete="new-password" value={form.confirm} onChange={(e) => update("confirm", e.target.value)} placeholder="Repeat your password" className={authInputClass} />
@@ -14735,15 +14770,23 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
               {error && <div className={isForgot ? "rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm font-bold text-amber-300" : "rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-300"}>{error}</div>}
 
               {isRegister && (
-                <p className={isLight ? "text-xs font-semibold leading-5 text-slate-500" : "text-xs font-semibold leading-5 text-zinc-500"}>
-                  By creating an account, you agree to the{" "}
-                  <button type="button" onClick={() => setAuthPage("terms")} className="font-black text-fuchsia-400 hover:text-fuchsia-300">Terms</button>
-                  {" "}and acknowledge the{" "}
-                  <button type="button" onClick={() => setAuthPage("privacy")} className="font-black text-fuchsia-400 hover:text-fuchsia-300">Privacy Policy</button>.
-                </p>
+                <label className={isLight ? "flex cursor-pointer items-start gap-3 text-sm font-semibold leading-6 text-slate-600" : "flex cursor-pointer items-start gap-3 text-sm font-semibold leading-6 text-zinc-400"}>
+                  <input
+                    type="checkbox"
+                    checked={form.agreedToTerms}
+                    onChange={(event) => update("agreedToTerms", event.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-fuchsia-400 bg-black text-fuchsia-500 focus:ring-fuchsia-500"
+                  />
+                  <span>
+                    I agree to the{" "}
+                    <button type="button" onClick={(event) => { event.preventDefault(); setAuthPage("terms"); }} className="font-black text-fuchsia-400 hover:text-fuchsia-300">Terms of Service</button>
+                    {" "}and{" "}
+                    <button type="button" onClick={(event) => { event.preventDefault(); setAuthPage("privacy"); }} className="font-black text-fuchsia-400 hover:text-fuchsia-300">Privacy Policy</button>
+                  </span>
+                </label>
               )}
 
-              <button type="submit" disabled={authLoading} className="auth-submit-button group flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-sm font-black text-white shadow-[0_18px_36px_rgba(217,70,239,0.24)] transition hover:scale-[1.01] hover:shadow-[0_20px_44px_rgba(217,70,239,0.34)] disabled:cursor-not-allowed disabled:opacity-60">
+              <button type="submit" disabled={!canSubmitAuth} className="auth-submit-button group flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-sm font-black text-white shadow-[0_18px_36px_rgba(217,70,239,0.24)] transition hover:scale-[1.01] hover:shadow-[0_20px_44px_rgba(217,70,239,0.34)] disabled:cursor-not-allowed disabled:opacity-60">
                 <span className="relative z-10">{authLoading ? "Please wait..." : isLogin ? "Sign in" : isRegister ? "Create account" : isUpdatePassword ? "Update password" : "Send reset link"}</span>
                 <span className="relative z-10 transition group-hover:translate-x-1">→</span>
               </button>
@@ -14754,6 +14797,15 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
               {isRegister && <>Already have an account? <button onClick={() => setAuthPage("login")} className="font-black text-fuchsia-300 hover:text-fuchsia-200">Sign in</button></>}
               {(isForgot || isUpdatePassword) && <button onClick={() => setAuthPage("login")} className="font-black text-fuchsia-300 hover:text-fuchsia-200">← Back to sign in</button>}
             </div>
+            {isRegister && (
+              <div className={isLight ? "mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm font-bold text-emerald-600" : "mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm font-bold text-emerald-300"}>
+                <span>✓ 7-day free trial</span>
+                <span className={isLight ? "text-slate-300" : "text-zinc-700"}>•</span>
+                <span>✓ Full access to all features</span>
+                <span className={isLight ? "text-slate-300" : "text-zinc-700"}>•</span>
+                <span>✓ Cancel anytime</span>
+              </div>
+            )}
           </motion.div>
         </div>
 
