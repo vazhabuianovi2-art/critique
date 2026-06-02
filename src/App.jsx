@@ -10631,7 +10631,7 @@ function SupportCenterPage({ authUser }) {
 
   useEffect(() => {
     loadMine();
-  }, []);
+  }, [authUser?.id, authUser?.email]);
 
   function updateForm(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -10777,7 +10777,12 @@ function SupportReportCard({ report, compact = false, onStatusChange, loading = 
           </div>
           <h3 className="mt-3 truncate text-lg font-black text-white">{report?.title}</h3>
           <p className={`${compact ? "line-clamp-2" : ""} mt-2 text-sm font-semibold leading-6 text-zinc-400`}>{report?.message}</p>
-          {!compact && report?.admin_note && <p className="mt-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm font-semibold text-emerald-100">{report.admin_note}</p>}
+          {report?.admin_note && (
+            <div className="mt-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3">
+              <div className="text-[11px] font-black uppercase tracking-[0.14em] text-emerald-300">Admin reply</div>
+              <p className={`${compact ? "line-clamp-3" : ""} mt-1 text-sm font-semibold leading-6 text-emerald-100`}>{report.admin_note}</p>
+            </div>
+          )}
           <div className="mt-3 text-xs font-semibold text-zinc-600">{report?.email || "unknown"} - {report?.created_at ? new Date(report.created_at).toLocaleString() : ""}</div>
         </div>
         {onStatusChange && (
@@ -10796,6 +10801,7 @@ function SupportReportCard({ report, compact = false, onStatusChange, loading = 
 function AdminSupportInbox() {
   const [reports, setReports] = useState([]);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [replyDrafts, setReplyDrafts] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -10830,6 +10836,22 @@ function AdminSupportInbox() {
     }
   }
 
+  async function saveAdminReply(report) {
+    const adminNote = String(replyDrafts[report.id] ?? report.admin_note ?? "").trim();
+    setLoading(true);
+    setError("");
+    try {
+      const data = await postSupportReports("update", { id: report.id, status: report.status || "open", adminNote });
+      const saved = data.report;
+      setReports((current) => current.map((item) => item.id === report.id ? { ...item, ...saved } : item));
+      setReplyDrafts((current) => ({ ...current, [report.id]: saved?.admin_note || "" }));
+    } catch (replyError) {
+      setError(replyError?.message || "Could not save admin reply.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   function changeStatusFilter(nextStatus) {
     setStatusFilter(nextStatus);
     loadReports(nextStatus);
@@ -10854,7 +10876,26 @@ function AdminSupportInbox() {
       {error && <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200">{error}</div>}
       <div className="mt-5 grid gap-3">
         {reports.length ? reports.map((report) => (
-          <SupportReportCard key={report.id} report={report} onStatusChange={updateReportStatus} loading={loading} />
+          <div key={report.id} className="rounded-xl border border-white/10 bg-black/45 p-4">
+            <SupportReportCard report={report} onStatusChange={updateReportStatus} loading={loading} />
+            <div className="mt-4 border-t border-white/10 pt-4">
+              <label className="block">
+                <span className="text-xs font-black uppercase tracking-[0.14em] text-fuchsia-200">Reply to sender</span>
+                <Textarea
+                  value={replyDrafts[report.id] ?? report.admin_note ?? ""}
+                  onChange={(event) => setReplyDrafts((current) => ({ ...current, [report.id]: event.target.value }))}
+                  placeholder="Write a short answer, fix note, or next step for the user..."
+                  className="mt-2 min-h-[88px] border-white/10 bg-black text-white"
+                />
+              </label>
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="text-xs font-semibold text-zinc-500">{report.email ? `Reply will show for ${report.email}` : "Reply will show on this report."}</div>
+                <Button type="button" onClick={() => saveAdminReply(report)} disabled={loading} className="bg-fuchsia-500 text-black hover:bg-fuchsia-400">
+                  <Send size={16} /> {loading ? "Saving..." : "Save Reply"}
+                </Button>
+              </div>
+            </div>
+          </div>
         )) : (
           <div className="rounded-xl border border-white/10 bg-black/40 p-8 text-center text-sm font-bold text-zinc-500">No support reports found.</div>
         )}

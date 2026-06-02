@@ -121,7 +121,9 @@ export default async function handler(req, res) {
 
     if (action === "mine") {
       if (!user?.id) return json(res, 401, { ok: false, error: "Please sign in to view your support reports." });
-      const query = `user_id=eq.${encodeURIComponent(user.id)}&select=*&order=created_at.desc&limit=25`;
+      const filters = [`user_id.eq.${encodeURIComponent(user.id)}`];
+      if (requesterEmail) filters.push(`email.eq.${encodeURIComponent(requesterEmail)}`);
+      const query = `or=(${filters.join(",")})&select=*&order=created_at.desc&limit=25`;
       const response = await fetch(`${supabaseUrl}/rest/v1/support_reports?${query}`, { headers });
       const data = await supabaseJson(response, "Could not load support reports.");
       return json(res, 200, { ok: true, reports: Array.isArray(data) ? data : [] });
