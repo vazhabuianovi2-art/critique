@@ -8219,9 +8219,28 @@ function MobileBottomNav({ active, setActive, onAdd, setTradeViewMode, lockedToB
     [BarChart3, "Statistics"],
     [Target, "Mistake Detector"],
   ];
+  const MobileFabIcon = lockedToBilling ? CreditCard : Plus;
+  const handleFabClick = () => {
+    if (lockedToBilling) {
+      setTradeViewMode(null);
+      setActive("Billing");
+      return;
+    }
+    onAdd();
+  };
   return (
     <div className="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-40 border-t border-fuchsia-500/25 bg-black/95 px-2 py-2 backdrop-blur lg:hidden">
-      <button onClick={onAdd} className="mobile-nav-fab absolute -top-7 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-2xl bg-fuchsia-500 text-white shadow-[0_0_28px_rgba(217,70,239,.48)]"><Plus size={24} /></button>
+      <button
+        type="button"
+        onClick={handleFabClick}
+        aria-label={lockedToBilling ? "Open billing" : "Add trade"}
+        title={lockedToBilling ? "Open billing" : "Add trade"}
+        className={lockedToBilling
+          ? "mobile-nav-fab absolute -top-7 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-2xl border border-amber-300/40 bg-gradient-to-br from-amber-400 to-fuchsia-500 text-black shadow-[0_0_28px_rgba(245,158,11,.35)]"
+          : "mobile-nav-fab absolute -top-7 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-2xl bg-fuchsia-500 text-white shadow-[0_0_28px_rgba(217,70,239,.48)]"}
+      >
+        <MobileFabIcon size={lockedToBilling ? 22 : 24} />
+      </button>
       <div className="grid grid-cols-5 gap-1">
         {items.map(([Icon, label]) => {
           const isAdd = false;
@@ -11430,14 +11449,22 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
     "Priority product updates",
   ];
 
-  const setupItems = [
-    "DODO_PAYMENTS_API_KEY",
-    "DODO_MONTHLY_PRODUCT_ID",
-    "DODO_YEARLY_PRODUCT_ID",
-    "DODO_PAYMENTS_WEBHOOK_KEY",
-    "DODO_PAYMENTS_ENVIRONMENT",
-    "DODO_BUSINESS_ID",
-    "VITE_SITE_URL",
+  const billingTrustItems = [
+    {
+      title: "Secure checkout",
+      detail: "Payments, cards, taxes, and receipts are handled by Dodo Payments.",
+      icon: CreditCard,
+    },
+    {
+      title: "7-day trial",
+      detail: "Start with the full Pro workflow and keep access when the plan becomes active.",
+      icon: Sparkles,
+    },
+    {
+      title: "Easy management",
+      detail: "Open the billing portal anytime to update payment details or cancel renewal.",
+      icon: Settings,
+    },
   ];
 
   const subscriptionStatus = String(subscription?.status || "").replaceAll("_", " ");
@@ -11581,7 +11608,7 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
         )}
         {requireActivation && (
           <div className="mb-5 rounded-lg border border-fuchsia-500/35 bg-fuchsia-500/10 px-4 py-3 text-sm font-bold text-fuchsia-100">
-            Activate a Pro subscription to unlock the dashboard, journal, calendar, statistics, and mistake detector. You can start with the 7-day trial.
+            Your workspace is protected until Pro is active. Your account and saved trading data stay safe while billing is updated.
           </div>
         )}
         {gateMessage && (
@@ -11735,15 +11762,21 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
               </button>
             </div>
 
-            <div className="mt-6 rounded-lg border border-amber-500/25 bg-amber-500/10 p-5">
-              <div className="font-black text-amber-200">Go-live checklist</div>
-              <p className="mt-2 text-sm font-semibold leading-6 text-amber-100/80">
-                Add these values in Vercel before live checkout. Without them, the page stays safe and shows a setup message.
+            <div className="mt-6 rounded-lg border border-emerald-500/25 bg-gradient-to-br from-emerald-500/10 via-black to-fuchsia-500/10 p-5">
+              <div className="font-black text-emerald-200">Ready when you are</div>
+              <p className="mt-2 text-sm font-semibold leading-6 text-zinc-300">
+                Your trading data stays protected while billing is handled through a secure Dodo checkout.
               </p>
-              <div className="mt-4 grid gap-2">
-                {setupItems.map((item) => (
-                  <div key={item} className="rounded-md border border-amber-500/20 bg-black/30 px-3 py-2 font-mono text-xs font-bold text-amber-100">
-                    {item}
+              <div className="mt-4 grid gap-3">
+                {billingTrustItems.map(({ title, detail, icon: Icon }) => (
+                  <div key={title} className="flex items-start gap-3 rounded-lg border border-white/10 bg-black/35 p-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-500/25 bg-emerald-500/10 text-emerald-300">
+                      <Icon size={17} />
+                    </span>
+                    <div>
+                      <div className="text-sm font-black text-white">{title}</div>
+                      <p className="mt-1 text-xs font-semibold leading-5 text-zinc-400">{detail}</p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -11765,7 +11798,7 @@ function getAccessSuspendedCopy(subscription) {
   if (!subscription) {
     return {
       title: "Activate Pro",
-      detail: "Start a subscription to unlock your trading workspace.",
+      detail: "Start a Pro subscription to unlock your trading workspace. Your existing data stays protected.",
       badge: "Subscription required",
     };
   }
@@ -11773,14 +11806,14 @@ function getAccessSuspendedCopy(subscription) {
   if (status === "trialing" || status === "on_trial") {
     return {
       title: "Trial Expired",
-      detail: expiredText ? `Your trial ended on ${expiredText}. Subscribe to regain access.` : "Your trial ended. Subscribe to regain access.",
+      detail: expiredText ? `Your trial ended on ${expiredText}. Subscribe to regain access without losing your data.` : "Your trial ended. Subscribe to regain access without losing your data.",
       badge: "Trial ended",
     };
   }
 
   return {
     title: "Access Suspended",
-    detail: expiredText ? `Expired on ${expiredText}. Reactivate your subscription to continue.` : "Reactivate your subscription to continue.",
+    detail: expiredText ? `Expired on ${expiredText}. Reactivate your subscription to continue where you left off.` : "Reactivate your subscription to continue where you left off.",
     badge: "Payment required",
   };
 }
