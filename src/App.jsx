@@ -6668,6 +6668,18 @@ function mergeTradesUnique(primary = [], secondary = []) {
   return output.sort((a, b) => Number(b.createdAt || b.id || 0) - Number(a.createdAt || a.id || 0));
 }
 
+function getStableTradeSyncKey(trade) {
+  const normalized = normalizeTradeForStorage(trade || {});
+  return [
+    getTradeDuplicateKey(normalized),
+    normalized.createdAt || "",
+    normalized.entryDate || "",
+    normalized.pnl ?? "",
+    normalized.risk ?? "",
+    normalized.quantity ?? "",
+  ].join("|");
+}
+
 async function replaceTradesInSupabase(userId, tradesToRestore) {
   if (!supabase || !userId) throw new Error("Supabase/Auth არ არის მზად. თავიდან შედი ანგარიშში და მერე სცადე Restore.");
 
@@ -6746,6 +6758,7 @@ export default function TradingJournalDashboard() {
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
   const [isTradeSaving, setIsTradeSaving] = useState(false);
   const tradeSavingRef = useRef(false);
+  const cloudSnapshotSyncRef = useRef("");
   const [isRoutineOpen, setIsRoutineOpen] = useState(false);
   const [routine, setRoutine] = useState(() => {
     try {
@@ -7131,6 +7144,55 @@ export default function TradingJournalDashboard() {
       mounted = false;
     };
   }, [authUser?.id, isAuthenticated]);
+
+  useEffect(() => {
+    if (!supabase || !authUser?.id || !isAuthenticated || !hasLoadedRemoteTrades || !hasLoadedRemoteAccount) return undefined;
+
+    const browserTrades = filterDeletedTrades(mergeTradesUnique(trades, readLocalTradesFallback(authUser.id, true)), authUser.id);
+    const browserAccounts = mergeAccountsUnique(accounts, readStoredAccounts(authUser.id, true));
+    if (!browserTrades.length && !browserAccounts.length) return undefined;
+
+    const signature = JSON.stringify({
+      userId: authUser.id,
+      trades: browserTrades.map((trade) => getStableTradeSyncKey(trade)),
+      accounts: browserAccounts.map((item) => `${item.id}|${item.name}|${item.balance}|${item.currency}|${item.type}`),
+      activeAccountId,
+    });
+
+    if (cloudSnapshotSyncRef.current === signature) return undefined;
+    cloudSnapshotSyncRef.current = signature;
+
+    let mounted = true;
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        let syncedTrades = null;
+        if (browserTrades.length) {
+          syncedTrades = await replaceTradesInSupabase(authUser.id, browserTrades);
+        }
+        if (browserAccounts.length) {
+          await saveAccountBundleToSupabase(authUser.id, browserAccounts, activeAccountId);
+        }
+        if (!mounted) return;
+        if (Array.isArray(syncedTrades) && syncedTrades.length) {
+          setTrades(syncedTrades);
+          saveLocalTradesFallback(syncedTrades, authUser.id);
+          saveRestoreCache(authUser.id, { trades: syncedTrades, account, routine, theme });
+        }
+        if (browserAccounts.length) {
+          setAccounts((current) => mergeAccountsUnique(browserAccounts, current));
+        }
+      } catch (error) {
+        if (!mounted || isSupabaseAuthExpiredError(error)) return;
+        console.warn("Could not force-sync browser data to Supabase:", error?.message || error);
+      }
+    }, 1300);
+
+    return () => {
+      mounted = false;
+      window.clearTimeout(timeoutId);
+    };
+  }, [account, accounts, activeAccountId, authUser?.id, hasLoadedRemoteAccount, hasLoadedRemoteTrades, isAuthenticated, routine, theme, trades]);
+
   useEffect(() => { localStorage.setItem(ROUTINE_KEY, JSON.stringify(routine)); }, [routine]);
   useEffect(() => { localStorage.setItem(THEME_KEY, theme); }, [theme]);
   useEffect(() => {
