@@ -162,3 +162,12 @@ drop policy if exists "support_reports_insert_own" on public.support_reports;
 create policy "support_reports_insert_own"
   on public.support_reports for insert
   with check (auth.uid() = user_id);
+
+alter table public.support_reports
+  add column if not exists messages jsonb not null default '[]'::jsonb,
+  add column if not exists admin_unread_count integer not null default 0,
+  add column if not exists user_unread_count integer not null default 0,
+  add column if not exists last_message_at timestamptz;
+
+create index if not exists support_reports_last_message_at_idx
+  on public.support_reports (last_message_at desc nulls last, created_at desc);

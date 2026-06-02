@@ -339,7 +339,7 @@ async function postAdminEntitlements(action, payload = {}) {
 }
 
 async function postSupportReports(action, payload = {}) {
-  const canSendWithoutSession = action === "create";
+  const canSendWithoutSession = ["create", "mine", "send_message"].includes(action);
 
   async function sendWithToken(token) {
     const response = await fetch("/api/support-reports", {
@@ -10615,13 +10615,14 @@ function SupportCenterPage({ authUser }) {
     message: "",
   });
   const [reports, setReports] = useState([]);
+  const [replyDrafts, setReplyDrafts] = useState({});
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   async function loadMine() {
     try {
-      const data = await postSupportReports("mine");
+      const data = await postSupportReports("mine", { email: authUser?.email || "" });
       setReports(Array.isArray(data.reports) ? data.reports : []);
     } catch (loadError) {
       setReports([]);
@@ -10656,6 +10657,30 @@ function SupportCenterPage({ authUser }) {
       setMessage("Report sent. Thank you, this is exactly how the product gets sharper.");
     } catch (submitError) {
       setError(submitError?.message || "Could not send report.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function sendUserReply(report) {
+    const text = String(replyDrafts[report.id] || "").trim();
+    if (!text) return;
+    setLoading(true);
+    setMessage("");
+    setError("");
+    try {
+      const data = await postSupportReports("send_message", {
+        id: report.id,
+        text,
+        name: getUserDisplayName(authUser, ""),
+        email: authUser?.email || report.email || "",
+      });
+      const saved = data.report;
+      setReports((current) => current.map((item) => item.id === report.id ? { ...item, ...saved } : item));
+      setReplyDrafts((current) => ({ ...current, [report.id]: "" }));
+      setMessage("Reply sent.");
+    } catch (replyError) {
+      setError(replyError?.message || "Could not send reply.");
     } finally {
       setLoading(false);
     }
@@ -10745,7 +10770,17 @@ function SupportCenterPage({ authUser }) {
             </div>
             <div className="mt-5 space-y-3">
               {reports.length ? reports.slice(0, 8).map((report) => (
-                <SupportReportCard key={report.id} report={report} compact />
+                <SupportReportCard
+                  key={report.id}
+                  report={report}
+                  compact
+                  unreadCount={Number(report.user_unread_count || 0)}
+                  replyValue={replyDrafts[report.id] || ""}
+                  onReplyChange={(value) => setReplyDrafts((current) => ({ ...current, [report.id]: value }))}
+                  onReplySend={() => sendUserReply(report)}
+                  replyButtonLabel="Send Reply"
+                  loading={loading}
+                />
               )) : (
                 <div className="rounded-xl border border-white/10 bg-black/40 p-5 text-sm font-bold text-zinc-500">No reports yet.</div>
               )}
@@ -10757,8 +10792,32 @@ function SupportCenterPage({ authUser }) {
   );
 }
 
-function SupportReportCard({ report, compact = false, onStatusChange, loading = false }) {
+function getSupportMessages(report) {
+  const savedMessages = Array.isArray(report?.messages) ? report.messages : [];
+  if (savedMessages.length) return savedMessages;
+  return report?.message ? [{
+    id: `${report.id || "report"}_initial`,
+    sender: "user",
+    text: report.message,
+    name: report.name || "",
+    email: report.email || "",
+    created_at: report.created_at,
+  }] : [];
+}
+
+function SupportReportCard({
+  report,
+  compact = false,
+  onStatusChange,
+  loading = false,
+  unreadCount = 0,
+  replyValue = "",
+  onReplyChange,
+  onReplySend,
+  replyButtonLabel = "Send Reply",
+}) {
   const status = String(report?.status || "open").toLowerCase();
+  const messages = getSupportMessages(report);
   const statusClass = status === "resolved"
     ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
     : status === "in_progress"
@@ -10774,13 +10833,37 @@ function SupportReportCard({ report, compact = false, onStatusChange, loading = 
             <span className="rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1 text-[11px] font-black uppercase tracking-wider text-zinc-400">{report?.type || "Report"}</span>
             <span className={`rounded-lg border px-2 py-1 text-[11px] font-black uppercase tracking-wider ${statusClass}`}>{String(report?.status || "open").replaceAll("_", " ")}</span>
             <span className="text-[11px] font-bold text-zinc-500">{report?.priority || "Medium"}</span>
+            {unreadCount > 0 && <span className="rounded-full bg-fuchsia-500 px-2 py-1 text-[11px] font-black text-black">{unreadCount} new</span>}
           </div>
           <h3 className="mt-3 truncate text-lg font-black text-white">{report?.title}</h3>
           <p className={`${compact ? "line-clamp-2" : ""} mt-2 text-sm font-semibold leading-6 text-zinc-400`}>{report?.message}</p>
-          {report?.admin_note && (
-            <div className="mt-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3">
-              <div className="text-[11px] font-black uppercase tracking-[0.14em] text-emerald-300">Admin reply</div>
-              <p className={`${compact ? "line-clamp-3" : ""} mt-1 text-sm font-semibold leading-6 text-emerald-100`}>{report.admin_note}</p>
+          <div className="mt-4 space-y-2">
+            {messages.slice(compact ? -4 : 0).map((supportMessage) => {
+              const sender = String(supportMessage.sender || "user").toLowerCase();
+              const isAdminMessage = sender === "admin";
+              return (
+                <div key={supportMessage.id || `${sender}-${supportMessage.created_at}`} className={`rounded-xl border p-3 ${isAdminMessage ? "border-emerald-500/20 bg-emerald-500/10" : "border-white/10 bg-white/[0.03]"}`}>
+                  <div className={`text-[11px] font-black uppercase tracking-[0.14em] ${isAdminMessage ? "text-emerald-300" : "text-fuchsia-200"}`}>
+                    {isAdminMessage ? "Admin" : "You"} {supportMessage.created_at ? `- ${new Date(supportMessage.created_at).toLocaleString()}` : ""}
+                  </div>
+                  <p className="mt-1 whitespace-pre-wrap text-sm font-semibold leading-6 text-zinc-100">{supportMessage.text}</p>
+                </div>
+              );
+            })}
+          </div>
+          {onReplySend && (
+            <div className="mt-4 border-t border-white/10 pt-4">
+              <Textarea
+                value={replyValue}
+                onChange={(event) => onReplyChange?.(event.target.value)}
+                placeholder="Write a reply..."
+                className="min-h-[82px] border-white/10 bg-black text-white"
+              />
+              <div className="mt-3 flex justify-end">
+                <Button type="button" onClick={onReplySend} disabled={loading || !String(replyValue || "").trim()} className="bg-fuchsia-500 text-black hover:bg-fuchsia-400">
+                  <Send size={16} /> {loading ? "Sending..." : replyButtonLabel}
+                </Button>
+              </div>
             </div>
           )}
           <div className="mt-3 text-xs font-semibold text-zinc-600">{report?.email || "unknown"} - {report?.created_at ? new Date(report.created_at).toLocaleString() : ""}</div>
@@ -10836,15 +10919,16 @@ function AdminSupportInbox() {
     }
   }
 
-  async function saveAdminReply(report) {
-    const adminNote = String(replyDrafts[report.id] ?? report.admin_note ?? "").trim();
+  async function sendAdminReply(report) {
+    const text = String(replyDrafts[report.id] || "").trim();
+    if (!text) return;
     setLoading(true);
     setError("");
     try {
-      const data = await postSupportReports("update", { id: report.id, status: report.status || "open", adminNote });
+      const data = await postSupportReports("send_message", { id: report.id, text });
       const saved = data.report;
       setReports((current) => current.map((item) => item.id === report.id ? { ...item, ...saved } : item));
-      setReplyDrafts((current) => ({ ...current, [report.id]: saved?.admin_note || "" }));
+      setReplyDrafts((current) => ({ ...current, [report.id]: "" }));
     } catch (replyError) {
       setError(replyError?.message || "Could not save admin reply.");
     } finally {
@@ -10876,26 +10960,17 @@ function AdminSupportInbox() {
       {error && <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200">{error}</div>}
       <div className="mt-5 grid gap-3">
         {reports.length ? reports.map((report) => (
-          <div key={report.id} className="rounded-xl border border-white/10 bg-black/45 p-4">
-            <SupportReportCard report={report} onStatusChange={updateReportStatus} loading={loading} />
-            <div className="mt-4 border-t border-white/10 pt-4">
-              <label className="block">
-                <span className="text-xs font-black uppercase tracking-[0.14em] text-fuchsia-200">Reply to sender</span>
-                <Textarea
-                  value={replyDrafts[report.id] ?? report.admin_note ?? ""}
-                  onChange={(event) => setReplyDrafts((current) => ({ ...current, [report.id]: event.target.value }))}
-                  placeholder="Write a short answer, fix note, or next step for the user..."
-                  className="mt-2 min-h-[88px] border-white/10 bg-black text-white"
-                />
-              </label>
-              <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-xs font-semibold text-zinc-500">{report.email ? `Reply will show for ${report.email}` : "Reply will show on this report."}</div>
-                <Button type="button" onClick={() => saveAdminReply(report)} disabled={loading} className="bg-fuchsia-500 text-black hover:bg-fuchsia-400">
-                  <Send size={16} /> {loading ? "Saving..." : "Save Reply"}
-                </Button>
-              </div>
-            </div>
-          </div>
+          <SupportReportCard
+            key={report.id}
+            report={report}
+            onStatusChange={updateReportStatus}
+            loading={loading}
+            unreadCount={Number(report.admin_unread_count || 0)}
+            replyValue={replyDrafts[report.id] || ""}
+            onReplyChange={(value) => setReplyDrafts((current) => ({ ...current, [report.id]: value }))}
+            onReplySend={() => sendAdminReply(report)}
+            replyButtonLabel="Reply to Sender"
+          />
         )) : (
           <div className="rounded-xl border border-white/10 bg-black/40 p-8 text-center text-sm font-bold text-zinc-500">No support reports found.</div>
         )}

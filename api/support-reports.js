@@ -41,6 +41,21 @@ function getTokenEmail(accessToken) {
   return normalizeEmail(payload?.email || payload?.user_metadata?.email);
 }
 
+function makeMessage({ sender, text, name, email }) {
+  return {
+    id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+    sender,
+    text: String(text || "").trim().slice(0, 4000),
+    name: String(name || "").trim().slice(0, 100),
+    email: normalizeEmail(email),
+    created_at: new Date().toISOString(),
+  };
+}
+
+function normalizeMessages(messages) {
+  return Array.isArray(messages) ? messages.filter((message) => message && typeof message === "object") : [];
+}
+
 async function getUserFromToken(supabaseUrl, anonKey, accessToken) {
   const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
     headers: {
@@ -110,23 +125,86 @@ export default async function handler(req, res) {
 
     if (action === "create") {
       const payload = sanitizeReportPayload(body, user);
+      const firstMessage = makeMessage({ sender: "user", text: payload.message, name: payload.name, email: payload.email });
+      const chatPayload = {
+        ...payload,
+        messages: [firstMessage],
+        admin_unread_count: 1,
+        user_unread_count: 0,
+        last_message_at: firstMessage.created_at,
+      };
       const response = await fetch(`${supabaseUrl}/rest/v1/support_reports?select=*`, {
         method: "POST",
         headers: { ...headers, Prefer: "return=representation" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(chatPayload),
       });
-      const data = await supabaseJson(response, "Could not save support report.");
+      let data = await response.json().catch(() => null);
+      if (!response.ok && /messages|unread|last_message/i.test(data?.message || data?.error || "")) {
+        const fallbackResponse = await fetch(`${supabaseUrl}/rest/v1/support_reports?select=*`, {
+          method: "POST",
+          headers: { ...headers, Prefer: "return=representation" },
+          body: JSON.stringify(payload),
+        });
+        data = await supabaseJson(fallbackResponse, "Could not save support report.");
+      } else if (!response.ok) {
+        throw new Error(data?.message || data?.error || "Could not save support report.");
+      }
       return json(res, 200, { ok: true, report: Array.isArray(data) ? data[0] : data });
     }
 
     if (action === "mine") {
-      if (!user?.id) return json(res, 401, { ok: false, error: "Please sign in to view your support reports." });
-      const filters = [`user_id.eq.${encodeURIComponent(user.id)}`];
-      if (requesterEmail) filters.push(`email.eq.${encodeURIComponent(requesterEmail)}`);
+      const reportEmail = requesterEmail || normalizeEmail(body.email);
+      if (!user?.id && !reportEmail) return json(res, 401, { ok: false, error: "Please sign in to view your support reports." });
+      const filters = [];
+      if (user?.id) filters.push(`user_id.eq.${encodeURIComponent(user.id)}`);
+      if (reportEmail) filters.push(`email.eq.${encodeURIComponent(reportEmail)}`);
       const query = `or=(${filters.join(",")})&select=*&order=created_at.desc&limit=25`;
       const response = await fetch(`${supabaseUrl}/rest/v1/support_reports?${query}`, { headers });
       const data = await supabaseJson(response, "Could not load support reports.");
       return json(res, 200, { ok: true, reports: Array.isArray(data) ? data : [] });
+    }
+
+    if (action === "send_message") {
+      const id = String(body.id || "");
+      const text = String(body.text || "").trim();
+      if (!id) return json(res, 400, { ok: false, error: "Report id is required." });
+      if (text.length < 1) return json(res, 400, { ok: false, error: "Message is required." });
+
+      const lookupResponse = await fetch(`${supabaseUrl}/rest/v1/support_reports?id=eq.${encodeURIComponent(id)}&select=*&limit=1`, { headers });
+      const rows = await supabaseJson(lookupResponse, "Could not load support report.");
+      const report = Array.isArray(rows) ? rows[0] : null;
+      if (!report) return json(res, 404, { ok: false, error: "Support report not found." });
+
+      const reportEmail = normalizeEmail(report.email);
+      const senderEmail = requesterEmail || normalizeEmail(body.email);
+      const canUserReply = Boolean(user?.id && report.user_id === user.id) || Boolean(senderEmail && reportEmail && senderEmail === reportEmail);
+      if (!isAdmin && !canUserReply) return json(res, 403, { ok: false, error: "You cannot reply to this report." });
+
+      const sender = isAdmin ? "admin" : "user";
+      const message = makeMessage({
+        sender,
+        text,
+        name: isAdmin ? "TryCritique Support" : String(body.name || user?.user_metadata?.full_name || ""),
+        email: senderEmail,
+      });
+      const messages = [...normalizeMessages(report.messages), message];
+      const payload = {
+        messages,
+        admin_note: isAdmin ? text : report.admin_note || "",
+        updated_at: message.created_at,
+        last_message_at: message.created_at,
+        admin_unread_count: sender === "user" ? Number(report.admin_unread_count || 0) + 1 : 0,
+        user_unread_count: sender === "admin" ? Number(report.user_unread_count || 0) + 1 : 0,
+        status: sender === "admin" && String(report.status || "open") === "open" ? "in_progress" : report.status || "open",
+      };
+
+      const response = await fetch(`${supabaseUrl}/rest/v1/support_reports?id=eq.${encodeURIComponent(id)}&select=*`, {
+        method: "PATCH",
+        headers: { ...headers, Prefer: "return=representation" },
+        body: JSON.stringify(payload),
+      });
+      const data = await supabaseJson(response, "Could not save support reply.");
+      return json(res, 200, { ok: true, report: Array.isArray(data) ? data[0] : data, message });
     }
 
     if (!isAdmin) return json(res, 403, { ok: false, error: "Admin access required." });
@@ -145,6 +223,7 @@ export default async function handler(req, res) {
       const payload = {
         status: String(body.status || "open").slice(0, 30),
         admin_note: String(body.adminNote || "").slice(0, 2000),
+        admin_unread_count: 0,
         updated_at: new Date().toISOString(),
       };
       const response = await fetch(`${supabaseUrl}/rest/v1/support_reports?id=eq.${encodeURIComponent(id)}&select=*`, {
