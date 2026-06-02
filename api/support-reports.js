@@ -109,7 +109,6 @@ export default async function handler(req, res) {
     };
 
     if (action === "create") {
-      if (!user?.id) return json(res, 401, { ok: false, error: "Please sign in before sending support feedback." });
       const payload = sanitizeReportPayload(body, user);
       const response = await fetch(`${supabaseUrl}/rest/v1/support_reports?select=*`, {
         method: "POST",

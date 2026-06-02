@@ -339,6 +339,8 @@ async function postAdminEntitlements(action, payload = {}) {
 }
 
 async function postSupportReports(action, payload = {}) {
+  const canSendWithoutSession = action === "create";
+
   async function sendWithToken(token) {
     const response = await fetch("/api/support-reports", {
       method: "POST",
@@ -354,7 +356,7 @@ async function postSupportReports(action, payload = {}) {
     const refreshed = await refreshCurrentSession();
     accessToken = refreshed?.access_token || "";
   }
-  if (!accessToken) throw new Error("Login session is missing.");
+  if (!accessToken && !canSendWithoutSession) throw new Error("Login session is missing.");
 
   let { response, data } = await sendWithToken(accessToken);
   if (response.status === 401) {
