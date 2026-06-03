@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+﻿import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
 import {
@@ -82,16 +82,16 @@ const BRAND_NAME = "TryCritique";
 const OWNER_ADMIN_EMAILS = ["vazhabuianovi2@gmail.com"];
 const TAWK_TO_PROPERTY_ID = "6a1ecbced0b6e01c2e34b60c";
 const TAWK_TO_WIDGET_ID = "1jq44o7ki";
-const BRAND_MARK = "◉";
+const BRAND_MARK = "â—‰";
 const TRADING_SESSIONS = ["Asia", "London", "NY-AM", "Lunch", "NY-PM", "Pre-Market"];
 const LEGACY_DEFAULT_STRATEGIES = ["Liquidity Sweep", "ICT FVG", "Order Block", "Breaker Block", "Silver Bullet"];
 const DEFAULT_STRATEGIES = [];
 const EMOTION_OPTIONS = [
-  ["Calm", "Focus", "◌"],
-  ["Confident", "Ready", "✦"],
-  ["Fearful", "Careful", "◇"],
+  ["Calm", "Focus", "â—Œ"],
+  ["Confident", "Ready", "âœ¦"],
+  ["Fearful", "Careful", "â—‡"],
   ["Greedy", "Risk", "$"],
-  ["FOMO", "Impulse", "↗"],
+  ["FOMO", "Impulse", "â†—"],
   ["Revenge", "Reset", "!"],
 ];
 const MISTAKE_OPTIONS = ["None", "Early Entry", "Late Entry", "No Confirmation", "Overtrading", "Emotional Trade", "Bad Risk Management", "Moved Stop Loss"];
@@ -517,17 +517,13 @@ function getActiveAccountKey(userId) {
   return userId ? `${ACTIVE_ACCOUNT_KEY}_${userId}` : ACTIVE_ACCOUNT_KEY;
 }
 
-function readStoredAccounts(userId, includeLegacy = !userId) {
+function readStoredAccounts(userId) {
   try {
     const savedAccounts = JSON.parse(localStorage.getItem(getAccountsKey(userId)) || "null");
     if (Array.isArray(savedAccounts) && savedAccounts.length) {
       return savedAccounts.map((item, index) => ({ ...defaultAccount, ...item, id: item.id || `acc-${index + 1}` }));
     }
-    if (userId && !includeLegacy) return [];
-    const legacyAccounts = JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || "null");
-    if (Array.isArray(legacyAccounts) && legacyAccounts.length) {
-      return legacyAccounts.map((item, index) => ({ ...defaultAccount, ...item, id: item.id || `acc-${index + 1}` }));
-    }
+    if (userId) return [];
     const legacyAccount = JSON.parse(localStorage.getItem(ACCOUNT_KEY) || "null");
     return legacyAccount?.id ? [{ ...defaultAccount, ...legacyAccount, id: legacyAccount.id }] : [];
   } catch {
@@ -541,66 +537,6 @@ function readStoredActiveAccountId(userId) {
   } catch {
     return "";
   }
-}
-
-function normalizeAccountForStorage(account, fallbackId = `acc-${Date.now()}`) {
-  return {
-    ...defaultAccount,
-    ...(account || {}),
-    id: account?.id || fallbackId,
-    name: String(account?.name || "").trim() || defaultAccount.name,
-    balance: Number(account?.balance ?? defaultAccount.balance ?? 0),
-    isPlaceholder: false,
-  };
-}
-
-function normalizeAccountsList(accountsToNormalize = []) {
-  const seen = new Set();
-  return (Array.isArray(accountsToNormalize) ? accountsToNormalize : [])
-    .filter((item) => item && typeof item === "object" && !item.isPlaceholder)
-    .map((item, index) => normalizeAccountForStorage(item, item.id || `acc-${index + 1}`))
-    .filter((item) => {
-      const key = String(item.id);
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-}
-
-function mergeAccountsUnique(primary = [], secondary = []) {
-  return normalizeAccountsList([...primary, ...secondary]);
-}
-
-function buildAccountBundle(accountsToSave = [], activeId = "") {
-  const normalizedAccounts = normalizeAccountsList(accountsToSave);
-  const activeAccount = normalizedAccounts.find((item) => String(item.id) === String(activeId)) || normalizedAccounts[0] || null;
-  return {
-    schemaVersion: 2,
-    account: activeAccount,
-    accounts: normalizedAccounts,
-    activeAccountId: activeAccount?.id || "",
-    updatedAt: new Date().toISOString(),
-  };
-}
-
-function parseAccountBundle(accountData) {
-  if (!accountData || typeof accountData !== "object") return { accounts: [], activeAccountId: "" };
-  if (Array.isArray(accountData.accounts)) {
-    const accounts = normalizeAccountsList(accountData.accounts);
-    const activeAccountId = accounts.some((item) => String(item.id) === String(accountData.activeAccountId))
-      ? accountData.activeAccountId
-      : accounts[0]?.id || "";
-    return { accounts, activeAccountId };
-  }
-  if (accountData.account && typeof accountData.account === "object") {
-    const accounts = normalizeAccountsList([accountData.account]);
-    return { accounts, activeAccountId: accounts[0]?.id || "" };
-  }
-  if (accountData.id || accountData.name || accountData.balance) {
-    const accounts = normalizeAccountsList([accountData]);
-    return { accounts, activeAccountId: accounts[0]?.id || "" };
-  }
-  return { accounts: [], activeAccountId: "" };
 }
 
 function getStoredProfilePhoto(user) {
@@ -5337,12 +5273,12 @@ const quotes = [
 ];
 
 const routineItems = [
-  { id: "news", label: "News checked", detail: "High impact events reviewed", icon: "⚡" },
-  { id: "bias", label: "Market bias confirmed", detail: "Daily/HTF direction is clear", icon: "🎯" },
-  { id: "liquidity", label: "Liquidity levels marked", detail: "PDH/PDL, Asia high/low, equal highs/lows", icon: "💧" },
-  { id: "setup", label: "Valid setup only", detail: "Entry matches your trading model", icon: "✅" },
+  { id: "news", label: "News checked", detail: "High impact events reviewed", icon: "âš¡" },
+  { id: "bias", label: "Market bias confirmed", detail: "Daily/HTF direction is clear", icon: "ðŸŽ¯" },
+  { id: "liquidity", label: "Liquidity levels marked", detail: "PDH/PDL, Asia high/low, equal highs/lows", icon: "ðŸ’§" },
+  { id: "setup", label: "Valid setup only", detail: "Entry matches your trading model", icon: "âœ…" },
   { id: "risk", label: "Risk defined", detail: "Stop loss, target and max loss prepared", icon: "$" },
-  { id: "emotion", label: "Emotion check", detail: "No FOMO, revenge, or overtrading", icon: "🧠" },
+  { id: "emotion", label: "Emotion check", detail: "No FOMO, revenge, or overtrading", icon: "ðŸ§ " },
 ];
 
 function normalizeScreenshots(value) {
@@ -5760,9 +5696,9 @@ function getPnlPillClass(value) {
 
 function getPnlArrow(value) {
   const pnl = Number(value || 0);
-  if (pnl > 0) return "↗";
-  if (pnl < 0) return "↘";
-  return "—";
+  if (pnl > 0) return "â†—";
+  if (pnl < 0) return "â†˜";
+  return "â€”";
 }
 
 function getTradeGrade(trade) {
@@ -6018,11 +5954,11 @@ function getDashboardInsights(trades = [], stats = {}) {
   const streak = getCurrentStreak(trades);
   const avgRisk = trades.length ? trades.reduce((sum, trade) => sum + Number(trade.risk || 0), 0) / trades.length : 0;
   return [
-    { title: "Best Session", value: bestSession.name, detail: `${formatMoney(bestSession.pnl || 0)} · ${bestSession.count || 0} trades`, tone: "emerald", icon: "☀" },
-    { title: "Best Strategy", value: bestStrategy.name, detail: `${formatMoney(bestStrategy.pnl || 0)} net P&L`, tone: "fuchsia", icon: "ϟ" },
-    { title: "Current Streak", value: streak.count ? `${streak.count} ${streak.type}` : "Neutral", detail: streak.type === "Loss" ? "Slow down and protect capital" : "Stay disciplined", tone: streak.type === "Loss" ? "red" : "emerald", icon: streak.type === "Loss" ? "↘" : "↗" },
+    { title: "Best Session", value: bestSession.name, detail: `${formatMoney(bestSession.pnl || 0)} Â· ${bestSession.count || 0} trades`, tone: "emerald", icon: "â˜€" },
+    { title: "Best Strategy", value: bestStrategy.name, detail: `${formatMoney(bestStrategy.pnl || 0)} net P&L`, tone: "fuchsia", icon: "ÏŸ" },
+    { title: "Current Streak", value: streak.count ? `${streak.count} ${streak.type}` : "Neutral", detail: streak.type === "Loss" ? "Slow down and protect capital" : "Stay disciplined", tone: streak.type === "Loss" ? "red" : "emerald", icon: streak.type === "Loss" ? "â†˜" : "â†—" },
     { title: "Avg Risk", value: formatMoney(avgRisk), detail: "Average risk per trade", tone: "amber", icon: "$" },
-    { title: "Mistake Watch", value: worstMistake.name, detail: worstMistake.count ? `${worstMistake.losses || 0} losses · ${formatMoney(worstMistake.pnl || 0)}` : "Clean execution so far", tone: worstMistake.count ? "red" : "emerald", icon: "!" },
+    { title: "Mistake Watch", value: worstMistake.name, detail: worstMistake.count ? `${worstMistake.losses || 0} losses Â· ${formatMoney(worstMistake.pnl || 0)}` : "Clean execution so far", tone: worstMistake.count ? "red" : "emerald", icon: "!" },
   ];
 }
 
@@ -6163,7 +6099,7 @@ function translateDetectorText(value) {
     "Chased price": "Chased Price",
     "Revenge trade": "Revenge Trade"
   };
-  return map[value] || value || "—";
+  return map[value] || value || "â€”";
 }
 
 function translateDetectorFix(value) {
@@ -6197,7 +6133,7 @@ function getMostCommonValue(trades = [], key, fallback = "No data") {
 function buildFocusPlan(rootType, issueTitle) {
   const translatedIssue = translateDetectorText(issueTitle || "entry timing");
   const plans = {
-    Execution: ["Wait for full confirmation before entering.", "If price already moved away, do not chase it — wait for a new setup or skip.", `Main focus: ${translatedIssue}. Check the screenshot before every next trade.`],
+    Execution: ["Wait for full confirmation before entering.", "If price already moved away, do not chase it â€” wait for a new setup or skip.", `Main focus: ${translatedIssue}. Check the screenshot before every next trade.`],
     Psychology: ["Take a 30-second pause before clicking Buy/Sell.", "Write your emotion before the entry, not after the result.", "After an emotional loss, skip the next trade."],
     Risk: ["Define max risk before entry and do not change it.", "Never move the stop loss after entry.", "Reduce size until you complete 5 rule-followed trades in a row."],
     Setup: ["Trade only A/B quality setups this week.", "Before entry, write why the setup is valid.", "Skip C/D setups even if they look attractive."],
@@ -6244,7 +6180,7 @@ function exportCritiqueBackup({ trades, account, routine, theme }) {
 function validateCritiqueBackup(payload) {
   const data = payload?.data || payload;
   const trades = Array.isArray(data?.trades) ? data.trades : null;
-  if (!trades) return { ok: false, error: "Backup file-ში trades ვერ მოიძებნა." };
+  if (!trades) return { ok: false, error: "Backup file-áƒ¨áƒ˜ trades áƒ•áƒ”áƒ  áƒ›áƒáƒ˜áƒ«áƒ”áƒ‘áƒœáƒ." };
   return {
     ok: true,
     trades: trades.map((trade, index) => ({
@@ -6472,8 +6408,7 @@ async function loadAccountFromSupabase(userId) {
   if (!supabase || !userId) return null;
   const result = await postSupabaseSync("loadAccount");
   const accountData = result?.account;
-  const bundle = parseAccountBundle(accountData);
-  return bundle.accounts[0] || null;
+  return accountData && typeof accountData === "object" && Object.keys(accountData).length ? accountData : null;
 }
 
 async function saveAccountToSupabase(userId, account) {
@@ -6487,19 +6422,6 @@ async function saveAccountToSupabase(userId, account) {
 
   const result = await postSupabaseSync("saveAccount", { account: normalizedAccount });
   return result?.account || normalizedAccount;
-}
-
-async function loadAccountBundleFromSupabase(userId) {
-  if (!supabase || !userId) return { accounts: [], activeAccountId: "" };
-  const result = await postSupabaseSync("loadAccountBundle");
-  return parseAccountBundle(result?.accountData);
-}
-
-async function saveAccountBundleToSupabase(userId, accountsToSave, activeId) {
-  const accountData = buildAccountBundle(accountsToSave, activeId);
-  if (!supabase || !userId || !accountData.accounts.length) return accountData;
-  const result = await postSupabaseSync("saveAccountBundle", { accountData });
-  return result?.accountData || accountData;
 }
 
 function getRestoreCacheKey(userId) {
@@ -6615,13 +6537,13 @@ function setJsonStorageItem(key, value, compactValue = value) {
   }
 }
 
-function readLocalTradesFallback(userId, includeLegacy = !userId) {
+function readLocalTradesFallback(userId) {
   try {
     const userSaved = JSON.parse(localStorage.getItem(getUserTradesKey(userId)) || "[]");
     if (Array.isArray(userSaved) && userSaved.length) return filterDeletedTrades(userSaved.map(normalizeTradeForStorage), userId);
     const userBackup = JSON.parse(localStorage.getItem(getUserTradesBackupKey(userId)) || "[]");
     if (Array.isArray(userBackup) && userBackup.length) return filterDeletedTrades(userBackup.map(normalizeTradeForStorage), userId);
-    if (userId && !includeLegacy) return [];
+    if (userId) return [];
 
     const oldSaved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
     return Array.isArray(oldSaved) ? filterDeletedTrades(oldSaved.map(normalizeTradeForStorage), userId) : [];
@@ -6656,10 +6578,7 @@ function mergeTradesUnique(primary = [], secondary = []) {
   const seen = new Set();
   [...primary, ...secondary].forEach((trade) => {
     const normalized = normalizeTradeForStorage(trade);
-    const durableId = normalized.supabaseId || normalized.id;
-    const key = durableId
-      ? `id:${String(durableId)}`
-      : `trade:${getTradeDuplicateKey(normalized)}|created:${String(normalized.createdAt || "")}`;
+    const key = getTradeDuplicateKey(normalized);
     if (seen.has(key)) return;
     seen.add(key);
     output.push(normalized);
@@ -6667,20 +6586,8 @@ function mergeTradesUnique(primary = [], secondary = []) {
   return output.sort((a, b) => Number(b.createdAt || b.id || 0) - Number(a.createdAt || a.id || 0));
 }
 
-function getStableTradeSyncKey(trade) {
-  const normalized = normalizeTradeForStorage(trade || {});
-  return [
-    getTradeDuplicateKey(normalized),
-    normalized.createdAt || "",
-    normalized.entryDate || "",
-    normalized.pnl ?? "",
-    normalized.risk ?? "",
-    normalized.quantity ?? "",
-  ].join("|");
-}
-
 async function replaceTradesInSupabase(userId, tradesToRestore) {
-  if (!supabase || !userId) throw new Error("Supabase/Auth არ არის მზად. თავიდან შედი ანგარიშში და მერე სცადე Restore.");
+  if (!supabase || !userId) throw new Error("Supabase/Auth áƒáƒ  áƒáƒ áƒ˜áƒ¡ áƒ›áƒ–áƒáƒ“. áƒ—áƒáƒ•áƒ˜áƒ“áƒáƒœ áƒ¨áƒ”áƒ“áƒ˜ áƒáƒœáƒ’áƒáƒ áƒ˜áƒ¨áƒ¨áƒ˜ áƒ“áƒ áƒ›áƒ”áƒ áƒ” áƒ¡áƒªáƒáƒ“áƒ” Restore.");
 
   const result = await postSupabaseSync("replaceTrades", { trades: tradesToRestore });
 
@@ -6757,7 +6664,6 @@ export default function TradingJournalDashboard() {
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
   const [isTradeSaving, setIsTradeSaving] = useState(false);
   const tradeSavingRef = useRef(false);
-  const cloudSnapshotSyncRef = useRef("");
   const [isRoutineOpen, setIsRoutineOpen] = useState(false);
   const [routine, setRoutine] = useState(() => {
     try {
@@ -6808,7 +6714,6 @@ export default function TradingJournalDashboard() {
   const [passwordRecoverySession, setPasswordRecoverySession] = useState(false);
   const [tradesLoading, setTradesLoading] = useState(false);
   const [hasLoadedRemoteTrades, setHasLoadedRemoteTrades] = useState(false);
-  const [hasLoadedRemoteAccount, setHasLoadedRemoteAccount] = useState(false);
   const [billingSubscription, setBillingSubscription] = useState(null);
   const [billingLoading, setBillingLoading] = useState(false);
   const [billingGateMessage, setBillingGateMessage] = useState("");
@@ -6921,82 +6826,27 @@ export default function TradingJournalDashboard() {
     setTradesLoading(true);
     setHasLoadedRemoteTrades(false);
     setDataMessage("");
-    const cachedRestore = readRestoreCache(authUser.id);
-    const browserTrades = mergeTradesUnique(Array.isArray(trades) ? trades : [], readLocalTradesFallback(authUser.id, true));
-    const cachedTrades = filterDeletedTrades(mergeTradesUnique(browserTrades, Array.isArray(cachedRestore?.trades) ? cachedRestore.trades : []), authUser.id);
-    if (cachedTrades.length) {
-      setTrades(cachedTrades);
-    } else {
-      setTrades([]);
-    }
+    setTrades([]);
 
     loadTradesFromSupabase(authUser.id)
       .then(async (rows) => {
         if (!mounted || !Array.isArray(rows)) return;
 
-        const visibleRows = filterDeletedTrades(rows, authUser.id);
-        const deletedRemoteRows = rows.filter((row) => !visibleRows.some((visibleRow) => getTradeDurableId(visibleRow) === getTradeDurableId(row)));
-        if (deletedRemoteRows.length) {
-          deletedRemoteRows.forEach((row) => {
-            deleteTradeFromSupabase(authUser.id, row).catch((deleteError) => {
-              console.warn("Could not finish cloud delete for a locally deleted trade:", deleteError?.message || deleteError);
-            });
-          });
-        }
-
-        if (visibleRows.length) {
-          const serverTrades = mergeTradesUnique(visibleRows, []);
-          const mergedTrades = mergeTradesUnique(serverTrades, cachedTrades);
-          setTrades(mergedTrades);
-          saveLocalTradesFallback(mergedTrades, authUser.id);
-          saveRestoreCache(authUser.id, { trades: mergedTrades, account, routine, theme });
-
-          if (mergedTrades.length > serverTrades.length) {
-            try {
-              const reSavedTrades = await replaceTradesInSupabase(authUser.id, mergedTrades);
-              if (!mounted) return;
-              const finalTrades = reSavedTrades.length ? reSavedTrades : mergedTrades;
-              setTrades(finalTrades);
-              saveLocalTradesFallback(finalTrades, authUser.id);
-              saveRestoreCache(authUser.id, { trades: finalTrades, account, routine, theme });
-              setDataMessage(`Recovered ${finalTrades.length - serverTrades.length} browser-saved trade${finalTrades.length - serverTrades.length === 1 ? "" : "s"} and synced them to cloud.`);
-            } catch (syncError) {
-              if (!mounted) return;
-              console.warn("Could not re-sync recovered browser trades:", syncError?.message || syncError);
-            }
-          }
+        if (rows.length) {
+          const serverTrades = mergeTradesUnique(rows, []);
+          setTrades(serverTrades);
+          saveLocalTradesFallback(serverTrades, authUser.id);
+          saveRestoreCache(authUser.id, { trades: serverTrades, account, routine, theme });
           return;
         }
 
-        const fallbackTrades = cachedTrades;
-
-        if (fallbackTrades.length) {
-          setTrades(fallbackTrades);
-          saveLocalTradesFallback(fallbackTrades, authUser.id);
-          saveRestoreCache(authUser.id, { trades: fallbackTrades, account, routine, theme });
-
-          try {
-            const reSavedTrades = await replaceTradesInSupabase(authUser.id, fallbackTrades);
-            if (!mounted) return;
-            const finalTrades = reSavedTrades.length ? reSavedTrades : fallbackTrades;
-            setTrades(finalTrades);
-            saveLocalTradesFallback(finalTrades, authUser.id);
-            saveRestoreCache(authUser.id, { trades: finalTrades, account, routine, theme });
-            setDataMessage(`Supabase was empty, but your local trades were recovered and re-synced ✅ Trades: ${finalTrades.length}`);
-            return;
-          } catch (syncError) {
-            if (!mounted) return;
-            setDataMessage(syncError?.message || "Supabase returned empty. Trades are still safe in browser storage, but Supabase re-sync failed. Check RLS policies.");
-            return;
-          }
-        }
 
         setTrades([]);
         setDataMessage("");
       })
       .catch(async (error) => {
         if (!mounted) return;
-        const localTrades = mergeTradesUnique(Array.isArray(trades) ? trades : [], readLocalTradesFallback(authUser.id, true));
+        const localTrades = readLocalTradesFallback(authUser.id);
         if (localTrades.length) {
           setTrades(localTrades);
           saveRestoreCache(authUser.id, { trades: localTrades, account, routine, theme });
@@ -7050,36 +6900,10 @@ export default function TradingJournalDashboard() {
   }, [accounts, account, authUser?.id]);
 
   useEffect(() => {
-    if (!supabase || !authUser?.id || !isAuthenticated || !hasLoadedRemoteAccount) return undefined;
-    const cloudAccounts = normalizeAccountsList(accounts);
-    if (!cloudAccounts.length) return undefined;
-
-    const timeoutId = window.setTimeout(() => {
-      saveAccountBundleToSupabase(authUser.id, cloudAccounts, activeAccountId)
-        .catch((error) => {
-          if (!isSupabaseAuthExpiredError(error)) {
-            console.warn("Could not sync trading accounts to Supabase:", error?.message || error);
-          }
-        });
-    }, 700);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [accounts, activeAccountId, authUser?.id, hasLoadedRemoteAccount, isAuthenticated]);
-
-  useEffect(() => {
-    if (!authUser?.id || !isAuthenticated) {
-      setHasLoadedRemoteAccount(false);
-      return;
-    }
-    setHasLoadedRemoteAccount(false);
+    if (!authUser?.id || !isAuthenticated) return;
     accountStorageUserRef.current = authUser.id;
-    const storedAccounts = readStoredAccounts(authUser.id, true);
-    setAccounts((current) => mergeAccountsUnique(current, storedAccounts));
-    setActiveAccountId((current) => {
-      const savedActiveId = readStoredActiveAccountId(authUser.id) || current;
-      const mergedAccounts = mergeAccountsUnique(accounts, storedAccounts);
-      return mergedAccounts.some((item) => String(item.id) === String(savedActiveId)) ? savedActiveId : mergedAccounts[0]?.id || "";
-    });
+    setAccounts(readStoredAccounts(authUser.id));
+    setActiveAccountId(readStoredActiveAccountId(authUser.id));
     setPendingAccountDraft(null);
   }, [authUser?.id, isAuthenticated]);
 
@@ -7115,83 +6939,26 @@ export default function TradingJournalDashboard() {
     if (!supabase || !authUser?.id || !isAuthenticated) return undefined;
     let mounted = true;
 
-    loadAccountBundleFromSupabase(authUser.id)
-      .then((profileBundle) => {
-        if (!mounted) return;
-        const localAccounts = mergeAccountsUnique(accounts, readStoredAccounts(authUser.id, true));
-        const mergedAccounts = mergeAccountsUnique(localAccounts, profileBundle.accounts);
-        const savedActiveId = readStoredActiveAccountId(authUser.id);
-        const nextActiveId = mergedAccounts.some((item) => String(item.id) === String(profileBundle.activeAccountId))
-          ? profileBundle.activeAccountId
-          : mergedAccounts.some((item) => String(item.id) === String(savedActiveId))
-            ? savedActiveId
-            : mergedAccounts[0]?.id || "";
-        setAccounts(mergedAccounts);
-        setActiveAccountId(nextActiveId);
+    loadAccountFromSupabase(authUser.id)
+      .then((profileAccount) => {
+        if (!mounted || !profileAccount) return;
+        setAccounts((current) => {
+          const normalized = { ...defaultAccount, ...profileAccount, id: profileAccount.id || activeAccountId || defaultAccount.id, balance: Number(profileAccount.balance || defaultAccount.balance) };
+          const exists = current.some((item) => String(item.id) === String(normalized.id));
+          return exists ? current.map((item) => String(item.id) === String(normalized.id) ? normalized : item) : [normalized, ...current];
+        });
       })
       .catch((error) => {
         if (isSupabaseAuthExpiredError(error)) {
           return;
         }
         console.warn("Could not load account profile from Supabase:", error?.message || error);
-      })
-      .finally(() => {
-        if (mounted) setHasLoadedRemoteAccount(true);
       });
 
     return () => {
       mounted = false;
     };
   }, [authUser?.id, isAuthenticated]);
-
-  useEffect(() => {
-    if (!supabase || !authUser?.id || !isAuthenticated || !hasLoadedRemoteTrades || !hasLoadedRemoteAccount) return undefined;
-
-    const browserTrades = filterDeletedTrades(mergeTradesUnique(trades, readLocalTradesFallback(authUser.id, true)), authUser.id);
-    const browserAccounts = mergeAccountsUnique(accounts, readStoredAccounts(authUser.id, true));
-    if (!browserTrades.length && !browserAccounts.length) return undefined;
-
-    const signature = JSON.stringify({
-      userId: authUser.id,
-      trades: browserTrades.map((trade) => getStableTradeSyncKey(trade)),
-      accounts: browserAccounts.map((item) => `${item.id}|${item.name}|${item.balance}|${item.currency}|${item.type}`),
-      activeAccountId,
-    });
-
-    if (cloudSnapshotSyncRef.current === signature) return undefined;
-    cloudSnapshotSyncRef.current = signature;
-
-    let mounted = true;
-    const timeoutId = window.setTimeout(async () => {
-      try {
-        let syncedTrades = null;
-        if (browserTrades.length) {
-          syncedTrades = await replaceTradesInSupabase(authUser.id, browserTrades);
-        }
-        if (browserAccounts.length) {
-          await saveAccountBundleToSupabase(authUser.id, browserAccounts, activeAccountId);
-        }
-        if (!mounted) return;
-        if (Array.isArray(syncedTrades) && syncedTrades.length) {
-          setTrades(syncedTrades);
-          saveLocalTradesFallback(syncedTrades, authUser.id);
-          saveRestoreCache(authUser.id, { trades: syncedTrades, account, routine, theme });
-        }
-        if (browserAccounts.length) {
-          setAccounts((current) => mergeAccountsUnique(browserAccounts, current));
-        }
-      } catch (error) {
-        if (!mounted || isSupabaseAuthExpiredError(error)) return;
-        console.warn("Could not force-sync browser data to Supabase:", error?.message || error);
-      }
-    }, 1300);
-
-    return () => {
-      mounted = false;
-      window.clearTimeout(timeoutId);
-    };
-  }, [account, accounts, activeAccountId, authUser?.id, hasLoadedRemoteAccount, hasLoadedRemoteTrades, isAuthenticated, routine, theme, trades]);
-
   useEffect(() => { localStorage.setItem(ROUTINE_KEY, JSON.stringify(routine)); }, [routine]);
   useEffect(() => { localStorage.setItem(THEME_KEY, theme); }, [theme]);
   useEffect(() => {
@@ -7726,7 +7493,7 @@ export default function TradingJournalDashboard() {
         return nextTrades;
       });
       setImportPreview(null);
-      setDataMessage(`${savedTrades.length} imported trade${savedTrades.length === 1 ? "" : "s"} saved locally + to Supabase ✅`);
+      setDataMessage(`${savedTrades.length} imported trade${savedTrades.length === 1 ? "" : "s"} saved locally + to Supabase âœ…`);
     } catch (error) {
       setTrades((current) => {
         const nextTrades = [...importPreview.trades, ...current];
@@ -7735,7 +7502,7 @@ export default function TradingJournalDashboard() {
         return nextTrades;
       });
       setImportPreview(null);
-      setDataMessage(`Trades saved in browser backup ✅ Supabase import failed: ${error?.message || "check RLS policies"}`);
+      setDataMessage(`Trades saved in browser backup âœ… Supabase import failed: ${error?.message || "check RLS policies"}`);
     }
   }
   async function restoreBackupFromFile(event) {
@@ -7744,13 +7511,13 @@ export default function TradingJournalDashboard() {
 
     try {
       if (!supabase || !authUser?.id) {
-        throw new Error("Supabase/Auth არ არის მზად. თავიდან შედი ანგარიშში და მერე სცადე Restore.");
+        throw new Error("Supabase/Auth áƒáƒ  áƒáƒ áƒ˜áƒ¡ áƒ›áƒ–áƒáƒ“. áƒ—áƒáƒ•áƒ˜áƒ“áƒáƒœ áƒ¨áƒ”áƒ“áƒ˜ áƒáƒœáƒ’áƒáƒ áƒ˜áƒ¨áƒ¨áƒ˜ áƒ“áƒ áƒ›áƒ”áƒ áƒ” áƒ¡áƒªáƒáƒ“áƒ” Restore.");
       }
 
       const text = await file.text();
       const parsed = validateCritiqueBackup(JSON.parse(text));
       if (!parsed.ok) {
-        window.alert(parsed.error || "Backup file ვერ წაიკითხა.");
+        window.alert(parsed.error || "Backup file áƒ•áƒ”áƒ  áƒ¬áƒáƒ˜áƒ™áƒ˜áƒ—áƒ®áƒ.");
         return;
       }
 
@@ -7768,7 +7535,7 @@ Current trades: ${currentTrades.length}
 Final trades after merge: ${mergedTrades.length}
 Skipped duplicates: ${duplicateCount}
 
-ეს აღარ წაშლის ახალ trades-ს. Backup დაემატება არსებულ trades-ს და დუბლიკატები არ გამეორდება.`);
+áƒ”áƒ¡ áƒáƒ¦áƒáƒ  áƒ¬áƒáƒ¨áƒšáƒ˜áƒ¡ áƒáƒ®áƒáƒš trades-áƒ¡. Backup áƒ“áƒáƒ”áƒ›áƒáƒ¢áƒ”áƒ‘áƒ áƒáƒ áƒ¡áƒ”áƒ‘áƒ£áƒš trades-áƒ¡ áƒ“áƒ áƒ“áƒ£áƒ‘áƒšáƒ˜áƒ™áƒáƒ¢áƒ”áƒ‘áƒ˜ áƒáƒ  áƒ’áƒáƒ›áƒ”áƒáƒ áƒ“áƒ”áƒ‘áƒ.`);
       if (!confirmed) return;
 
       setDataMessage("Merging backup with your current trades...");
@@ -7802,16 +7569,16 @@ Skipped duplicates: ${duplicateCount}
       });
       setRoutine(parsed.routine);
       setTheme(parsed.theme);
-      setDataMessage(`Backup merged, verified and cached ✅ Final trades: ${finalTrades.length}. Added: ${addedCount}. Skipped duplicates: ${duplicateCount}.`);
-      window.alert(`Backup წარმატებით დაემატა არსებულ trades-ს ✅
+      setDataMessage(`Backup merged, verified and cached âœ… Final trades: ${finalTrades.length}. Added: ${addedCount}. Skipped duplicates: ${duplicateCount}.`);
+      window.alert(`Backup áƒ¬áƒáƒ áƒ›áƒáƒ¢áƒ”áƒ‘áƒ˜áƒ— áƒ“áƒáƒ”áƒ›áƒáƒ¢áƒ áƒáƒ áƒ¡áƒ”áƒ‘áƒ£áƒš trades-áƒ¡ âœ…
 Final trades: ${finalTrades.length}
 Added: ${addedCount}
 Skipped duplicates: ${duplicateCount}
 
-ახლა refresh გააკეთე. ახალი trades აღარ უნდა წაიშალოს.`);
+áƒáƒ®áƒšáƒ refresh áƒ’áƒáƒáƒ™áƒ”áƒ—áƒ”. áƒáƒ®áƒáƒšáƒ˜ trades áƒáƒ¦áƒáƒ  áƒ£áƒœáƒ“áƒ áƒ¬áƒáƒ˜áƒ¨áƒáƒšáƒáƒ¡.`);
     } catch (error) {
-      setDataMessage(error?.message || "Backup file არასწორია ან Supabase-ში ვერ ჩაიწერა.");
-      window.alert(error?.message || "Backup file არასწორია ან დაზიანებულია.");
+      setDataMessage(error?.message || "Backup file áƒáƒ áƒáƒ¡áƒ¬áƒáƒ áƒ˜áƒ áƒáƒœ Supabase-áƒ¨áƒ˜ áƒ•áƒ”áƒ  áƒ©áƒáƒ˜áƒ¬áƒ”áƒ áƒ.");
+      window.alert(error?.message || "Backup file áƒáƒ áƒáƒ¡áƒ¬áƒáƒ áƒ˜áƒ áƒáƒœ áƒ“áƒáƒ–áƒ˜áƒáƒœáƒ”áƒ‘áƒ£áƒšáƒ˜áƒ.");
     } finally {
       event.target.value = "";
     }
@@ -7908,16 +7675,16 @@ Skipped duplicates: ${duplicateCount}
             className="rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 px-3 py-2 text-sm font-black text-fuchsia-300 transition hover:bg-fuchsia-500 hover:text-black"
             title={theme === "dark" ? "Switch to white mode" : "Switch to dark mode"}
           >
-            {theme === "dark" ? "☀" : "🌙"}
+            {theme === "dark" ? "â˜€" : "ðŸŒ™"}
           </button>
         </div>
         <div className="relative mt-10">
           <button onClick={() => accounts.length ? setIsAccountSwitcherOpen((open) => !open) : createNewAccount()} className="account-sidebar-card flex w-full items-center justify-between rounded-lg border border-white/10 bg-zinc-950 px-3 py-3 text-left hover:border-fuchsia-500/40">
             <div>
-              <div className="text-sm font-bold">{accounts.length ? `🎯 ${account.name}` : "＋ Create account"}</div>
+              <div className="text-sm font-bold">{accounts.length ? `ðŸŽ¯ ${account.name}` : "ï¼‹ Create account"}</div>
               <div className="text-xs text-zinc-400">{accounts.length ? `${account.currency} ${accountBalance.currentBalance.toLocaleString()}` : "No trading account yet"}</div>
             </div>
-            <span className={isAccountSwitcherOpen ? "rotate-180 text-zinc-500 transition" : "text-zinc-500 transition"}>⌄</span>
+            <span className={isAccountSwitcherOpen ? "rotate-180 text-zinc-500 transition" : "text-zinc-500 transition"}>âŒ„</span>
           </button>
 
           {isAccountSwitcherOpen && (
@@ -7934,7 +7701,7 @@ Skipped duplicates: ${duplicateCount}
                   return (
                     <div key={item.id} role="button" tabIndex={0} onClick={() => { setActiveAccountId(item.id); setIsAccountSwitcherOpen(false); }} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setActiveAccountId(item.id); setIsAccountSwitcherOpen(false); } }} className={isActive ? "flex w-full cursor-pointer items-center justify-between gap-3 rounded-lg border border-fuchsia-500/30 bg-fuchsia-500/12 px-3 py-3 text-left" : "flex w-full cursor-pointer items-center justify-between gap-3 rounded-lg border border-transparent px-3 py-3 text-left hover:border-fuchsia-500/25 hover:bg-white/5"}>
                       <div className="flex min-w-0 items-center gap-3">
-                        <span className="text-lg">🎯</span>
+                        <span className="text-lg">ðŸŽ¯</span>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="truncate text-sm font-black text-white">{item.name}</span>
@@ -8025,7 +7792,7 @@ Skipped duplicates: ${duplicateCount}
                 <div className="text-xs font-semibold text-zinc-400">Pro Trial</div>
               </div>
             </div>
-            <span className={isSidebarUserMenuOpen ? "text-zinc-400 transition rotate-180" : "text-zinc-400 transition"}>⌄</span>
+            <span className={isSidebarUserMenuOpen ? "text-zinc-400 transition rotate-180" : "text-zinc-400 transition"}>âŒ„</span>
           </button>
         </div>
       </aside>
@@ -8283,7 +8050,7 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
       <div className="journal-hero flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-6 shadow-[0_18px_45px_rgba(217,70,239,0.10)]">
         <div className="flex items-center gap-4">
           <div className="journal-hero-icon rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 p-3 text-fuchsia-300 shadow-[0_0_18px_rgba(217,70,239,0.18)]"><BookOpen /></div>
-          <div><h1 className="text-3xl font-black">Trading Journal</h1><p className="text-zinc-400">v • Track and analyze your trades efficiently</p></div>
+          <div><h1 className="text-3xl font-black">Trading Journal</h1><p className="text-zinc-400">v â€¢ Track and analyze your trades efficiently</p></div>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button onClick={onStrategies} variant="outline" className="journal-action-btn border-white/15 bg-black text-white"><ListChecks size={16} /> Strategies</Button>
@@ -8334,12 +8101,12 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
           <div className="flex items-center gap-3 text-sm text-zinc-400">
             <span>Sort by:</span>
             <div className="w-36"><Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}><option>Date</option><option>P&L</option><option>Symbol</option><option>Grade</option></Select></div>
-            <button onClick={() => setSortDirection(sortDirection === "asc" ? "desc" : "asc")} className="rounded-lg border border-fuchsia-500/35 bg-fuchsia-950/25 px-3 py-2 font-black text-fuchsia-300 shadow-[0_0_14px_rgba(217,70,239,0.12)] transition hover:border-fuchsia-400/80 hover:bg-fuchsia-500 hover:text-black hover:shadow-[0_0_20px_rgba(217,70,239,0.28)]">{sortDirection === "asc" ? "↑" : "↓"}</button>
+            <button onClick={() => setSortDirection(sortDirection === "asc" ? "desc" : "asc")} className="rounded-lg border border-fuchsia-500/35 bg-fuchsia-950/25 px-3 py-2 font-black text-fuchsia-300 shadow-[0_0_14px_rgba(217,70,239,0.12)] transition hover:border-fuchsia-400/80 hover:bg-fuchsia-500 hover:text-black hover:shadow-[0_0_20px_rgba(217,70,239,0.28)]">{sortDirection === "asc" ? "â†‘" : "â†“"}</button>
           </div>
           <div className="flex items-center gap-3 text-sm text-zinc-400">
             <span>View:</span>
-            <button onClick={() => setViewMode("grid")} className={viewMode === "grid" ? "rounded-lg border border-fuchsia-400 bg-fuchsia-500 px-3 py-2 font-black text-black shadow-[0_0_18px_rgba(217,70,239,0.35)]" : "rounded-lg border border-fuchsia-500/35 bg-fuchsia-950/20 px-3 py-2 text-fuchsia-300 transition hover:border-fuchsia-400/80 hover:bg-fuchsia-500/20"}>▦</button>
-            <button onClick={() => setViewMode("list")} className={viewMode === "list" ? "rounded-lg border border-fuchsia-400 bg-fuchsia-500 px-3 py-2 font-black text-black shadow-[0_0_18px_rgba(217,70,239,0.35)]" : "rounded-lg border border-fuchsia-500/35 bg-fuchsia-950/20 px-3 py-2 text-fuchsia-300 transition hover:border-fuchsia-400/80 hover:bg-fuchsia-500/20"}>☷</button>
+            <button onClick={() => setViewMode("grid")} className={viewMode === "grid" ? "rounded-lg border border-fuchsia-400 bg-fuchsia-500 px-3 py-2 font-black text-black shadow-[0_0_18px_rgba(217,70,239,0.35)]" : "rounded-lg border border-fuchsia-500/35 bg-fuchsia-950/20 px-3 py-2 text-fuchsia-300 transition hover:border-fuchsia-400/80 hover:bg-fuchsia-500/20"}>â–¦</button>
+            <button onClick={() => setViewMode("list")} className={viewMode === "list" ? "rounded-lg border border-fuchsia-400 bg-fuchsia-500 px-3 py-2 font-black text-black shadow-[0_0_18px_rgba(217,70,239,0.35)]" : "rounded-lg border border-fuchsia-500/35 bg-fuchsia-950/20 px-3 py-2 text-fuchsia-300 transition hover:border-fuchsia-400/80 hover:bg-fuchsia-500/20"}>â˜·</button>
           </div>
         </div>
       </div>
@@ -8469,12 +8236,12 @@ function TradeCard({ trade, onView, onEdit, onRemove }) {
       <div className="absolute right-0 top-0 h-28 w-28 rounded-bl-[2rem] bg-fuchsia-500/10" />
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent" />
       <button onClick={onView} className="trade-screenshot-area relative block h-48 w-full overflow-hidden bg-zinc-900 text-left">
-        {screenshots.length ? <><img src={screenshots[0]} alt="Trade screenshot" className="trade-screenshot-image h-full w-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:opacity-95" /><div className="trade-screenshot-overlay absolute inset-0 bg-gradient-to-t from-black via-black/15 to-transparent" /></> : <div className="trade-no-screenshot flex h-full flex-col items-center justify-center bg-gradient-to-br from-zinc-950 via-black to-fuchsia-950/20 text-zinc-500"><div className="trade-no-screenshot-icon flex h-14 w-14 items-center justify-center rounded-2xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300"><Camera size={24} /></div><span className="trade-no-screenshot-text mt-3 text-xs font-bold">No Screenshot</span><span className="mt-1 text-[11px] font-semibold text-zinc-500">Edit trade → upload image</span></div>}
+        {screenshots.length ? <><img src={screenshots[0]} alt="Trade screenshot" className="trade-screenshot-image h-full w-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:opacity-95" /><div className="trade-screenshot-overlay absolute inset-0 bg-gradient-to-t from-black via-black/15 to-transparent" /></> : <div className="trade-no-screenshot flex h-full flex-col items-center justify-center bg-gradient-to-br from-zinc-950 via-black to-fuchsia-950/20 text-zinc-500"><div className="trade-no-screenshot-icon flex h-14 w-14 items-center justify-center rounded-2xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300"><Camera size={24} /></div><span className="trade-no-screenshot-text mt-3 text-xs font-bold">No Screenshot</span><span className="mt-1 text-[11px] font-semibold text-zinc-500">Edit trade â†’ upload image</span></div>}
         <div className="absolute left-4 top-4 flex gap-2"><span className="rounded-full border border-fuchsia-500/30 bg-black/70 px-3 py-1 text-xs font-black text-fuchsia-300 backdrop-blur">{trade.pair}</span><span className={`rounded-full border px-3 py-1 text-xs font-black tracking-wider backdrop-blur ${getTradeDirectionClass(trade.direction)}`}>{trade.direction}</span></div>
         <div className={`absolute bottom-4 right-4 rounded-xl border px-4 py-2 text-lg font-black backdrop-blur ${getPnlPillClass(pnl)}`}>{getPnlArrow(pnl)} {formatMoney(pnl)}</div>
       </button>
       <div className="relative z-10 p-5">
-        <div className="flex items-start justify-between gap-3"><div><div className="text-xs font-bold uppercase tracking-wider text-zinc-500">{trade.date} • {trade.session || "No session"}</div><div className="mt-2 text-lg font-black text-white">{trade.setup}</div><div className="mt-1 text-xs text-zinc-400">{trade.accountName || "v"} • {trade.accountType || "Account"}</div></div><span className={`rounded-full border px-3 py-1 text-xs font-black ${getTradeGradeClass(grade)}`}>Grade {grade}</span></div>
+        <div className="flex items-start justify-between gap-3"><div><div className="text-xs font-bold uppercase tracking-wider text-zinc-500">{trade.date} â€¢ {trade.session || "No session"}</div><div className="mt-2 text-lg font-black text-white">{trade.setup}</div><div className="mt-1 text-xs text-zinc-400">{trade.accountName || "v"} â€¢ {trade.accountType || "Account"}</div></div><span className={`rounded-full border px-3 py-1 text-xs font-black ${getTradeGradeClass(grade)}`}>Grade {grade}</span></div>
         <div className="mt-4 grid grid-cols-3 gap-3"><MetricBox label="Risk" value={formatMoney(trade.risk)} tone="fuchsia" /><MetricBox label="R:R" value={`${rr.toFixed(2)}R`} tone="fuchsia" /><MetricBox label="Qty" value={trade.quantity} tone="fuchsia" /></div>
         <div className="mt-4 flex flex-wrap gap-2">{tags.length ? tags.map((tag) => <span key={tag} className="trade-tag rounded-full border border-fuchsia-500/35 bg-fuchsia-500/15 px-3 py-1.5 text-xs font-black text-fuchsia-200 shadow-[0_0_10px_rgba(217,70,239,0.16)]">#{tag}</span>) : <span className="text-xs text-zinc-500">No tags</span>}</div>
         <div className="mt-5 flex items-center justify-between gap-5 border-t border-white/10 pt-4"><div className="flex min-w-0 flex-wrap items-center gap-2 text-xs"><span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 font-bold text-emerald-200">{trade.emotion || "No emotion"}</span><span className={trade.mistake && trade.mistake !== "None" ? "rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1.5 font-bold text-red-300" : "rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 font-bold text-emerald-300"}>{trade.mistake || "None"}</span></div><div className="ml-auto flex shrink-0 gap-2"><button onClick={onView} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Eye size={16} /></button><button onClick={onEdit} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Edit3 size={16} /></button><button onClick={onRemove} className="rounded-lg border border-red-500/20 bg-red-500/10 p-2 text-red-400 transition hover:border-red-500/60"><Trash2 size={16} /></button></div></div>
@@ -8502,8 +8269,8 @@ function TradeListRow({ trade, onView, onEdit, onRemove }) {
         </div>
         <div className="flex items-center gap-7 text-sm text-zinc-400">
           <span className="journal-list-metric-chip">Qty {trade.quantity}</span>
-          <span className="journal-list-metric-chip">◎ 1:{Math.abs(rr).toFixed(1)}</span>
-          <span className="text-fuchsia-300">⌖ {trade.session || "—"}</span>
+          <span className="journal-list-metric-chip">â—Ž 1:{Math.abs(rr).toFixed(1)}</span>
+          <span className="text-fuchsia-300">âŒ– {trade.session || "â€”"}</span>
           <span>{trade.date}</span>
           <span className={`min-w-28 text-right text-xl font-black ${getPnlToneClass(pnl)}`}>{getPnlArrow(pnl)} {formatMoney(pnl)}</span>
           <div className="flex gap-2">
@@ -8533,18 +8300,18 @@ function TradeDetailsPage({ trade, account, onBack, onEdit, onDelete, onExport }
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-5xl">
       <TopCrumb page="Journal" />
-      <div className="mb-8 flex items-center justify-between"><button onClick={onBack} className="text-sm font-bold text-zinc-300 hover:text-white">← Back</button><div className="flex gap-3"><Button onClick={onExport} variant="outline" className="border-white/15 bg-black text-white"><Download size={16} /> Export</Button><Button onClick={onEdit} variant="outline" className="border-white/15 bg-black text-white"><Edit3 size={16} /> Edit</Button><Button onClick={onDelete} className="bg-red-600 text-white"><Trash2 size={16} /> Delete</Button></div></div>
+      <div className="mb-8 flex items-center justify-between"><button onClick={onBack} className="text-sm font-bold text-zinc-300 hover:text-white">â† Back</button><div className="flex gap-3"><Button onClick={onExport} variant="outline" className="border-white/15 bg-black text-white"><Download size={16} /> Export</Button><Button onClick={onEdit} variant="outline" className="border-white/15 bg-black text-white"><Edit3 size={16} /> Edit</Button><Button onClick={onDelete} className="bg-red-600 text-white"><Trash2 size={16} /> Delete</Button></div></div>
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
         <div className="flex h-full flex-col gap-6">
-          <div className="flex items-center gap-4"><div className="rounded-xl bg-fuchsia-500/20 p-4 text-fuchsia-300">{trade.pair}</div><div><h1 className="text-3xl font-black">{trade.pair} Trade Details</h1><p className="text-zinc-400">{trade.direction} • {trade.quantity} shares • {trade.date}</p></div></div>
+          <div className="flex items-center gap-4"><div className="rounded-xl bg-fuchsia-500/20 p-4 text-fuchsia-300">{trade.pair}</div><div><h1 className="text-3xl font-black">{trade.pair} Trade Details</h1><p className="text-zinc-400">{trade.direction} â€¢ {trade.quantity} shares â€¢ {trade.date}</p></div></div>
           <div className={`rounded-xl border p-6 ${Number(trade.pnl) > 0 ? "border-emerald-500/30 bg-emerald-950/30" : Number(trade.pnl) < 0 ? "border-red-500/30 bg-red-950/30" : "border-amber-500/30 bg-amber-950/30"}`}><div className="text-sm text-zinc-400">Total P&L</div><div className={`mt-2 text-4xl font-black ${getPnlToneClass(trade.pnl)}`}>{getPnlArrow(trade.pnl)} {formatMoney(trade.pnl)}</div></div>
-          <div className="rounded-xl border border-white/10 bg-zinc-950 p-6"><SectionTitle title="Trade Metadata" icon={<BarChart3 size={18} />} /><div className="mt-8 grid grid-cols-2 gap-8 border-b border-white/10 pb-6"><Meta label="Quantity" value={trade.quantity} /><Meta label="Session" value={trade.session || "—"} /></div><div className="grid grid-cols-2 gap-8 border-b border-white/10 py-6"><Meta label="Entry Date" value={trade.date} /><Meta label="Exit Date" value={trade.date} /></div><div className="grid grid-cols-3 gap-8 pt-6"><Meta label="Risk" value={formatMoney(trade.risk)} danger /><Meta label="Risk/Reward Ratio" value={`${getTradeRR(trade).toFixed(2)}:1`} gold /><Meta label="Realized P&L" value={formatMoney(trade.pnl)} green={Number(trade.pnl) > 0} gold={Number(trade.pnl) === 0} danger={Number(trade.pnl) < 0} /></div></div>
+          <div className="rounded-xl border border-white/10 bg-zinc-950 p-6"><SectionTitle title="Trade Metadata" icon={<BarChart3 size={18} />} /><div className="mt-8 grid grid-cols-2 gap-8 border-b border-white/10 pb-6"><Meta label="Quantity" value={trade.quantity} /><Meta label="Session" value={trade.session || "â€”"} /></div><div className="grid grid-cols-2 gap-8 border-b border-white/10 py-6"><Meta label="Entry Date" value={trade.date} /><Meta label="Exit Date" value={trade.date} /></div><div className="grid grid-cols-3 gap-8 pt-6"><Meta label="Risk" value={formatMoney(trade.risk)} danger /><Meta label="Risk/Reward Ratio" value={`${getTradeRR(trade).toFixed(2)}:1`} gold /><Meta label="Realized P&L" value={formatMoney(trade.pnl)} green={Number(trade.pnl) > 0} gold={Number(trade.pnl) === 0} danger={Number(trade.pnl) < 0} /></div></div>
           <div className="rounded-xl border border-white/10 bg-zinc-950 p-6"><SectionTitle title={`Trade Screenshots (${screenshots.length})`} icon={<Camera size={18} />} /><div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">{screenshots.length ? screenshots.map((img, index) => <button key={index} onClick={() => setActiveIndex(index)}><img src={img} alt="Trade screenshot" className="h-56 w-full rounded-lg object-cover hover:opacity-80" /></button>) : <div className="col-span-2 rounded-xl border border-dashed border-white/10 bg-black p-10 text-center text-zinc-500">No screenshots uploaded</div>}</div></div>
-          <div className="rounded-xl border border-white/10 bg-zinc-950 p-6"><SectionTitle title="Trade Analysis" icon={<BookOpen size={18} />} /><p className="trade-analysis-note mt-4 rounded-xl bg-black p-4 text-zinc-300">{trade.notes || "No notes"}</p><div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2"><ReviewBox title="What went well?" value={trade.whatWentWell || "No review yet"} tone="emerald" /><ReviewBox title="What went wrong?" value={trade.whatWentWrong || "No review yet"} tone="red" /></div><div className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-4"><Meta label="Rule Followed" value={trade.ruleFollowed || "—"} green={trade.ruleFollowed === "Yes"} danger={trade.ruleFollowed === "No"} /><Meta label="Entry Timing" value={trade.entryTiming || "—"} gold /><Meta label="Setup Quality" value={trade.setupQuality || getTradeGrade(trade)} gold /><Meta label="Market" value={trade.marketCondition || "—"} /><Meta label="Confirmation" value={trade.confirmation || "—"} green={trade.confirmation === "Yes"} danger={trade.confirmation === "No"} /><Meta label="Rule Broken" value={trade.ruleBroken || "None"} danger={trade.ruleBroken && trade.ruleBroken !== "None"} /><Meta label="Entry Quality" value={`${trade.entryQuality || "—"}/5`} gold /><Meta label="Exit Quality" value={`${trade.exitQuality || "—"}/5`} gold /></div></div>
+          <div className="rounded-xl border border-white/10 bg-zinc-950 p-6"><SectionTitle title="Trade Analysis" icon={<BookOpen size={18} />} /><p className="trade-analysis-note mt-4 rounded-xl bg-black p-4 text-zinc-300">{trade.notes || "No notes"}</p><div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2"><ReviewBox title="What went well?" value={trade.whatWentWell || "No review yet"} tone="emerald" /><ReviewBox title="What went wrong?" value={trade.whatWentWrong || "No review yet"} tone="red" /></div><div className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-4"><Meta label="Rule Followed" value={trade.ruleFollowed || "â€”"} green={trade.ruleFollowed === "Yes"} danger={trade.ruleFollowed === "No"} /><Meta label="Entry Timing" value={trade.entryTiming || "â€”"} gold /><Meta label="Setup Quality" value={trade.setupQuality || getTradeGrade(trade)} gold /><Meta label="Market" value={trade.marketCondition || "â€”"} /><Meta label="Confirmation" value={trade.confirmation || "â€”"} green={trade.confirmation === "Yes"} danger={trade.confirmation === "No"} /><Meta label="Rule Broken" value={trade.ruleBroken || "None"} danger={trade.ruleBroken && trade.ruleBroken !== "None"} /><Meta label="Entry Quality" value={`${trade.entryQuality || "â€”"}/5`} gold /><Meta label="Exit Quality" value={`${trade.exitQuality || "â€”"}/5`} gold /></div></div>
         </div>
-        <div className="space-y-5"><SideBox title="Trade Info"><MiniInfo label="Strategy" value={trade.setup} /><MiniInfo label="Account" value={trade.accountName || account?.name || "v"} /><MiniInfo label="Account Type" value={trade.accountType || account?.type || "—"} /><MiniInfo label="Trade Type" value={trade.direction} badge tone={trade.direction === "SELL" ? "red" : "green"} /></SideBox><SideBox title="Tags"><div className="flex flex-wrap gap-2">{normalizeTags(trade).length ? normalizeTags(trade).map((tag) => <span key={tag} className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">{tag}</span>) : <span className="text-zinc-500">No tags</span>}</div></SideBox><SideBox title="Emotions"><span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">{trade.emotion || "—"}</span></SideBox><SideBox title="Quality"><div className={`w-fit rounded-full border px-3 py-1 text-xs font-black ${getTradeGradeClass(getTradeGrade(trade))}`}>Grade {getTradeGrade(trade)}</div><div className="mt-3 text-sm text-zinc-400">Mistake: {trade.mistake || "None"}</div></SideBox></div>
+        <div className="space-y-5"><SideBox title="Trade Info"><MiniInfo label="Strategy" value={trade.setup} /><MiniInfo label="Account" value={trade.accountName || account?.name || "v"} /><MiniInfo label="Account Type" value={trade.accountType || account?.type || "â€”"} /><MiniInfo label="Trade Type" value={trade.direction} badge tone={trade.direction === "SELL" ? "red" : "green"} /></SideBox><SideBox title="Tags"><div className="flex flex-wrap gap-2">{normalizeTags(trade).length ? normalizeTags(trade).map((tag) => <span key={tag} className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">{tag}</span>) : <span className="text-zinc-500">No tags</span>}</div></SideBox><SideBox title="Emotions"><span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">{trade.emotion || "â€”"}</span></SideBox><SideBox title="Quality"><div className={`w-fit rounded-full border px-3 py-1 text-xs font-black ${getTradeGradeClass(getTradeGrade(trade))}`}>Grade {getTradeGrade(trade)}</div><div className="mt-3 text-sm text-zinc-400">Mistake: {trade.mistake || "None"}</div></SideBox></div>
       </div>
-      {activeIndex !== null && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95"><button onClick={() => setActiveIndex(null)} className="absolute right-8 top-8 text-3xl text-white">×</button><button onClick={() => setActiveIndex((activeIndex - 1 + screenshots.length) % screenshots.length)} className="absolute left-8 text-5xl text-white">‹</button><img src={screenshots[activeIndex]} alt="Fullscreen screenshot" className="max-h-[90vh] max-w-[90vw] rounded" /><button onClick={() => setActiveIndex((activeIndex + 1) % screenshots.length)} className="absolute right-8 text-5xl text-white">›</button></div>}
+      {activeIndex !== null && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95"><button onClick={() => setActiveIndex(null)} className="absolute right-8 top-8 text-3xl text-white">Ã—</button><button onClick={() => setActiveIndex((activeIndex - 1 + screenshots.length) % screenshots.length)} className="absolute left-8 text-5xl text-white">â€¹</button><img src={screenshots[activeIndex]} alt="Fullscreen screenshot" className="max-h-[90vh] max-w-[90vw] rounded" /><button onClick={() => setActiveIndex((activeIndex + 1) % screenshots.length)} className="absolute right-8 text-5xl text-white">â€º</button></div>}
     </motion.div>
   );
 }
@@ -8642,24 +8409,24 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
       <div className="dashboard-hero rounded-2xl border border-fuchsia-500/35 bg-gradient-to-r from-fuchsia-950/35 via-black to-[#08040d] p-5 shadow-[0_0_38px_rgba(168,85,247,0.12)]">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <h1 className="text-3xl font-black xl:text-4xl">Welcome back, {getFirstDisplayName(profileName)}! <span className="waving-hand" aria-hidden="true">👋</span></h1>
-            <p className="mt-3 flex items-center gap-2 text-base font-semibold text-zinc-400">▣ {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}</p>
+            <h1 className="text-3xl font-black xl:text-4xl">Welcome back, {getFirstDisplayName(profileName)}! <span className="waving-hand" aria-hidden="true">ðŸ‘‹</span></h1>
+            <p className="mt-3 flex items-center gap-2 text-base font-semibold text-zinc-400">â–£ {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Button onClick={onOpenJournal} className="dashboard-primary-btn bg-fuchsia-500 px-5 py-3 font-black text-black shadow-[0_0_24px_rgba(217,70,239,0.28)]">▣ Log Trades</Button>
+            <Button onClick={onOpenJournal} className="dashboard-primary-btn bg-fuchsia-500 px-5 py-3 font-black text-black shadow-[0_0_24px_rgba(217,70,239,0.28)]">â–£ Log Trades</Button>
             <Button onClick={onStartDay} className="dashboard-start-btn border border-emerald-500/45 bg-black px-5 py-3 font-black text-white hover:bg-emerald-500/15">Start Your Day</Button>
           </div>
         </div>
         <div className="dashboard-inspiration mt-4 rounded-xl border border-fuchsia-500/20 bg-black/30 p-3 text-center">
-          <div className="text-sm font-black uppercase tracking-widest text-fuchsia-400"><span className="daily-inspiration-star">✬</span> Daily Inspiration <span className="daily-inspiration-star">✬</span></div>
+          <div className="text-sm font-black uppercase tracking-widest text-fuchsia-400"><span className="daily-inspiration-star">âœ¬</span> Daily Inspiration <span className="daily-inspiration-star">âœ¬</span></div>
           <div className="moving-text-wrap mt-2">
             <div className="moving-text-track">
               {quotes.map((item, index) => (
                 <div key={index} className="moving-text-slide">
                   <span className="moving-text-item">
-                    <span className="moving-text-spark">✦</span>
+                    <span className="moving-text-spark">âœ¦</span>
                     {item}
-                    <span className="moving-text-spark">✦</span>
+                    <span className="moving-text-spark">âœ¦</span>
                   </span>
                 </div>
               ))}
@@ -8680,10 +8447,10 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
       )}
 
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        <DashCard title="TOTAL P&L" value={<RotatingPnlValue pnl={stats.totalPnl} balance={accountBalance.startingBalance} />} badge={stats.totalPnl >= 0 ? "↗ Positive P&L" : "↘ Negative P&L"} tone={stats.totalPnl >= 0 ? "emerald" : "amber"} icon="$" />
-        <DashCard title="WIN RATE" value={`${stats.winRate.toFixed(1)}%`} badge={`↗ ${stats.wins}W / ${stats.losses}L`} tone="fuchsia" icon="🏆" />
-        <DashCard title="TOTAL TRADES" value={stats.trades} badge={`▣ ${stats.trades} closed`} tone="cyan" icon="⌁" />
-        <DashCard title="AVG WIN/LOSS" value={`${formatMoney(stats.avgWin)} / ${formatMoney(stats.avgLoss)}`} badge={stats.avgWinLoss >= 999 ? "↗ Positive R:R" : `${stats.avgWinLoss.toFixed(2)} ratio`} tone="amber" icon="↗" />
+        <DashCard title="TOTAL P&L" value={<RotatingPnlValue pnl={stats.totalPnl} balance={accountBalance.startingBalance} />} badge={stats.totalPnl >= 0 ? "â†— Positive P&L" : "â†˜ Negative P&L"} tone={stats.totalPnl >= 0 ? "emerald" : "amber"} icon="$" />
+        <DashCard title="WIN RATE" value={`${stats.winRate.toFixed(1)}%`} badge={`â†— ${stats.wins}W / ${stats.losses}L`} tone="fuchsia" icon="ðŸ†" />
+        <DashCard title="TOTAL TRADES" value={stats.trades} badge={`â–£ ${stats.trades} closed`} tone="cyan" icon="âŒ" />
+        <DashCard title="AVG WIN/LOSS" value={`${formatMoney(stats.avgWin)} / ${formatMoney(stats.avgLoss)}`} badge={stats.avgWinLoss >= 999 ? "â†— Positive R:R" : `${stats.avgWinLoss.toFixed(2)} ratio`} tone="amber" icon="â†—" />
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-[2fr_1fr]">
@@ -8698,9 +8465,9 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
             </div>
             <div className="flex flex-wrap gap-2 rounded-xl border border-white/10 bg-black/70 p-1.5">
               {[
-                ["EquityCurve", "↗ EquityCurve"],
-                ["WinRate", "⌁ WinRate"],
-                ["DailyP&L", "▥ DailyP&L"],
+                ["EquityCurve", "â†— EquityCurve"],
+                ["WinRate", "âŒ WinRate"],
+                ["DailyP&L", "â–¥ DailyP&L"],
               ].map(([mode, label]) => (
                 <button key={mode} onClick={() => setPerformanceMode(mode)} className={performanceMode === mode ? "rounded-lg bg-fuchsia-500 px-4 py-2 text-sm font-black text-black" : "rounded-lg px-4 py-2 text-sm font-black text-zinc-300 hover:bg-white/5"}>{label}</button>
               ))}
@@ -8738,7 +8505,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
                       </div>
                       <div>
                         <div className="flex items-center gap-2"><span className="text-xl font-black">{trade.pair}</span><span className="rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 px-2.5 py-1 text-xs font-black text-fuchsia-100">{trade.setup}</span></div>
-                        <div className="mt-1 text-sm font-semibold text-zinc-400">{trade.quantity} shares • {trade.date}</div>
+                        <div className="mt-1 text-sm font-semibold text-zinc-400">{trade.quantity} shares â€¢ {trade.date}</div>
                       </div>
                     </div>
                     <div className={`rounded-xl border px-3 py-2 font-black ${getPnlPillClass(pnl)}`}>{getPnlArrow(pnl)} {formatMoney(pnl)}</div>
@@ -8756,7 +8523,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
                   <div className="mt-4 text-4xl font-black text-white">{checkedCount}/{routineItems.length}</div>
                   <div className="mt-2 text-sm font-bold text-emerald-300">{routinePercent === 100 ? "Ready to Trade" : `${routinePercent}% complete`}</div>
                 </div>
-                <div className="dashboard-routine-icon flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/15 text-2xl text-emerald-300">✅</div>
+                <div className="dashboard-routine-icon flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/15 text-2xl text-emerald-300">âœ…</div>
               </div>
               <div className="mt-6">
                 <div className="mb-2 flex justify-between text-[10px] font-black uppercase tracking-wider text-zinc-500"><span>Checklist Progress</span><span>{routinePercent}%</span></div>
@@ -8782,9 +8549,9 @@ function DashboardMistakeAlert({ trades, onOpen }) {
         <div>
           <div className="text-xs font-black uppercase tracking-widest text-red-300">Main Mistake Warning</div>
           <div className="mt-2 text-2xl font-black text-white">{translateDetectorText(detector.mainIssue.title)}</div>
-          <div className="mt-1 text-sm font-bold text-zinc-400">{translateDetectorText(detector.mainRoot?.title || detector.mainIssue.type)} · {detector.confidence}% confidence · {formatMoney(detector.affectedPnl)} lost P&L</div>
+          <div className="mt-1 text-sm font-bold text-zinc-400">{translateDetectorText(detector.mainRoot?.title || detector.mainIssue.type)} Â· {detector.confidence}% confidence Â· {formatMoney(detector.affectedPnl)} lost P&L</div>
         </div>
-        <span className="rounded-xl border border-red-500/35 bg-red-500/15 px-4 py-3 text-sm font-black text-red-300">Open Mistake Analysis →</span>
+        <span className="rounded-xl border border-red-500/35 bg-red-500/15 px-4 py-3 text-sm font-black text-red-300">Open Mistake Analysis â†’</span>
       </div>
     </button>
   );
@@ -9006,10 +8773,10 @@ function TradingActivityPanel({ trades, selectedDate, onSelectDate }) {
 
       <div className="relative z-10 mt-auto border-t border-white/10 pt-5">
         <div className="grid grid-cols-2 gap-3">
-          <ActivityStat tone="fuchsia" title="ACTIVE" value={activityTotals.trades} subtitle="trades" icon="●" />
-          <ActivityStat tone="emerald" title="WINS" value={activityTotals.wins} subtitle="profitable trades" icon="↗" />
-          <ActivityStat tone="red" title="LOSSES" value={activityTotals.losses} subtitle="unprofitable trades" icon="↘" />
-          <ActivityStat tone="amber" title="BE" value={activityTotals.breakEvens} subtitle="neutral trades" icon="—" />
+          <ActivityStat tone="fuchsia" title="ACTIVE" value={activityTotals.trades} subtitle="trades" icon="â—" />
+          <ActivityStat tone="emerald" title="WINS" value={activityTotals.wins} subtitle="profitable trades" icon="â†—" />
+          <ActivityStat tone="red" title="LOSSES" value={activityTotals.losses} subtitle="unprofitable trades" icon="â†˜" />
+          <ActivityStat tone="amber" title="BE" value={activityTotals.breakEvens} subtitle="neutral trades" icon="â€”" />
         </div>
       </div>
     </div>
@@ -9104,7 +8871,7 @@ function PerformanceScorePanel({ stats }) {
   ];
 
   const chartPoints = metricOrder.map((point) => {
-    const metric = baseMetrics[point.key] || { label: point.key, description: "", actual: "—", score: 0 };
+    const metric = baseMetrics[point.key] || { label: point.key, description: "", actual: "â€”", score: 0 };
     const scale = Math.max(0.22, Number(metric.score || 0) / 100);
     return {
       ...point,
@@ -9124,7 +8891,7 @@ function PerformanceScorePanel({ stats }) {
 
       <div className="relative z-10 flex items-start gap-4">
         <div className="dashboard-section-icon flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/15 text-fuchsia-300 shadow-[0_0_18px_rgba(217,70,239,0.25)]">
-          <span className="text-2xl font-black">ⓘ</span>
+          <span className="text-2xl font-black">â“˜</span>
         </div>
         <div>
           <h2 className="text-2xl font-black">Performance <span className="text-zinc-300">Score</span></h2>
@@ -9325,7 +9092,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
             <TopPill label="P&L:" value={formatMoney(monthStats.pnl)} green={monthStats.pnl >= 0} red={monthStats.pnl < 0} />
             <TopPill label="WIN:" value={`${monthStats.winRate.toFixed(0)}%`} />
             <button onClick={goToday} className="calendar-top-pill rounded-xl border border-white/15 bg-black px-4 py-3 text-sm font-black text-white shadow-[0_0_16px_rgba(217,70,239,0.10)] transition hover:border-fuchsia-400/60">
-              ▣ Today
+              â–£ Today
             </button>
           </div>
         </div>
@@ -9390,7 +9157,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                         </div>
                       ) : (
                         <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 text-center text-zinc-600">
-                          {isWeekend ? <span className="text-lg opacity-80">🏖️</span> : <span className="calendar-empty-dash text-2xl">–</span>}
+                          {isWeekend ? <span className="text-lg opacity-80">ðŸ–ï¸</span> : <span className="calendar-empty-dash text-2xl">â€“</span>}
                         </div>
                       )}
                     </button>
@@ -9437,7 +9204,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
 function CalendarDayDetailsModal({ dateKey, trades = [], events = [], onClose, onAdd }) {
   const stats = summarizeTrades(trades);
   const date = new Date(`${dateKey}T00:00:00`);
-  const dayNumber = Number.isNaN(date.getTime()) ? "—" : date.getDate();
+  const dayNumber = Number.isNaN(date.getTime()) ? "â€”" : date.getDate();
   const title = Number.isNaN(date.getTime()) ? dateKey : date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
   const sortedTrades = [...trades].sort((a, b) => Number(b.createdAt || b.id || 0) - Number(a.createdAt || a.id || 0));
   const resultTone = stats.pnl > 0 ? "win" : stats.pnl < 0 ? "loss" : stats.count ? "be" : "empty";
@@ -9453,13 +9220,13 @@ function CalendarDayDetailsModal({ dateKey, trades = [], events = [], onClose, o
               <h2 className="text-2xl font-black text-white">{title}</h2>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-sm font-bold text-zinc-400">
                 <span>{stats.count} trade{stats.count === 1 ? "" : "s"}</span>
-                <span>•</span>
+                <span>â€¢</span>
                 <span>{stats.winRate.toFixed(1)}% win</span>
                 <span className={resultTone === "win" ? "calendar-modal-status calendar-modal-status-win" : resultTone === "loss" ? "calendar-modal-status calendar-modal-status-loss" : resultTone === "be" ? "calendar-modal-status calendar-modal-status-be" : "calendar-modal-status calendar-modal-status-empty"}>{resultLabel}</span>
               </div>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-xl border border-white/10 bg-black px-3 py-2 text-xl font-black text-zinc-400 transition hover:border-fuchsia-500/50 hover:text-white">×</button>
+          <button onClick={onClose} className="rounded-xl border border-white/10 bg-black px-3 py-2 text-xl font-black text-zinc-400 transition hover:border-fuchsia-500/50 hover:text-white">Ã—</button>
         </div>
 
         <div className={resultTone === "win" ? "calendar-day-modal-summary calendar-day-modal-summary-win" : resultTone === "loss" ? "calendar-day-modal-summary calendar-day-modal-summary-loss" : resultTone === "be" ? "calendar-day-modal-summary calendar-day-modal-summary-be" : "calendar-day-modal-summary calendar-day-modal-summary-empty"}>
@@ -9534,15 +9301,15 @@ function CalendarModalTradeRow({ trade }) {
         <div className="flex flex-wrap items-center gap-2">
           <span className={trade.direction === "SELL" ? "rounded-full border border-red-500/40 bg-red-500/20 px-3 py-1 text-xs font-black text-red-200" : "rounded-full border border-fuchsia-500/40 bg-fuchsia-500 px-3 py-1 text-xs font-black text-black"}>{trade.direction} {trade.pair}</span>
           <span className="rounded-full border border-white/15 bg-white/8 px-3 py-1 text-xs font-black text-white">{trade.setup || "Manual Trade"}</span>
-          <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-black text-zinc-300">{trade.session || "—"}</span>
+          <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-black text-zinc-300">{trade.session || "â€”"}</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-sm font-bold text-zinc-400">◷ {trade.createdAt ? new Date(Number(trade.createdAt)).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "—"}</span>
+          <span className="text-sm font-bold text-zinc-400">â—· {trade.createdAt ? new Date(Number(trade.createdAt)).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "â€”"}</span>
           <span className={pnl > 0 ? "text-3xl font-black text-emerald-400" : pnl < 0 ? "text-3xl font-black text-red-400" : "text-3xl font-black text-amber-400"}>{getPnlArrow(pnl)} {formatMoney(pnl)}</span>
         </div>
       </div>
       <div className="mt-4 border-t border-white/10 pt-3">
-        <span className="rounded-full border border-white/12 bg-black/35 px-3 py-1 text-xs font-black text-zinc-300">◇ {tag}</span>
+        <span className="rounded-full border border-white/12 bg-black/35 px-3 py-1 text-xs font-black text-zinc-300">â—‡ {tag}</span>
       </div>
     </div>
   );
@@ -9553,7 +9320,7 @@ function CalendarMonthSummary({ monthStats, selectedDate, selectedDayStats, best
   return (
     <section className="calendar-summary-pro mt-7 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
       <CalendarSummaryCard title="Month Result" value={formatMoney(monthStats.pnl)} text={`${monthStats.count} trades this month`} tone={monthStats.pnl >= 0 ? "emerald" : "red"} />
-      <CalendarSummaryCard title="Today" value={formatMoney(selectedDayStats.pnl)} text={`${selectedLabel} · ${selectedDayStats.count} trade${selectedDayStats.count === 1 ? "" : "s"}`} tone={selectedDayStats.pnl > 0 ? "emerald" : selectedDayStats.pnl < 0 ? "red" : "amber"} />
+      <CalendarSummaryCard title="Today" value={formatMoney(selectedDayStats.pnl)} text={`${selectedLabel} Â· ${selectedDayStats.count} trade${selectedDayStats.count === 1 ? "" : "s"}`} tone={selectedDayStats.pnl > 0 ? "emerald" : selectedDayStats.pnl < 0 ? "red" : "amber"} />
       <CalendarSummaryCard title="Best Day" value={bestMonthDay ? formatMoney(bestMonthDay.pnl) : "$0"} text={bestMonthDay ? bestMonthDay.dateKey : "No profitable day yet"} tone="emerald" />
       <CalendarSummaryCard title="Worst Day" value={worstMonthDay ? formatMoney(worstMonthDay.pnl) : "$0"} text={worstMonthDay ? worstMonthDay.dateKey : "No losing day yet"} tone="red" />
     </section>
@@ -9621,7 +9388,7 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], selectedCurrenci
           <div>
             <h2 className="text-2xl font-black text-white">Economic Calendar</h2>
             <p className="mt-1 text-sm font-semibold text-zinc-400">
-              Live economic feed · {visibleEvents.length} events · {economicCalendar?.updatedAt ? new Date(economicCalendar.updatedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "updating"}
+              Live economic feed Â· {visibleEvents.length} events Â· {economicCalendar?.updatedAt ? new Date(economicCalendar.updatedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "updating"}
             </p>
           </div>
         </div>
@@ -9640,8 +9407,8 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], selectedCurrenci
       </div>
 
       <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_1fr_1fr]">
-        <EconomicMiniMetric label="Best News Day" value={newsStats.best ? formatMoney(newsStats.best.pnl) : "$0"} detail={newsStats.best ? `${newsStats.best.event.country} · ${newsStats.best.event.title}` : "No trades on event days yet"} />
-        <EconomicMiniMetric label="Worst News Day" value={newsStats.worst ? formatMoney(newsStats.worst.pnl) : "$0"} detail={newsStats.worst ? `${newsStats.worst.event.country} · ${newsStats.worst.event.title}` : "No losses on event days yet"} tone="amber" />
+        <EconomicMiniMetric label="Best News Day" value={newsStats.best ? formatMoney(newsStats.best.pnl) : "$0"} detail={newsStats.best ? `${newsStats.best.event.country} Â· ${newsStats.best.event.title}` : "No trades on event days yet"} />
+        <EconomicMiniMetric label="Worst News Day" value={newsStats.worst ? formatMoney(newsStats.worst.pnl) : "$0"} detail={newsStats.worst ? `${newsStats.worst.event.country} Â· ${newsStats.worst.event.title}` : "No losses on event days yet"} tone="amber" />
         <EconomicMiniMetric label="Tracked Events" value={visibleEvents.length} detail={`${newsStats.rows.length} event days with trades`} tone="fuchsia" />
       </div>
 
@@ -9725,7 +9492,7 @@ function EconomicEventRow({ event, compact = false }) {
         <div className="truncate text-sm font-black text-white">{event.title}</div>
         {(event.forecast || event.previous || event.actual) && (
           <div className="mt-1 text-xs font-semibold text-zinc-500">
-            {event.actual ? `A: ${event.actual} · ` : ""}{event.forecast ? `F: ${event.forecast} · ` : ""}{event.previous ? `P: ${event.previous}` : ""}
+            {event.actual ? `A: ${event.actual} Â· ` : ""}{event.forecast ? `F: ${event.forecast} Â· ` : ""}{event.previous ? `P: ${event.previous}` : ""}
           </div>
         )}
       </div>
@@ -9772,7 +9539,7 @@ function CalendarGuide() {
 }
 
 function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, onSave, account, accountBalance }) {
-  const rr = Number(form.risk) ? (Number(form.pnl || 0) / Number(form.risk)).toFixed(2) : "—";
+  const rr = Number(form.risk) ? (Number(form.pnl || 0) / Number(form.risk)).toFixed(2) : "â€”";
   const screenshots = normalizeScreenshots(form);
   const previewGrade = getTradeGrade(createTradeFromForm(form, 1, account));
   const riskWarnings = getRiskWarnings(form, accountBalance);
@@ -9862,7 +9629,7 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
               <FieldError text={formErrors.risk} />
             </Field>
             <Field label="R:R Ratio">
-              <Input disabled value={rr === "NaN" ? "—" : `${rr}R`} className="border-white/10 bg-zinc-900" />
+              <Input disabled value={rr === "NaN" ? "â€”" : `${rr}R`} className="border-white/10 bg-zinc-900" />
             </Field>
             <Field label="Trade Grade">
               <Input disabled value={previewGrade} className="border-white/10 bg-zinc-900" />
@@ -9924,7 +9691,7 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
                   <FieldError text={formErrors.strategy} />
                 </Field>
                 <Field label="Account">
-                  <Input value={`${account.name} • ${account.currency} ${Number(accountBalance?.currentBalance ?? account.balance).toLocaleString()} • ${account.type}`} disabled className="trade-context-input border-white/10 bg-black/45 text-zinc-400" />
+                  <Input value={`${account.name} â€¢ ${account.currency} ${Number(accountBalance?.currentBalance ?? account.balance).toLocaleString()} â€¢ ${account.type}`} disabled className="trade-context-input border-white/10 bg-black/45 text-zinc-400" />
                 </Field>
               </div>
             </div>
@@ -10114,7 +9881,7 @@ function MultiChoice({ value, options = [], onChange, tone = "emotion", allowNon
         return (
           <button key={label} type="button" onClick={() => toggle(label)} className={`rounded-xl border px-3 py-2 text-left text-xs font-black transition-all duration-200 hover:scale-[1.02] ${selected ? `multi-choice-active ${toneClass.active}` : toneClass.idle}`}>
             <span className="flex items-center gap-2">
-              <span className={`flex h-6 w-6 items-center justify-center rounded-lg ${toneClass.icon}`}>{icon || (selected ? "✓" : "+")}</span>
+              <span className={`flex h-6 w-6 items-center justify-center rounded-lg ${toneClass.icon}`}>{icon || (selected ? "âœ“" : "+")}</span>
               <span>
                 <span className="block">{label}</span>
                 {detail && <span className="mt-0.5 block text-[10px] font-bold opacity-70">{detail}</span>}
@@ -10141,7 +9908,7 @@ function getTradeFormErrors(form) {
 
 function FieldError({ text }) {
   if (!text) return null;
-  return <div className="mt-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-black text-red-300">⚠ {text}</div>;
+  return <div className="mt-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-black text-red-300">âš  {text}</div>;
 }
 
 function ImportPreviewModal({ preview, onConfirm, onClose }) {
@@ -10155,7 +9922,7 @@ function ImportPreviewModal({ preview, onConfirm, onClose }) {
         <div className="flex items-start justify-between">
           <div>
             <h2 className="flex items-center gap-3 text-2xl font-black"><Upload className="text-fuchsia-400" size={22} /> Import Preview</h2>
-            <p className="mt-2 text-sm text-zinc-400">{preview.filename} · Review trades before adding them to your journal.</p>
+            <p className="mt-2 text-sm text-zinc-400">{preview.filename} Â· Review trades before adding them to your journal.</p>
           </div>
           <button onClick={onClose} className="text-zinc-400 hover:text-white"><X /></button>
         </div>
@@ -10178,7 +9945,7 @@ function ImportPreviewModal({ preview, onConfirm, onClose }) {
                 <div key={trade.id} className="grid grid-cols-[90px_90px_1fr_90px_110px] items-center gap-3 rounded-xl border border-white/10 bg-black p-3 text-sm">
                   <span className="font-black text-white">{trade.pair}</span>
                   <span className={`w-fit rounded-full border px-2 py-1 text-xs font-black ${getTradeDirectionClass(trade.direction)}`}>{trade.direction}</span>
-                  <span className="truncate text-zinc-400">{trade.date} · {trade.session} · {trade.setup}</span>
+                  <span className="truncate text-zinc-400">{trade.date} Â· {trade.session} Â· {trade.setup}</span>
                   <span className="text-zinc-400">Qty {trade.quantity}</span>
                   <span className={`text-right font-black ${getPnlToneClass(trade.pnl)}`}>{getPnlArrow(trade.pnl)} {formatMoney(trade.pnl)}</span>
                 </div>
@@ -10229,7 +9996,7 @@ function PreTradeRoutineModal({ routine, setRoutine, onClose }) {
       <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} className="pretrade-modal-panel max-h-[90vh] w-full max-w-[860px] overflow-y-auto rounded-2xl border border-white/15 bg-black p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-500/40 bg-emerald-500/15 text-emerald-300">✅</div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-500/40 bg-emerald-500/15 text-emerald-300">âœ…</div>
             <div>
               <h2 className="text-2xl font-black">Start Your Day</h2>
               <p className="text-sm text-zinc-400">Pre-trade routine checklist before taking any trade.</p>
@@ -10239,9 +10006,9 @@ function PreTradeRoutineModal({ routine, setRoutine, onClose }) {
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-          <DashCard title="ROUTINE STATUS" value={ready ? "READY" : "WAIT"} badge={ready ? "✓ All checked" : "Finish checklist"} tone={ready ? "emerald" : "amber"} icon={ready ? "✓" : "!"} />
+          <DashCard title="ROUTINE STATUS" value={ready ? "READY" : "WAIT"} badge={ready ? "âœ“ All checked" : "Finish checklist"} tone={ready ? "emerald" : "amber"} icon={ready ? "âœ“" : "!"} />
           <DashCard title="COMPLETED" value={`${percent}%`} badge={`${checkedCount}/${routineItems.length} items`} tone="fuchsia" icon="%" />
-          <DashCard title="TRADE MODE" value={ready ? "ACTIVE" : "LOCKED"} badge={ready ? "Trade with plan" : "No impulse trades"} tone="cyan" icon="⌁" />
+          <DashCard title="TRADE MODE" value={ready ? "ACTIVE" : "LOCKED"} badge={ready ? "Trade with plan" : "No impulse trades"} tone="cyan" icon="âŒ" />
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -10258,7 +10025,7 @@ function PreTradeRoutineModal({ routine, setRoutine, onClose }) {
                     </div>
                   </div>
                   <div className={checked ? "flex h-7 w-7 items-center justify-center rounded-full border border-emerald-500 bg-emerald-500 text-xs font-black text-black" : "flex h-7 w-7 items-center justify-center rounded-full border border-white/20 text-xs font-black text-zinc-500"}>
-                    {checked ? "✓" : ""}
+                    {checked ? "âœ“" : ""}
                   </div>
                 </div>
               </button>
@@ -10718,8 +10485,8 @@ function SettingsPage({ account, accountBalance, authUser, theme, setTheme, isSu
             <h2 className="text-xl font-black">Appearance</h2>
             <p className="mt-1 text-sm font-semibold text-zinc-400">Switch between dark and light mode.</p>
             <div className="mt-5 grid grid-cols-2 gap-3">
-              <button onClick={() => setTheme("dark")} className={theme === "dark" ? "rounded-2xl border border-fuchsia-500 bg-fuchsia-500 p-4 text-left font-black text-black" : "rounded-2xl border border-white/10 bg-zinc-950 p-4 text-left font-black text-white hover:border-fuchsia-500/40"}>🌙 Dark</button>
-              <button onClick={() => setTheme("light")} className={theme === "light" ? "rounded-2xl border border-fuchsia-500 bg-fuchsia-500 p-4 text-left font-black text-black" : "rounded-2xl border border-white/10 bg-zinc-950 p-4 text-left font-black text-white hover:border-fuchsia-500/40"}>☀ Light</button>
+              <button onClick={() => setTheme("dark")} className={theme === "dark" ? "rounded-2xl border border-fuchsia-500 bg-fuchsia-500 p-4 text-left font-black text-black" : "rounded-2xl border border-white/10 bg-zinc-950 p-4 text-left font-black text-white hover:border-fuchsia-500/40"}>ðŸŒ™ Dark</button>
+              <button onClick={() => setTheme("light")} className={theme === "light" ? "rounded-2xl border border-fuchsia-500 bg-fuchsia-500 p-4 text-left font-black text-black" : "rounded-2xl border border-white/10 bg-zinc-950 p-4 text-left font-black text-white hover:border-fuchsia-500/40"}>â˜€ Light</button>
             </div>
           </CardContent>
         </Card>
@@ -10916,7 +10683,7 @@ function FloatingSupportWidget({ authUser }) {
 
           <div className="h-[430px] overflow-y-auto bg-zinc-50 px-5 py-5">
             <div className="mb-5 flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-200 text-xl">👋</div>
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-200 text-xl">ðŸ‘‹</div>
               <div>
                 <div className="mb-1 text-xs font-semibold text-zinc-500">Customer Support</div>
                 <div className="rounded-2xl bg-violet-500 px-4 py-3 text-sm font-bold text-white shadow-md">Hi! How can we help?</div>
@@ -11937,7 +11704,7 @@ function BillingPagePro({ account, authUser }) {
             <div className="mt-6 grid gap-x-8 gap-y-5 md:grid-cols-2">
               {features.map((feature) => (
                 <div key={feature} className="flex items-center gap-3 text-base font-bold text-white">
-                  <span className="text-xl font-black text-emerald-400">✓</span>
+                  <span className="text-xl font-black text-emerald-400">âœ“</span>
                   {feature}
                 </div>
               ))}
@@ -12068,7 +11835,7 @@ function BillingPage({ account, authUser }) {
             </div>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               {features.map((feature) => (
-                <div key={feature} className="rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-bold text-zinc-200">✓ {feature}</div>
+                <div key={feature} className="rounded-xl border border-white/10 bg-zinc-950 px-4 py-3 text-sm font-bold text-zinc-200">âœ“ {feature}</div>
               ))}
             </div>
           </CardContent>
@@ -12100,11 +11867,11 @@ function BillingPage({ account, authUser }) {
 function AccountModal({ account, accountBalance, onSaveAccount, onClose }) {
   const [draft, setDraft] = useState(account);
   const types = [
-    ["💰", "Live Account", "Real money trading account"],
-    ["🎯", "Demo Account", "Practice trading with virtual money"],
-    ["📈", "Backtesting", "Historical strategy testing"],
-    ["🏆", "Funded Account", "Prop firm or funded trading account"],
-    ["📋", "Paper Trading", "Simulated trading environment"],
+    ["ðŸ’°", "Live Account", "Real money trading account"],
+    ["ðŸŽ¯", "Demo Account", "Practice trading with virtual money"],
+    ["ðŸ“ˆ", "Backtesting", "Historical strategy testing"],
+    ["ðŸ†", "Funded Account", "Prop firm or funded trading account"],
+    ["ðŸ“‹", "Paper Trading", "Simulated trading environment"],
   ];
 
   const [saving, setSaving] = useState(false);
@@ -12182,7 +11949,7 @@ function AccountModal({ account, accountBalance, onSaveAccount, onClose }) {
           <div className="text-sm font-bold">Account Preview:</div>
           <div className="mt-4 flex items-center justify-between">
             <div>
-              <div className="font-bold">🎯 {draft.name || "Account Name"}</div>
+              <div className="font-bold">ðŸŽ¯ {draft.name || "Account Name"}</div>
               <div className="text-xs text-zinc-400">{draft.type}</div>
             </div>
             <div className="text-right">
@@ -12351,7 +12118,7 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
             <AdvancedAnalyticsTile label="Smallest Win" value={formatMoney(smallestWinItem?.pnl || 0)} badge={smallestWinItem?.pair || "No win"} tone="amber" />
           </div>
 
-          <StatsSectionTitle title="Best Performance" icon={<span className="text-lg font-black">🏆</span>} className="mt-12" />
+          <StatsSectionTitle title="Best Performance" icon={<span className="text-lg font-black">ðŸ†</span>} className="mt-12" />
           <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             <BestPerfTile label="Best Day" value={formatMoney(bestPerformance.day.pnl)} detail={bestPerformance.day.label} badge={`${bestPerformance.day.count} trades`} />
             <BestPerfTile label="Best Week" value={formatMoney(bestPerformance.week.pnl)} detail={bestPerformance.week.label} badge={`${bestPerformance.week.count} trades`} />
@@ -12406,8 +12173,8 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
             </button>
           </div>
           <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-            <SimpleStatCard label="Best News Day" value={newsStats.best ? formatMoney(newsStats.best.pnl) : "$0"} detail={newsStats.best ? `${newsStats.best.event.country} · ${newsStats.best.event.title}` : "No trades on event days yet."} tone="green" />
-            <SimpleStatCard label="Worst News Day" value={newsStats.worst ? formatMoney(newsStats.worst.pnl) : "$0"} detail={newsStats.worst ? `${newsStats.worst.event.country} · ${newsStats.worst.event.title}` : "No losing event day yet."} tone="amber" />
+            <SimpleStatCard label="Best News Day" value={newsStats.best ? formatMoney(newsStats.best.pnl) : "$0"} detail={newsStats.best ? `${newsStats.best.event.country} Â· ${newsStats.best.event.title}` : "No trades on event days yet."} tone="green" />
+            <SimpleStatCard label="Worst News Day" value={newsStats.worst ? formatMoney(newsStats.worst.pnl) : "$0"} detail={newsStats.worst ? `${newsStats.worst.event.country} Â· ${newsStats.worst.event.title}` : "No losing event day yet."} tone="amber" />
             <SimpleStatCard label="Event Days Traded" value={newsStats.rows.length} detail={`${newsStats.totalNewsTrades || 0} trades on ${newsStats.totalEventCount || 0} loaded events.`} tone="fuchsia" />
             <SimpleStatCard label="Top Currency" value={newsStats.currencyRows[0]?.name || "No data"} detail={newsStats.currencyRows[0] ? `${formatMoney(newsStats.currencyRows[0].pnl)} across ${newsStats.currencyRows[0].trades} trades` : "Trade on news days to measure."} tone="green" />
           </div>
@@ -12417,8 +12184,8 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
               {newsStats.eventRows.length ? newsStats.eventRows.slice(0, 6).map((row) => (
                 <div key={`${row.country}-${row.name}`} className="mb-2 flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-black/35 px-4 py-3">
                   <div className="min-w-0">
-                    <div className="truncate font-black text-white">{row.country} · {row.name}</div>
-                    <div className="text-xs font-semibold text-zinc-500">{row.trades} trades · {row.count} event match{row.count === 1 ? "" : "es"}</div>
+                    <div className="truncate font-black text-white">{row.country} Â· {row.name}</div>
+                    <div className="text-xs font-semibold text-zinc-500">{row.trades} trades Â· {row.count} event match{row.count === 1 ? "" : "es"}</div>
                   </div>
                   <div className={row.pnl >= 0 ? "font-black text-emerald-400" : "font-black text-red-400"}>{formatMoney(row.pnl)}</div>
                 </div>
@@ -12465,7 +12232,7 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
 }
 
 function RefreshCwIcon() {
-  return <span className="text-sm leading-none">↻</span>;
+  return <span className="text-sm leading-none">â†»</span>;
 }
 
 function StatsSectionTitle({ title, icon, className = "" }) {
@@ -12506,7 +12273,7 @@ function BestPerfTile({ label, value, detail, badge }) {
     <div className="stats-interactive-card stats-card-purple rounded-lg border border-white/10 p-5 shadow-[0_16px_45px_rgba(0,0,0,0.22)]">
       <div className="mb-5 flex items-center justify-between">
         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-zinc-400"><Calendar size={15} /></span>
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-fuchsia-500/15 text-fuchsia-300">★</span>
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-fuchsia-500/15 text-fuchsia-300">â˜…</span>
       </div>
       <div className="text-xs font-black uppercase tracking-wider text-zinc-500">{label}</div>
       <div className="mt-3 text-3xl font-black text-emerald-400">{value}</div>
@@ -12604,7 +12371,7 @@ function SimpleStatsRows({ rows, empty, negative = false }) {
             <div className="flex items-center justify-between gap-4">
               <div>
                 <div className="font-black text-white">{name}</div>
-                <div className="mt-1 text-xs font-bold text-zinc-500">{item?.count || 0} trades{winRate !== null ? ` · ${winRate.toFixed(1)}% win rate` : ""}</div>
+                <div className="mt-1 text-xs font-bold text-zinc-500">{item?.count || 0} trades{winRate !== null ? ` Â· ${winRate.toFixed(1)}% win rate` : ""}</div>
               </div>
               <div className={`text-lg font-black ${tone}`}>{formatMoney(pnl)}</div>
             </div>
@@ -12695,7 +12462,7 @@ function SimpleMistakeDetectorPage({ trades = [] }) {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="font-black text-white">{index + 1}. {translateDetectorText(issue.title)}</div>
-                    <div className="mt-1 text-xs font-bold text-zinc-400">{issue.count} losses · {formatMoney(issue.pnl)}</div>
+                    <div className="mt-1 text-xs font-bold text-zinc-400">{issue.count} losses Â· {formatMoney(issue.pnl)}</div>
                   </div>
                   <span className="rounded-full bg-red-500/15 px-2 py-1 text-xs font-black text-red-300">{losses.length ? Math.round((issue.count / losses.length) * 100) : 0}%</span>
                 </div>
@@ -12863,7 +12630,7 @@ function StatisticsPage({ stats: initialStats, curve: initialCurve, trades = [],
       <div className="statistics-tabs-pro mt-7">
         {tabs.map((tab) => (
           <button key={tab} onClick={() => setStatisticsTab(tab)} className={statisticsTab === tab ? "statistics-tab-pro statistics-tab-pro-active" : "statistics-tab-pro"}>
-            <span className="statistics-tab-icon-pro">{tab === "Overview" ? "▥" : tab === "Patterns" ? "◷" : tab === "Strategies" ? "◈" : tab === "Charts" ? "⌁" : "$"}</span>
+            <span className="statistics-tab-icon-pro">{tab === "Overview" ? "â–¥" : tab === "Patterns" ? "â—·" : tab === "Strategies" ? "â—ˆ" : tab === "Charts" ? "âŒ" : "$"}</span>
             <span>{tab}</span>
           </button>
         ))}
@@ -12878,13 +12645,13 @@ function StatisticsPage({ stats: initialStats, curve: initialCurve, trades = [],
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatisticsMetricCard title="TOTAL P&L" value={formatMoney(stats.totalPnl)} sub="Net result" icon="$" tone={stats.totalPnl >= 0 ? "green" : "red"} />
-              <StatisticsMetricCard title="WIN RATE" value={`${stats.winRate.toFixed(1)}%`} sub={`${stats.wins}W/${stats.losses}L`} icon="◎" tone="green" />
-              <StatisticsMetricCard title="BREAK EVEN" value={stats.breakEvens || 0} sub={`${(stats.breakEvenRate || 0).toFixed(1)}% BE`} icon="—" tone="amber" />
-              <StatisticsMetricCard title="TRADES" value={stats.trades} sub={`${stats.trades} closed`} icon="⌁" tone="white" />
-              <StatisticsMetricCard title="AVG WIN" value={formatMoney(stats.avgWin)} sub="Average winner" icon="↗" tone="green" active />
-              <StatisticsMetricCard title="AVG LOSS" value={formatMoney(stats.avgLoss)} sub="Average loser" icon="↘" tone="red" />
-              <StatisticsMetricCard title="PROFIT FACTOR" value={profitFactor >= 999 ? "999.00" : profitFactor.toFixed(2)} sub={profitFactor >= 999 ? "Perfect" : "Gross P/L"} icon="▣" tone={profitFactor >= 1 ? "green" : "red"} />
-              <StatisticsMetricCard title="MAX DRAWDOWN" value={formatMoney(stats.maxDrawdown)} sub={`${stats.maxDrawdownPercent.toFixed(1)}% DD`} icon="↓" tone={stats.maxDrawdownPercent <= 3 ? "green" : stats.maxDrawdownPercent <= 6 ? "amber" : "red"} />
+              <StatisticsMetricCard title="WIN RATE" value={`${stats.winRate.toFixed(1)}%`} sub={`${stats.wins}W/${stats.losses}L`} icon="â—Ž" tone="green" />
+              <StatisticsMetricCard title="BREAK EVEN" value={stats.breakEvens || 0} sub={`${(stats.breakEvenRate || 0).toFixed(1)}% BE`} icon="â€”" tone="amber" />
+              <StatisticsMetricCard title="TRADES" value={stats.trades} sub={`${stats.trades} closed`} icon="âŒ" tone="white" />
+              <StatisticsMetricCard title="AVG WIN" value={formatMoney(stats.avgWin)} sub="Average winner" icon="â†—" tone="green" active />
+              <StatisticsMetricCard title="AVG LOSS" value={formatMoney(stats.avgLoss)} sub="Average loser" icon="â†˜" tone="red" />
+              <StatisticsMetricCard title="PROFIT FACTOR" value={profitFactor >= 999 ? "999.00" : profitFactor.toFixed(2)} sub={profitFactor >= 999 ? "Perfect" : "Gross P/L"} icon="â–£" tone={profitFactor >= 1 ? "green" : "red"} />
+              <StatisticsMetricCard title="MAX DRAWDOWN" value={formatMoney(stats.maxDrawdown)} sub={`${stats.maxDrawdownPercent.toFixed(1)}% DD`} icon="â†“" tone={stats.maxDrawdownPercent <= 3 ? "green" : stats.maxDrawdownPercent <= 6 ? "amber" : "red"} />
             </div>
           </section>
 
@@ -12903,15 +12670,15 @@ function StatisticsPage({ stats: initialStats, curve: initialCurve, trades = [],
 
           <section className="mt-8 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.04] to-black/25 p-5">
             <div className="mb-4 flex items-center justify-between gap-3">
-              <SectionTitle title="Best Performance" gold icon={<span className="text-xl">🏆</span>} />
+              <SectionTitle title="Best Performance" gold icon={<span className="text-xl">ðŸ†</span>} />
               <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-xs font-black text-amber-300">Best results</span>
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
-              <BestPerformanceCard title="BEST DAY" value={formatMoney(bestPerformance.day.pnl)} detail={bestPerformance.day.label} badge={`${bestPerformance.day.count} trades`} icon="▣" accent="amber" />
-              <BestPerformanceCard title="BEST WEEK" value={formatMoney(bestPerformance.week.pnl)} detail={bestPerformance.week.label} badge={`${bestPerformance.week.count} trades`} icon="♛" accent="fuchsia" />
-              <BestPerformanceCard title="BEST MONTH" value={formatMoney(bestPerformance.month.pnl)} detail={bestPerformance.month.label} badge={`${bestPerformance.month.count} trades`} icon="↗" accent="blue" />
-              <BestPerformanceCard title="BEST YEAR" value={formatMoney(bestPerformance.year.pnl)} detail={bestPerformance.year.label} badge={`${bestPerformance.year.count} trades`} icon="♙" accent="green" />
-              <BestPerformanceCard title="BEST SESSION" value={formatMoney(bestSession?.[1]?.pnl || 0)} detail={bestSession?.[0] || "No session"} badge={`${bestSession?.[1]?.count || 0} trades`} icon="☀" accent="cyan" />
+              <BestPerformanceCard title="BEST DAY" value={formatMoney(bestPerformance.day.pnl)} detail={bestPerformance.day.label} badge={`${bestPerformance.day.count} trades`} icon="â–£" accent="amber" />
+              <BestPerformanceCard title="BEST WEEK" value={formatMoney(bestPerformance.week.pnl)} detail={bestPerformance.week.label} badge={`${bestPerformance.week.count} trades`} icon="â™›" accent="fuchsia" />
+              <BestPerformanceCard title="BEST MONTH" value={formatMoney(bestPerformance.month.pnl)} detail={bestPerformance.month.label} badge={`${bestPerformance.month.count} trades`} icon="â†—" accent="blue" />
+              <BestPerformanceCard title="BEST YEAR" value={formatMoney(bestPerformance.year.pnl)} detail={bestPerformance.year.label} badge={`${bestPerformance.year.count} trades`} icon="â™™" accent="green" />
+              <BestPerformanceCard title="BEST SESSION" value={formatMoney(bestSession?.[1]?.pnl || 0)} detail={bestSession?.[0] || "No session"} badge={`${bestSession?.[1]?.count || 0} trades`} icon="â˜€" accent="cyan" />
             </div>
           </section>
 
@@ -12987,7 +12754,7 @@ function StatDefinitionCard({ title, meaning, good, bad }) {
       </div>
       <div className="mt-2 text-sm font-semibold leading-6 text-zinc-400">{meaning}</div>
       <div className="mt-4 grid grid-cols-1 gap-2">
-        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs font-black text-emerald-300">✓ {good}</div>
+        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs font-black text-emerald-300">âœ“ {good}</div>
         <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs font-black text-red-300">! {bad}</div>
       </div>
     </div>
@@ -13057,7 +12824,7 @@ function MistakeDetectorPage({ trades = [] }) {
         </div>
         <div>
           <span className="text-zinc-500">Purpose</span>
-          <b>Find → Understand → Fix</b>
+          <b>Find â†’ Understand â†’ Fix</b>
         </div>
       </div>
 
@@ -13161,7 +12928,7 @@ function MistakeDetector({ trades = [] }) {
         <div className="mistake-panel-clean">
           <div className="mistake-panel-head">
             <div>
-              <div className="mistake-eyebrow text-red-300">Step 1 · Diagnosis</div>
+              <div className="mistake-eyebrow text-red-300">Step 1 Â· Diagnosis</div>
               <h3 className="mt-1 text-2xl font-black text-white">What went wrong?</h3>
               <p className="mt-1 text-sm font-semibold text-zinc-500">Click a mistake below to update the coach plan on the right.</p>
             </div>
@@ -13185,7 +12952,7 @@ function MistakeDetector({ trades = [] }) {
         <div className="mistake-panel-clean mistake-fix-panel">
           <div className="mistake-panel-head">
             <div>
-              <div className="mistake-eyebrow text-emerald-300">Step 2 · Correction</div>
+              <div className="mistake-eyebrow text-emerald-300">Step 2 Â· Correction</div>
               <h3 className="mt-1 text-2xl font-black text-white">How to fix it?</h3>
               <p className="mt-1 text-sm font-semibold text-zinc-500">Use these as rules before, during and after your next trade.</p>
             </div>
@@ -13219,7 +12986,7 @@ function MistakeDetector({ trades = [] }) {
         <div className="mistake-panel-clean">
           <div className="mistake-panel-head">
             <div>
-              <div className="mistake-eyebrow text-amber-300">Step 3 · Location</div>
+              <div className="mistake-eyebrow text-amber-300">Step 3 Â· Location</div>
               <h3 className="mt-1 text-lg font-black text-white">Where you lose most</h3>
               <p className="mt-1 text-xs font-semibold text-zinc-500">Shows the setup and session with the highest loss impact.</p>
             </div>
@@ -13248,7 +13015,7 @@ function MistakeDetector({ trades = [] }) {
         <div className="mistake-panel-clean">
           <div className="mistake-panel-head">
             <div>
-              <div className="mistake-eyebrow text-red-300">Step 4 · Behavior</div>
+              <div className="mistake-eyebrow text-red-300">Step 4 Â· Behavior</div>
               <h3 className="mt-1 text-lg font-black text-white">Danger Habits</h3>
               <p className="mt-1 text-xs font-semibold text-zinc-500">Warns you about revenge trading, overtrading and loss streaks.</p>
             </div>
@@ -13262,7 +13029,7 @@ function MistakeDetector({ trades = [] }) {
         <div className="mistake-panel-clean">
           <div className="mistake-panel-head">
             <div>
-              <div className="mistake-eyebrow text-cyan-300">Step 5 · Accuracy</div>
+              <div className="mistake-eyebrow text-cyan-300">Step 5 Â· Accuracy</div>
               <h3 className="mt-1 text-lg font-black text-white">Detector Accuracy</h3>
               <p className="mt-1 text-xs font-semibold text-zinc-500">Shows whether your trade data is complete enough for a reliable report.</p>
             </div>
@@ -13327,7 +13094,7 @@ function IssueSelectorCard({ index, issue, active, losses, onClick }) {
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="text-base font-black text-white">{translateDetectorText(issue.title)}</div>
-              <div className="mt-1 text-xs font-bold text-zinc-400">{translateDetectorText(issue.type)} · {issue.count} loss · {formatMoney(issue.pnl)}</div>
+              <div className="mt-1 text-xs font-bold text-zinc-400">{translateDetectorText(issue.type)} Â· {issue.count} loss Â· {formatMoney(issue.pnl)}</div>
             </div>
             <span className="rounded-full border border-red-400/25 bg-red-500/10 px-2.5 py-1 text-[11px] font-black text-red-300">{percent}%</span>
           </div>
@@ -13372,7 +13139,7 @@ function DetectorPill({ label, value, tone }) {
       </div>
       <div className="mt-1 text-lg font-black">{value}</div>
       <div className="pointer-events-none absolute right-0 top-full z-50 mt-2 hidden w-72 rounded-xl border border-white/15 bg-[#050005] p-3 text-left text-xs font-semibold leading-5 text-zinc-300 shadow-[0_18px_45px_rgba(0,0,0,0.9)] group-hover:block">
-        <div className="mb-1 font-black text-white">{labelMap[label] || label} რას ნიშნავს?</div>
+        <div className="mb-1 font-black text-white">{labelMap[label] || label} áƒ áƒáƒ¡ áƒœáƒ˜áƒ¨áƒœáƒáƒ•áƒ¡?</div>
         {getDetectorPillExplanation(label)}
       </div>
     </div>
@@ -13382,7 +13149,7 @@ function DetectorPill({ label, value, tone }) {
 function DetectorMetricGuide() {
   return (
     <details className="mt-4 rounded-2xl border border-white/10 bg-black/25 p-4 text-sm">
-      <summary className="cursor-pointer select-none text-xs font-black uppercase tracking-widest text-fuchsia-300">Metric guide · click to learn what each metric means</summary>
+      <summary className="cursor-pointer select-none text-xs font-black uppercase tracking-widest text-fuchsia-300">Metric guide Â· click to learn what each metric means</summary>
       <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
         <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3"><b className="text-amber-300">Confidence</b><p className="mt-1 text-xs font-semibold leading-5 text-zinc-400">How often the main mistake appears in losing trades.</p></div>
         <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3"><b className="text-red-300">Severity</b><p className="mt-1 text-xs font-semibold leading-5 text-zinc-400">Mistake danger based on frequency, lost P&L, risk, discipline and psychology.</p></div>
@@ -13398,7 +13165,7 @@ function DetectorStepCard({ number, title, value, detail, explanation, tone }) {
     <div className={`group relative overflow-hidden rounded-2xl border p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition hover:-translate-y-0.5 hover:border-red-300/55 ${color}`}>
       <div className="pointer-events-none absolute right-0 top-0 h-16 w-16 rounded-bl-3xl bg-white/5" />
       <div className="relative z-10 flex items-center justify-between gap-3">
-        <div className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{number} · {title}</div>
+        <div className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{number} Â· {title}</div>
         {explanation && <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/15 bg-black/35 text-[11px] font-black text-zinc-300">?</span>}
       </div>
       <div className="relative z-10 mt-2 line-clamp-2 text-xl font-black text-white">{value}</div>
@@ -13410,7 +13177,7 @@ function DetectorStepCard({ number, title, value, detail, explanation, tone }) {
 
 function CompactPanel({ title, badge, children }) {
   const toneMap = {
-    "Top შეცდომები": "red",
+    "Top áƒ¨áƒ”áƒªáƒ“áƒáƒ›áƒ”áƒ‘áƒ˜": "red",
     "Anti-Pattern Warning": "red",
     "Winning vs Losing Formula": "mixed",
     "Setup / Session Map": "amber",
@@ -13475,7 +13242,7 @@ function CompactIssueRow({ index, title, meta, fix, percent, active, onClick }) 
           </div>
           <div className="mt-3 rounded-xl border border-red-400/20 bg-red-500/[0.08] p-3 text-xs font-semibold leading-5 text-zinc-300"><span className="font-black text-red-300">Fix: </span>{fix}</div>
           <div className={active ? "mt-3 rounded-xl border border-red-300/45 bg-gradient-to-r from-red-500/22 to-red-950/20 px-3 py-2 text-center text-[11px] font-black uppercase tracking-wider text-red-50" : "mt-3 rounded-xl border border-red-400/25 bg-red-500/10 px-3 py-2 text-center text-[11px] font-black uppercase tracking-wider text-red-200 transition group-hover:bg-red-500/18"}>
-            {active ? "✓ Selected — analysis is focused on this mistake" : "Click to focus this mistake →"}
+            {active ? "âœ“ Selected â€” analysis is focused on this mistake" : "Click to focus this mistake â†’"}
           </div>
         </div>
       </div>
@@ -13538,8 +13305,8 @@ function getDetectorEnhancements(trades = [], detector = {}) {
   const severity = detector.mainIssue ? Math.min(100, Math.round((detector.confidence || 0) * 0.45 + (Math.abs(detector.affectedPnl || 0) / totalLossAbs) * 35 + (["Risk", "Discipline", "Psychology"].includes(detector.mainRoot?.key) ? 20 : 8))) : 0;
   const severityLabel = severity >= 75 ? "High Risk" : severity >= 45 ? "Medium Risk" : "Low Risk";
 
-  const winningFormula = `Session: ${translateDetectorText(detector.winProfile?.session)} • Timing: ${translateDetectorText(detector.winProfile?.timing)} • Emotion: ${translateDetectorText(detector.winProfile?.emotion)} • Setup: ${translateDetectorText(detector.winProfile?.setup)}`;
-  const losingFormula = `Session: ${translateDetectorText(detector.lossProfile?.session)} • Timing: ${translateDetectorText(detector.lossProfile?.timing)} • Emotion: ${translateDetectorText(detector.lossProfile?.emotion)} • Setup: ${translateDetectorText(detector.lossProfile?.setup)}`;
+  const winningFormula = `Session: ${translateDetectorText(detector.winProfile?.session)} â€¢ Timing: ${translateDetectorText(detector.winProfile?.timing)} â€¢ Emotion: ${translateDetectorText(detector.winProfile?.emotion)} â€¢ Setup: ${translateDetectorText(detector.winProfile?.setup)}`;
+  const losingFormula = `Session: ${translateDetectorText(detector.lossProfile?.session)} â€¢ Timing: ${translateDetectorText(detector.lossProfile?.timing)} â€¢ Emotion: ${translateDetectorText(detector.lossProfile?.emotion)} â€¢ Setup: ${translateDetectorText(detector.lossProfile?.setup)}`;
 
   const lossGroupsBySetup = groupLossesByKey(losses, "setup").slice(0, 4);
   const lossGroupsBySession = groupLossesByKey(losses, "session").slice(0, 4);
@@ -13632,7 +13399,7 @@ function DetectorEnhancementPanel({ trades, detector }) {
           </div>
           <div className="rounded-xl border border-white/10 bg-black/35 p-4">
             <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Most expensive mistake</div>
-            <div className="mt-2 text-xl font-black text-white">{extra.mostExpensive ? translateDetectorText(extra.mostExpensive.title) : "ჯერ არ ჩანს"}</div>
+            <div className="mt-2 text-xl font-black text-white">{extra.mostExpensive ? translateDetectorText(extra.mostExpensive.title) : "áƒ¯áƒ”áƒ  áƒáƒ  áƒ©áƒáƒœáƒ¡"}</div>
             <div className="mt-1 text-sm font-bold text-red-300">{extra.mostExpensive ? formatMoney(extra.mostExpensive.pnl) : formatMoney(0)}</div>
           </div>
         </div>
@@ -13664,7 +13431,7 @@ function DetectorEnhancementPanel({ trades, detector }) {
       </div>
 
       <div className="rounded-2xl border border-orange-500/25 bg-orange-500/10 p-5">
-        <SectionTitle title="Anti-Pattern Warning" icon={<span className="text-lg">⚠</span>} />
+        <SectionTitle title="Anti-Pattern Warning" icon={<span className="text-lg">âš </span>} />
         <div className="mt-4 space-y-3">
           {extra.antiPatterns.length ? extra.antiPatterns.map((warning) => <div key={warning.title} className="rounded-xl border border-white/10 bg-black/35 p-4"><div className="font-black text-orange-300">{warning.title}</div><div className="mt-1 text-sm font-semibold text-zinc-300">{warning.text}</div></div>) : <div className="rounded-xl border border-white/10 bg-black/35 p-4 text-sm font-semibold text-zinc-400">No dangerous anti-pattern detected yet.</div>}
         </div>
@@ -13681,7 +13448,7 @@ function DetectorGroupPanel({ title, rows, empty }) {
         {rows.length ? rows.map((row) => (
           <div key={row.name} className="rounded-xl border border-white/10 bg-black/35 p-4">
             <div className="flex items-center justify-between gap-4"><div className="font-black text-white">{translateDetectorText(row.name)}</div><div className="font-black text-red-300">{formatMoney(row.pnl)}</div></div>
-            <div className="mt-1 text-xs font-bold text-zinc-400">{row.count} loss · Main issue: {translateDetectorText(row.top)}</div>
+            <div className="mt-1 text-xs font-bold text-zinc-400">{row.count} loss Â· Main issue: {translateDetectorText(row.top)}</div>
           </div>
         )) : <div className="rounded-xl border border-dashed border-white/10 bg-black/25 p-5 text-center text-zinc-500">{empty}</div>}
       </div>
@@ -13781,7 +13548,7 @@ function BestPerformanceCard({ title, value, detail, badge, icon, accent }) {
         <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-fuchsia-500/20 blur-2xl" />
       </div>
       <div className="relative z-10 flex items-start justify-between">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-zinc-400">▣</div>
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-zinc-400">â–£</div>
         <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm ${accentMap[accent] || accentMap.fuchsia}`}>{icon}</div>
       </div>
       <div className="relative z-10 mt-4 text-xs font-black uppercase tracking-wider text-zinc-400">{title}</div>
@@ -14098,7 +13865,7 @@ function PatternDayCard({ day, isActive, dayStats }) {
       </div>
 
       <div className="relative z-10 mt-6 flex items-center justify-between rounded-xl border border-white/10 bg-black/25 p-3 text-sm">
-        <span className="font-bold text-zinc-300"><span className="mr-2 text-fuchsia-400">▥</span>Trades</span>
+        <span className="font-bold text-zinc-300"><span className="mr-2 text-fuchsia-400">â–¥</span>Trades</span>
         <span className="font-black text-white">{totalTrades}</span>
       </div>
 
@@ -14109,8 +13876,8 @@ function PatternDayCard({ day, isActive, dayStats }) {
             <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-2"><div className="text-[10px] font-black uppercase text-zinc-500">Losses</div><div className="text-lg font-black text-red-400">{losses}</div></div>
             <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-2"><div className="text-[10px] font-black uppercase text-zinc-500">BE</div><div className="text-lg font-black text-amber-400">{breakEvens}</div></div>
           </div>
-          <div className="flex justify-between text-sm"><span className="text-emerald-400">◎ Win Rate</span><span className="font-black text-emerald-400">{winRate.toFixed(1)}%</span></div>
-          <div className="flex justify-between text-sm"><span className="text-amber-400">⌁ Avg RR</span><span className="font-black text-amber-400">{avgRR.toFixed(2)}</span></div>
+          <div className="flex justify-between text-sm"><span className="text-emerald-400">â—Ž Win Rate</span><span className="font-black text-emerald-400">{winRate.toFixed(1)}%</span></div>
+          <div className="flex justify-between text-sm"><span className="text-amber-400">âŒ Avg RR</span><span className="font-black text-amber-400">{avgRR.toFixed(2)}</span></div>
           <div className="flex justify-between text-sm"><span className="text-fuchsia-300">Avg P&L</span><span className={avgPnl >= 0 ? "font-black text-emerald-400" : "font-black text-red-400"}>{formatMoney(avgPnl)}</span></div>
           <div className={totalPnl >= 0 ? "rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-center text-xs text-zinc-400" : "rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-center text-xs text-zinc-400"}>Total P&L<div className={totalPnl >= 0 ? "mt-1 text-xl font-black text-emerald-400" : "mt-1 text-xl font-black text-red-400"}>{formatMoney(totalPnl)}</div></div>
           <div className="rounded-xl border border-fuchsia-500/20 bg-fuchsia-500/10 p-3">
@@ -14120,7 +13887,7 @@ function PatternDayCard({ day, isActive, dayStats }) {
         </div>
       ) : (
         <div className="relative z-10 mt-7 flex flex-col items-center justify-center rounded-xl border border-dashed border-white/10 bg-black/20 p-5 text-sm text-zinc-500">
-          <span className="text-2xl text-fuchsia-400/40">—</span>
+          <span className="text-2xl text-fuchsia-400/40">â€”</span>
           <span className="mt-2">No trades recorded</span>
         </div>
       )}
@@ -14147,7 +13914,7 @@ function StatisticsStrategiesView({ stats }) {
   return (
     <section className="mt-10">
       <div className="flex items-end justify-between">
-        <SectionTitle title="Strategy Performance" icon={<span className="text-xl">ϟ</span>} />
+        <SectionTitle title="Strategy Performance" icon={<span className="text-xl">ÏŸ</span>} />
         <div className="rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 px-4 py-2 text-xs font-black uppercase tracking-widest text-fuchsia-300">
           {strategyRows.length} active strategies
         </div>
@@ -14179,7 +13946,7 @@ function StatisticsStrategiesView({ stats }) {
                     <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-fuchsia-500/18 to-transparent" style={{ width: `${width}%` }} />
                     <div className="relative z-10 grid grid-cols-[44px_1fr_100px_120px_80px] items-center gap-3">
                       <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-fuchsia-500/15 text-sm font-black text-fuchsia-300">#{index + 1}</div>
-                      <div><div className="font-black text-white">{name}</div><div className="text-xs text-zinc-400">{item.count} trades · {item.wins || 0} wins · {item.losses || 0} losses · {item.breakEvens || 0} BE</div></div>
+                      <div><div className="font-black text-white">{name}</div><div className="text-xs text-zinc-400">{item.count} trades Â· {item.wins || 0} wins Â· {item.losses || 0} losses Â· {item.breakEvens || 0} BE</div></div>
                       <div className="text-right text-sm font-black text-emerald-400">{itemWinRate.toFixed(1)}%</div>
                       <div className={item.pnl >= 0 ? "text-right font-black text-emerald-400" : "text-right font-black text-red-400"}>{formatMoney(item.pnl)}</div>
                       <div className="text-right text-sm font-black text-amber-400">{(item.riskTrades ? item.rrSum / item.riskTrades : 0).toFixed(2)}</div>
@@ -14193,13 +13960,13 @@ function StatisticsStrategiesView({ stats }) {
           <div className="strategy-detail-card strategy-detail-pro rounded-2xl border border-fuchsia-500/20 bg-gradient-to-br from-black via-[#07030b] to-[#13091c] p-6">
             <div className="flex items-start justify-between">
               <div><div className="text-xs font-black uppercase tracking-widest text-zinc-500">Selected Strategy</div><h3 className="mt-2 text-2xl font-black text-white">{bestName}</h3></div>
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300">ϟ</span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300">ÏŸ</span>
             </div>
             <div className="mt-6 space-y-4 text-sm">
-              <StrategyLine label="Trades" value={bestStats.count} icon="▥" />
+              <StrategyLine label="Trades" value={bestStats.count} icon="â–¥" />
               <StrategyLine label="Closed" value={`${bestStats.count} closed`} muted />
-              <StrategyLine label="Win Rate" value={`${winRate.toFixed(1)}%`} green icon="◎" />
-              <StrategyLine label="Avg RR" value={bestAvgRR.toFixed(2)} amber icon="⌁" />
+              <StrategyLine label="Win Rate" value={`${winRate.toFixed(1)}%`} green icon="â—Ž" />
+              <StrategyLine label="Avg RR" value={bestAvgRR.toFixed(2)} amber icon="âŒ" />
               <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
                 <div className="flex justify-between"><span className="text-zinc-400">Total P&L</span><span className="font-black text-emerald-400">{formatMoney(bestStats.pnl)}</span></div>
                 <div className="mt-2 flex justify-between"><span className="text-zinc-400">Avg P&L / Trade</span><span className="font-black text-emerald-400">{formatMoney(avgPnl)}</span></div>
@@ -14295,7 +14062,7 @@ function StatisticsRiskView({ stats, trades = [] }) {
 }
 
 function RiskRule({ passed, title, detail }) {
-  return <div className={passed ? "rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-4" : "rounded-xl border border-red-500/25 bg-red-500/10 p-4"}><div className="flex items-center justify-between"><div className="font-black text-white">{title}</div><span className={passed ? "text-emerald-400" : "text-red-400"}>{passed ? "✓" : "!"}</span></div><div className="mt-1 text-sm text-zinc-400">{detail}</div></div>;
+  return <div className={passed ? "rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-4" : "rounded-xl border border-red-500/25 bg-red-500/10 p-4"}><div className="flex items-center justify-between"><div className="font-black text-white">{title}</div><span className={passed ? "text-emerald-400" : "text-red-400"}>{passed ? "âœ“" : "!"}</span></div><div className="mt-1 text-sm text-zinc-400">{detail}</div></div>;
 }
 
 function StatisticsChartsView({ stats, curve, trades = [] }) {
@@ -14323,7 +14090,7 @@ function StatisticsChartsView({ stats, curve, trades = [] }) {
       </div>
 
       <div className="statistics-chart-panel charts-pro-card rounded-2xl border border-fuchsia-500/20 bg-gradient-to-br from-black via-[#05030a] to-[#080413] p-6">
-        <div className="flex items-start justify-between"><SectionTitle title="Strategy Breakdown" icon={<span className="text-xl">ϟ</span>} /><span className="rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 px-3 py-2 text-xs font-black text-fuchsia-300">Mix</span></div>
+        <div className="flex items-start justify-between"><SectionTitle title="Strategy Breakdown" icon={<span className="text-xl">ÏŸ</span>} /><span className="rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 px-3 py-2 text-xs font-black text-fuchsia-300">Mix</span></div>
         <StrategyBreakdownDonut data={fallbackStrategies} total={stats.trades || 0} />
       </div>
     </section>
@@ -14379,7 +14146,7 @@ function AnalyticsTable({ title, icon, data, isMistake }) {
 }
 
 function MiniTradeRow({ trade }) {
-  return <div className="rounded-xl border border-white/10 bg-black p-4"><div className="flex items-center justify-between"><span className="font-bold">{trade.pair}</span><span className={`font-black ${getPnlToneClass(trade.pnl)}`}>{getPnlArrow(trade.pnl)} {formatMoney(trade.pnl)}</span></div><div className="mt-2 text-sm text-zinc-400">{trade.direction} · {trade.setup}</div></div>;
+  return <div className="rounded-xl border border-white/10 bg-black p-4"><div className="flex items-center justify-between"><span className="font-bold">{trade.pair}</span><span className={`font-black ${getPnlToneClass(trade.pnl)}`}>{getPnlArrow(trade.pnl)} {formatMoney(trade.pnl)}</span></div><div className="mt-2 text-sm text-zinc-400">{trade.direction} Â· {trade.setup}</div></div>;
 }
 function Meta({ label, value, green, gold, danger }) { return <div><div className="text-xs text-zinc-500">{label}</div><div className={`mt-2 text-lg font-black ${green ? "text-emerald-400" : gold ? "text-amber-400" : danger ? "text-orange-400" : "text-white"}`}>{value}</div></div>; }
 function MiniInfo({ label, value, badge, tone }) { const badgeClass = tone === "red" ? "bg-red-600/90 border border-red-500/70 text-white shadow-[0_0_14px_rgba(239,68,68,0.35)]" : tone === "green" ? "bg-emerald-600/90 border border-emerald-500/70 text-white shadow-[0_0_14px_rgba(16,185,129,0.35)]" : "bg-fuchsia-500 text-black"; return <div className="mb-6"><div className="text-sm font-bold text-zinc-300">{label}</div><div className={badge ? `mt-2 w-fit rounded-full px-3 py-1 text-xs font-black ${badgeClass}` : "mt-2 text-sm text-zinc-400"}>{value}</div></div>; }
@@ -14418,17 +14185,17 @@ function getSelectOptionStyle(label) {
   const key = String(label || "").toLowerCase();
   const base = { icon: "", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(217,70,239,0.35)]", normal: "text-zinc-200 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" };
   const styles = {
-    buy: { icon: "↗", active: "bg-emerald-500 text-black shadow-[0_0_14px_rgba(16,185,129,0.35)]", normal: "text-emerald-300 hover:bg-emerald-500/15 hover:text-emerald-200" },
-    sell: { icon: "↘", active: "bg-red-500 text-black shadow-[0_0_14px_rgba(239,68,68,0.35)]", normal: "text-red-300 hover:bg-red-500/15 hover:text-red-200" },
-    win: { icon: "●", active: "bg-emerald-500 text-black shadow-[0_0_14px_rgba(16,185,129,0.35)]", normal: "text-emerald-300 hover:bg-emerald-500/15 hover:text-emerald-200" },
-    loss: { icon: "●", active: "bg-red-500 text-black shadow-[0_0_14px_rgba(239,68,68,0.35)]", normal: "text-red-300 hover:bg-red-500/15 hover:text-red-200" },
-    "break even": { icon: "—", active: "bg-amber-500 text-black shadow-[0_0_14px_rgba(245,158,11,0.35)]", normal: "text-amber-300 hover:bg-amber-500/15 hover:text-amber-200" },
+    buy: { icon: "â†—", active: "bg-emerald-500 text-black shadow-[0_0_14px_rgba(16,185,129,0.35)]", normal: "text-emerald-300 hover:bg-emerald-500/15 hover:text-emerald-200" },
+    sell: { icon: "â†˜", active: "bg-red-500 text-black shadow-[0_0_14px_rgba(239,68,68,0.35)]", normal: "text-red-300 hover:bg-red-500/15 hover:text-red-200" },
+    win: { icon: "â—", active: "bg-emerald-500 text-black shadow-[0_0_14px_rgba(16,185,129,0.35)]", normal: "text-emerald-300 hover:bg-emerald-500/15 hover:text-emerald-200" },
+    loss: { icon: "â—", active: "bg-red-500 text-black shadow-[0_0_14px_rgba(239,68,68,0.35)]", normal: "text-red-300 hover:bg-red-500/15 hover:text-red-200" },
+    "break even": { icon: "â€”", active: "bg-amber-500 text-black shadow-[0_0_14px_rgba(245,158,11,0.35)]", normal: "text-amber-300 hover:bg-amber-500/15 hover:text-amber-200" },
     a: { icon: "A", active: "bg-emerald-500 text-black shadow-[0_0_14px_rgba(16,185,129,0.35)]", normal: "text-emerald-300 hover:bg-emerald-500/15 hover:text-emerald-200" },
     b: { icon: "B", active: "bg-blue-500 text-black shadow-[0_0_14px_rgba(59,130,246,0.35)]", normal: "text-blue-300 hover:bg-blue-500/15 hover:text-blue-200" },
     c: { icon: "C", active: "bg-amber-500 text-black shadow-[0_0_14px_rgba(245,158,11,0.35)]", normal: "text-amber-300 hover:bg-amber-500/15 hover:text-amber-200" },
     d: { icon: "D", active: "bg-red-500 text-black shadow-[0_0_14px_rgba(239,68,68,0.35)]", normal: "text-red-300 hover:bg-red-500/15 hover:text-red-200" },
-    calm: { icon: "◌", active: "bg-cyan-500 text-black shadow-[0_0_14px_rgba(6,182,212,0.35)]", normal: "text-cyan-300 hover:bg-cyan-500/15 hover:text-cyan-200" },
-    confident: { icon: "◆", active: "bg-emerald-500 text-black shadow-[0_0_14px_rgba(16,185,129,0.35)]", normal: "text-emerald-300 hover:bg-emerald-500/15 hover:text-emerald-200" },
+    calm: { icon: "â—Œ", active: "bg-cyan-500 text-black shadow-[0_0_14px_rgba(6,182,212,0.35)]", normal: "text-cyan-300 hover:bg-cyan-500/15 hover:text-cyan-200" },
+    confident: { icon: "â—†", active: "bg-emerald-500 text-black shadow-[0_0_14px_rgba(16,185,129,0.35)]", normal: "text-emerald-300 hover:bg-emerald-500/15 hover:text-emerald-200" },
     fearful: { icon: "!", active: "bg-amber-500 text-black shadow-[0_0_14px_rgba(245,158,11,0.35)]", normal: "text-amber-300 hover:bg-amber-500/15 hover:text-amber-200" },
     greedy: { icon: "$", active: "bg-orange-500 text-black shadow-[0_0_14px_rgba(249,115,22,0.35)]", normal: "text-orange-300 hover:bg-orange-500/15 hover:text-orange-200" },
     asia: { icon: "", active: "session-active-asia text-blue-100", normal: "session-neon session-neon-asia" },
@@ -14437,8 +14204,8 @@ function getSelectOptionStyle(label) {
     lunch: { icon: "", active: "session-active-lunch text-amber-100", normal: "session-neon session-neon-lunch" },
     "ny-pm": { icon: "", active: "session-active-nypm text-fuchsia-100", normal: "session-neon session-neon-nypm" },
     "pre-market": { icon: "", active: "session-active-premarket text-cyan-100", normal: "session-neon session-neon-premarket" },
-    "select trading session": { icon: "⌁", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(217,70,239,0.35)]", normal: "text-zinc-400 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" },
-    all: { icon: "✦", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(217,70,239,0.35)]", normal: "text-fuchsia-200 hover:bg-fuchsia-500/15 hover:text-fuchsia-100" },
+    "select trading session": { icon: "âŒ", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(217,70,239,0.35)]", normal: "text-zinc-400 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" },
+    all: { icon: "âœ¦", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(217,70,239,0.35)]", normal: "text-fuchsia-200 hover:bg-fuchsia-500/15 hover:text-fuchsia-100" },
   };
   return styles[key] || base;
 }
@@ -14547,8 +14314,8 @@ function Select({ value, onChange, children }) {
   );
 }
 function StatCard({ title, value, green, gold }) {
-  const iconMap = { "Total Trades": "⌁", "Win Rate": "🏆", "Break Even": "—", "Avg P&L": "$", "Avg R:R": "↗", "Total P&L": "$", "TOTAL P&L": "$", "WIN RATE": "🏆", "BREAK EVEN": "—", "TRADES": "⌁", "AVG WIN": "↗", "AVG LOSS": "↘", "PROFIT FACTOR": "✦" };
-  const icon = iconMap[title] || "✦";
+  const iconMap = { "Total Trades": "âŒ", "Win Rate": "ðŸ†", "Break Even": "â€”", "Avg P&L": "$", "Avg R:R": "â†—", "Total P&L": "$", "TOTAL P&L": "$", "WIN RATE": "ðŸ†", "BREAK EVEN": "â€”", "TRADES": "âŒ", "AVG WIN": "â†—", "AVG LOSS": "â†˜", "PROFIT FACTOR": "âœ¦" };
+  const icon = iconMap[title] || "âœ¦";
   const iconTone = green ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300 shadow-[0_0_14px_rgba(16,185,129,0.18)]" : gold ? "border-amber-500/30 bg-amber-500/10 text-amber-300 shadow-[0_0_14px_rgba(245,158,11,0.18)]" : "border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300 shadow-[0_0_14px_rgba(217,70,239,0.18)]";
   return <Card className="group relative overflow-hidden border-fuchsia-500/35 bg-gradient-to-br from-zinc-950 via-black to-black text-white shadow-[0_0_22px_rgba(217,70,239,0.12)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-fuchsia-400/80 hover:shadow-2xl hover:shadow-fuchsia-500/25"><div className="absolute right-0 top-0 h-20 w-20 rounded-bl-[2rem] bg-fuchsia-500/10" /><div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent" /><CardContent className="relative z-10 p-5"><div className="flex items-start justify-between gap-3"><div><div className="text-xs font-black uppercase tracking-wider text-zinc-400">{title}</div><div className={`mt-4 text-2xl font-black ${green ? "text-emerald-400" : gold ? "text-amber-400" : "text-white"}`}><AnimatedValue value={value} /></div></div><div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-lg font-black ${iconTone}`}>{icon}</div></div></CardContent></Card>;
 }
@@ -14694,17 +14461,17 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
               )}
 
               {isRegister && (
-                <AuthField label="Full name" icon="👤">
+                <AuthField label="Full name" icon="ðŸ‘¤">
                   <Input id="auth-name" name="name" autoComplete="name" value={form.name} onChange={(e) => update("name", e.target.value)} placeholder="Enter your name" className={authInputClass} />
                 </AuthField>
               )}
 
-              <AuthField label="Email address" icon="✉">
+              <AuthField label="Email address" icon="âœ‰">
                 <Input id="auth-email" name="email" type="email" autoComplete="username" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="Enter your email" className={authInputClass} />
               </AuthField>
 
               {!isForgot && (
-                <AuthField label={isUpdatePassword ? "New password" : "Password"} icon="🔒">
+                <AuthField label={isUpdatePassword ? "New password" : "Password"} icon="ðŸ”’">
                   <Input id="auth-password" name={isUpdatePassword || isRegister ? "new-password" : "password"} type={showPassword ? "text" : "password"} autoComplete={isUpdatePassword || isRegister ? "new-password" : "current-password"} value={form.password} onChange={(e) => update("password", e.target.value)} placeholder="Enter your password" className={authPasswordInputClass} />
                   <button type="button" onClick={() => setShowPassword((current) => !current)} className={isLight ? "absolute right-3 top-[35px] text-slate-400 hover:text-slate-950" : "absolute right-3 top-[35px] text-zinc-500 hover:text-white"} aria-label={showPassword ? "Hide password" : "Show password"}>
                     {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
@@ -14727,7 +14494,7 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
               )}
 
               {(isRegister || isUpdatePassword) && (
-                <AuthField label="Confirm password" icon="🔐">
+                <AuthField label="Confirm password" icon="ðŸ”">
                   <Input id="auth-confirm-password" name="confirm-password" type={showPassword ? "text" : "password"} autoComplete="new-password" value={form.confirm} onChange={(e) => update("confirm", e.target.value)} placeholder="Repeat your password" className={authInputClass} />
                 </AuthField>
               )}
@@ -14768,22 +14535,22 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
 
               <button type="submit" disabled={!canSubmitAuth} className="auth-submit-button group flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-sm font-black text-white shadow-[0_18px_36px_rgba(217,70,239,0.24)] transition hover:scale-[1.01] hover:shadow-[0_20px_44px_rgba(217,70,239,0.34)] disabled:cursor-not-allowed disabled:opacity-60">
                 <span className="relative z-10">{authLoading ? "Please wait..." : isLogin ? "Sign in" : isRegister ? "Create account" : isUpdatePassword ? "Update password" : "Send reset link"}</span>
-                <span className="relative z-10 transition group-hover:translate-x-1">→</span>
+                <span className="relative z-10 transition group-hover:translate-x-1">â†’</span>
               </button>
             </form>
 
             <div className="mt-7 text-center text-sm font-semibold text-zinc-500">
               {isLogin && <>Don&apos;t have an account? <button onClick={() => setAuthPage("register")} className="font-black text-fuchsia-300 hover:text-fuchsia-200">Sign up for free</button></>}
               {isRegister && <>Already have an account? <button onClick={() => setAuthPage("login")} className="font-black text-fuchsia-300 hover:text-fuchsia-200">Sign in</button></>}
-              {(isForgot || isUpdatePassword) && <button onClick={() => setAuthPage("login")} className="font-black text-fuchsia-300 hover:text-fuchsia-200">← Back to sign in</button>}
+              {(isForgot || isUpdatePassword) && <button onClick={() => setAuthPage("login")} className="font-black text-fuchsia-300 hover:text-fuchsia-200">â† Back to sign in</button>}
             </div>
             {isRegister && (
               <div className={isLight ? "mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm font-bold text-emerald-600" : "mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm font-bold text-emerald-300"}>
-                <span>✓ 7-day free trial</span>
-                <span className={isLight ? "text-slate-300" : "text-zinc-700"}>•</span>
-                <span>✓ Full access to all features</span>
-                <span className={isLight ? "text-slate-300" : "text-zinc-700"}>•</span>
-                <span>✓ Cancel anytime</span>
+                <span>âœ“ 7-day free trial</span>
+                <span className={isLight ? "text-slate-300" : "text-zinc-700"}>â€¢</span>
+                <span>âœ“ Full access to all features</span>
+                <span className={isLight ? "text-slate-300" : "text-zinc-700"}>â€¢</span>
+                <span>âœ“ Cancel anytime</span>
               </div>
             )}
           </motion.div>
@@ -14798,7 +14565,7 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
           <div className="auth-float-card auth-float-two absolute right-12 top-28 rounded-2xl border border-fuchsia-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(217,70,239,0.10)] backdrop-blur-xl">
             <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Mistake Detector</div>
             <div className="mt-3 text-xl font-black text-fuchsia-300">Active Coach</div>
-            <div className="mt-1 text-xs font-bold text-zinc-400">Find → Understand → Fix</div>
+            <div className="mt-1 text-xs font-bold text-zinc-400">Find â†’ Understand â†’ Fix</div>
           </div>
           <div className="auth-float-card auth-float-three absolute right-[6%] top-[30%] rounded-2xl border border-emerald-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(16,185,129,0.10)] backdrop-blur-xl">
             <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Total P&L</div>
@@ -14930,7 +14697,7 @@ function LegalInfoPage({ page, setAuthPage, theme, setTheme }) {
         </main>
 
         <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 py-6 text-sm font-bold">
-          <span className={isLight ? "text-slate-500" : "text-zinc-500"}>© 2026 {BRAND_NAME}</span>
+          <span className={isLight ? "text-slate-500" : "text-zinc-500"}>Â© 2026 {BRAND_NAME}</span>
           <div className="flex flex-wrap gap-4">
             {Object.entries(LEGAL_PAGES).map(([key, item]) => (
               <button key={key} onClick={() => setAuthPage(key)} className={linkClass}>{item.eyebrow}</button>
@@ -15188,10 +14955,10 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
 
               <div className="grid gap-4 p-4 sm:grid-cols-2">
                 {[
-                  ["NQ", "Long", "NY AM · Breakout", "+$580", ["confluence", "trend"], "green"],
-                  ["ES", "Short", "London · Mean Revert", "$120", ["fakeout"], "red"],
-                  ["AAPL", "Long", "NY AM · Trend Follow", "+$340", ["momentum"], "green"],
-                  ["CL", "Long", "NY PM · Breakout", "+$210", ["news", "vol"], "green"],
+                  ["NQ", "Long", "NY AM Â· Breakout", "+$580", ["confluence", "trend"], "green"],
+                  ["ES", "Short", "London Â· Mean Revert", "$120", ["fakeout"], "red"],
+                  ["AAPL", "Long", "NY AM Â· Trend Follow", "+$340", ["momentum"], "green"],
+                  ["CL", "Long", "NY PM Â· Breakout", "+$210", ["news", "vol"], "green"],
                 ].map(([symbol, side, meta, pnl, tags, tone]) => (
                   <div key={symbol} className={tone === "red" ? "rounded-2xl border border-red-500/30 bg-red-500/8 p-4" : "rounded-2xl border border-emerald-500/30 bg-emerald-500/8 p-4"}>
                     <div className="flex items-start justify-between gap-4">
@@ -15201,7 +14968,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
                         </div>
                         <div className={isLight ? "mt-3 text-xs font-semibold text-slate-500" : "mt-3 text-xs font-semibold text-zinc-400"}>{meta}</div>
                       </div>
-                      <div className={tone === "red" ? "text-sm font-black text-red-400" : "text-sm font-black text-emerald-400"}>{tone === "red" ? "↘" : "↗"} {pnl}</div>
+                      <div className={tone === "red" ? "text-sm font-black text-red-400" : "text-sm font-black text-emerald-400"}>{tone === "red" ? "â†˜" : "â†—"} {pnl}</div>
                     </div>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {tags.map((tag) => (
@@ -15363,7 +15130,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
                 ].map(([title, copy]) => (
                   <div key={title} className={isLight ? "rounded-2xl border border-slate-200 bg-slate-50/80 p-4" : "rounded-2xl border border-white/10 bg-black/35 p-4"}>
                     <div className="flex gap-3">
-                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-xs font-black text-emerald-400">✓</span>
+                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-xs font-black text-emerald-400">âœ“</span>
                       <div>
                         <div className={isLight ? "text-sm font-black text-slate-950" : "text-sm font-black text-white"}>{title}</div>
                         <p className={isLight ? "mt-1 text-sm font-semibold leading-6 text-slate-600" : "mt-1 text-sm font-semibold leading-6 text-zinc-400"}>{copy}</p>
@@ -15485,7 +15252,7 @@ function WatchDemoModal({ onClose, onStart, isLight }) {
     }
 
     setActiveScene(sceneIndex);
-    setVoiceStatus(`Playing calm male voice · ${currentScene.eyebrow}`);
+    setVoiceStatus(`Playing calm male voice Â· ${currentScene.eyebrow}`);
 
     const utterance = new SpeechSynthesisUtterance(currentScene.voiceover);
     const voices = window.speechSynthesis.getVoices();

@@ -78,32 +78,19 @@ export default async function handler(request, response) {
       if (!trade) return json(response, 400, { error: "Trade is missing." });
       const payload = { ...trade };
       delete payload.supabaseId;
-      const rowId = trade.supabaseId || "";
+      const rowId = trade.supabaseId || (typeof trade.id === "string" && trade.id.includes("-") ? trade.id : "");
 
-      const saveNewTrade = async () => fetch(`${supabaseUrl}/rest/v1/trades?select=id`, {
-        method: "POST",
+      const url = rowId
+        ? `${supabaseUrl}/rest/v1/trades?id=eq.${rowId}&user_id=eq.${userId}&select=id`
+        : `${supabaseUrl}/rest/v1/trades?select=id`;
+      const upstream = await fetch(url, {
+        method: rowId ? "PATCH" : "POST",
         headers: { ...headers, Prefer: "return=representation" },
-        body: JSON.stringify({ user_id: userId, trade_data: payload }),
+        body: JSON.stringify(rowId ? { trade_data: payload } : { user_id: userId, trade_data: payload }),
       });
-
-      let upstream = rowId
-        ? await fetch(`${supabaseUrl}/rest/v1/trades?id=eq.${rowId}&user_id=eq.${userId}&select=id`, {
-            method: "PATCH",
-            headers: { ...headers, Prefer: "return=representation" },
-            body: JSON.stringify({ trade_data: payload }),
-          })
-        : await saveNewTrade();
       const result = await upstream.json().catch(() => null);
       if (!upstream.ok) return json(response, upstream.status, { error: result?.message || "Could not save trade." });
-
-      let savedId = Array.isArray(result) ? result[0]?.id : result?.id;
-      if (rowId && !savedId) {
-        upstream = await saveNewTrade();
-        const inserted = await upstream.json().catch(() => null);
-        if (!upstream.ok) return json(response, upstream.status, { error: inserted?.message || "Could not save trade." });
-        savedId = Array.isArray(inserted) ? inserted[0]?.id : inserted?.id;
-      }
-
+      const savedId = Array.isArray(result) ? result[0]?.id : result?.id;
       return json(response, 200, { trade: { ...trade, id: savedId || trade.id, supabaseId: savedId || trade.supabaseId } });
     }
 
@@ -131,16 +118,6 @@ export default async function handler(request, response) {
       return json(response, 200, { account: row?.account_data || null });
     }
 
-    if (action === "loadAccountBundle") {
-      const upstream = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=account_data&limit=1`, {
-        headers,
-      });
-      const result = await upstream.json().catch(() => null);
-      if (!upstream.ok) return json(response, upstream.status, { error: result?.message || "Could not load account profile." });
-      const row = Array.isArray(result) ? result[0] : null;
-      return json(response, 200, { accountData: row?.account_data || null });
-    }
-
     if (action === "saveAccount") {
       const account = body.account && typeof body.account === "object" ? body.account : null;
       if (!account) return json(response, 400, { error: "Account is missing." });
@@ -157,24 +134,6 @@ export default async function handler(request, response) {
       if (!upstream.ok) return json(response, upstream.status, { error: result?.message || "Could not save account profile." });
       const row = Array.isArray(result) ? result[0] : result;
       return json(response, 200, { account: row?.account_data || account });
-    }
-
-    if (action === "saveAccountBundle") {
-      const accountData = body.accountData && typeof body.accountData === "object" ? body.accountData : null;
-      if (!accountData) return json(response, 400, { error: "Account data is missing." });
-      const upstream = await fetch(`${supabaseUrl}/rest/v1/profiles?on_conflict=id&select=account_data`, {
-        method: "POST",
-        headers: { ...headers, Prefer: "resolution=merge-duplicates,return=representation" },
-        body: JSON.stringify({
-          id: userId,
-          account_data: accountData,
-          updated_at: new Date().toISOString(),
-        }),
-      });
-      const result = await upstream.json().catch(() => null);
-      if (!upstream.ok) return json(response, upstream.status, { error: result?.message || "Could not save account profile." });
-      const row = Array.isArray(result) ? result[0] : result;
-      return json(response, 200, { accountData: row?.account_data || accountData });
     }
 
     if (action === "replaceTrades") {
