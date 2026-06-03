@@ -83,6 +83,12 @@ const OWNER_ADMIN_EMAILS = ["vazhabuianovi2@gmail.com"];
 const TAWK_TO_PROPERTY_ID = "6a1ecbced0b6e01c2e34b60c";
 const TAWK_TO_WIDGET_ID = "1jq44o7ki";
 const BRAND_MARK = "◉";
+const DASHBOARD_NAV_EVENT = "trycritique:navigate-dashboard";
+
+function requestDashboardNavigation() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(DASHBOARD_NAV_EVENT));
+}
 const TRADING_SESSIONS = ["Asia", "London", "NY-AM", "Lunch", "NY-PM", "Pre-Market"];
 const LEGACY_DEFAULT_STRATEGIES = ["Liquidity Sweep", "ICT FVG", "Order Block", "Breaker Block", "Silver Bullet"];
 const DEFAULT_STRATEGIES = [];
@@ -6819,6 +6825,15 @@ export default function TradingJournalDashboard() {
   }, [active, shouldGateForBilling]);
 
   useEffect(() => {
+    function handleDashboardNavigation() {
+      setTradeViewMode(null);
+      setActive(shouldGateForBilling ? "Billing" : "Dashboard");
+    }
+    window.addEventListener(DASHBOARD_NAV_EVENT, handleDashboardNavigation);
+    return () => window.removeEventListener(DASHBOARD_NAV_EVENT, handleDashboardNavigation);
+  }, [shouldGateForBilling]);
+
+  useEffect(() => {
     function syncAuthPageFromBrowserPath() {
       if (!isAuthenticated) setAuthPageState(getAuthPageFromPath());
     }
@@ -7680,7 +7695,17 @@ Skipped duplicates: ${duplicateCount}
       <style>{THEME_STYLE_CSS}</style>
       <aside className="fixed left-0 top-0 z-[70] hidden h-full w-64 border-r border-white/10 bg-black p-5 lg:block">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 text-xl font-black"><span className="text-fuchsia-400 drop-shadow-[0_0_12px_rgba(217,70,239,0.85)]">{BRAND_MARK}</span><span className="tracking-tight">{BRAND_NAME}</span></div>
+          <button
+            type="button"
+            onClick={() => {
+              setTradeViewMode(null);
+              setActive(shouldGateForBilling ? "Billing" : "Dashboard");
+            }}
+            className="flex items-center gap-3 rounded-xl text-left text-xl font-black transition hover:text-fuchsia-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/60"
+            aria-label="Go to dashboard"
+          >
+            <span className="text-fuchsia-400 drop-shadow-[0_0_12px_rgba(217,70,239,0.85)]">{BRAND_MARK}</span><span className="tracking-tight">{BRAND_NAME}</span>
+          </button>
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 px-3 py-2 text-sm font-black text-fuchsia-300 transition hover:bg-fuchsia-500 hover:text-black"
@@ -7983,7 +8008,7 @@ Skipped duplicates: ${duplicateCount}
 function MobileHeader({ onAdd }) {
   return (
     <div className="mobile-header-pro mb-6 flex items-center justify-between rounded-2xl border border-fuchsia-500/25 bg-black p-4 lg:hidden">
-      <div className="flex items-center gap-3 text-xl font-black"><span className="text-fuchsia-400 drop-shadow-[0_0_12px_rgba(217,70,239,0.85)]">{BRAND_MARK}</span><span className="tracking-tight">{BRAND_NAME}</span></div>
+      <button type="button" onClick={requestDashboardNavigation} className="flex items-center gap-3 rounded-xl text-left text-xl font-black transition hover:text-fuchsia-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/60" aria-label="Go to dashboard"><span className="text-fuchsia-400 drop-shadow-[0_0_12px_rgba(217,70,239,0.85)]">{BRAND_MARK}</span><span className="tracking-tight">{BRAND_NAME}</span></button>
       <button onClick={onAdd} className="mobile-add-trade-button inline-flex items-center gap-2 rounded-xl bg-fuchsia-500 px-3 py-2 text-sm font-black text-white shadow-[0_0_18px_rgba(217,70,239,0.25)]"><Plus size={15} /> Add</button>
     </div>
   );
@@ -8026,8 +8051,10 @@ function MobileBottomNav({ active, setActive, onAdd, setTradeViewMode, lockedToB
 function TopCrumb({ page }) {
   return (
     <div className="mb-8 flex items-center gap-3 text-sm font-semibold">
-      <span className="text-fuchsia-400 drop-shadow-[0_0_12px_rgba(217,70,239,0.85)]">{BRAND_MARK}</span>
-      <span className="tracking-tight">{BRAND_NAME}</span>
+      <button type="button" onClick={requestDashboardNavigation} className="flex items-center gap-3 rounded-lg transition hover:text-fuchsia-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/60" aria-label="Go to dashboard">
+        <span className="text-fuchsia-400 drop-shadow-[0_0_12px_rgba(217,70,239,0.85)]">{BRAND_MARK}</span>
+        <span className="tracking-tight">{BRAND_NAME}</span>
+      </button>
       <span className="text-zinc-500">/</span>
       <span>{page}</span>
     </div>
@@ -8307,6 +8334,14 @@ function MetricBox({ label, value, tone }) {
 function TradeDetailsPage({ trade, account, onBack, onEdit, onDelete, onExport }) {
   const screenshots = normalizeScreenshots(trade);
   const [activeIndex, setActiveIndex] = useState(null);
+  useEffect(() => {
+    if (activeIndex === null) return undefined;
+    function closeOnEscape(event) {
+      if (event.key === "Escape") setActiveIndex(null);
+    }
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [activeIndex]);
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-5xl">
       <TopCrumb page="Journal" />
@@ -8321,7 +8356,40 @@ function TradeDetailsPage({ trade, account, onBack, onEdit, onDelete, onExport }
         </div>
         <div className="space-y-5"><SideBox title="Trade Info"><MiniInfo label="Strategy" value={trade.setup} /><MiniInfo label="Account" value={trade.accountName || account?.name || "v"} /><MiniInfo label="Account Type" value={trade.accountType || account?.type || "—"} /><MiniInfo label="Trade Type" value={trade.direction} badge tone={trade.direction === "SELL" ? "red" : "green"} /></SideBox><SideBox title="Tags"><div className="flex flex-wrap gap-2">{normalizeTags(trade).length ? normalizeTags(trade).map((tag) => <span key={tag} className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">{tag}</span>) : <span className="text-zinc-500">No tags</span>}</div></SideBox><SideBox title="Emotions"><span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">{trade.emotion || "—"}</span></SideBox><SideBox title="Result"><div className={`w-fit rounded-full border px-3 py-1 text-xs font-black ${getTradeResultClass(getTradeResult(trade))}`}>{getTradeResult(trade)}</div><div className="mt-3 text-sm text-zinc-400">Mistake: {trade.mistake || "None"}</div></SideBox></div>
       </div>
-      {activeIndex !== null && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95"><button onClick={() => setActiveIndex(null)} className="absolute right-8 top-8 text-3xl text-white">×</button><button onClick={() => setActiveIndex((activeIndex - 1 + screenshots.length) % screenshots.length)} className="absolute left-8 text-5xl text-white">‹</button><img src={screenshots[activeIndex]} alt="Fullscreen screenshot" className="max-h-[90vh] max-w-[90vw] rounded" /><button onClick={() => setActiveIndex((activeIndex + 1) % screenshots.length)} className="absolute right-8 text-5xl text-white">›</button></div>}
+      {activeIndex !== null && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/95 p-4">
+          <button
+            type="button"
+            onClick={() => setActiveIndex(null)}
+            className="fixed right-4 top-4 z-[130] flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-zinc-950/90 text-white shadow-[0_0_26px_rgba(217,70,239,0.28)] backdrop-blur transition hover:border-fuchsia-400/70 hover:bg-fuchsia-500 hover:text-black sm:right-8 sm:top-8"
+            aria-label="Close screenshot preview"
+            title="Close"
+          >
+            <X size={24} strokeWidth={2.8} />
+          </button>
+          {screenshots.length > 1 && (
+            <button
+              type="button"
+              onClick={() => setActiveIndex((activeIndex - 1 + screenshots.length) % screenshots.length)}
+              className="fixed left-4 top-1/2 z-[125] flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-2xl border border-white/15 bg-zinc-950/80 text-3xl text-white shadow-lg transition hover:border-fuchsia-400/70 hover:text-fuchsia-200 sm:left-8"
+              aria-label="Previous screenshot"
+            >
+              &lt;
+            </button>
+          )}
+          <img src={screenshots[activeIndex]} alt="Fullscreen screenshot" className="max-h-[92vh] max-w-[92vw] rounded-xl border border-white/10 object-contain shadow-[0_24px_80px_rgba(0,0,0,0.75)]" />
+          {screenshots.length > 1 && (
+            <button
+              type="button"
+              onClick={() => setActiveIndex((activeIndex + 1) % screenshots.length)}
+              className="fixed right-4 top-1/2 z-[125] flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-2xl border border-white/15 bg-zinc-950/80 text-3xl text-white shadow-lg transition hover:border-fuchsia-400/70 hover:text-fuchsia-200 sm:right-8"
+              aria-label="Next screenshot"
+            >
+              &gt;
+            </button>
+          )}
+        </div>
+      )}
     </motion.div>
   );
 }
