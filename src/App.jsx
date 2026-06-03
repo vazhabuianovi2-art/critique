@@ -5566,7 +5566,7 @@ function getEconomicWeekRange(events = [], week) {
   return `${formatEconomicRangeDate(keys[0])} - ${formatEconomicRangeDate(keys[keys.length - 1])}`;
 }
 
-function getEconomicCalendarWeekRangeLabel(week) {
+function getEconomicCalendarWeekRangeDates(week) {
   const now = new Date();
   const day = now.getDay();
   const sunday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day);
@@ -5575,7 +5575,20 @@ function getEconomicCalendarWeekRangeLabel(week) {
   start.setDate(sunday.getDate() + (offsets[week] || 0));
   const end = new Date(start);
   end.setDate(start.getDate() + 6);
-  return `${formatEconomicRangeDate(formatDateKey(start))} - ${formatEconomicRangeDate(formatDateKey(end))}`;
+  return { startKey: formatDateKey(start), endKey: formatDateKey(end) };
+}
+
+function getEconomicCalendarWeekRangeLabel(week) {
+  const { startKey, endKey } = getEconomicCalendarWeekRangeDates(week);
+  return `${formatEconomicRangeDate(startKey)} - ${formatEconomicRangeDate(endKey)}`;
+}
+
+function isEventInEconomicWeek(event, week) {
+  if (week === "all") return true;
+  const eventDateKey = getEconomicEventDateKey(event);
+  if (!eventDateKey) return false;
+  const { startKey, endKey } = getEconomicCalendarWeekRangeDates(week);
+  return eventDateKey >= startKey && eventDateKey <= endKey;
 }
 
 function getPrimaryEventImpact(events = []) {
@@ -9594,7 +9607,7 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], selectedCurrenci
   const visibleEvents = useMemo(() => {
     const selectedCurrencySet = new Set(normalizedSelectedCurrencies.filter((currency) => currency !== "All"));
     return events.filter((event) => {
-      if (weekFilter !== "all" && event.week !== weekFilter) return false;
+      if (!isEventInEconomicWeek(event, weekFilter)) return false;
       if (!impactFilters.includes(getEventImpactLabel(event.impact))) return false;
       if (selectedCurrencySet.size && !selectedCurrencySet.has(String(event.country || "").toUpperCase())) return false;
       return true;
@@ -9613,7 +9626,7 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], selectedCurrenci
     last: getEconomicCalendarWeekRangeLabel("last") || getEconomicWeekRange(events, "last"),
     this: getEconomicCalendarWeekRangeLabel("this") || getEconomicWeekRange(events, "this"),
     next: getEconomicCalendarWeekRangeLabel("next") || getEconomicWeekRange(events, "next"),
-  }), [events]);
+  }), []);
 
   function toggleImpactFilter(impact) {
     setImpactFilters((current) => {
