@@ -6902,6 +6902,18 @@ export default function TradingJournalDashboard() {
   const navItems = useMemo(() => canUseAdminTools ? [...nav, [ShieldCheck, "Admin"]] : nav, [canUseAdminTools]);
   const hasBillingAccess = useMemo(() => canUseAdminTools || isSubscriptionAccessActive(billingSubscription), [canUseAdminTools, billingSubscription]);
   const shouldGateForBilling = Boolean(isAuthenticated && !billingLoading && !hasBillingAccess);
+  const billingAccessLabel = useMemo(() => {
+    if (billingLoading) return "Checking access";
+    const provider = String(billingSubscription?.provider || "").toLowerCase();
+    const status = String(billingSubscription?.status || "").toLowerCase();
+    if (canUseAdminTools || provider === "admin") return "Admin Pro";
+    if (isSubscriptionAccessActive(billingSubscription)) {
+      if (billingSubscription?.cancel_at_period_end) return "Pro active - cancels soon";
+      if (["trialing", "on_trial"].includes(status)) return "Pro trial";
+      return "Pro active";
+    }
+    return "Activate Pro";
+  }, [billingLoading, billingSubscription, canUseAdminTools]);
 
   useEffect(() => {
     if (!isAuthenticated || !authUser?.email) {
@@ -6962,7 +6974,7 @@ export default function TradingJournalDashboard() {
   }, [authUser?.id, authUser?.email, isAuthenticated, billingRefreshTick]);
 
   useEffect(() => {
-    if (!shouldGateForBilling || active === "Billing" || active === "Support" || active === "Admin") return;
+    if (!shouldGateForBilling || active === "Billing" || active === "Support") return;
     setActive("Billing", "replace");
   }, [active, shouldGateForBilling]);
 
@@ -7603,6 +7615,13 @@ export default function TradingJournalDashboard() {
   }
 
   function createNewAccount() {
+    if (shouldGateForBilling) {
+      setActive("Billing");
+      setTradeViewMode(null);
+      setIsAccountSwitcherOpen(false);
+      setDataMessage("");
+      return;
+    }
     const newAccount = {
       ...defaultAccount,
       id: `acc-${Date.now()}`,
@@ -8109,7 +8128,7 @@ Skipped duplicates: ${duplicateCount}
               </div>
               <div className="min-w-0">
                 <div className="truncate text-sm font-black text-white">{profileName}</div>
-                <div className="text-xs font-semibold text-zinc-400">Pro Trial</div>
+                <div className="text-xs font-semibold text-zinc-400">{billingAccessLabel}</div>
               </div>
             </div>
             <span className={isSidebarUserMenuOpen ? "text-zinc-400 transition rotate-180" : "text-zinc-400 transition"}>⌄</span>
@@ -8136,7 +8155,7 @@ Skipped duplicates: ${duplicateCount}
             {dataMessage}
           </div>
         )}
-        {shouldGateForBilling && active !== "Support" && active !== "Admin" ? (
+        {shouldGateForBilling && active !== "Support" ? (
           <BillingPageDodo
             account={account}
             authUser={authUser}
@@ -11576,9 +11595,24 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
     },
   ];
 
-  const subscriptionStatus = String(subscription?.status || "").replaceAll("_", " ");
+  const rawSubscriptionStatus = String(subscription?.status || "").toLowerCase();
+  const subscriptionStatus = rawSubscriptionStatus.replaceAll("_", " ");
   const isAdminGrantedPlan = String(subscription?.provider || "").toLowerCase() === "admin";
-  const subscriptionDate = subscription?.trial_end || subscription?.current_period_end || "";
+  const isTrialSubscription = ["trialing", "on_trial"].includes(rawSubscriptionStatus);
+  const subscriptionDate = isAdminGrantedPlan
+    ? subscription?.current_period_end || subscription?.trial_end || ""
+    : isTrialSubscription
+      ? subscription?.trial_end || subscription?.current_period_end || ""
+      : subscription?.current_period_end || subscription?.trial_end || subscription?.canceled_at || "";
+  const subscriptionDateLabel = isAdminGrantedPlan
+    ? "Access granted until"
+    : isTrialSubscription
+      ? "Trial ends"
+      : subscription?.cancel_at_period_end
+        ? "Access ends"
+        : ["canceled", "cancelled", "expired", "past_due"].includes(rawSubscriptionStatus)
+          ? "Last access date"
+          : "Current period ends";
   const subscriptionDateText = subscriptionDate
     ? new Date(subscriptionDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
     : "";
@@ -11854,10 +11888,10 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
                   {subscription?.cancel_at_period_end && <span className="rounded-full bg-amber-500/15 px-2 py-1 text-xs font-black text-amber-200">Cancels soon</span>}
                 </div>
                 <div className="mt-1 text-sm font-semibold text-zinc-400">
-                  {isAdminGrantedPlan
-                    ? `Access granted until ${subscriptionDateText || "admin removes it"}`
-                    : subscriptionDateText
-                      ? `${subscription?.status === "trialing" ? "Trial ends" : "Current period ends"} ${subscriptionDateText}`
+                  {subscriptionDateText
+                    ? `${subscriptionDateLabel} ${subscriptionDateText}`
+                    : isAdminGrantedPlan
+                      ? "Access granted until admin removes it"
                       : "Start a plan to unlock saved subscription details."}
                 </div>
               </div>
