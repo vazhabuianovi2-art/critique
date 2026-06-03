@@ -637,7 +637,8 @@ function getStoredProfilePhoto(user) {
   const metadataPhoto = user?.user_metadata?.profile_photo || user?.user_metadata?.avatar_url || "";
   if (metadataPhoto) return metadataPhoto;
   try {
-    return localStorage.getItem(getProfilePhotoKey(user?.id)) || localStorage.getItem(PROFILE_PHOTO_KEY) || "";
+    if (user?.id) return localStorage.getItem(getProfilePhotoKey(user.id)) || "";
+    return localStorage.getItem(PROFILE_PHOTO_KEY) || "";
   } catch {
     return "";
   }
@@ -6675,14 +6676,16 @@ function setJsonStorageItem(key, value, compactValue = value) {
 
 function readLocalTradesFallback(userId, includeLegacy = !userId) {
   try {
+    if (!userId) {
+      const oldSaved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      return Array.isArray(oldSaved) && includeLegacy ? oldSaved.map(normalizeTradeForStorage) : [];
+    }
+
     const userSaved = JSON.parse(localStorage.getItem(getUserTradesKey(userId)) || "[]");
     if (Array.isArray(userSaved) && userSaved.length) return filterDeletedTrades(userSaved.map(normalizeTradeForStorage), userId);
     const userBackup = JSON.parse(localStorage.getItem(getUserTradesBackupKey(userId)) || "[]");
     if (Array.isArray(userBackup) && userBackup.length) return filterDeletedTrades(userBackup.map(normalizeTradeForStorage), userId);
-    if (userId && !includeLegacy) return [];
-
-    const oldSaved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    return Array.isArray(oldSaved) ? filterDeletedTrades(oldSaved.map(normalizeTradeForStorage), userId) : [];
+    return [];
   } catch {
     return [];
   }
@@ -6796,15 +6799,7 @@ export default function TradingJournalDashboard() {
     }
   }
   const [tradeViewMode, setTradeViewMode] = useState(null);
-  const [trades, setTrades] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      const parsed = saved ? JSON.parse(saved) : [];
-      return parsed.map((trade) => ({ ...trade, screenshots: normalizeScreenshots(trade), tags: normalizeTags(trade) }));
-    } catch {
-      return [];
-    }
-  });
+  const [trades, setTrades] = useState([]);
   const [accounts, setAccounts] = useState(() => {
     return readStoredAccounts(null);
   });
@@ -7008,14 +7003,7 @@ export default function TradingJournalDashboard() {
     setTradesLoading(true);
     setHasLoadedRemoteTrades(false);
     setDataMessage("");
-    const cachedRestore = readRestoreCache(authUser.id);
-    const browserTrades = mergeTradesUnique(Array.isArray(trades) ? trades : [], readLocalTradesFallback(authUser.id, true));
-    const cachedTrades = filterDeletedTrades(mergeTradesUnique(browserTrades, Array.isArray(cachedRestore?.trades) ? cachedRestore.trades : []), authUser.id);
-    if (cachedTrades.length) {
-      setTrades(cachedTrades);
-    } else {
-      setTrades([]);
-    }
+    setTrades([]);
 
     loadTradesFromSupabase(authUser.id)
       .then(async (rows) => {
@@ -7033,31 +7021,15 @@ export default function TradingJournalDashboard() {
 
         if (visibleRows.length) {
           const serverTrades = mergeTradesUnique(visibleRows, []);
-          const mergedTrades = mergeTradesUnique(serverTrades, cachedTrades);
-          setTrades(mergedTrades);
-          saveLocalTradesFallback(mergedTrades, authUser.id);
-          saveRestoreCache(authUser.id, { trades: mergedTrades, account, routine, theme });
-
-          if (mergedTrades.length > serverTrades.length) {
-            try {
-              const reSavedTrades = await replaceTradesInSupabase(authUser.id, mergedTrades);
-              if (!mounted) return;
-              const finalTrades = reSavedTrades.length ? reSavedTrades : mergedTrades;
-              setTrades(finalTrades);
-              saveLocalTradesFallback(finalTrades, authUser.id);
-              saveRestoreCache(authUser.id, { trades: finalTrades, account, routine, theme });
-              setDataMessage(`Recovered ${finalTrades.length - serverTrades.length} browser-saved trade${finalTrades.length - serverTrades.length === 1 ? "" : "s"} and synced them to cloud.`);
-            } catch (syncError) {
-              if (!mounted) return;
-              console.warn("Could not re-sync recovered browser trades:", syncError?.message || syncError);
-            }
-          }
+          setTrades(serverTrades);
+          saveLocalTradesFallback(serverTrades, authUser.id);
+          saveRestoreCache(authUser.id, { trades: serverTrades, account, routine, theme });
           return;
         }
 
-        const fallbackTrades = cachedTrades;
+        const fallbackTrades = [];
 
-        if (fallbackTrades.length) {
+        if (false && fallbackTrades.length) {
           setTrades(fallbackTrades);
           saveLocalTradesFallback(fallbackTrades, authUser.id);
           saveRestoreCache(authUser.id, { trades: fallbackTrades, account, routine, theme });
@@ -7083,7 +7055,7 @@ export default function TradingJournalDashboard() {
       })
       .catch(async (error) => {
         if (!mounted) return;
-        const localTrades = mergeTradesUnique(Array.isArray(trades) ? trades : [], readLocalTradesFallback(authUser.id, true));
+        const localTrades = readLocalTradesFallback(authUser.id, true);
         if (localTrades.length) {
           setTrades(localTrades);
           saveRestoreCache(authUser.id, { trades: localTrades, account, routine, theme });
@@ -7160,11 +7132,11 @@ export default function TradingJournalDashboard() {
     }
     setHasLoadedRemoteAccount(false);
     accountStorageUserRef.current = authUser.id;
-    const storedAccounts = readStoredAccounts(authUser.id, true);
-    setAccounts((current) => mergeAccountsUnique(current, storedAccounts));
+    const storedAccounts = readStoredAccounts(authUser.id, false);
+    setAccounts(storedAccounts);
     setActiveAccountId((current) => {
       const savedActiveId = readStoredActiveAccountId(authUser.id) || current;
-      const mergedAccounts = mergeAccountsUnique(accounts, storedAccounts);
+      const mergedAccounts = storedAccounts;
       return mergedAccounts.some((item) => String(item.id) === String(savedActiveId)) ? savedActiveId : mergedAccounts[0]?.id || "";
     });
     setPendingAccountDraft(null);
@@ -7205,7 +7177,7 @@ export default function TradingJournalDashboard() {
     loadAccountBundleFromSupabase(authUser.id)
       .then((profileBundle) => {
         if (!mounted) return;
-        const localAccounts = mergeAccountsUnique(accounts, readStoredAccounts(authUser.id, true));
+        const localAccounts = readStoredAccounts(authUser.id, false);
         const mergedAccounts = mergeAccountsUnique(localAccounts, profileBundle.accounts);
         const savedActiveId = readStoredActiveAccountId(authUser.id);
         const nextActiveId = mergedAccounts.some((item) => String(item.id) === String(profileBundle.activeAccountId))
@@ -7234,8 +7206,8 @@ export default function TradingJournalDashboard() {
   useEffect(() => {
     if (!supabase || !authUser?.id || !isAuthenticated || !hasLoadedRemoteTrades || !hasLoadedRemoteAccount) return undefined;
 
-    const browserTrades = filterDeletedTrades(mergeTradesUnique(trades, readLocalTradesFallback(authUser.id, true)), authUser.id);
-    const browserAccounts = mergeAccountsUnique(accounts, readStoredAccounts(authUser.id, true));
+    const browserTrades = filterDeletedTrades(trades, authUser.id);
+    const browserAccounts = mergeAccountsUnique(accounts, readStoredAccounts(authUser.id, false));
     if (!browserTrades.length && !browserAccounts.length) return undefined;
 
     const signature = JSON.stringify({
@@ -11965,6 +11937,7 @@ function getAccessSuspendedCopy(subscription) {
 
 function AccessSuspendedOverlay({ subscription, loadingPlan, onStartCheckout, onSignOut }) {
   const copy = getAccessSuspendedCopy(subscription);
+  const hasPreviousSubscription = Boolean(subscription);
   const perks = [
     [Database, "Data safe"],
     [ShieldCheck, "Account secure"],
@@ -12010,7 +11983,7 @@ function AccessSuspendedOverlay({ subscription, loadingPlan, onStartCheckout, on
             className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-fuchsia-300/60 bg-fuchsia-500 px-4 py-3 text-sm font-black text-black shadow-[0_0_28px_rgba(217,70,239,0.35)] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <CreditCard size={16} />
-            {loadingPlan === "monthly" ? "Opening checkout..." : "Reactivate Monthly"}
+            {loadingPlan === "monthly" ? "Opening checkout..." : hasPreviousSubscription ? "Reactivate Monthly" : "Start Monthly"}
           </button>
           <button
             type="button"
@@ -12018,7 +11991,7 @@ function AccessSuspendedOverlay({ subscription, loadingPlan, onStartCheckout, on
             disabled={Boolean(loadingPlan)}
             className="mt-3 w-full rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-black text-fuchsia-100 transition hover:border-fuchsia-400/45 hover:bg-fuchsia-500/10 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loadingPlan === "yearly" ? "Opening checkout..." : "Choose Yearly"}
+            {loadingPlan === "yearly" ? "Opening checkout..." : hasPreviousSubscription ? "Reactivate Yearly" : "Start Yearly"}
           </button>
           <button
             type="button"
