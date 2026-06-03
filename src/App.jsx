@@ -10442,6 +10442,21 @@ function getTimezoneOptions() {
     });
 }
 
+const SETTINGS_PREFERENCES_KEY = "critique_settings_preferences_v1";
+
+function getStoredTradingPreferences(account) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(SETTINGS_PREFERENCES_KEY) || "null") || {};
+    return {
+      currency: saved.currency || account?.currency || "USD",
+      timezone: normalizeTimezoneValue(saved.timezone || "Asia/Tbilisi"),
+      weekStartsOn: saved.weekStartsOn || "Monday",
+    };
+  } catch {
+    return { currency: account?.currency || "USD", timezone: "Asia/Tbilisi", weekStartsOn: "Monday" };
+  }
+}
+
 function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, isSupabaseReady, onOpenAccount, onBackup, onRestore, onSignOut, profilePhoto, setProfilePhoto }) {
   const profileName = getUserDisplayName(authUser, account?.isPlaceholder ? "User" : account?.name || "User");
   const profileInitials = profileName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join("") || "U";
@@ -10456,16 +10471,11 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
   const [passwordMessage, setPasswordMessage] = useState("");
   const [passwordStatus, setPasswordStatus] = useState("");
   const [showSettingsPasswords, setShowSettingsPasswords] = useState(false);
-  const [preferences, setPreferences] = useState(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem("critique_settings_preferences_v1") || "null") || {};
-      return { currency: saved.currency || account?.currency || "USD", timezone: normalizeTimezoneValue(saved.timezone || "Asia/Tbilisi"), weekStartsOn: saved.weekStartsOn || "Monday" };
-    } catch {
-      return { currency: account?.currency || "USD", timezone: "Asia/Tbilisi", weekStartsOn: "Monday" };
-    }
-  });
+  const [savedPreferences, setSavedPreferences] = useState(() => getStoredTradingPreferences(account));
+  const [preferences, setPreferences] = useState(() => getStoredTradingPreferences(account));
   const timezoneOptions = useMemo(() => getTimezoneOptions(), []);
-  useEffect(() => { localStorage.setItem("critique_settings_preferences_v1", JSON.stringify(preferences)); }, [preferences]);
+  const normalizedPreferences = useMemo(() => ({ ...preferences, timezone: normalizeTimezoneValue(preferences.timezone) }), [preferences]);
+  const hasPreferenceChanges = JSON.stringify(normalizedPreferences) !== JSON.stringify(savedPreferences);
 
   async function uploadProfilePhoto(event) {
     const file = event.target.files?.[0];
@@ -10585,9 +10595,10 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
   }
 
   function savePreferences() {
-    const next = { ...preferences, timezone: normalizeTimezoneValue(preferences.timezone) };
+    const next = { ...normalizedPreferences };
     setPreferences(next);
-    localStorage.setItem("critique_settings_preferences_v1", JSON.stringify(next));
+    setSavedPreferences(next);
+    localStorage.setItem(SETTINGS_PREFERENCES_KEY, JSON.stringify(next));
     setMessage("Trading preferences saved.");
   }
 
@@ -10659,13 +10670,22 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
             <div className="mt-8 flex items-center justify-between"><div className="font-black text-white">Dark Mode</div><SettingsToggle checked={theme === "dark"} onClick={() => setTheme(theme === "dark" ? "light" : "dark")} /></div>
           </SettingsPanel>
           <SettingsPanel icon={<Target size={25} />} title="Trading Preferences" subtitle="Default settings for trading">
+            <div className="mt-6 flex items-center justify-between rounded-xl border border-white/10 bg-black px-4 py-3">
+              <div>
+                <div className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500">Preference Status</div>
+                <div className={hasPreferenceChanges ? "mt-1 text-sm font-black text-amber-300" : "mt-1 text-sm font-black text-emerald-300"}>
+                  {hasPreferenceChanges ? "Unsaved changes" : "Saved"}
+                </div>
+              </div>
+              <span className={hasPreferenceChanges ? "h-3 w-3 rounded-full bg-amber-400 shadow-[0_0_16px_rgba(251,191,36,0.75)]" : "h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_16px_rgba(52,211,153,0.75)]"} />
+            </div>
             <div className="mt-7 space-y-5">
               <Field label="Default Account"><Select value={account?.name || "Trading Account"} onChange={onOpenAccount}><option>{account?.name || "Trading Account"}</option></Select></Field>
               <Field label="Currency"><Select value={preferences.currency} onChange={(event) => setPreferences((current) => ({ ...current, currency: event.target.value }))}><option value="USD">USD ($)</option><option value="EUR">EUR</option><option value="GBP">GBP</option></Select></Field>
               <Field label="Timezone"><Select value={normalizeTimezoneValue(preferences.timezone)} onChange={(event) => setPreferences((current) => ({ ...current, timezone: event.target.value }))}>{timezoneOptions.map((zone) => <option key={zone.value} value={zone.value}>{zone.label}</option>)}</Select></Field>
               <Field label="Week Starts On"><Select value={preferences.weekStartsOn} onChange={(event) => setPreferences((current) => ({ ...current, weekStartsOn: event.target.value }))}><option>Monday</option><option>Sunday</option></Select></Field>
             </div>
-            <div className="mt-5 flex justify-end"><Button onClick={savePreferences} className="bg-fuchsia-500 text-black"><Save size={16} /> Save Preferences</Button></div>
+            <div className="mt-5 flex justify-end"><Button onClick={savePreferences} disabled={!hasPreferenceChanges} className={hasPreferenceChanges ? "bg-fuchsia-500 text-black" : "cursor-not-allowed bg-zinc-800 text-zinc-500"}><Save size={16} /> Save Preferences</Button></div>
           </SettingsPanel>
         </div>
       </div>
