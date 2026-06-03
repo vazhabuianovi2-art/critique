@@ -159,17 +159,45 @@ function getPathForAuthPage(page) {
   return paths[page] || "/";
 }
 
-function enterAppRoute() {
+const APP_PAGE_PATHS = {
+  Dashboard: "/dashboard",
+  Journal: "/journal",
+  Calendar: "/calendar",
+  Statistics: "/statistics",
+  "Mistake Detector": "/mistake-detector",
+  Settings: "/settings",
+  Billing: "/billing",
+  Admin: "/admin",
+  Support: "/support",
+};
+
+function getNormalizedBrowserPath() {
+  if (typeof window === "undefined") return "/";
+  return window.location.pathname.replace(/\/+$/, "") || "/";
+}
+
+function getAppPageFromPath() {
+  const path = getNormalizedBrowserPath();
+  return Object.entries(APP_PAGE_PATHS).find(([, pagePath]) => pagePath === path)?.[0] || null;
+}
+
+function getPathForAppPage(page) {
+  return APP_PAGE_PATHS[page] || "";
+}
+
+function enterAppRoute(page = "Dashboard", navigationMode = "replace") {
   if (typeof window === "undefined") return;
-  if (window.location.pathname !== "/dashboard") {
-    window.history.replaceState(null, "", "/dashboard");
+  const nextPath = getPathForAppPage(page) || "/dashboard";
+  if (window.location.pathname !== nextPath) {
+    const method = navigationMode === "push" ? "pushState" : "replaceState";
+    window.history[method](null, "", nextPath);
   }
 }
 
 function isPublicAuthPath() {
   if (typeof window === "undefined") return false;
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
-  return path === "/" || path === "/auth/login" || path === "/auth/register" || path === "/auth/forgot";
+  return ["/", "/auth/login", "/auth/register", "/auth/forgot", "/terms", "/privacy", "/refund", "/contact"].includes(path);
 }
 
 function isOwnerAdminEmail(email) {
@@ -6739,7 +6767,17 @@ export default function TradingJournalDashboard() {
     }
     link.href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
   }, []);
-  const [active, setActive] = useState("Dashboard");
+  const [active, setActiveState] = useState(() => getAppPageFromPath() || "Dashboard");
+  function setActive(nextActive, navigationMode = "push") {
+    const page = typeof nextActive === "function" ? nextActive(active) : nextActive;
+    setActiveState(page);
+    setTradeViewMode(null);
+    const nextPath = getPathForAppPage(page);
+    if (nextPath && typeof window !== "undefined" && window.location.pathname !== nextPath) {
+      const method = navigationMode === "replace" ? "replaceState" : "pushState";
+      window.history[method](null, "", nextPath);
+    }
+  }
   const [tradeViewMode, setTradeViewMode] = useState(null);
   const [trades, setTrades] = useState(() => {
     try {
@@ -6910,16 +6948,23 @@ export default function TradingJournalDashboard() {
 
   useEffect(() => {
     if (!shouldGateForBilling || active === "Billing" || active === "Support" || active === "Admin") return;
-    setTradeViewMode(null);
-    setActive("Billing");
+    setActive("Billing", "replace");
   }, [active, shouldGateForBilling]);
 
   useEffect(() => {
-    function syncAuthPageFromBrowserPath() {
-      if (!isAuthenticated) setAuthPageState(getAuthPageFromPath());
+    function syncPageFromBrowserPath() {
+      if (isAuthenticated) {
+        const page = getAppPageFromPath();
+        if (page) {
+          setActiveState(page);
+          setTradeViewMode(null);
+        }
+        return;
+      }
+      setAuthPageState(getAuthPageFromPath());
     }
-    window.addEventListener("popstate", syncAuthPageFromBrowserPath);
-    return () => window.removeEventListener("popstate", syncAuthPageFromBrowserPath);
+    window.addEventListener("popstate", syncPageFromBrowserPath);
+    return () => window.removeEventListener("popstate", syncPageFromBrowserPath);
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -7320,6 +7365,15 @@ export default function TradingJournalDashboard() {
       }
       setAuthUser(user);
       setIsAuthenticated(Boolean(user));
+      if (user) {
+        const pageFromPath = getAppPageFromPath();
+        if (pageFromPath) {
+          setActiveState(pageFromPath);
+        } else if (!isPublicAuthPath()) {
+          setActiveState("Dashboard");
+          enterAppRoute("Dashboard", "replace");
+        }
+      }
       setAuthLoading(false);
     }).catch((error) => {
       if (!mounted) return;
@@ -7350,11 +7404,12 @@ export default function TradingJournalDashboard() {
       if (event === "SIGNED_OUT") {
         setAuthUser(null);
         setIsAuthenticated(false);
+        setAuthPage("login", "replace");
         setAuthLoading(false);
         return;
       }
 
-      if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") && isPublicAuthPath()) {
+      if (event === "INITIAL_SESSION" && isPublicAuthPath()) {
         setAuthLoading(false);
         return;
       }
@@ -7362,6 +7417,8 @@ export default function TradingJournalDashboard() {
       if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") && user) {
         setAuthUser(user);
         setIsAuthenticated(true);
+        const pageFromPath = getAppPageFromPath();
+        if (pageFromPath) setActiveState(pageFromPath);
         setAuthLoading(false);
       }
     });
@@ -7390,7 +7447,8 @@ export default function TradingJournalDashboard() {
         } else {
           localStorage.setItem(REMEMBER_EMAIL_KEY, String(values.email || ""));
         }
-        enterAppRoute();
+        enterAppRoute("Dashboard", "replace");
+        setActiveState("Dashboard");
         setAuthUser(data?.user || null);
         setIsAuthenticated(Boolean(data?.user));
         return { ok: true };
@@ -7491,6 +7549,7 @@ export default function TradingJournalDashboard() {
     await safeLocalSignOut();
     setIsAuthenticated(false);
     setAuthUser(null);
+    setAuthPage("login", "replace");
     setIsSidebarUserMenuOpen(false);
   }
 
