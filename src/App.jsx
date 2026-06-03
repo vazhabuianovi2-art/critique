@@ -5308,15 +5308,12 @@ function joinMultiValues(values = []) {
 }
 
 function getResultTagFromPnl(value) {
-  const result = getResultFromPnl(value);
-  if (result === "Win") return "result:win";
-  if (result === "Loss") return "result:loss";
-  return "result:break-even";
+  return resultToTag(getResultFromPnl(value));
 }
 
-function syncResultTag(tagsValue, pnl) {
+function syncResultTag(tagsValue, pnl, result) {
   const tags = normalizeTags({ tags: tagsValue }).filter((tag) => !String(tag).toLowerCase().startsWith("result:"));
-  return [getResultTagFromPnl(pnl), ...tags].join(", ");
+  return [resultToTag(normalizeTradeResult(result) || getResultFromPnl(pnl)), ...tags].join(", ");
 }
 
 function formatMoney(value) {
@@ -5670,9 +5667,36 @@ function getResultFromPnl(value) {
   return "Break Even";
 }
 
+const TRADE_RESULT_OPTIONS = ["Win", "Loss", "Break Even", "Partial"];
+
+function normalizeTradeResult(value) {
+  const raw = String(value || "").trim();
+  const normalized = raw.toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ");
+  if (["win", "won", "profit", "profitable"].includes(normalized)) return "Win";
+  if (["loss", "lose", "lost"].includes(normalized)) return "Loss";
+  if (["break even", "breakeven", "break", "be"].includes(normalized)) return "Break Even";
+  if (["partial", "partially", "partial win", "partial loss"].includes(normalized)) return "Partial";
+  return "";
+}
+
+function resultToTag(result) {
+  const normalized = normalizeTradeResult(result) || "Break Even";
+  return `result:${normalized.toLowerCase().replace(/\s+/g, "-")}`;
+}
+
+function getTradeResult(trade) {
+  const direct = normalizeTradeResult(trade?.result || trade?.outcome);
+  if (direct) return direct;
+  const tagResult = normalizeTags(trade).find((tag) => normalizeTradeResult(String(tag).replace(/^result:/i, "")));
+  if (tagResult) return normalizeTradeResult(String(tagResult).replace(/^result:/i, ""));
+  return getResultFromPnl(trade?.pnl);
+}
+
 function getResultTone(result) {
-  if (result === "Win") return "emerald";
-  if (result === "Loss") return "red";
+  const normalized = normalizeTradeResult(result) || result;
+  if (normalized === "Win") return "emerald";
+  if (normalized === "Loss") return "red";
+  if (normalized === "Partial") return "fuchsia";
   return "amber";
 }
 
@@ -5701,24 +5725,12 @@ function getPnlArrow(value) {
   return "—";
 }
 
-function getTradeGrade(trade) {
-  const rr = getTradeRR(trade);
-  const pnl = Number(trade?.pnl || 0);
-  const tags = normalizeTags(trade).map((tag) => tag.toLowerCase());
-  const hasAPlus = tags.some((tag) => tag.includes("a+") || tag.includes("a setup"));
-  if (pnl > 0 && (rr >= 3 || hasAPlus)) return "A+";
-  if (pnl > 0 && rr >= 2) return "A";
-  if (pnl > 0 && rr >= 1) return "B";
-  if (pnl >= 0) return "C";
-  return "D";
-}
-
-function getTradeGradeClass(grade) {
-  if (grade === "A+") return "border-fuchsia-500/45 bg-fuchsia-500/15 text-fuchsia-200";
-  if (grade === "A") return "border-emerald-500/40 bg-emerald-500/15 text-emerald-300";
-  if (grade === "B") return "border-blue-500/40 bg-blue-500/15 text-blue-300";
-  if (grade === "C") return "border-amber-500/40 bg-amber-500/15 text-amber-300";
-  return "border-red-500/40 bg-red-500/15 text-red-300";
+function getTradeResultClass(result) {
+  const normalized = normalizeTradeResult(result) || "Break Even";
+  if (normalized === "Win") return "border-emerald-500/40 bg-emerald-500/15 text-emerald-300";
+  if (normalized === "Loss") return "border-red-500/40 bg-red-500/15 text-red-300";
+  if (normalized === "Partial") return "border-fuchsia-500/45 bg-fuchsia-500/15 text-fuchsia-200";
+  return "border-amber-500/40 bg-amber-500/15 text-amber-300";
 }
 
 function getTradeDirectionClass(direction) {
@@ -5743,7 +5755,7 @@ function createTradeFromForm(form, existingId, account, existingTrade = null) {
     quantity: Number(form.quantity || 0),
     setup: form.strategy || "Manual Trade",
     session: form.session,
-    result: getResultFromPnl(pnl),
+    result: normalizeTradeResult(form.result) || getResultFromPnl(pnl),
     emotion: form.emotion,
     risk: Number(form.risk || 0),
     pnl,
@@ -5755,7 +5767,7 @@ function createTradeFromForm(form, existingId, account, existingTrade = null) {
     confirmation: form.confirmation || "Yes",
     ruleBroken: form.ruleBroken || "None",
     marketCondition: form.marketCondition || "Trending",
-    setupQuality: form.setupQuality || getTradeGrade({ pnl, risk: Number(form.risk || 0), tags: form.tags }),
+    setupQuality: form.setupQuality || existingTrade?.setupQuality || "",
     entryQuality: Number(form.entryQuality || 0),
     exitQuality: Number(form.exitQuality || 0),
     mistake: form.mistake || "None",
@@ -5774,7 +5786,7 @@ function formFromTrade(trade) {
     date: trade.date || "",
     session: trade.session || "",
     strategy: trade.setup || "",
-    result: trade.result || "",
+    result: getTradeResult(trade),
     tags: normalizeTags(trade).join(", "),
     emotion: trade.emotion || "",
     mistake: trade.mistake || "None",
@@ -5786,7 +5798,7 @@ function formFromTrade(trade) {
     confirmation: trade.confirmation || "Yes",
     ruleBroken: trade.ruleBroken || "None",
     marketCondition: trade.marketCondition || "Trending",
-    setupQuality: trade.setupQuality || getTradeGrade(trade),
+    setupQuality: trade.setupQuality || "",
     entryQuality: String(trade.entryQuality ?? "3"),
     exitQuality: String(trade.exitQuality ?? "3"),
     screenshots: normalizeScreenshots(trade),
@@ -6024,7 +6036,7 @@ function getMistakeDetectorStats(trades = []) {
     const timing = trade.entryTiming || "On Time";
     const emotions = splitMultiValues(trade.emotion).length ? splitMultiValues(trade.emotion) : ["Calm"];
     const brokenRules = splitMultiValues(trade.ruleBroken).filter((item) => item && item !== "None");
-    const setupQuality = trade.setupQuality || getTradeGrade(trade);
+    const setupQuality = trade.setupQuality || "";
 
     if (mistakes.length) mistakes.forEach((mistake) => addIssue(`mistake-${mistake}`, mistake, trade, "Execution", `Focus on removing ${mistake.toLowerCase()} before increasing size.`, 1.3));
     else addIssue("unclassified", "Unclassified mistake", trade, "Discipline", "Tag the exact mistake after each loss so the detector can become more accurate.", 0.6);
@@ -6035,7 +6047,7 @@ function getMistakeDetectorStats(trades = []) {
     if (Number(trade.exitQuality || 0) > 0 && Number(trade.exitQuality || 0) <= 2) addIssue("exit-low", "Low exit quality", trade, "Execution", "Pre-plan partials, target and invalidation before entering the trade.", 1);
     if (["No", "Partial"].includes(trade.ruleFollowed) || brokenRules.length) addIssue("rules-broken", brokenRules[0] || "Rules not fully followed", trade, "Discipline", "Only take trades that match your checklist. If rules are not met, skip the trade.", 1.35);
     if (["Bad Risk Management", "Moved Stop Loss", "Overrisk"].includes(primaryMistake) || brokenRules.some((rule) => ["Moved SL", "Overrisk"].includes(rule))) addIssue("risk-control", "Risk control problem", trade, "Risk", "Reduce size and never move stop loss after entry. Risk must be decided before execution.", 1.4);
-    if (["C", "D"].includes(setupQuality) || ["C", "D"].includes(getTradeGrade(trade))) addIssue("setup-quality", "Weak setup quality", trade, "Setup", "Trade only A/B setups and write why the setup deserves execution before entry.", 1.2);
+    if (["C", "D"].includes(setupQuality)) addIssue("setup-quality", "Weak setup quality", trade, "Setup", "Trade only A/B setups and write why the setup deserves execution before entry.", 1.2);
   });
 
   const issues = Object.values(issueMap).sort((a, b) => b.weightedCount !== a.weightedCount ? b.weightedCount - a.weightedCount : Math.abs(b.pnl) - Math.abs(a.pnl));
@@ -6045,8 +6057,8 @@ function getMistakeDetectorStats(trades = []) {
   const confidence = losses.length && mainIssue ? Math.round(Math.min(100, (mainIssue.count / losses.length) * 100)) : 0;
   const affectedPnl = mainIssue ? mainIssue.pnl : 0;
   const cleanTrades = safe.filter((trade) => Number(trade.pnl || 0) >= 0 && (!trade.mistake || trade.mistake === "None")).length;
-  const winProfile = { emotion: getMostCommonValue(wins, "emotion", "No emotion"), timing: getMostCommonValue(wins, "entryTiming", "No timing"), setup: getMostCommonValue(wins, "setupQuality", "No grade"), session: getMostCommonValue(wins, "session", "No session") };
-  const lossProfile = { emotion: getMostCommonValue(losses, "emotion", "No emotion"), timing: getMostCommonValue(losses, "entryTiming", "No timing"), setup: getMostCommonValue(losses, "setupQuality", "No grade"), session: getMostCommonValue(losses, "session", "No session") };
+  const winProfile = { emotion: getMostCommonValue(wins, "emotion", "No emotion"), timing: getMostCommonValue(wins, "entryTiming", "No timing"), setup: getMostCommonValue(wins, "setupQuality", "No setup quality"), session: getMostCommonValue(wins, "session", "No session") };
+  const lossProfile = { emotion: getMostCommonValue(losses, "emotion", "No emotion"), timing: getMostCommonValue(losses, "entryTiming", "No timing"), setup: getMostCommonValue(losses, "setupQuality", "No setup quality"), session: getMostCommonValue(losses, "session", "No session") };
   const focusPlan = mainRoot ? buildFocusPlan(mainRoot.key, mainIssue?.title) : ["Log at least 5 losing trades with mistake, emotion and entry quality.", "Review screenshots after every trade.", "Keep the same risk until patterns become clear."];
 
   return { losses, wins, issues, roots, mainIssue, mainRoot, confidence, affectedPnl, cleanTrades, winProfile, lossProfile, focusPlan, summary: losses.length ? `${issues.length} mistake patterns detected from ${losses.length} losing trade${losses.length === 1 ? "" : "s"}.` : "No losing trades detected yet." };
@@ -6091,7 +6103,7 @@ function translateDetectorText(value) {
     "Late": "Late",
     "No timing": "No Timing Data",
     "No emotion": "No Emotion Data",
-    "No grade": "No Grade Data",
+    "No setup quality": "No Setup Quality Data",
     "No session": "No Session Data",
     "Moved SL": "Moved Stop Loss",
     "Overrisk": "Overrisk",
@@ -6303,20 +6315,20 @@ function calculateStatistics(trades = [], startingBalance = 50000) {
   const avgPnl = safeTrades.length ? base.pnl / safeTrades.length : 0;
   const avgWin = wins.length ? wins.reduce((sum, trade) => sum + Number(trade.pnl), 0) / wins.length : 0;
   const avgLoss = losses.length ? Math.abs(losses.reduce((sum, trade) => sum + Number(trade.pnl), 0) / losses.length) : 0;
-  const gradeStats = { "A+": { count: 0, pnl: 0 }, A: { count: 0, pnl: 0 }, B: { count: 0, pnl: 0 }, C: { count: 0, pnl: 0 }, D: { count: 0, pnl: 0 } };
+  const resultStats = TRADE_RESULT_OPTIONS.reduce((output, result) => ({ ...output, [result]: { count: 0, pnl: 0 } }), {});
   const strategyStats = {};
   const mistakeStats = {};
   const sessionStats = {};
 
   safeTrades.forEach((trade) => {
     const pnl = Number(trade.pnl || 0);
-    const grade = getTradeGrade(trade);
+    const result = getTradeResult(trade);
     const strategy = trade.setup || "Manual Trade";
     const mistake = trade.mistake || "None";
     const session = trade.session || "Unknown";
-    if (!gradeStats[grade]) gradeStats[grade] = { count: 0, pnl: 0 };
-    gradeStats[grade].count += 1;
-    gradeStats[grade].pnl += pnl;
+    if (!resultStats[result]) resultStats[result] = { count: 0, pnl: 0 };
+    resultStats[result].count += 1;
+    resultStats[result].pnl += pnl;
     if (!strategyStats[strategy]) strategyStats[strategy] = { count: 0, pnl: 0, wins: 0, losses: 0, breakEvens: 0, rrSum: 0, riskTrades: 0 };
     strategyStats[strategy].count += 1;
     strategyStats[strategy].pnl += pnl;
@@ -6365,7 +6377,7 @@ function calculateStatistics(trades = [], startingBalance = 50000) {
   const score = Math.round((metricScores.winRate + metricScores.profitFactor + metricScores.avgWinLoss + metricScores.recoveryFactor + metricScores.maxDrawdown + metricScores.consistency) / 6);
   return {
     totalPnl: base.pnl, trades: base.count, wins: base.wins, losses: base.losses, breakEvens: base.breakEvens, decisive: base.decisive, winRate: base.winRate, breakEvenRate: base.breakEvenRate, avgPnl, avgWin, avgLoss, avgRR, score,
-    grossProfit, grossLoss, profitFactor, avgWinLoss, maxDrawdown, maxDrawdownPercent, gradeStats, strategyStats, mistakeStats, sessionStats,
+    grossProfit, grossLoss, profitFactor, avgWinLoss, maxDrawdown, maxDrawdownPercent, resultStats, strategyStats, mistakeStats, sessionStats,
     metrics: {
       winRate: { label: "Win %", description: "Winning trades divided by win/loss trades. Break-even trades are tracked separately.", actual: `${base.winRate.toFixed(1)}%`, score: metricScores.winRate },
       profitFactor: { label: "Profit factor", description: "Gross profit divided by gross loss", actual: profitFactor >= 999 ? "Perfect" : profitFactor.toFixed(2), score: metricScores.profitFactor },
@@ -6604,8 +6616,8 @@ async function replaceTradesInSupabase(userId, tradesToRestore) {
 function runHelperTests() {
   console.assert(normalizeTags({ tags: "A, B, C" }).length === 3, "tags split by comma");
   console.assert(getTradeRR({ pnl: 200, risk: 100 }) === 2, "R:R works");
-  console.assert(getTradeGrade({ pnl: 200, risk: 100 }) === "A", "grade works");
-  console.assert(getTradeGrade({ pnl: 300, risk: 100 }) === "A+", "A+ grade works");
+  console.assert(getTradeResult({ result: "partial", pnl: 200 }) === "Partial", "partial result works");
+  console.assert(resultToTag("Partial") === "result:partial", "partial result tag works");
   console.assert(getCalendarCells(2026, 4).length === 42, "calendar grid works");
   console.assert(getLastTradingDays(20).length === 20, "trading activity excludes weekends");
   console.assert(formatDateKey(new Date("2026-05-15T00:00:00")) === "2026-05-15", "date key format works");
@@ -7352,10 +7364,9 @@ export default function TradingJournalDashboard() {
       const pnl = Number(trade.pnl || 0);
       return (
         (!query || text.includes(query)) &&
-        (filters.result === "All" || trade.result === filters.result) &&
+        (filters.result === "All" || getTradeResult(trade) === filters.result) &&
         (filters.direction === "All" || trade.direction === filters.direction.toUpperCase()) &&
         (filters.strategy === "All" || trade.setup === filters.strategy) &&
-        (filters.grade === "All" || getTradeGrade(trade) === filters.grade) &&
         (filters.session === "All" || trade.session === filters.session) &&
         (!filters.dateFrom || dateKey >= filters.dateFrom) &&
         (!filters.dateTo || dateKey <= filters.dateTo) &&
@@ -7434,10 +7445,10 @@ export default function TradingJournalDashboard() {
     if (tradeSavingRef.current) return;
     tradeSavingRef.current = true;
     setIsTradeSaving(true);
-    const normalizedResult = getResultFromPnl(pnl);
+    const normalizedResult = normalizeTradeResult(form.result) || getResultFromPnl(pnl);
     const normalizedTags = normalizeTags(form).filter((tag) => !String(tag).toLowerCase().startsWith("result:"));
     const existingTrade = trades.find((item) => item.id === editingTradeId);
-    const trade = createTradeFromForm({ ...form, result: normalizedResult, tags: [`result:${normalizedResult.toLowerCase().replaceAll(" ", "-")}`, ...normalizedTags].join(", "), pnl, quantity, risk }, editingTradeId || existingTrade?.id, account, existingTrade);
+    const trade = createTradeFromForm({ ...form, result: normalizedResult, tags: [resultToTag(normalizedResult), ...normalizedTags].join(", "), pnl, quantity, risk }, editingTradeId || existingTrade?.id, account, existingTrade);
     const tradeForSave = existingTrade?.supabaseId ? { ...trade, supabaseId: existingTrade.supabaseId } : trade;
 
     try {
@@ -8033,14 +8044,14 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
   const isJournalEmpty = allTrades.length === 0;
   const resetJournalFilters = () => {
     setSearchQuery("");
-    setFilters({ result: "All", direction: "All", strategy: "All", grade: "All", session: "All", dateFrom: "", dateTo: "", minPnl: "", maxPnl: "", emotion: "All", tag: "" });
+    setFilters({ result: "All", direction: "All", strategy: "All", session: "All", dateFrom: "", dateTo: "", minPnl: "", maxPnl: "", emotion: "All", tag: "" });
   };
   const sortedTrades = useMemo(() => {
     const direction = sortDirection === "asc" ? 1 : -1;
     return [...trades].sort((a, b) => {
       if (sortBy === "P&L") return (Number(a.pnl || 0) - Number(b.pnl || 0)) * direction;
       if (sortBy === "Symbol") return String(a.pair || "").localeCompare(String(b.pair || "")) * direction;
-      if (sortBy === "Grade") return getTradeGrade(a).localeCompare(getTradeGrade(b)) * direction;
+      if (sortBy === "Result") return getTradeResult(a).localeCompare(getTradeResult(b)) * direction;
       return String(getTradeDateKey(a)).localeCompare(String(getTradeDateKey(b))) * direction;
     });
   }, [trades, sortBy, sortDirection]);
@@ -8069,10 +8080,9 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
         {showFilters && (
           <div className="mt-6 rounded-xl border border-fuchsia-500/45 bg-gradient-to-br from-zinc-950 via-black to-black p-5 shadow-[0_0_28px_rgba(217,70,239,0.22)] ring-1 ring-fuchsia-500/15">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <Field label="Status"><Select value={filters.result} onChange={(e) => setFilters({ ...filters, result: e.target.value })}><option>All</option><option>Win</option><option>Loss</option><option>Break Even</option></Select></Field>
+              <Field label="Result"><Select value={filters.result} onChange={(e) => setFilters({ ...filters, result: e.target.value })}><option>All</option>{TRADE_RESULT_OPTIONS.map((result) => <option key={result}>{result}</option>)}</Select></Field>
               <Field label="Type"><Select value={filters.direction} onChange={(e) => setFilters({ ...filters, direction: e.target.value })}><option>All</option><option>Buy</option><option>Sell</option></Select></Field>
               <Field label="Strategy"><Select value={filters.strategy} onChange={(e) => setFilters({ ...filters, strategy: e.target.value })}>{strategies.map((strategy) => <option key={strategy}>{strategy}</option>)}</Select></Field>
-              <Field label="Grade"><Select value={filters.grade} onChange={(e) => setFilters({ ...filters, grade: e.target.value })}><option>All</option><option>A</option><option>B</option><option>C</option><option>D</option></Select></Field>
               <Field label="Session"><Select value={filters.session} onChange={(e) => setFilters({ ...filters, session: e.target.value })}>{sessions.map((session) => <option key={session}>{session}</option>)}</Select></Field>
               <DateFilterField label="From Date" value={filters.dateFrom} onChange={(value) => setFilters({ ...filters, dateFrom: value })} />
               <DateFilterField label="To Date" value={filters.dateTo} onChange={(value) => setFilters({ ...filters, dateTo: value })} />
@@ -8100,7 +8110,7 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 text-sm text-zinc-400">
             <span>Sort by:</span>
-            <div className="w-36"><Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}><option>Date</option><option>P&L</option><option>Symbol</option><option>Grade</option></Select></div>
+            <div className="w-36"><Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}><option>Date</option><option>P&L</option><option>Symbol</option><option>Result</option></Select></div>
             <button onClick={() => setSortDirection(sortDirection === "asc" ? "desc" : "asc")} className="rounded-lg border border-fuchsia-500/35 bg-fuchsia-950/25 px-3 py-2 font-black text-fuchsia-300 shadow-[0_0_14px_rgba(217,70,239,0.12)] transition hover:border-fuchsia-400/80 hover:bg-fuchsia-500 hover:text-black hover:shadow-[0_0_20px_rgba(217,70,239,0.28)]">{sortDirection === "asc" ? "↑" : "↓"}</button>
           </div>
           <div className="flex items-center gap-3 text-sm text-zinc-400">
@@ -8228,7 +8238,7 @@ function TradeCard({ trade, onView, onEdit, onRemove }) {
   const pnl = Number(trade.pnl || 0);
   const isWin = pnl > 0;
   const isBreakEven = pnl === 0;
-  const grade = getTradeGrade(trade);
+  const result = getTradeResult(trade);
   const rr = getTradeRR(trade);
   const tags = normalizeTags(trade).slice(0, 3);
   return (
@@ -8241,7 +8251,7 @@ function TradeCard({ trade, onView, onEdit, onRemove }) {
         <div className={`absolute bottom-4 right-4 rounded-xl border px-4 py-2 text-lg font-black backdrop-blur ${getPnlPillClass(pnl)}`}>{getPnlArrow(pnl)} {formatMoney(pnl)}</div>
       </button>
       <div className="relative z-10 p-5">
-        <div className="flex items-start justify-between gap-3"><div><div className="text-xs font-bold uppercase tracking-wider text-zinc-500">{trade.date} • {trade.session || "No session"}</div><div className="mt-2 text-lg font-black text-white">{trade.setup}</div><div className="mt-1 text-xs text-zinc-400">{trade.accountName || "v"} • {trade.accountType || "Account"}</div></div><span className={`rounded-full border px-3 py-1 text-xs font-black ${getTradeGradeClass(grade)}`}>Grade {grade}</span></div>
+        <div className="flex items-start justify-between gap-3"><div><div className="text-xs font-bold uppercase tracking-wider text-zinc-500">{trade.date} • {trade.session || "No session"}</div><div className="mt-2 text-lg font-black text-white">{trade.setup}</div><div className="mt-1 text-xs text-zinc-400">{trade.accountName || "v"} • {trade.accountType || "Account"}</div></div><span className={`rounded-full border px-3 py-1 text-xs font-black ${getTradeResultClass(result)}`}>{result}</span></div>
         <div className="mt-4 grid grid-cols-3 gap-3"><MetricBox label="Risk" value={formatMoney(trade.risk)} tone="fuchsia" /><MetricBox label="R:R" value={`${rr.toFixed(2)}R`} tone="fuchsia" /><MetricBox label="Qty" value={trade.quantity} tone="fuchsia" /></div>
         <div className="mt-4 flex flex-wrap gap-2">{tags.length ? tags.map((tag) => <span key={tag} className="trade-tag rounded-full border border-fuchsia-500/35 bg-fuchsia-500/15 px-3 py-1.5 text-xs font-black text-fuchsia-200 shadow-[0_0_10px_rgba(217,70,239,0.16)]">#{tag}</span>) : <span className="text-xs text-zinc-500">No tags</span>}</div>
         <div className="mt-5 flex items-center justify-between gap-5 border-t border-white/10 pt-4"><div className="flex min-w-0 flex-wrap items-center gap-2 text-xs"><span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 font-bold text-emerald-200">{trade.emotion || "No emotion"}</span><span className={trade.mistake && trade.mistake !== "None" ? "rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1.5 font-bold text-red-300" : "rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 font-bold text-emerald-300"}>{trade.mistake || "None"}</span></div><div className="ml-auto flex shrink-0 gap-2"><button onClick={onView} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Eye size={16} /></button><button onClick={onEdit} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Edit3 size={16} /></button><button onClick={onRemove} className="rounded-lg border border-red-500/20 bg-red-500/10 p-2 text-red-400 transition hover:border-red-500/60"><Trash2 size={16} /></button></div></div>
@@ -8307,9 +8317,9 @@ function TradeDetailsPage({ trade, account, onBack, onEdit, onDelete, onExport }
           <div className={`rounded-xl border p-6 ${Number(trade.pnl) > 0 ? "border-emerald-500/30 bg-emerald-950/30" : Number(trade.pnl) < 0 ? "border-red-500/30 bg-red-950/30" : "border-amber-500/30 bg-amber-950/30"}`}><div className="text-sm text-zinc-400">Total P&L</div><div className={`mt-2 text-4xl font-black ${getPnlToneClass(trade.pnl)}`}>{getPnlArrow(trade.pnl)} {formatMoney(trade.pnl)}</div></div>
           <div className="rounded-xl border border-white/10 bg-zinc-950 p-6"><SectionTitle title="Trade Metadata" icon={<BarChart3 size={18} />} /><div className="mt-8 grid grid-cols-2 gap-8 border-b border-white/10 pb-6"><Meta label="Quantity" value={trade.quantity} /><Meta label="Session" value={trade.session || "—"} /></div><div className="grid grid-cols-2 gap-8 border-b border-white/10 py-6"><Meta label="Entry Date" value={trade.date} /><Meta label="Exit Date" value={trade.date} /></div><div className="grid grid-cols-3 gap-8 pt-6"><Meta label="Risk" value={formatMoney(trade.risk)} danger /><Meta label="Risk/Reward Ratio" value={`${getTradeRR(trade).toFixed(2)}:1`} gold /><Meta label="Realized P&L" value={formatMoney(trade.pnl)} green={Number(trade.pnl) > 0} gold={Number(trade.pnl) === 0} danger={Number(trade.pnl) < 0} /></div></div>
           <div className="rounded-xl border border-white/10 bg-zinc-950 p-6"><SectionTitle title={`Trade Screenshots (${screenshots.length})`} icon={<Camera size={18} />} /><div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">{screenshots.length ? screenshots.map((img, index) => <button key={index} onClick={() => setActiveIndex(index)}><img src={img} alt="Trade screenshot" className="h-56 w-full rounded-lg object-cover hover:opacity-80" /></button>) : <div className="col-span-2 rounded-xl border border-dashed border-white/10 bg-black p-10 text-center text-zinc-500">No screenshots uploaded</div>}</div></div>
-          <div className="rounded-xl border border-white/10 bg-zinc-950 p-6"><SectionTitle title="Trade Analysis" icon={<BookOpen size={18} />} /><p className="trade-analysis-note mt-4 rounded-xl bg-black p-4 text-zinc-300">{trade.notes || "No notes"}</p><div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2"><ReviewBox title="What went well?" value={trade.whatWentWell || "No review yet"} tone="emerald" /><ReviewBox title="What went wrong?" value={trade.whatWentWrong || "No review yet"} tone="red" /></div><div className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-4"><Meta label="Rule Followed" value={trade.ruleFollowed || "—"} green={trade.ruleFollowed === "Yes"} danger={trade.ruleFollowed === "No"} /><Meta label="Entry Timing" value={trade.entryTiming || "—"} gold /><Meta label="Setup Quality" value={trade.setupQuality || getTradeGrade(trade)} gold /><Meta label="Market" value={trade.marketCondition || "—"} /><Meta label="Confirmation" value={trade.confirmation || "—"} green={trade.confirmation === "Yes"} danger={trade.confirmation === "No"} /><Meta label="Rule Broken" value={trade.ruleBroken || "None"} danger={trade.ruleBroken && trade.ruleBroken !== "None"} /><Meta label="Entry Quality" value={`${trade.entryQuality || "—"}/5`} gold /><Meta label="Exit Quality" value={`${trade.exitQuality || "—"}/5`} gold /></div></div>
+          <div className="rounded-xl border border-white/10 bg-zinc-950 p-6"><SectionTitle title="Trade Analysis" icon={<BookOpen size={18} />} /><p className="trade-analysis-note mt-4 rounded-xl bg-black p-4 text-zinc-300">{trade.notes || "No notes"}</p><div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2"><ReviewBox title="What went well?" value={trade.whatWentWell || "No review yet"} tone="emerald" /><ReviewBox title="What went wrong?" value={trade.whatWentWrong || "No review yet"} tone="red" /></div><div className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-4"><Meta label="Rule Followed" value={trade.ruleFollowed || "—"} green={trade.ruleFollowed === "Yes"} danger={trade.ruleFollowed === "No"} /><Meta label="Entry Timing" value={trade.entryTiming || "—"} gold /><Meta label="Setup Quality" value={trade.setupQuality || "?"} gold /><Meta label="Market" value={trade.marketCondition || "—"} /><Meta label="Confirmation" value={trade.confirmation || "—"} green={trade.confirmation === "Yes"} danger={trade.confirmation === "No"} /><Meta label="Rule Broken" value={trade.ruleBroken || "None"} danger={trade.ruleBroken && trade.ruleBroken !== "None"} /><Meta label="Entry Quality" value={`${trade.entryQuality || "—"}/5`} gold /><Meta label="Exit Quality" value={`${trade.exitQuality || "—"}/5`} gold /></div></div>
         </div>
-        <div className="space-y-5"><SideBox title="Trade Info"><MiniInfo label="Strategy" value={trade.setup} /><MiniInfo label="Account" value={trade.accountName || account?.name || "v"} /><MiniInfo label="Account Type" value={trade.accountType || account?.type || "—"} /><MiniInfo label="Trade Type" value={trade.direction} badge tone={trade.direction === "SELL" ? "red" : "green"} /></SideBox><SideBox title="Tags"><div className="flex flex-wrap gap-2">{normalizeTags(trade).length ? normalizeTags(trade).map((tag) => <span key={tag} className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">{tag}</span>) : <span className="text-zinc-500">No tags</span>}</div></SideBox><SideBox title="Emotions"><span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">{trade.emotion || "—"}</span></SideBox><SideBox title="Quality"><div className={`w-fit rounded-full border px-3 py-1 text-xs font-black ${getTradeGradeClass(getTradeGrade(trade))}`}>Grade {getTradeGrade(trade)}</div><div className="mt-3 text-sm text-zinc-400">Mistake: {trade.mistake || "None"}</div></SideBox></div>
+        <div className="space-y-5"><SideBox title="Trade Info"><MiniInfo label="Strategy" value={trade.setup} /><MiniInfo label="Account" value={trade.accountName || account?.name || "v"} /><MiniInfo label="Account Type" value={trade.accountType || account?.type || "—"} /><MiniInfo label="Trade Type" value={trade.direction} badge tone={trade.direction === "SELL" ? "red" : "green"} /></SideBox><SideBox title="Tags"><div className="flex flex-wrap gap-2">{normalizeTags(trade).length ? normalizeTags(trade).map((tag) => <span key={tag} className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">{tag}</span>) : <span className="text-zinc-500">No tags</span>}</div></SideBox><SideBox title="Emotions"><span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">{trade.emotion || "—"}</span></SideBox><SideBox title="Result"><div className={`w-fit rounded-full border px-3 py-1 text-xs font-black ${getTradeResultClass(getTradeResult(trade))}`}>{getTradeResult(trade)}</div><div className="mt-3 text-sm text-zinc-400">Mistake: {trade.mistake || "None"}</div></SideBox></div>
       </div>
       {activeIndex !== null && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95"><button onClick={() => setActiveIndex(null)} className="absolute right-8 top-8 text-3xl text-white">×</button><button onClick={() => setActiveIndex((activeIndex - 1 + screenshots.length) % screenshots.length)} className="absolute left-8 text-5xl text-white">‹</button><img src={screenshots[activeIndex]} alt="Fullscreen screenshot" className="max-h-[90vh] max-w-[90vw] rounded" /><button onClick={() => setActiveIndex((activeIndex + 1) % screenshots.length)} className="absolute right-8 text-5xl text-white">›</button></div>}
     </motion.div>
@@ -9540,8 +9550,7 @@ function CalendarGuide() {
 
 function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, onSave, account, accountBalance }) {
   const rr = Number(form.risk) ? (Number(form.pnl || 0) / Number(form.risk)).toFixed(2) : "—";
-  const screenshots = normalizeScreenshots(form);
-  const previewGrade = getTradeGrade(createTradeFromForm(form, 1, account));
+  const screenshots = normalizeScreenshots(form);
   const riskWarnings = getRiskWarnings(form, accountBalance);
   const formErrors = getTradeFormErrors(form);
   const hasFormErrors = Object.keys(formErrors).length > 0;
@@ -9558,11 +9567,19 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
 
   function updateField(key, value) {
     if (key === "pnl") {
-      setForm({ ...form, pnl: value, tags: syncResultTag(form.tags, value) });
+      const previousAutoResult = getResultFromPnl(form.pnl);
+      const currentResult = normalizeTradeResult(form.result);
+      const nextResult = !currentResult || currentResult === previousAutoResult ? getResultFromPnl(value) : currentResult;
+      setForm({ ...form, pnl: value, result: nextResult, tags: syncResultTag(form.tags, value, nextResult) });
+      return;
+    }
+    if (key === "result") {
+      const nextResult = normalizeTradeResult(value) || getResultFromPnl(form.pnl);
+      setForm({ ...form, result: nextResult, tags: syncResultTag(form.tags, form.pnl, nextResult) });
       return;
     }
     if (key === "tags") {
-      setForm({ ...form, tags: syncResultTag(value, form.pnl) });
+      setForm({ ...form, tags: syncResultTag(value, form.pnl, form.result) });
       return;
     }
     setForm({ ...form, [key]: value });
@@ -9631,9 +9648,6 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
             <Field label="R:R Ratio">
               <Input disabled value={rr === "NaN" ? "—" : `${rr}R`} className="border-white/10 bg-zinc-900" />
             </Field>
-            <Field label="Trade Grade">
-              <Input disabled value={previewGrade} className="border-white/10 bg-zinc-900" />
-            </Field>
             <div>
               <DateFilterField label="Trade Date" value={form.date} onChange={(value) => updateField("date", value)} />
               <FieldError text={formErrors.date} />
@@ -9698,14 +9712,15 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
 
             <div className="trade-context-card">
               <Field label="Result">
-                <div className={getResultTone(getResultFromPnl(form.pnl)) === "emerald" ? "trade-context-result border-emerald-500/35 bg-emerald-500/10 text-emerald-300" : getResultTone(getResultFromPnl(form.pnl)) === "red" ? "trade-context-result border-red-500/35 bg-red-500/10 text-red-300" : "trade-context-result border-amber-500/35 bg-amber-500/10 text-amber-300"}>
-                  {getResultFromPnl(form.pnl)} <span className="ml-2 text-xs font-bold text-zinc-500">auto by P&L</span>
-                </div>
+                <Select value={normalizeTradeResult(form.result) || getResultFromPnl(form.pnl)} onChange={(e) => updateField("result", e.target.value)}>
+                  {TRADE_RESULT_OPTIONS.map((resultOption) => <option key={resultOption}>{resultOption}</option>)}
+                </Select>
+                <p className="mt-2 text-xs font-semibold text-zinc-500">Auto follows P&L unless you choose Partial.</p>
               </Field>
             </div>
 
             <div className="trade-context-card">
-              <Field label="Tags"><Input value={syncResultTag(form.tags, form.pnl)} onChange={(e) => updateField("tags", e.target.value)} placeholder="result:win, A+ Setup, NY AM, FVG" className="trade-context-input border-white/10 bg-black/45 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
+              <Field label="Tags"><Input value={syncResultTag(form.tags, form.pnl, form.result)} onChange={(e) => updateField("tags", e.target.value)} placeholder="result:win, NY AM, FVG" className="trade-context-input border-white/10 bg-black/45 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
             </div>
 
             <div className="trade-context-card"><Field label="Emotions"><MultiChoice value={form.emotion} options={EMOTION_OPTIONS} onChange={(value) => updateField("emotion", value)} tone="emotion" /></Field></div>
