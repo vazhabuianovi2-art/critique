@@ -9685,7 +9685,7 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], selectedCurrenci
     last: getEconomicCalendarWeekRangeLabel("last") || getEconomicWeekRange(events, "last"),
     this: getEconomicCalendarWeekRangeLabel("this") || getEconomicWeekRange(events, "this"),
     next: getEconomicCalendarWeekRangeLabel("next") || getEconomicWeekRange(events, "next"),
-  }), []);
+  }), [events]);
 
   function toggleImpactFilter(impact) {
     setImpactFilters((current) => {
