@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
 import {
@@ -51,17 +51,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  BarChart,
-  Bar,
-} from "recharts";
 
 const STORAGE_KEY = "critique_video_style_trades_v1";
 const ACCOUNT_KEY = "critique_video_style_account_v1";
@@ -86,6 +75,17 @@ const BRAND_MARK = "◉";
 const TRADING_SESSIONS = ["Asia", "London", "NY-AM", "Lunch", "NY-PM", "Pre-Market"];
 const LEGACY_DEFAULT_STRATEGIES = ["Liquidity Sweep", "ICT FVG", "Order Block", "Breaker Block", "Silver Bullet"];
 const DEFAULT_STRATEGIES = [];
+const lazyRechartsComponent = (componentName) =>
+  React.lazy(() => import("recharts").then((module) => ({ default: module[componentName] })));
+const ResponsiveContainer = lazyRechartsComponent("ResponsiveContainer");
+const LineChart = lazyRechartsComponent("LineChart");
+const Line = lazyRechartsComponent("Line");
+const XAxis = lazyRechartsComponent("XAxis");
+const YAxis = lazyRechartsComponent("YAxis");
+const Tooltip = lazyRechartsComponent("Tooltip");
+const CartesianGrid = lazyRechartsComponent("CartesianGrid");
+const BarChart = lazyRechartsComponent("BarChart");
+const Bar = lazyRechartsComponent("Bar");
 const EMOTION_OPTIONS = [
   ["Calm", "Focus", "◌"],
   ["Confident", "Ready", "✦"],
@@ -491,9 +491,11 @@ function SafeResponsiveContainer({ children, minHeight = 240 }) {
   return (
     <div ref={hostRef} style={{ width: "100%", height: "100%", minHeight }}>
       {size.width > 1 && size.height > 1 ? (
-        <ResponsiveContainer width={size.width} height={size.height} minWidth={1} minHeight={minHeight}>
-          {children}
-        </ResponsiveContainer>
+        <Suspense fallback={<div className="h-full min-h-[inherit] animate-pulse rounded-xl bg-white/[0.03]" />}>
+          <ResponsiveContainer width={size.width} height={size.height} minWidth={1} minHeight={minHeight}>
+            {children}
+          </ResponsiveContainer>
+        </Suspense>
       ) : null}
     </div>
   );
