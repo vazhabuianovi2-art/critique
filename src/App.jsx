@@ -5661,7 +5661,7 @@ function addNewsAggregate(bucket, key, values) {
 }
 
 function getNewsPerformanceStats(trades = [], events = []) {
-  const groupedTrades = groupTradesByDate(trades);
+  const groupedTrades = groupTradesByDate(getAnalyzableTrades(trades));
   const eventsByDate = (Array.isArray(events) ? events : []).reduce((groups, event) => {
     const dateKey = getEconomicEventDateKey(event);
     if (!dateKey) return groups;
@@ -5692,8 +5692,8 @@ function getNewsPerformanceStats(trades = [], events = []) {
       wins: stats.wins,
       losses: stats.losses,
       breakEvens: stats.breakEvens || 0,
-      grossWin: dayTrades.reduce((total, trade) => total + Math.max(0, Number(trade.pnl || 0)), 0),
-      grossLoss: dayTrades.reduce((total, trade) => total + Math.min(0, Number(trade.pnl || 0)), 0),
+      grossWin: dayTrades.reduce((total, trade) => total + Math.max(0, getTradePnl(trade)), 0),
+      grossLoss: dayTrades.reduce((total, trade) => total + Math.min(0, getTradePnl(trade)), 0),
     });
 
     const impactKey = event.impact || getPrimaryEventImpact(dayEvents);
@@ -5705,12 +5705,12 @@ function getNewsPerformanceStats(trades = [], events = []) {
       wins: stats.wins,
       losses: stats.losses,
       breakEvens: stats.breakEvens || 0,
-      grossWin: dayTrades.reduce((total, trade) => total + Math.max(0, Number(trade.pnl || 0)), 0),
-      grossLoss: dayTrades.reduce((total, trade) => total + Math.min(0, Number(trade.pnl || 0)), 0),
+      grossWin: dayTrades.reduce((total, trade) => total + Math.max(0, getTradePnl(trade)), 0),
+      grossLoss: dayTrades.reduce((total, trade) => total + Math.min(0, getTradePnl(trade)), 0),
     });
 
     dayTrades.forEach((trade) => {
-      const tradePnl = Number(trade.pnl || 0);
+      const tradePnl = getTradePnl(trade);
       const tradeCurrencies = getTradeCurrencyCodes(trade);
       const eventCurrencies = new Set(dayEvents.map((item) => String(item.country || "").toUpperCase()).filter(Boolean));
       const matchedCurrencies = tradeCurrencies.filter((currency) => eventCurrencies.has(currency));
@@ -5898,12 +5898,26 @@ function formFromTrade(trade) {
   };
 }
 
+function hasValidPnl(trade) {
+  const raw = trade?.pnl;
+  if (raw === "" || raw === null || raw === undefined) return false;
+  return Number.isFinite(Number(raw));
+}
+
+function getTradePnl(trade) {
+  return hasValidPnl(trade) ? Number(trade.pnl) : 0;
+}
+
+function getAnalyzableTrades(trades = []) {
+  return (Array.isArray(trades) ? trades : []).filter(hasValidPnl);
+}
+
 function summarizeTrades(trades = []) {
-  const safe = Array.isArray(trades) ? trades : [];
-  const pnl = safe.reduce((sum, trade) => sum + Number(trade.pnl || 0), 0);
-  const wins = safe.filter((trade) => Number(trade.pnl) > 0).length;
-  const losses = safe.filter((trade) => Number(trade.pnl) < 0).length;
-  const breakEvens = safe.filter((trade) => Number(trade.pnl) === 0).length;
+  const safe = getAnalyzableTrades(trades);
+  const pnl = safe.reduce((sum, trade) => sum + getTradePnl(trade), 0);
+  const wins = safe.filter((trade) => getTradePnl(trade) > 0).length;
+  const losses = safe.filter((trade) => getTradePnl(trade) < 0).length;
+  const breakEvens = safe.filter((trade) => getTradePnl(trade) === 0).length;
   const decisive = wins + losses;
   return { count: safe.length, pnl, wins, losses, breakEvens, decisive, winRate: decisive ? (wins / decisive) * 100 : 0, breakEvenRate: safe.length ? (breakEvens / safe.length) * 100 : 0 };
 }
@@ -6019,18 +6033,18 @@ function getTradesForAccount(trades = [], account) {
 function calculateAccountBalance(account, trades = []) {
   const startingBalance = Number(account?.balance || 0);
   const accountTrades = getTradesForAccount(trades, account);
-  const tradePnl = accountTrades.reduce((sum, trade) => sum + Number(trade.pnl || 0), 0);
+  const tradePnl = getAnalyzableTrades(accountTrades).reduce((sum, trade) => sum + getTradePnl(trade), 0);
   return { startingBalance, tradePnl, currentBalance: startingBalance + tradePnl };
 }
 
 function getCurrentStreak(trades = []) {
-  const ordered = [...trades].sort((a, b) => Number(b.createdAt || b.id || 0) - Number(a.createdAt || a.id || 0));
-  const first = ordered.find((trade) => Number(trade.pnl || 0) !== 0);
+  const ordered = getAnalyzableTrades(trades).sort((a, b) => Number(b.createdAt || b.id || 0) - Number(a.createdAt || a.id || 0));
+  const first = ordered.find((trade) => getTradePnl(trade) !== 0);
   if (!first) return { type: "Neutral", count: 0 };
-  const isWin = Number(first.pnl || 0) > 0;
+  const isWin = getTradePnl(first) > 0;
   let count = 0;
   for (const trade of ordered) {
-    const pnl = Number(trade.pnl || 0);
+    const pnl = getTradePnl(trade);
     if (pnl === 0) continue;
     if ((pnl > 0) === isWin) count += 1;
     else break;
@@ -6053,11 +6067,12 @@ function getWorstMistake(statsGroup = {}) {
 }
 
 function getDashboardInsights(trades = [], stats = {}) {
+  const safe = getAnalyzableTrades(trades);
   const bestSession = getTopGroup(stats.sessionStats, "No session");
   const bestStrategy = getTopGroup(stats.strategyStats, "No strategy");
   const worstMistake = getWorstMistake(stats.mistakeStats);
-  const streak = getCurrentStreak(trades);
-  const avgRisk = trades.length ? trades.reduce((sum, trade) => sum + Number(trade.risk || 0), 0) / trades.length : 0;
+  const streak = getCurrentStreak(safe);
+  const avgRisk = safe.length ? safe.reduce((sum, trade) => sum + Number(trade.risk || 0), 0) / safe.length : 0;
   return [
     { title: "Best Session", value: bestSession.name, detail: `${formatMoney(bestSession.pnl || 0)} · ${bestSession.count || 0} trades`, tone: "emerald", icon: "☀" },
     { title: "Best Strategy", value: bestStrategy.name, detail: `${formatMoney(bestStrategy.pnl || 0)} net P&L`, tone: "fuchsia", icon: "ϟ" },
@@ -6080,14 +6095,14 @@ function getRiskWarnings(form, accountBalance) {
 }
 
 function getRiskDashboardStats(trades = [], startingBalance = 50000) {
-  const safe = Array.isArray(trades) ? trades : [];
+  const safe = getAnalyzableTrades(trades);
   const riskTrades = safe.filter((trade) => Number(trade.risk || 0) > 0);
   const avgRisk = riskTrades.length ? riskTrades.reduce((sum, trade) => sum + Number(trade.risk || 0), 0) / riskTrades.length : 0;
   const maxRisk = riskTrades.length ? Math.max(...riskTrades.map((trade) => Number(trade.risk || 0))) : 0;
   const avgRiskPercent = startingBalance ? (avgRisk / Number(startingBalance || 1)) * 100 : 0;
   const maxRiskPercent = startingBalance ? (maxRisk / Number(startingBalance || 1)) * 100 : 0;
-  const losses = safe.filter((trade) => Number(trade.pnl || 0) < 0);
-  const biggestLoss = losses.length ? Math.min(...losses.map((trade) => Number(trade.pnl || 0))) : 0;
+  const losses = safe.filter((trade) => getTradePnl(trade) < 0);
+  const biggestLoss = losses.length ? Math.min(...losses.map(getTradePnl)) : 0;
   const riskScores = riskTrades.map((trade) => Number(trade.risk || 0));
   const riskMean = riskScores.length ? riskScores.reduce((sum, value) => sum + value, 0) / riskScores.length : 0;
   const riskVariance = riskScores.length > 1 ? riskScores.reduce((sum, value) => sum + Math.pow(value - riskMean, 2), 0) / (riskScores.length - 1) : 0;
@@ -6098,9 +6113,9 @@ function getRiskDashboardStats(trades = [], startingBalance = 50000) {
 }
 
 function getMistakeDetectorStats(trades = []) {
-  const safe = Array.isArray(trades) ? trades : [];
-  const losses = safe.filter((trade) => Number(trade.pnl || 0) < 0);
-  const wins = safe.filter((trade) => Number(trade.pnl || 0) > 0);
+  const safe = getAnalyzableTrades(trades);
+  const losses = safe.filter((trade) => getTradePnl(trade) < 0);
+  const wins = safe.filter((trade) => getTradePnl(trade) > 0);
   const issueMap = {};
   const rootMap = {
     Execution: { key: "Execution", title: "Execution", count: 0, pnl: 0, issues: [] },
@@ -6114,11 +6129,11 @@ function getMistakeDetectorStats(trades = []) {
     if (!issueMap[key]) issueMap[key] = { key, title, type, fix, count: 0, weightedCount: 0, pnl: 0, trades: [] };
     issueMap[key].count += 1;
     issueMap[key].weightedCount += weight;
-    issueMap[key].pnl += Number(trade.pnl || 0);
+    issueMap[key].pnl += getTradePnl(trade);
     issueMap[key].trades.push(trade);
     if (rootMap[type]) {
       rootMap[type].count += weight;
-      rootMap[type].pnl += Number(trade.pnl || 0);
+      rootMap[type].pnl += getTradePnl(trade);
       if (!rootMap[type].issues.includes(title)) rootMap[type].issues.push(title);
     }
   }
@@ -6149,7 +6164,7 @@ function getMistakeDetectorStats(trades = []) {
   const mainRoot = roots[0] || null;
   const confidence = losses.length && mainIssue ? Math.round(Math.min(100, (mainIssue.count / losses.length) * 100)) : 0;
   const affectedPnl = mainIssue ? mainIssue.pnl : 0;
-  const cleanTrades = safe.filter((trade) => Number(trade.pnl || 0) >= 0 && (!trade.mistake || trade.mistake === "None")).length;
+  const cleanTrades = safe.filter((trade) => getTradePnl(trade) >= 0 && (!trade.mistake || trade.mistake === "None")).length;
   const winProfile = { emotion: getMostCommonValue(wins, "emotion", "No emotion"), timing: getMostCommonValue(wins, "entryTiming", "No timing"), setup: getMostCommonValue(wins, "setupQuality", "No grade"), session: getMostCommonValue(wins, "session", "No session") };
   const lossProfile = { emotion: getMostCommonValue(losses, "emotion", "No emotion"), timing: getMostCommonValue(losses, "entryTiming", "No timing"), setup: getMostCommonValue(losses, "setupQuality", "No grade"), session: getMostCommonValue(losses, "session", "No session") };
   const focusPlan = mainRoot ? buildFocusPlan(mainRoot.key, mainIssue?.title) : ["Log at least 5 losing trades with mistake, emotion and entry quality.", "Review screenshots after every trade.", "Keep the same risk until patterns become clear."];
@@ -6401,20 +6416,20 @@ function parseTradesCSV(text, account, existingTrades = []) {
 }
 
 function calculateStatistics(trades = [], startingBalance = 50000) {
-  const safeTrades = Array.isArray(trades) ? trades : [];
+  const safeTrades = getAnalyzableTrades(trades);
   const base = summarizeTrades(safeTrades);
-  const wins = safeTrades.filter((trade) => Number(trade.pnl) > 0);
-  const losses = safeTrades.filter((trade) => Number(trade.pnl) < 0);
+  const wins = safeTrades.filter((trade) => getTradePnl(trade) > 0);
+  const losses = safeTrades.filter((trade) => getTradePnl(trade) < 0);
   const avgPnl = safeTrades.length ? base.pnl / safeTrades.length : 0;
-  const avgWin = wins.length ? wins.reduce((sum, trade) => sum + Number(trade.pnl), 0) / wins.length : 0;
-  const avgLoss = losses.length ? Math.abs(losses.reduce((sum, trade) => sum + Number(trade.pnl), 0) / losses.length) : 0;
+  const avgWin = wins.length ? wins.reduce((sum, trade) => sum + getTradePnl(trade), 0) / wins.length : 0;
+  const avgLoss = losses.length ? Math.abs(losses.reduce((sum, trade) => sum + getTradePnl(trade), 0) / losses.length) : 0;
   const gradeStats = { "A+": { count: 0, pnl: 0 }, A: { count: 0, pnl: 0 }, B: { count: 0, pnl: 0 }, C: { count: 0, pnl: 0 }, D: { count: 0, pnl: 0 } };
   const strategyStats = {};
   const mistakeStats = {};
   const sessionStats = {};
 
   safeTrades.forEach((trade) => {
-    const pnl = Number(trade.pnl || 0);
+    const pnl = getTradePnl(trade);
     const grade = getTradeGrade(trade);
     const strategy = trade.setup || "Manual Trade";
     const mistake = trade.mistake || "None";
@@ -6446,13 +6461,13 @@ function calculateStatistics(trades = [], startingBalance = 50000) {
   let peak = 0;
   let maxDrawdown = 0;
   sortTradesChronologically(safeTrades).forEach((trade) => {
-    equity += Number(trade.pnl || 0);
+    equity += getTradePnl(trade);
     peak = Math.max(peak, equity);
     maxDrawdown = Math.max(maxDrawdown, peak - equity);
   });
 
-  const grossProfit = wins.reduce((sum, trade) => sum + Number(trade.pnl || 0), 0);
-  const grossLoss = Math.abs(losses.reduce((sum, trade) => sum + Number(trade.pnl || 0), 0));
+  const grossProfit = wins.reduce((sum, trade) => sum + getTradePnl(trade), 0);
+  const grossLoss = Math.abs(losses.reduce((sum, trade) => sum + getTradePnl(trade), 0));
   const profitFactor = grossLoss ? grossProfit / grossLoss : grossProfit > 0 ? 999 : 0;
   const avgWinLoss = avgLoss ? avgWin / avgLoss : avgWin > 0 ? 999 : 0;
   const tradesWithRisk = safeTrades.filter((trade) => Number(trade.risk || 0) > 0);
@@ -7654,7 +7669,7 @@ export default function TradingJournalDashboard() {
       const tags = normalizeTags(trade);
       const text = [trade.pair, trade.direction, trade.setup, trade.session, trade.result, trade.mistake, trade.notes, trade.date, tags.join(" ")].join(" ").toLowerCase();
       const dateKey = getTradeDateKey(trade);
-      const pnl = Number(trade.pnl || 0);
+      const pnl = getTradePnl(trade);
       return (
         (!query || text.includes(query)) &&
         (filters.result === "All" || trade.result === filters.result) &&
@@ -7676,8 +7691,8 @@ export default function TradingJournalDashboard() {
 
   const curve = useMemo(() => {
     let balance = 0;
-    return sortTradesChronologically(activeTrades).map((trade) => {
-      balance += Number(trade.pnl || 0);
+    return sortTradesChronologically(getAnalyzableTrades(activeTrades)).map((trade) => {
+      balance += getTradePnl(trade);
       return { date: getTradeDateKey(trade), pnl: balance, winRate: stats.winRate };
     });
   }, [activeTrades, stats.winRate]);
@@ -8549,7 +8564,7 @@ function DateFilterField({ label, value, onChange }) {
 
 function TradeCard({ trade, onView, onEdit, onRemove }) {
   const screenshots = normalizeScreenshots(trade);
-  const pnl = Number(trade.pnl || 0);
+  const pnl = getTradePnl(trade);
   const isWin = pnl > 0;
   const isBreakEven = pnl === 0;
   const grade = getTradeGrade(trade);
@@ -8575,7 +8590,7 @@ function TradeCard({ trade, onView, onEdit, onRemove }) {
 }
 
 function TradeListRow({ trade, onView, onEdit, onRemove }) {
-  const pnl = Number(trade.pnl || 0);
+  const pnl = getTradePnl(trade);
   const isWin = pnl > 0;
   const isBreakEven = pnl === 0;
   const rr = getTradeRR(trade);
@@ -8621,6 +8636,7 @@ function MetricBox({ label, value, tone }) {
 function TradeDetailsPage({ trade, account, onBack, onEdit, onDelete, onExport }) {
   const screenshots = normalizeScreenshots(trade);
   const [activeIndex, setActiveIndex] = useState(null);
+  const pnl = getTradePnl(trade);
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-5xl">
       <TopCrumb page="Journal" />
@@ -8628,8 +8644,8 @@ function TradeDetailsPage({ trade, account, onBack, onEdit, onDelete, onExport }
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
         <div className="flex h-full flex-col gap-6">
           <div className="flex items-center gap-4"><div className="rounded-xl bg-fuchsia-500/20 p-4 text-fuchsia-300">{trade.pair}</div><div><h1 className="text-3xl font-black">{trade.pair} Trade Details</h1><p className="text-zinc-400">{trade.direction} • {trade.quantity} shares • {trade.date}</p></div></div>
-          <div className={`rounded-xl border p-6 ${Number(trade.pnl) > 0 ? "border-emerald-500/30 bg-emerald-950/30" : Number(trade.pnl) < 0 ? "border-red-500/30 bg-red-950/30" : "border-amber-500/30 bg-amber-950/30"}`}><div className="text-sm text-zinc-400">Total P&L</div><div className={`mt-2 text-4xl font-black ${getPnlToneClass(trade.pnl)}`}>{getPnlArrow(trade.pnl)} {formatMoney(trade.pnl)}</div></div>
-          <div className="rounded-xl border border-white/10 bg-zinc-950 p-6"><SectionTitle title="Trade Metadata" icon={<BarChart3 size={18} />} /><div className="mt-8 grid grid-cols-2 gap-8 border-b border-white/10 pb-6"><Meta label="Quantity" value={trade.quantity} /><Meta label="Session" value={trade.session || "—"} /></div><div className="grid grid-cols-2 gap-8 border-b border-white/10 py-6"><Meta label="Entry Date" value={trade.date} /><Meta label="Exit Date" value={trade.date} /></div><div className="grid grid-cols-3 gap-8 pt-6"><Meta label="Risk" value={formatMoney(trade.risk)} danger /><Meta label="Risk/Reward Ratio" value={`${getTradeRR(trade).toFixed(2)}:1`} gold /><Meta label="Realized P&L" value={formatMoney(trade.pnl)} green={Number(trade.pnl) > 0} gold={Number(trade.pnl) === 0} danger={Number(trade.pnl) < 0} /></div></div>
+          <div className={`rounded-xl border p-6 ${pnl > 0 ? "border-emerald-500/30 bg-emerald-950/30" : pnl < 0 ? "border-red-500/30 bg-red-950/30" : "border-amber-500/30 bg-amber-950/30"}`}><div className="text-sm text-zinc-400">Total P&L</div><div className={`mt-2 text-4xl font-black ${getPnlToneClass(pnl)}`}>{getPnlArrow(pnl)} {formatMoney(pnl)}</div></div>
+          <div className="rounded-xl border border-white/10 bg-zinc-950 p-6"><SectionTitle title="Trade Metadata" icon={<BarChart3 size={18} />} /><div className="mt-8 grid grid-cols-2 gap-8 border-b border-white/10 pb-6"><Meta label="Quantity" value={trade.quantity} /><Meta label="Session" value={trade.session || "—"} /></div><div className="grid grid-cols-2 gap-8 border-b border-white/10 py-6"><Meta label="Entry Date" value={trade.date} /><Meta label="Exit Date" value={trade.date} /></div><div className="grid grid-cols-3 gap-8 pt-6"><Meta label="Risk" value={formatMoney(trade.risk)} danger /><Meta label="Risk/Reward Ratio" value={`${getTradeRR(trade).toFixed(2)}:1`} gold /><Meta label="Realized P&L" value={formatMoney(pnl)} green={pnl > 0} gold={pnl === 0} danger={pnl < 0} /></div></div>
           <div className="rounded-xl border border-white/10 bg-zinc-950 p-6"><SectionTitle title={`Trade Screenshots (${screenshots.length})`} icon={<Camera size={18} />} /><div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">{screenshots.length ? screenshots.map((img, index) => <button key={index} onClick={() => setActiveIndex(index)}><img src={img} alt="Trade screenshot" className="h-56 w-full rounded-lg object-cover hover:opacity-80" /></button>) : <div className="col-span-2 rounded-xl border border-dashed border-white/10 bg-black p-10 text-center text-zinc-500">No screenshots uploaded</div>}</div></div>
           <div className="rounded-xl border border-white/10 bg-zinc-950 p-6"><SectionTitle title="Trade Analysis" icon={<BookOpen size={18} />} /><p className="trade-analysis-note mt-4 rounded-xl bg-black p-4 text-zinc-300">{trade.notes || "No notes"}</p><div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2"><ReviewBox title="What went well?" value={trade.whatWentWell || "No review yet"} tone="emerald" /><ReviewBox title="What went wrong?" value={trade.whatWentWrong || "No review yet"} tone="red" /></div><div className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-4"><Meta label="Rule Followed" value={trade.ruleFollowed || "—"} green={trade.ruleFollowed === "Yes"} danger={trade.ruleFollowed === "No"} /><Meta label="Entry Timing" value={trade.entryTiming || "—"} gold /><Meta label="Setup Quality" value={trade.setupQuality || getTradeGrade(trade)} gold /><Meta label="Market" value={trade.marketCondition || "—"} /><Meta label="Confirmation" value={trade.confirmation || "—"} green={trade.confirmation === "Yes"} danger={trade.confirmation === "No"} /><Meta label="Rule Broken" value={trade.ruleBroken || "None"} danger={trade.ruleBroken && trade.ruleBroken !== "None"} /><Meta label="Entry Quality" value={`${trade.entryQuality || "—"}/5`} gold /><Meta label="Exit Quality" value={`${trade.exitQuality || "—"}/5`} gold /></div></div>
         </div>
@@ -8820,7 +8836,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
             <div className="dashboard-recent-list light-card-soft relative z-10 flex-1 rounded-2xl border border-fuchsia-500/18 bg-black/45 p-4">
               {recentTrades.map((trade) => {
                 const screenshots = normalizeScreenshots(trade);
-                const pnl = Number(trade.pnl || 0);
+                const pnl = getTradePnl(trade);
                 return (
                   <button key={trade.id} onClick={() => onView(trade)} className="dashboard-recent-row group flex w-full items-center justify-between rounded-xl border border-transparent p-3 text-left transition-all hover:border-fuchsia-500/35 hover:bg-fuchsia-500/8">
                     <div className="flex items-center gap-4">
@@ -9130,17 +9146,18 @@ function ActivityStat({ tone, title, value, subtitle, icon }) {
 
 function PerformanceOverviewChart({ mode, trades, curve, stats }) {
   const chartData = useMemo(() => {
+    const safeTrades = getAnalyzableTrades(trades);
     if (mode === "WinRate") {
       let total = 0;
       let wins = 0;
-      return sortTradesChronologically(trades).map((trade) => {
+      return sortTradesChronologically(safeTrades).map((trade) => {
         total += 1;
-        if (Number(trade.pnl) > 0) wins += 1;
+        if (getTradePnl(trade) > 0) wins += 1;
         return { date: getTradeDateKey(trade), value: total ? (wins / total) * 100 : 0 };
       });
     }
     if (mode === "DailyP&L") {
-      return Object.entries(groupTradesByDate(trades))
+      return Object.entries(groupTradesByDate(safeTrades))
         .sort((a, b) => a[0].localeCompare(b[0]))
         .map(([date, dayTrades]) => ({ date, value: summarizeTrades(dayTrades).pnl }));
     }
@@ -9616,7 +9633,7 @@ function CalendarModalMetric({ value, label, tone }) {
 }
 
 function CalendarModalTradeRow({ trade }) {
-  const pnl = Number(trade.pnl || 0);
+  const pnl = getTradePnl(trade);
   const isWin = pnl > 0;
   const tag = normalizeTags(trade)[0] || `result:${getResultFromPnl(pnl).toLowerCase().replaceAll(" ", "-")}`;
   return (
@@ -10239,7 +10256,7 @@ function ImportPreviewModal({ preview, onConfirm, onClose }) {
   const validCount = preview?.trades?.length || 0;
   const duplicateCount = preview?.duplicates?.length || 0;
   const invalidCount = preview?.invalidRows?.length || 0;
-  const totalPnl = (preview?.trades || []).reduce((sum, trade) => sum + Number(trade.pnl || 0), 0);
+  const totalPnl = (preview?.trades || []).reduce((sum, trade) => sum + getTradePnl(trade), 0);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-6 backdrop-blur-sm">
       <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} className="max-h-[90vh] w-full max-w-[860px] overflow-y-auto rounded-2xl border border-fuchsia-500/35 bg-black p-6 shadow-[0_22px_70px_rgba(0,0,0,0.75)]">
@@ -12404,8 +12421,8 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
   const stats = useMemo(() => calculateStatistics(visibleTrades), [visibleTrades]);
   const curve = useMemo(() => {
     let balance = 0;
-    return sortTradesChronologically(visibleTrades).map((trade) => {
-      balance += Number(trade.pnl || 0);
+    return sortTradesChronologically(getAnalyzableTrades(visibleTrades)).map((trade) => {
+      balance += getTradePnl(trade);
       return { date: getTradeDateKey(trade), value: balance };
     });
   }, [visibleTrades]);
@@ -12416,9 +12433,10 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
   const sessionRows = Object.entries(stats.sessionStats || {}).sort((a, b) => Number(b[1].pnl || 0) - Number(a[1].pnl || 0));
   const mistakeRows = Object.entries(stats.mistakeStats || {}).filter(([name]) => name && name !== "None").sort((a, b) => Number(a[1].pnl || 0) - Number(b[1].pnl || 0));
   const bestPerformance = useMemo(() => getBestPerformanceStats(visibleTrades), [visibleTrades]);
-  const wins = visibleTrades.filter((trade) => Number(trade.pnl || 0) > 0);
-  const bestTradeItem = [...visibleTrades].sort((a, b) => Number(b.pnl || 0) - Number(a.pnl || 0))[0];
-  const smallestWinItem = [...wins].sort((a, b) => Number(a.pnl || 0) - Number(b.pnl || 0))[0];
+  const analyzableVisibleTrades = getAnalyzableTrades(visibleTrades);
+  const wins = analyzableVisibleTrades.filter((trade) => getTradePnl(trade) > 0);
+  const bestTradeItem = [...analyzableVisibleTrades].sort((a, b) => getTradePnl(b) - getTradePnl(a))[0];
+  const smallestWinItem = [...wins].sort((a, b) => getTradePnl(a) - getTradePnl(b))[0];
   const weekdayRows = getWeekdayStatsRows(visibleTrades);
   const newsStats = useMemo(() => getNewsPerformanceStats(visibleTrades, economicCalendar?.events || []), [visibleTrades, economicCalendar?.events]);
   const tabs = [
@@ -12757,7 +12775,7 @@ function SimpleMistakeDetectorPage({ trades = [] }) {
   }, [allTrades, rangeFilter]);
   const detector = useMemo(() => getMistakeDetectorStats(visibleTrades), [visibleTrades]);
   const extra = useMemo(() => getDetectorEnhancements(visibleTrades, detector), [visibleTrades, detector]);
-  const losses = visibleTrades.filter((trade) => Number(trade.pnl || 0) < 0);
+  const losses = getAnalyzableTrades(visibleTrades).filter((trade) => getTradePnl(trade) < 0);
   const mainIssue = detector.mainIssue;
   const root = detector.mainRoot;
   const focusPlan = detector.focusPlan || [];
@@ -12880,22 +12898,23 @@ function StatisticsPage({ stats: initialStats, curve: initialCurve, trades = [],
   const stats = useMemo(() => calculateStatistics(closedTrades), [closedTrades, refreshTick]);
   const curve = useMemo(() => {
     let balance = 0;
-    return sortTradesChronologically(closedTrades).map((trade) => {
-      balance += Number(trade.pnl || 0);
+    return sortTradesChronologically(getAnalyzableTrades(closedTrades)).map((trade) => {
+      balance += getTradePnl(trade);
       return { date: getTradeDateKey(trade), pnl: balance, winRate: stats.winRate };
     });
   }, [closedTrades, stats.winRate, refreshTick]);
 
   const profitFactor = Number(stats.profitFactor || 0);
   const expectancy = stats.trades ? stats.totalPnl / stats.trades : 0;
-  const wins = closedTrades.filter((trade) => Number(trade.pnl || 0) > 0);
-  const bestTradeItem = [...closedTrades].sort((a, b) => Number(b.pnl || 0) - Number(a.pnl || 0))[0];
-  const smallestWinItem = [...wins].sort((a, b) => Number(a.pnl || 0) - Number(b.pnl || 0))[0];
-  const bestTrade = Number(bestTradeItem?.pnl || 0);
-  const smallestWin = Number(smallestWinItem?.pnl || 0);
+  const analyzableClosedTrades = getAnalyzableTrades(closedTrades);
+  const wins = analyzableClosedTrades.filter((trade) => getTradePnl(trade) > 0);
+  const bestTradeItem = [...analyzableClosedTrades].sort((a, b) => getTradePnl(b) - getTradePnl(a))[0];
+  const smallestWinItem = [...wins].sort((a, b) => getTradePnl(a) - getTradePnl(b))[0];
+  const bestTrade = getTradePnl(bestTradeItem);
+  const smallestWin = getTradePnl(smallestWinItem);
   const bestSession = Object.entries(stats.sessionStats || {}).sort((a, b) => Number(b[1].pnl || 0) - Number(a[1].pnl || 0))[0];
   const bestPerformance = useMemo(() => getBestPerformanceStats(closedTrades), [closedTrades]);
-  const pnlValues = closedTrades.map((trade) => Number(trade.pnl || 0));
+  const pnlValues = analyzableClosedTrades.map(getTradePnl);
   const pnlMean = pnlValues.length ? pnlValues.reduce((sum, value) => sum + value, 0) / pnlValues.length : 0;
   const pnlStd = pnlValues.length > 1 ? Math.sqrt(pnlValues.reduce((sum, value) => sum + Math.pow(value - pnlMean, 2), 0) / (pnlValues.length - 1)) : 0;
   const riskAdjusted = pnlStd ? expectancy / pnlStd : expectancy > 0 ? 999 : 0;
@@ -13140,7 +13159,7 @@ function MistakeDetectorPage({ trades = [] }) {
     });
   }, [allTrades, strategyFilter, rangeFilter]);
 
-  const analyzedLosses = filteredTrades.filter((trade) => Number(trade.pnl || 0) < 0).length;
+  const analyzedLosses = getAnalyzableTrades(filteredTrades).filter((trade) => getTradePnl(trade) < 0).length;
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mistake-page-pro">
@@ -13638,8 +13657,8 @@ function DetectorProfile({ title, profile, tone }) {
 }
 
 function getDetectorEnhancements(trades = [], detector = {}) {
-  const safe = Array.isArray(trades) ? trades : [];
-  const losses = safe.filter((trade) => Number(trade.pnl || 0) < 0);
+  const safe = getAnalyzableTrades(trades);
+  const losses = safe.filter((trade) => getTradePnl(trade) < 0);
   const ordered = sortTradesChronologically(safe);
   const requiredFields = ["mistake", "emotion", "entryTiming", "confirmation", "ruleBroken", "marketCondition", "setupQuality", "ruleFollowed", "entryQuality", "exitQuality"];
   const totalChecks = Math.max(1, safe.length * requiredFields.length);
@@ -13659,7 +13678,7 @@ function getDetectorEnhancements(trades = [], detector = {}) {
 
   const dataQuality = Math.round((filledChecks / totalChecks) * 100);
   const mostExpensive = [...(detector.issues || [])].sort((a, b) => Number(a.pnl || 0) - Number(b.pnl || 0))[0] || null;
-  const totalLossAbs = Math.max(1, Math.abs(losses.reduce((sum, trade) => sum + Number(trade.pnl || 0), 0)));
+  const totalLossAbs = Math.max(1, Math.abs(losses.reduce((sum, trade) => sum + getTradePnl(trade), 0)));
   const severity = detector.mainIssue ? Math.min(100, Math.round((detector.confidence || 0) * 0.45 + (Math.abs(detector.affectedPnl || 0) / totalLossAbs) * 35 + (["Risk", "Discipline", "Psychology"].includes(detector.mainRoot?.key) ? 20 : 8))) : 0;
   const severityLabel = severity >= 75 ? "High Risk" : severity >= 45 ? "Medium Risk" : "Low Risk";
 
@@ -13670,8 +13689,8 @@ function getDetectorEnhancements(trades = [], detector = {}) {
   const lossGroupsBySession = groupLossesByKey(losses, "session").slice(0, 4);
   const last10 = ordered.slice(-10);
   const previous10 = ordered.slice(-20, -10);
-  const lastLossRate = last10.length ? (last10.filter((trade) => Number(trade.pnl || 0) < 0).length / last10.length) * 100 : 0;
-  const previousLossRate = previous10.length ? (previous10.filter((trade) => Number(trade.pnl || 0) < 0).length / previous10.length) * 100 : 0;
+  const lastLossRate = last10.length ? (last10.filter((trade) => getTradePnl(trade) < 0).length / last10.length) * 100 : 0;
+  const previousLossRate = previous10.length ? (previous10.filter((trade) => getTradePnl(trade) < 0).length / previous10.length) * 100 : 0;
   const timelineChange = previous10.length ? Math.round(previousLossRate - lastLossRate) : 0;
   const timelineText = previous10.length ? (timelineChange > 0 ? `Loss rate improved by ${timelineChange}% in the last 10 trades.` : timelineChange < 0 ? `Loss rate worsened by ${Math.abs(timelineChange)}% in the last 10 trades.` : "Loss rate is unchanged in the last 10 trades.") : "At least 20 trades are needed to calculate a trend.";
 
@@ -13690,7 +13709,7 @@ function groupLossesByKey(losses = [], key) {
   }, {});
   return Object.entries(groups).map(([name, rows]) => {
     const stats = getMistakeDetectorStats(rows);
-    return { name, count: rows.length, pnl: rows.reduce((sum, trade) => sum + Number(trade.pnl || 0), 0), top: stats.mainIssue?.title || "No issue detected" };
+    return { name, count: rows.length, pnl: rows.reduce((sum, trade) => sum + getTradePnl(trade), 0), top: stats.mainIssue?.title || "No issue detected" };
   }).sort((a, b) => Math.abs(b.pnl) - Math.abs(a.pnl));
 }
 
@@ -13699,7 +13718,7 @@ function detectAntiPatterns(ordered = []) {
   let currentLossStreak = 0;
   let maxLossStreak = 0;
   ordered.forEach((trade) => {
-    const pnl = Number(trade.pnl || 0);
+    const pnl = getTradePnl(trade);
     if (pnl < 0) currentLossStreak += 1;
     else if (pnl > 0) currentLossStreak = 0;
     maxLossStreak = Math.max(maxLossStreak, currentLossStreak);
@@ -13708,20 +13727,20 @@ function detectAntiPatterns(ordered = []) {
 
   const grouped = groupTradesByDate(ordered);
   Object.entries(grouped).forEach(([date, rows]) => {
-    const dayLosses = rows.filter((trade) => Number(trade.pnl || 0) < 0).length;
+    const dayLosses = rows.filter((trade) => getTradePnl(trade) < 0).length;
     if (rows.length >= 4 && dayLosses >= 2) warnings.push({ title: "Overtrading risk", text: `${date} had ${rows.length} trades and ${dayLosses} losses. Execution quality may be dropping later in the day.` });
   });
 
   ordered.forEach((trade, index) => {
     const previous = ordered[index - 1];
     if (!previous) return;
-    const previousLoss = Number(previous.pnl || 0) < 0;
+    const previousLoss = getTradePnl(previous) < 0;
     const sameDay = getTradeDateKey(previous) === getTradeDateKey(trade);
     const riskIncreased = Number(trade.risk || 0) > Number(previous.risk || 0);
     if (previousLoss && sameDay && riskIncreased) warnings.push({ title: "Possible revenge risk", text: "Risk increased on the same day after a loss. This looks like a revenge/overrisk pattern." });
   });
 
-  const emotional = ordered.filter((trade) => ["FOMO", "Revenge", "Greedy"].includes(trade.emotion) && Number(trade.pnl || 0) < 0).length;
+  const emotional = ordered.filter((trade) => ["FOMO", "Revenge", "Greedy"].includes(trade.emotion) && getTradePnl(trade) < 0).length;
   if (emotional >= 2) warnings.push({ title: "Emotional loss pattern", text: `${emotional} losses are connected to FOMO/Revenge/Greedy emotions.` });
   return warnings.slice(0, 4);
 }
