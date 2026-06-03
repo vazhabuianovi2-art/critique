@@ -4,17 +4,6 @@ const FEEDS = {
 
 const TRADINGVIEW_EVENTS_URL = "https://economic-calendar.tradingview.com/events";
 const TRADINGVIEW_COUNTRIES = "US,EU,GB,JP,CA,AU,NZ,CH,CN";
-const TRADINGVIEW_COUNTRY_TO_CURRENCY = {
-  US: "USD",
-  EU: "EUR",
-  GB: "GBP",
-  JP: "JPY",
-  CA: "CAD",
-  AU: "AUD",
-  NZ: "NZD",
-  CH: "CHF",
-  CN: "CNY",
-};
 
 const ADJACENT_WEEK_OFFSETS = {
   last: -7,
@@ -212,8 +201,7 @@ function normalizeTradingViewEvent(event, week) {
         });
   const importance = Number(event?.importance ?? event?.impact ?? -1);
   const impact = isHoliday ? "Holiday" : importance >= 1 ? "High" : importance === 0 ? "Medium" : "Low";
-  const rawCountry = String(event?.currency || event?.country || event?.ticker || "All").toUpperCase();
-  const country = TRADINGVIEW_COUNTRY_TO_CURRENCY[rawCountry] || rawCountry;
+  const country = String(event?.currency || event?.country || event?.ticker || "All").toUpperCase();
 
   return {
     id: `${dateKey}-${country}-${title}-${sourceDate}`,
@@ -262,33 +250,25 @@ async function fetchFeed(week) {
     return cached.events;
   }
 
-  try {
-    const liveEvents = await fetchTradingViewFeed(week);
-    if (liveEvents.length) {
-      feedCache[week] = { events: liveEvents, cachedAt: Date.now() };
-      return liveEvents;
-    }
-  } catch (error) {
-    if (week !== "this") throw error;
-  }
-
-  if (week === "this") {
-    const response = await fetch(FEEDS[week], {
-      headers: {
-        "accept": "application/json,text/plain,*/*",
-        "user-agent": "TryCritique Economic Calendar",
-      },
-    });
-    if (!response.ok) {
-      throw new Error(`ForexFactory feed failed: ${week} ${response.status}`);
-    }
-    const rows = await response.json();
-    const normalized = Array.isArray(rows) ? rows.map((event) => normalizeEvent(event, week)) : [];
-    if (normalized.length) feedCache[week] = { events: normalized, cachedAt: Date.now() };
+  if (week === "last" || week === "next") {
+    const normalized = createFallbackWeekEvents(week);
+    feedCache[week] = { events: normalized, cachedAt: Date.now() };
     return normalized;
   }
 
-  return [];
+  const response = await fetch(FEEDS[week], {
+    headers: {
+      "accept": "application/json,text/plain,*/*",
+      "user-agent": "TryCritique Economic Calendar",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`ForexFactory feed failed: ${week} ${response.status}`);
+  }
+  const rows = await response.json();
+  const normalized = Array.isArray(rows) ? rows.map((event) => normalizeEvent(event, week)) : [];
+  if (normalized.length) feedCache[week] = { events: normalized, cachedAt: Date.now() };
+  return normalized;
 }
 
 export default async function handler(req, res) {
