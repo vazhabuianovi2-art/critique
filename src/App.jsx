@@ -5962,11 +5962,12 @@ function formFromTrade(trade) {
 function summarizeTrades(trades = []) {
   const safe = Array.isArray(trades) ? trades : [];
   const pnl = safe.reduce((sum, trade) => sum + Number(trade.pnl || 0), 0);
-  const wins = safe.filter((trade) => Number(trade.pnl) > 0).length;
-  const losses = safe.filter((trade) => Number(trade.pnl) < 0).length;
-  const breakEvens = safe.filter((trade) => Number(trade.pnl) === 0).length;
+  const wins = safe.filter((trade) => getTradeResult(trade) === "Win").length;
+  const losses = safe.filter((trade) => getTradeResult(trade) === "Loss").length;
+  const breakEvens = safe.filter((trade) => getTradeResult(trade) === "Break Even").length;
+  const partials = safe.filter((trade) => getTradeResult(trade) === "Partial").length;
   const decisive = wins + losses;
-  return { count: safe.length, pnl, wins, losses, breakEvens, decisive, winRate: decisive ? (wins / decisive) * 100 : 0, breakEvenRate: safe.length ? (breakEvens / safe.length) * 100 : 0 };
+  return { count: safe.length, pnl, wins, losses, breakEvens, partials, decisive, winRate: decisive ? (wins / decisive) * 100 : 0, breakEvenRate: safe.length ? (breakEvens / safe.length) * 100 : 0, partialRate: safe.length ? (partials / safe.length) * 100 : 0 };
 }
 
 function groupTradesByDate(trades = []) {
@@ -5977,6 +5978,25 @@ function groupTradesByDate(trades = []) {
     groups[key].push(trade);
     return groups;
   }, {});
+}
+
+function getSortedTradeDateGroups(trades = []) {
+  return Object.entries(groupTradesByDate(trades)).sort(([dateA], [dateB]) => dateA.localeCompare(dateB));
+}
+
+function getDailyPerformanceSeries(trades = [], mode = "EquityCurve") {
+  const dateGroups = getSortedTradeDateGroups(trades);
+  let cumulativePnl = 0;
+  const cumulativeTrades = [];
+  return dateGroups.map(([date, dayTrades]) => {
+    const daySummary = summarizeTrades(dayTrades);
+    cumulativePnl += daySummary.pnl;
+    cumulativeTrades.push(...sortTradesChronologically(dayTrades));
+    const cumulativeSummary = summarizeTrades(cumulativeTrades);
+    if (mode === "WinRate") return { date, value: cumulativeSummary.winRate };
+    if (mode === "DailyP&L") return { date, value: daySummary.pnl };
+    return { date, value: cumulativePnl };
+  });
 }
 
 function getCalendarCells(year, monthIndex) {
@@ -6464,8 +6484,8 @@ function parseTradesCSV(text, account, existingTrades = []) {
 function calculateStatistics(trades = [], startingBalance = 50000) {
   const safeTrades = Array.isArray(trades) ? trades : [];
   const base = summarizeTrades(safeTrades);
-  const wins = safeTrades.filter((trade) => Number(trade.pnl) > 0);
-  const losses = safeTrades.filter((trade) => Number(trade.pnl) < 0);
+  const wins = safeTrades.filter((trade) => getTradeResult(trade) === "Win");
+  const losses = safeTrades.filter((trade) => getTradeResult(trade) === "Loss");
   const avgPnl = safeTrades.length ? base.pnl / safeTrades.length : 0;
   const avgWin = wins.length ? wins.reduce((sum, trade) => sum + Number(trade.pnl), 0) / wins.length : 0;
   const avgLoss = losses.length ? Math.abs(losses.reduce((sum, trade) => sum + Number(trade.pnl), 0) / losses.length) : 0;
@@ -6483,24 +6503,26 @@ function calculateStatistics(trades = [], startingBalance = 50000) {
     if (!resultStats[result]) resultStats[result] = { count: 0, pnl: 0 };
     resultStats[result].count += 1;
     resultStats[result].pnl += pnl;
-    if (!strategyStats[strategy]) strategyStats[strategy] = { count: 0, pnl: 0, wins: 0, losses: 0, breakEvens: 0, rrSum: 0, riskTrades: 0 };
+    if (!strategyStats[strategy]) strategyStats[strategy] = { count: 0, pnl: 0, wins: 0, losses: 0, breakEvens: 0, partials: 0, rrSum: 0, riskTrades: 0 };
     strategyStats[strategy].count += 1;
     strategyStats[strategy].pnl += pnl;
     if (Number(trade.risk || 0) > 0) { strategyStats[strategy].rrSum += getTradeRR(trade); strategyStats[strategy].riskTrades += 1; }
-    if (pnl > 0) strategyStats[strategy].wins += 1;
-    if (pnl < 0) strategyStats[strategy].losses += 1;
-    if (pnl === 0) strategyStats[strategy].breakEvens += 1;
+    if (result === "Win") strategyStats[strategy].wins += 1;
+    if (result === "Loss") strategyStats[strategy].losses += 1;
+    if (result === "Break Even") strategyStats[strategy].breakEvens += 1;
+    if (result === "Partial") strategyStats[strategy].partials += 1;
     if (!mistakeStats[mistake]) mistakeStats[mistake] = { count: 0, pnl: 0, losses: 0 };
     mistakeStats[mistake].count += 1;
     mistakeStats[mistake].pnl += pnl;
     if (pnl < 0) mistakeStats[mistake].losses += 1;
-    if (!sessionStats[session]) sessionStats[session] = { count: 0, pnl: 0, wins: 0, losses: 0, breakEvens: 0, rrSum: 0, riskTrades: 0 };
+    if (!sessionStats[session]) sessionStats[session] = { count: 0, pnl: 0, wins: 0, losses: 0, breakEvens: 0, partials: 0, rrSum: 0, riskTrades: 0 };
     sessionStats[session].count += 1;
     sessionStats[session].pnl += pnl;
     if (Number(trade.risk || 0) > 0) { sessionStats[session].rrSum += getTradeRR(trade); sessionStats[session].riskTrades += 1; }
-    if (pnl > 0) sessionStats[session].wins += 1;
-    if (pnl < 0) sessionStats[session].losses += 1;
-    if (pnl === 0) sessionStats[session].breakEvens += 1;
+    if (result === "Win") sessionStats[session].wins += 1;
+    if (result === "Loss") sessionStats[session].losses += 1;
+    if (result === "Break Even") sessionStats[session].breakEvens += 1;
+    if (result === "Partial") sessionStats[session].partials += 1;
   });
 
   let equity = 0;
@@ -6530,7 +6552,7 @@ function calculateStatistics(trades = [], startingBalance = 50000) {
   };
   const score = Math.round((metricScores.winRate + metricScores.profitFactor + metricScores.avgWinLoss + metricScores.recoveryFactor + metricScores.maxDrawdown + metricScores.consistency) / 6);
   return {
-    totalPnl: base.pnl, trades: base.count, wins: base.wins, losses: base.losses, breakEvens: base.breakEvens, decisive: base.decisive, winRate: base.winRate, breakEvenRate: base.breakEvenRate, avgPnl, avgWin, avgLoss, avgRR, score,
+    totalPnl: base.pnl, trades: base.count, wins: base.wins, losses: base.losses, breakEvens: base.breakEvens, partials: base.partials, decisive: base.decisive, winRate: base.winRate, breakEvenRate: base.breakEvenRate, partialRate: base.partialRate, avgPnl, avgWin, avgLoss, avgRR, score,
     grossProfit, grossLoss, profitFactor, avgWinLoss, maxDrawdown, maxDrawdownPercent, resultStats, strategyStats, mistakeStats, sessionStats,
     metrics: {
       winRate: { label: "Win %", description: "Winning trades divided by win/loss trades. Break-even trades are tracked separately.", actual: `${base.winRate.toFixed(1)}%`, score: metricScores.winRate },
@@ -9040,27 +9062,8 @@ function ActivityStat({ tone, title, value, subtitle, icon }) {
 
 function PerformanceOverviewChart({ mode, trades, curve, stats }) {
   const chartData = useMemo(() => {
-    if (mode === "WinRate") {
-      // Group by date, show cumulative win rate per day (not per trade)
-      let total = 0;
-      let wins = 0;
-      return Object.entries(groupTradesByDate(trades))
-        .sort((a, b) => a[0].localeCompare(b[0]))
-        .map(([date, dayTrades]) => {
-          dayTrades.forEach((trade) => {
-            total += 1;
-            if (Number(trade.pnl) > 0) wins += 1;
-          });
-          return { date, value: total ? Math.round((wins / total) * 1000) / 10 : 0 };
-        });
-    }
-    if (mode === "DailyP&L") {
-      return Object.entries(groupTradesByDate(trades))
-        .sort((a, b) => a[0].localeCompare(b[0]))
-        .map(([date, dayTrades]) => ({ date, value: summarizeTrades(dayTrades).pnl }));
-    }
-    return curve.map((point) => ({ date: point.date, value: point.pnl }));
-  }, [mode, trades, curve]);
+    return getDailyPerformanceSeries(trades, mode);
+  }, [mode, trades]);
 
   const latestValue = chartData.length ? chartData[chartData.length - 1].value : 0;
   const isWinRate = mode === "WinRate";
