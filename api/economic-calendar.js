@@ -250,12 +250,26 @@ async function fetchFeed(week) {
     return cached.events;
   }
 
+  // Last and Next week: ForexFactory has no endpoint for these, so use TradingView
+  // which supports arbitrary date ranges and all major currencies (USD, EUR, GBP, JPY, CAD, AUD, NZD, CHF, CNY)
   if (week === "last" || week === "next") {
-    const normalized = createFallbackWeekEvents(week);
-    feedCache[week] = { events: normalized, cachedAt: Date.now() };
-    return normalized;
+    try {
+      const events = await fetchTradingViewFeed(week);
+      if (events.length) {
+        feedCache[week] = { events, cachedAt: Date.now() };
+        return events;
+      }
+    } catch (err) {
+      // TradingView unavailable — fall through to hardcoded fallback
+      console.warn(`TradingView feed failed for ${week}:`, err?.message || err);
+    }
+    // Last-resort: hardcoded fallback (USD-only, but better than nothing)
+    const fallback = createFallbackWeekEvents(week);
+    feedCache[week] = { events: fallback, cachedAt: Date.now() };
+    return fallback;
   }
 
+  // This week: ForexFactory (most accurate, all currencies)
   const response = await fetch(FEEDS[week], {
     headers: {
       "accept": "application/json,text/plain,*/*",
