@@ -5985,18 +5985,39 @@ function getSortedTradeDateGroups(trades = []) {
 }
 
 function getDailyPerformanceSeries(trades = [], mode = "EquityCurve") {
-  const dateGroups = getSortedTradeDateGroups(trades);
+  if (mode === "DailyP&L") {
+    return getSortedTradeDateGroups(trades).map(([date, dayTrades]) => ({
+      date,
+      chartKey: date,
+      value: summarizeTrades(dayTrades).pnl,
+    }));
+  }
+
+  const orderedTrades = sortTradesChronologically(trades);
+  const points = [];
   let cumulativePnl = 0;
   const cumulativeTrades = [];
-  return dateGroups.map(([date, dayTrades]) => {
-    const daySummary = summarizeTrades(dayTrades);
-    cumulativePnl += daySummary.pnl;
-    cumulativeTrades.push(...sortTradesChronologically(dayTrades));
+
+  if (orderedTrades.length) {
+    const firstDate = getTradeDateKey(orderedTrades[0]);
+    points.push({ date: firstDate, chartKey: `${firstDate}-start`, tradeNumber: 0, value: 0 });
+  }
+
+  orderedTrades.forEach((trade, index) => {
+    const date = getTradeDateKey(trade);
+    cumulativePnl += Number(trade.pnl || 0);
+    cumulativeTrades.push(trade);
     const cumulativeSummary = summarizeTrades(cumulativeTrades);
-    if (mode === "WinRate") return { date, value: cumulativeSummary.winRate };
-    if (mode === "DailyP&L") return { date, value: daySummary.pnl };
-    return { date, value: cumulativePnl };
+
+    points.push({
+      date,
+      chartKey: `${date || "trade"}-${index + 1}`,
+      tradeNumber: index + 1,
+      value: mode === "WinRate" ? Math.round(cumulativeSummary.winRate * 10) / 10 : cumulativePnl,
+    });
   });
+
+  return points;
 }
 
 function getCalendarCells(year, monthIndex) {
@@ -9086,9 +9107,24 @@ function PerformanceOverviewChart({ mode, trades, curve, stats }) {
         <SafeResponsiveContainer>
           <LineChart data={chartData} margin={{ top: 16, right: 18, left: 8, bottom: 6 }}>
             <CartesianGrid strokeDasharray="4 6" stroke="rgba(148,163,184,0.16)" vertical={false} />
-            <XAxis dataKey="date" stroke="#94a3b8" tickLine={false} axisLine={{ stroke: "rgba(168,85,247,0.25)" }} />
+            <XAxis
+              dataKey="chartKey"
+              stroke="#94a3b8"
+              tickLine={false}
+              axisLine={{ stroke: "rgba(168,85,247,0.25)" }}
+              tickFormatter={(value, index) => chartData[index]?.date || value}
+            />
             <YAxis stroke="#94a3b8" tickLine={false} axisLine={{ stroke: "rgba(168,85,247,0.25)" }} tickFormatter={(value) => (isWinRate ? `${value}%` : `$${value}`)} />
-            <Tooltip contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }} formatter={(value) => [isWinRate ? `${Number(value).toFixed(1)}%` : formatMoney(value), mode]} />
+            <Tooltip
+              contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }}
+              formatter={(value) => [isWinRate ? `${Number(value).toFixed(1)}%` : formatMoney(value), mode]}
+              labelFormatter={(_, payload) => {
+                const point = payload?.[0]?.payload;
+                if (!point) return "";
+                if (point.tradeNumber) return `${point.date} - Trade ${point.tradeNumber}`;
+                return point.date || "";
+              }}
+            />
             <Line type="monotone" dataKey="value" name={mode} stroke={stroke} strokeWidth={4} dot={{ r: 5, fill: stroke, stroke: "#ffffff", strokeWidth: 2 }} activeDot={{ r: 8, fill: "#d946ef", stroke: "#ffffff", strokeWidth: 3 }} />
           </LineChart>
         </SafeResponsiveContainer>
