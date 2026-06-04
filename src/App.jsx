@@ -12347,24 +12347,9 @@ function SimplePanel({ title, subtitle, children, icon }) {
 }
 
 function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefreshEconomicCalendar }) {
-  const [rangeFilter, setRangeFilter] = useState("30 days");
-  const [strategyFilter, setStrategyFilter] = useState("All");
   const [activeTab, setActiveTab] = useState("Overview");
   const allTrades = Array.isArray(trades) ? trades : [];
-  const strategyOptions = ["All", ...Array.from(new Set(allTrades.map((trade) => trade.setup).filter(Boolean)))];
-  const visibleTrades = useMemo(() => {
-    const today = new Date();
-    const days = rangeFilter === "7 days" ? 7 : rangeFilter === "30 days" ? 30 : rangeFilter === "90 days" ? 90 : null;
-    const start = new Date(today);
-    if (days) start.setDate(today.getDate() - days + 1);
-    start.setHours(0, 0, 0, 0);
-    return allTrades.filter((trade) => {
-      if (strategyFilter !== "All" && trade.setup !== strategyFilter) return false;
-      if (!days) return true;
-      const date = new Date(`${getTradeDateKey(trade)}T00:00:00`);
-      return !Number.isNaN(date.getTime()) && date >= start && date <= today;
-    });
-  }, [allTrades, rangeFilter, strategyFilter]);
+  const visibleTrades = allTrades;
 
   const stats = useMemo(() => calculateStatistics(visibleTrades), [visibleTrades]);
   const curve = useMemo(() => {
@@ -12398,12 +12383,6 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
       crumb="Statistics"
       title="Statistics"
       subtitle="Comprehensive trading performance analytics"
-      action={
-        <div className="flex flex-wrap gap-2">
-          <Select value={strategyFilter} onChange={(e) => setStrategyFilter(e.target.value)}>{strategyOptions.map((strategy) => <option key={strategy} value={strategy}>{strategy === "All" ? "All Strategies" : strategy}</option>)}</Select>
-          <Select value={rangeFilter} onChange={(e) => setRangeFilter(e.target.value)}><option>7 days</option><option>30 days</option><option>90 days</option><option>All time</option></Select>
-        </div>
-      }
     >
       <div className="mt-2 h-px bg-white/10" />
       <div className="statistics-tabs mt-6 inline-flex max-w-full flex-wrap gap-2 rounded-xl border border-white/10 bg-[#111113] p-2 shadow-[0_18px_45px_rgba(0,0,0,0.22)]">
@@ -12705,20 +12684,8 @@ function SimpleStatsRows({ rows, empty, negative = false }) {
 }
 
 function SimpleMistakeDetectorPage({ trades = [] }) {
-  const [rangeFilter, setRangeFilter] = useState("30 days");
   const allTrades = Array.isArray(trades) ? trades : [];
-  const visibleTrades = useMemo(() => {
-    const today = new Date();
-    const days = rangeFilter === "7 days" ? 7 : rangeFilter === "30 days" ? 30 : rangeFilter === "90 days" ? 90 : null;
-    if (!days) return allTrades;
-    const start = new Date(today);
-    start.setDate(today.getDate() - days + 1);
-    start.setHours(0, 0, 0, 0);
-    return allTrades.filter((trade) => {
-      const date = new Date(`${getTradeDateKey(trade)}T00:00:00`);
-      return !Number.isNaN(date.getTime()) && date >= start && date <= today;
-    });
-  }, [allTrades, rangeFilter]);
+  const visibleTrades = allTrades;
   const detector = useMemo(() => getMistakeDetectorStats(visibleTrades), [visibleTrades]);
   const extra = useMemo(() => getDetectorEnhancements(visibleTrades, detector), [visibleTrades, detector]);
   const losses = visibleTrades.filter((trade) => Number(trade.pnl || 0) < 0);
@@ -12734,7 +12701,6 @@ function SimpleMistakeDetectorPage({ trades = [] }) {
       crumb="Mistake Detector"
       title="Mistake Detector"
       subtitle="A simple coach report. It shows your biggest mistake, why it happens, how much it costs, and what to fix next."
-      action={<Select value={rangeFilter} onChange={(e) => setRangeFilter(e.target.value)}><option>7 days</option><option>30 days</option><option>90 days</option></Select>}
     >
       <div className="rounded-lg border border-fuchsia-500/25 bg-gradient-to-r from-fuchsia-950/30 via-black to-red-950/10 p-6">
         <div className="text-xs font-black uppercase tracking-[0.18em] text-fuchsia-300">Coach Summary</div>
