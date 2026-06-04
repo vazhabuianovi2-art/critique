@@ -6563,13 +6563,28 @@ function calculateStatistics(trades = [], startingBalance = 50000) {
   const avgRR = tradesWithRisk.length ? tradesWithRisk.reduce((sum, trade) => sum + getTradeRR(trade), 0) / tradesWithRisk.length : 0;
   const recoveryFactor = maxDrawdown ? base.pnl / maxDrawdown : base.pnl > 0 ? 999 : 0;
   const maxDrawdownPercent = startingBalance ? (maxDrawdown / Number(startingBalance || 1)) * 100 : 0;
+
+  // Consistency: measures P&L stability trade-to-trade (coefficient of variation)
+  // Lower variance relative to average = more consistent = higher score
+  const pnlValues = safeTrades.map((t) => Number(t.pnl || 0));
+  const meanPnl = pnlValues.length ? pnlValues.reduce((a, b) => a + b, 0) / pnlValues.length : 0;
+  const pnlVariance = pnlValues.length ? pnlValues.reduce((sum, v) => sum + (v - meanPnl) ** 2, 0) / pnlValues.length : 0;
+  const pnlStddev = Math.sqrt(pnlVariance);
+  const refPnl = Math.max(Math.abs(meanPnl), avgLoss, 1);
+  const pnlCv = pnlStddev / refPnl; // coefficient of variation (lower = more consistent)
+  const rawConsistencyScore = Math.round(Math.min(100, Math.max(0, 100 - pnlCv * 25)));
+  // Penalise if too few trades to measure consistency reliably
+  const samplePenalty = safeTrades.length < 5 ? 0.75 : safeTrades.length < 10 ? 0.90 : 1;
+  const consistencyScore = Math.round(rawConsistencyScore * samplePenalty);
+  const consistencyLabel = consistencyScore >= 80 ? "Stable" : consistencyScore >= 60 ? "Moderate" : consistencyScore >= 40 ? "Variable" : "Erratic";
+
   const metricScores = {
     winRate: Math.min(100, Math.max(0, base.winRate)),
     profitFactor: Math.min(100, profitFactor >= 999 ? 100 : profitFactor * 33.33),
     avgWinLoss: Math.min(100, avgWinLoss >= 999 ? 100 : avgWinLoss * 33.33),
     recoveryFactor: Math.min(100, recoveryFactor >= 999 ? 100 : Math.max(0, recoveryFactor * 35)),
     maxDrawdown: Math.min(100, Math.max(0, 100 - maxDrawdownPercent * 10)),
-    consistency: Math.min(100, Math.max(0, base.winRate)),
+    consistency: consistencyScore,
   };
   const score = Math.round((metricScores.winRate + metricScores.profitFactor + metricScores.avgWinLoss + metricScores.recoveryFactor + metricScores.maxDrawdown + metricScores.consistency) / 6);
   return {
@@ -6577,11 +6592,11 @@ function calculateStatistics(trades = [], startingBalance = 50000) {
     grossProfit, grossLoss, profitFactor, avgWinLoss, maxDrawdown, maxDrawdownPercent, resultStats, strategyStats, mistakeStats, sessionStats,
     metrics: {
       winRate: { label: "Win %", description: "Winning trades divided by win/loss trades. Break-even trades are tracked separately.", actual: `${base.winRate.toFixed(1)}%`, score: metricScores.winRate },
-      profitFactor: { label: "Profit factor", description: "Gross profit divided by gross loss", actual: profitFactor >= 999 ? "Perfect" : profitFactor.toFixed(2), score: metricScores.profitFactor },
-      avgWinLoss: { label: "Avg win/loss", description: "Average win compared to average loss", actual: avgWinLoss >= 999 ? "Perfect" : avgWinLoss.toFixed(2), score: metricScores.avgWinLoss },
-      recoveryFactor: { label: "Recovery factor", description: "Net profit compared to max drawdown", actual: recoveryFactor >= 999 ? "Perfect" : recoveryFactor.toFixed(2), score: metricScores.recoveryFactor },
-      maxDrawdown: { label: "Max drawdown", description: "Largest peak-to-trough decline", actual: `${maxDrawdownPercent.toFixed(1)}%`, score: metricScores.maxDrawdown },
-      consistency: { label: "Consistency", description: "How stable your winning performance is", actual: `${base.winRate.toFixed(1)}%`, score: metricScores.consistency },
+      profitFactor: { label: "Profit factor", description: "Gross profit divided by gross loss. Target ≥ 1.5 (good), ≥ 3.0 (excellent).", actual: profitFactor >= 999 ? "Perfect" : profitFactor.toFixed(2), score: metricScores.profitFactor },
+      avgWinLoss: { label: "Avg win/loss", description: "Average win compared to average loss. Target ≥ 1.5 (good), ≥ 3.0 (excellent).", actual: avgWinLoss >= 999 ? "Perfect" : avgWinLoss.toFixed(2), score: metricScores.avgWinLoss },
+      recoveryFactor: { label: "Recovery factor", description: "Net profit compared to max drawdown. Higher = better bounce-back from losses.", actual: recoveryFactor >= 999 ? "Perfect" : recoveryFactor.toFixed(2), score: metricScores.recoveryFactor },
+      maxDrawdown: { label: "Max drawdown", description: "Largest peak-to-trough decline as % of account. Lower is better.", actual: `${maxDrawdownPercent.toFixed(1)}%`, score: metricScores.maxDrawdown },
+      consistency: { label: "Consistency", description: "How stable your P&L is trade-to-trade. Measures variance relative to your average result.", actual: consistencyLabel, score: metricScores.consistency },
     },
   };
 }
