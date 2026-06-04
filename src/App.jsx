@@ -8110,6 +8110,7 @@ Skipped duplicates: ${duplicateCount}
             onSignOut={handleSignOut}
             onSubscriptionChange={setBillingSubscription}
             onSubscriptionRefresh={() => setBillingRefreshTick((tick) => tick + 1)}
+            onActivated={() => setActive("Dashboard")}
           />
         )}
         </div>
@@ -11402,7 +11403,7 @@ function AdminAccessPage() {
   );
 }
 
-function BillingPageDodo({ account, authUser, initialSubscription = null, gateMessage = "", requireActivation = false, onSignOut, onSubscriptionChange, onSubscriptionRefresh }) {
+function BillingPageDodo({ account, authUser, initialSubscription = null, gateMessage = "", requireActivation = false, onSignOut, onSubscriptionChange, onSubscriptionRefresh, onActivated }) {
   const [billingStatus, setBillingStatus] = useState("");
   const [billingError, setBillingError] = useState("");
   const [loadingPlan, setLoadingPlan] = useState("");
@@ -11467,10 +11468,14 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const billingResult = params.get("billing");
-    if (billingResult === "success") setBillingStatus("Subscription checkout completed. Dodo will sync the active plan shortly.");
+    if (billingResult === "success") {
+      setBillingStatus("Subscription activated! Redirecting to your dashboard...");
+      onSubscriptionRefresh?.();
+      // Redirect to Dashboard after short delay so user sees the confirmation
+      setTimeout(() => { onActivated?.(); }, 2200);
+    }
     if (billingResult === "cancelled") setBillingStatus("Checkout was cancelled. You can choose a plan whenever you are ready.");
-    if (billingResult === "portal-return") setBillingStatus("Returned from the billing portal.");
-    if (billingResult === "success" || billingResult === "portal-return") onSubscriptionRefresh?.();
+    if (billingResult === "portal-return") { setBillingStatus("Returned from the billing portal."); onSubscriptionRefresh?.(); }
     if (billingResult) {
       params.delete("billing");
       const nextSearch = params.toString();
