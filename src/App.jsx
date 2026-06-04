@@ -70,6 +70,7 @@ const ACCOUNTS_KEY = "critique_video_style_accounts_v1";
 const ACTIVE_ACCOUNT_KEY = "critique_video_style_active_account_v1";
 const ROUTINE_KEY = "critique_pre_trade_routine_v1";
 const THEME_KEY = "critique_theme_mode_v1";
+const ACTIVE_PAGE_KEY = "critique_active_page_v1";
 const RESTORE_CACHE_PREFIX = "critique_last_successful_restore_v1";
 const USER_TRADES_KEY_PREFIX = "critique_user_trades_v2";
 const USER_TRADES_BACKUP_KEY_PREFIX = "critique_user_trades_last_nonempty_v1";
@@ -1713,8 +1714,22 @@ const THEME_STYLE_CSS = `
     box-shadow: 0 0 22px rgba(239,68,68,0.28), inset 0 1px 0 rgba(255,255,255,0.22) !important;
   }
 
+  .activity-day-breakeven {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 55%, #d97706 100%) !important;
+    border-color: rgba(245,158,11,0.78) !important;
+    box-shadow: 0 0 22px rgba(245,158,11,0.28), inset 0 1px 0 rgba(255,255,255,0.22) !important;
+  }
+
   .activity-day-win:hover {
     box-shadow: 0 0 30px rgba(16,185,129,0.42), 0 10px 24px rgba(16,185,129,0.20) !important;
+  }
+
+  .activity-day-breakeven:hover {
+    box-shadow: 0 0 30px rgba(245,158,11,0.42), 0 10px 24px rgba(245,158,11,0.20) !important;
+  }
+
+  .activity-day-selected.activity-day-breakeven {
+    box-shadow: 0 0 0 2px rgba(217,70,239,.55), 0 0 30px rgba(245,158,11,0.38) !important;
   }
 
   .activity-day-loss:hover {
@@ -6784,7 +6799,13 @@ export default function TradingJournalDashboard() {
     }
     link.href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
   }, []);
-  const [active, setActive] = useState("Dashboard");
+  const [active, setActiveRaw] = useState(() => {
+    try { return localStorage.getItem(ACTIVE_PAGE_KEY) || "Dashboard"; } catch { return "Dashboard"; }
+  });
+  const setActive = (page) => {
+    setActiveRaw(page);
+    try { localStorage.setItem(ACTIVE_PAGE_KEY, page); } catch {}
+  };
   const [tradeViewMode, setTradeViewMode] = useState(null);
   const [trades, setTrades] = useState(() => {
     try {
@@ -7311,7 +7332,7 @@ export default function TradingJournalDashboard() {
       }
 
       if (mode === "register") {
-        const { error } = await supabase.auth.signUp({
+        const { data: signUpData, error } = await supabase.auth.signUp({
           email: values.email,
           password: values.password,
           options: {
@@ -7319,7 +7340,17 @@ export default function TradingJournalDashboard() {
             emailRedirectTo: getAuthRedirectUrl("/auth/login"),
           },
         });
-        if (error) throw error;
+        if (error) {
+          const msg = String(error.message || "").toLowerCase();
+          if (msg.includes("already registered") || msg.includes("user already exists") || msg.includes("already been registered")) {
+            throw new Error("This email is already registered. Please sign in instead.");
+          }
+          throw error;
+        }
+        // Supabase returns identities:[] when email already exists (no error thrown)
+        if (signUpData?.user && Array.isArray(signUpData.user.identities) && signUpData.user.identities.length === 0) {
+          throw new Error("This email is already registered. Please sign in instead.");
+        }
         setAuthMessage("Account created. Check your email inbox and confirm your address before signing in.");
         setAuthPage("login");
         return { ok: true, needsConfirmation: true };
@@ -7811,17 +7842,7 @@ Skipped duplicates: ${duplicateCount}
     );
   }
 
-  if (billingLoading && !billingSubscription) {
-    return (
-      <div className={theme === "light" ? "light-theme flex min-h-screen items-center justify-center bg-black text-white" : "flex min-h-screen items-center justify-center bg-black text-white"}>
-        <style>{THEME_STYLE_CSS}</style>
-        <div className="rounded-2xl border border-fuchsia-500/25 bg-black p-6 text-center shadow-[0_0_35px_rgba(217,70,239,0.16)]">
-          <div className="text-3xl text-fuchsia-400">{BRAND_MARK}</div>
-          <div className="mt-3 text-sm font-black text-zinc-300">Checking subscription access...</div>
-        </div>
-      </div>
-    );
-  }
+  // Don't show subscription loading screen — render app directly
 
   return (
     <div className={theme === "light" ? "light-theme min-h-screen overflow-x-hidden bg-black text-white" : "min-h-screen overflow-x-hidden bg-black text-white"}>
@@ -9433,7 +9454,6 @@ function CalendarDayDetailsModal({ dateKey, trades = [], events = [], onClose, o
                 <span>{stats.count} trade{stats.count === 1 ? "" : "s"}</span>
                 <span>•</span>
                 <span>{stats.winRate.toFixed(1)}% win</span>
-                <span className={resultTone === "win" ? "calendar-modal-status calendar-modal-status-win" : resultTone === "loss" ? "calendar-modal-status calendar-modal-status-loss" : resultTone === "be" ? "calendar-modal-status calendar-modal-status-be" : "calendar-modal-status calendar-modal-status-empty"}>{resultLabel}</span>
               </div>
             </div>
           </div>
@@ -9444,7 +9464,6 @@ function CalendarDayDetailsModal({ dateKey, trades = [], events = [], onClose, o
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <CalendarModalMetric value={stats.wins} label="Wins" tone="win" />
             <CalendarModalMetric value={stats.losses} label="Losses" tone="loss" />
-            <CalendarModalMetric value={stats.breakEvens || 0} label="Break Even" tone="be" />
             <CalendarModalMetric value={`${getPnlArrow(stats.pnl)} ${formatMoney(stats.pnl)}`} label="Total P&L" tone={resultTone} />
           </div>
           <div className="mt-5">
@@ -9519,9 +9538,11 @@ function CalendarModalTradeRow({ trade }) {
           <span className={pnl > 0 ? "text-3xl font-black text-emerald-400" : pnl < 0 ? "text-3xl font-black text-red-400" : "text-3xl font-black text-amber-400"}>{getPnlArrow(pnl)} {formatMoney(pnl)}</span>
         </div>
       </div>
-      <div className="mt-4 border-t border-white/10 pt-3">
-        <span className="rounded-full border border-white/12 bg-black/35 px-3 py-1 text-xs font-black text-zinc-300">◇ {tag}</span>
-      </div>
+      {tag && !tag.startsWith("result:") && (
+        <div className="mt-4 border-t border-white/10 pt-3">
+          <span className="rounded-full border border-white/12 bg-black/35 px-3 py-1 text-xs font-black text-zinc-300">◇ {tag}</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -9609,11 +9630,9 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], selectedCurrenci
               {getEconomicWeekLabel(week)}{weekRanges[week] ? `: ${weekRanges[week]}` : ""}
             </button>
           ))}
-          <button onClick={() => setWeekFilter("all")} className={weekFilter === "all" ? "rounded-lg border border-fuchsia-400/70 bg-fuchsia-500/18 px-3 py-2 text-sm font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-sm font-black text-zinc-400 hover:border-fuchsia-500/45 hover:text-fuchsia-200"}>All</button>
           <button onClick={() => setFiltersOpen((open) => !open)} className={filtersOpen ? "rounded-lg border border-fuchsia-400/70 bg-fuchsia-500/18 px-3 py-2 text-sm font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-sm font-black text-zinc-300 hover:border-fuchsia-500/45"}>
             Filters {activeFilterCount ? <span className="ml-1 rounded-full bg-fuchsia-500 px-1.5 py-0.5 text-[10px] text-black">{activeFilterCount}</span> : null}
           </button>
-          <button onClick={onRefresh} className="rounded-lg border border-white/10 bg-black px-3 py-2 text-sm font-black text-zinc-300 hover:border-fuchsia-500/45"><RefreshCwIcon /></button>
         </div>
       </div>
 
@@ -10488,6 +10507,16 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
     if (newPassword.length < 6) {
       setPasswordStatus("error");
       setPasswordMessage("New password must be at least 6 characters.");
+      return;
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+      setPasswordStatus("error");
+      setPasswordMessage("New password must contain at least one uppercase letter.");
+      return;
+    }
+    if (!/[0-9]/.test(newPassword)) {
+      setPasswordStatus("error");
+      setPasswordMessage("New password must contain at least one number.");
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -11815,7 +11844,7 @@ function AccessSuspendedOverlay({ subscription, loadingPlan, onStartCheckout, on
             className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-fuchsia-300/60 bg-fuchsia-500 px-4 py-3 text-sm font-black text-black shadow-[0_0_28px_rgba(217,70,239,0.35)] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <CreditCard size={16} />
-            {loadingPlan === "monthly" ? "Opening checkout..." : "Reactivate Monthly"}
+            {loadingPlan === "monthly" ? "Opening checkout..." : (subscription ? "Reactivate Monthly" : "Start Free Trial")}
           </button>
           <button
             type="button"
@@ -12794,11 +12823,10 @@ function StatisticsPage({ stats: initialStats, curve: initialCurve, trades = [],
             </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <Select value={strategyFilter} onChange={(e) => setStrategyFilter(e.target.value)}>{strategyOptions.map((strategy) => <option key={strategy} value={strategy}>{strategy === "All" ? "All Strategies" : strategy}</option>)}</Select>
-              <Select value={rangeFilter} onChange={(e) => setRangeFilter(e.target.value)}><option>Today</option><option>7 days</option><option>30 days</option><option>90 days</option><option>All time</option></Select>
+              <Select value={rangeFilter} onChange={(e) => setRangeFilter(e.target.value)}><option>Today</option><option>7 days</option><option>90 days</option><option>All time</option></Select>
             </div>
-            <div className="mt-3 grid grid-cols-3 gap-2">
+            <div className="mt-3 grid grid-cols-2 gap-2">
               <button onClick={() => { setStrategyFilter("All"); setRangeFilter("All time"); }} className="statistics-filter-btn-pro">Clear</button>
-              <button onClick={() => setRefreshTick((tick) => tick + 1)} className="statistics-filter-btn-pro">Refresh</button>
               <button onClick={() => exportTradesToCSV(closedTrades)} className="statistics-filter-btn-pro"><Download size={14} className="inline" /> CSV</button>
             </div>
           </div>
