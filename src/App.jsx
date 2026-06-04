@@ -51,6 +51,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import ShaderBackground from "@/components/ui/shader-background";
 import {
   ResponsiveContainer,
   LineChart,
@@ -82,7 +83,7 @@ const BRAND_NAME = "TryCritique";
 const OWNER_ADMIN_EMAILS = ["vazhabuianovi2@gmail.com"];
 const TAWK_TO_PROPERTY_ID = "6a1ecbced0b6e01c2e34b60c";
 const TAWK_TO_WIDGET_ID = "1jq44o7ki";
-const BRAND_MARK = "◉";
+const BRAND_MARK = <BrandBolt className="h-8 w-8" />;
 const DASHBOARD_NAV_EVENT = "trycritique:navigate-dashboard";
 
 function requestDashboardNavigation() {
@@ -425,16 +426,49 @@ async function postSupabaseSync(action, payload = {}) {
 
 function BrandBolt({ className = "" }) {
   return (
-    <svg className={className} viewBox="0 0 48 64" fill="none" aria-hidden="true">
-      <path d="M30 2 9 34h13l-4 28 22-38H26L30 2Z" fill="url(#brand-bolt-gradient)" />
-      <path d="M25 7 15 30h10l-2 18 10-25H23l2-16Z" fill="#050007" fillOpacity="0.72" />
+    <svg className={className} viewBox="0 0 36 36" fill="none" aria-hidden="true">
       <defs>
-        <linearGradient id="brand-bolt-gradient" x1="9" x2="40" y1="2" y2="62" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#f0abfc" />
-          <stop offset="0.42" stopColor="#d946ef" />
-          <stop offset="1" stopColor="#7c3aed" />
+        <linearGradient id="bb-bg" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#4c1d95" />
+          <stop offset="1" stopColor="#86198f" />
         </linearGradient>
       </defs>
+
+      {/* Background */}
+      <rect width="36" height="36" rx="10" fill="url(#bb-bg)" />
+
+      {/* Outer dashed ring — slow rotation */}
+      <g>
+        <animateTransform attributeName="transform" type="rotate"
+          from="0 18 18" to="360 18 18" dur="12s" repeatCount="indefinite" />
+        <circle cx="18" cy="18" r="14" stroke="#e879f9" strokeOpacity="0.3"
+          strokeWidth="0.8" strokeDasharray="3.5 5" fill="none" />
+      </g>
+
+      {/* Inner soft glow — breathing */}
+      <circle cx="18" cy="18" r="9" fill="#c026d3" fillOpacity="0.18">
+        <animate attributeName="r" values="8;10.5;8" dur="5s" repeatCount="indefinite" />
+        <animate attributeName="fill-opacity" values="0.12;0.28;0.12" dur="5s" repeatCount="indefinite" />
+      </circle>
+
+      {/* Chart line — slow draw & redraw */}
+      <polyline points="9,24 13,19 17,21 22,13 27,17"
+        stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+        fill="none" strokeDasharray="28" strokeDashoffset="28">
+        <animate attributeName="stroke-dashoffset"
+          values="28;0;0;28" keyTimes="0;0.45;0.75;1"
+          dur="3.5s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.2 1;0 0 1 1;0 0 1 1" />
+      </polyline>
+
+      {/* Arrow tip — fades in with line */}
+      <polyline points="23.5,12.5 27,12.5 27,16"
+        stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+        fill="none" opacity="0">
+        <animate attributeName="opacity"
+          values="0;0;1;1;0" keyTimes="0;0.4;0.5;0.75;1"
+          dur="3.5s" repeatCount="indefinite" />
+      </polyline>
     </svg>
   );
 }
@@ -844,6 +878,105 @@ const THEME_STYLE_CSS = `
   @keyframes heroFloat {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-7px); }
+  }
+
+  /* ── Premium landing styles ── */
+  .glass-card {
+    background: rgba(10, 5, 20, 0.55);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .glass-card-vivid {
+    background: rgba(12, 4, 28, 0.6);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    border: 1px solid rgba(168,85,247,0.2);
+    box-shadow: 0 0 0 1px rgba(168,85,247,0.08), 0 24px 64px rgba(126,34,206,0.25), inset 0 1px 0 rgba(255,255,255,0.07);
+  }
+  .gradient-border {
+    position: relative;
+  }
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(168,85,247,0.6), rgba(217,70,239,0.4), rgba(20,184,166,0.3));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  .glow-fuchsia {
+    box-shadow: 0 0 40px rgba(217,70,239,0.18), 0 24px 64px rgba(126,34,206,0.22);
+  }
+  .glow-fuchsia:hover {
+    box-shadow: 0 0 60px rgba(217,70,239,0.28), 0 24px 80px rgba(126,34,206,0.3);
+  }
+  .text-gradient-primary {
+    background: linear-gradient(135deg, #c084fc 0%, #e879f9 40%, #67e8f9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-hero {
+    background: linear-gradient(100deg, #818cf8 0%, #c084fc 35%, #e879f9 65%, #34d399 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(168,85,247,0.35), rgba(217,70,239,0.35), transparent);
+    margin: 0;
+  }
+  .eyebrow-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(217,70,239,0.12));
+    border: 1px solid rgba(217,70,239,0.28);
+    color: #e879f9;
+    box-shadow: 0 0 20px rgba(217,70,239,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .btn-primary-glow {
+    background: linear-gradient(135deg, #7c3aed, #a855f7, #d946ef);
+    box-shadow: 0 4px 24px rgba(168,85,247,0.35), 0 0 0 1px rgba(217,70,239,0.3);
+    transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+  }
+  .btn-primary-glow:hover {
+    box-shadow: 0 8px 40px rgba(168,85,247,0.5), 0 0 0 1px rgba(217,70,239,0.5);
+    transform: translateY(-1px);
+  }
+  .btn-ghost-glow {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+  }
+  .btn-ghost-glow:hover {
+    background: rgba(168,85,247,0.1);
+    border-color: rgba(168,85,247,0.4);
+    box-shadow: 0 0 20px rgba(168,85,247,0.15);
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  .float-card-glow {
+    background: rgba(8, 3, 18, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(168,85,247,0.18);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07);
   }
 
   .stats-interactive-card {
@@ -7704,7 +7837,7 @@ Skipped duplicates: ${duplicateCount}
             className="flex items-center gap-3 rounded-xl text-left text-xl font-black transition hover:text-fuchsia-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/60"
             aria-label="Go to dashboard"
           >
-            <span className="text-fuchsia-400 drop-shadow-[0_0_12px_rgba(217,70,239,0.85)]">{BRAND_MARK}</span><span className="tracking-tight">{BRAND_NAME}</span>
+            <span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(217,70,239,0.2)]">{BRAND_MARK}</span><span className="tracking-tight">{BRAND_NAME}</span>
           </button>
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -8008,7 +8141,7 @@ Skipped duplicates: ${duplicateCount}
 function MobileHeader({ onAdd }) {
   return (
     <div className="mobile-header-pro mb-6 flex items-center justify-between rounded-2xl border border-fuchsia-500/25 bg-black p-4 lg:hidden">
-      <button type="button" onClick={requestDashboardNavigation} className="flex items-center gap-3 rounded-xl text-left text-xl font-black transition hover:text-fuchsia-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/60" aria-label="Go to dashboard"><span className="text-fuchsia-400 drop-shadow-[0_0_12px_rgba(217,70,239,0.85)]">{BRAND_MARK}</span><span className="tracking-tight">{BRAND_NAME}</span></button>
+      <button type="button" onClick={requestDashboardNavigation} className="flex items-center gap-3 rounded-xl text-left text-xl font-black transition hover:text-fuchsia-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/60" aria-label="Go to dashboard"><span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(217,70,239,0.2)]">{BRAND_MARK}</span><span className="tracking-tight">{BRAND_NAME}</span></button>
       <button onClick={onAdd} className="mobile-add-trade-button inline-flex items-center gap-2 rounded-xl bg-fuchsia-500 px-3 py-2 text-sm font-black text-white shadow-[0_0_18px_rgba(217,70,239,0.25)]"><Plus size={15} /> Add</button>
     </div>
   );
@@ -8052,7 +8185,7 @@ function TopCrumb({ page }) {
   return (
     <div className="mb-8 flex items-center gap-3 text-sm font-semibold">
       <button type="button" onClick={requestDashboardNavigation} className="flex items-center gap-3 rounded-lg transition hover:text-fuchsia-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/60" aria-label="Go to dashboard">
-        <span className="text-fuchsia-400 drop-shadow-[0_0_12px_rgba(217,70,239,0.85)]">{BRAND_MARK}</span>
+        <span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(217,70,239,0.2)]">{BRAND_MARK}</span>
         <span className="tracking-tight">{BRAND_NAME}</span>
       </button>
       <span className="text-zinc-500">/</span>
@@ -8977,7 +9110,7 @@ function PerformanceScorePanel({ stats }) {
         </div>
       </div>
 
-      <div className="dashboard-radar-card light-card-soft relative z-10 mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black/35 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <div className="dashboard-radar-card light-card-soft relative z-10 mt-5 rounded-2xl border border-white/10 bg-black/35 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
         {hovered && (
           <div className="light-tooltip pointer-events-none absolute left-6 top-7 z-50 w-64 rounded-xl border border-white/20 bg-[#020202] p-4 shadow-[0_18px_55px_rgba(0,0,0,0.95)] ring-1 ring-black">
             <div className="text-lg font-black text-white">{hovered.metric.label}</div>
@@ -8996,7 +9129,7 @@ function PerformanceScorePanel({ stats }) {
         )}
 
         <div className="flex justify-center">
-          <svg width="330" height="280" viewBox="0 0 330 280" className="overflow-visible">
+          <svg width="100%" viewBox="-55 0 420 290" className="overflow-visible" style={{maxWidth: 380}}>
             <defs>
               <filter id="radarGlow" x="-60%" y="-60%" width="220%" height="220%">
                 <feGaussianBlur stdDeviation="5" result="blur" />
@@ -9618,7 +9751,7 @@ function CalendarGuide() {
 
 function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, onSave, account, accountBalance }) {
   const rr = Number(form.risk) ? (Number(form.pnl || 0) / Number(form.risk)).toFixed(2) : "—";
-  const screenshots = normalizeScreenshots(form);
+  const screenshots = normalizeScreenshots(form);
   const riskWarnings = getRiskWarnings(form, accountBalance);
   const formErrors = getTradeFormErrors(form);
   const hasFormErrors = Object.keys(formErrors).length > 0;
@@ -14514,7 +14647,7 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
           <motion.div initial={{ opacity: 0, y: 16, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} whileHover={{ y: -4 }} transition={{ duration: 0.35 }} className={isLight ? "auth-card-panel w-full max-w-[430px] rounded-[2rem] border border-slate-200 bg-white/90 p-8 text-slate-950 shadow-[0_28px_90px_rgba(15,23,42,0.12),0_0_40px_rgba(217,70,239,0.10)] backdrop-blur-xl" : "auth-card-panel w-full max-w-[480px] rounded-[1.6rem] border border-white/12 bg-[#050507]/92 p-10 shadow-[0_28px_90px_rgba(0,0,0,0.78),0_0_40px_rgba(217,70,239,0.08)] backdrop-blur-xl"}>
             <div className={isLight ? "mb-8 flex items-center justify-between" : "mb-10 flex items-center justify-center gap-4"}>
               <button type="button" onClick={() => setAuthPage("landing")} className="auth-brand-button flex items-center gap-3 text-left" aria-label="Go to home page">
-                <BrandBolt className="h-11 w-8 drop-shadow-[0_0_18px_rgba(217,70,239,0.95)]" />
+                <BrandBolt className="h-11 w-8 drop-shadow-[0_0_8px_rgba(217,70,239,0.25)]" />
                 <span className="text-2xl font-black tracking-tight">{BRAND_NAME}</span>
               </button>
               <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className={isLight ? "rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-black text-slate-800 shadow-sm hover:border-fuchsia-300" : "absolute right-8 top-8 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-black text-zinc-300 hover:border-fuchsia-500/50 hover:text-white"}>{theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}</button>
@@ -14738,7 +14871,7 @@ function LegalInfoPage({ page, setAuthPage, theme, setTheme }) {
       <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-5 py-6 sm:px-8">
         <header className="flex items-center justify-between gap-4">
           <button onClick={() => setAuthPage("landing")} className="flex items-center gap-3 text-left">
-            <BrandBolt className="h-10 w-7 drop-shadow-[0_0_18px_rgba(217,70,239,0.75)]" />
+            <BrandBolt className="h-10 w-7 drop-shadow-[0_0_8px_rgba(217,70,239,0.25)]" />
             <span className="text-xl font-black">{BRAND_NAME}</span>
           </button>
           <div className="flex items-center gap-3">
@@ -14864,18 +14997,19 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
   };
 
   return (
-    <div className={isLight ? "min-h-screen overflow-x-hidden bg-[#f8fafc] text-slate-950" : "min-h-screen overflow-x-hidden bg-black text-white"}>
+    <div className={isLight ? "min-h-screen overflow-x-hidden bg-[#f8fafc] text-slate-950" : "min-h-screen overflow-x-hidden bg-transparent text-white"}>
+      {!isLight && <ShaderBackground />}
       <div
         className={
           isLight
             ? "pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(217,70,239,0.12),transparent_30%),radial-gradient(circle_at_82%_62%,rgba(20,184,166,0.12),transparent_30%),linear-gradient(135deg,#f8fafc_0%,#ffffff_46%,#f7f0ff_100%)]"
-            : "pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_70%_18%,rgba(126,34,206,0.20),transparent_31%),radial-gradient(circle_at_82%_70%,rgba(20,184,166,0.12),transparent_29%),linear-gradient(135deg,#000_0%,#020409_45%,#07020d_100%)]"
+            : "pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_70%_18%,rgba(126,34,206,0.08),transparent_31%),radial-gradient(circle_at_82%_70%,rgba(20,184,166,0.05),transparent_29%)]"
         }
       />
-      <header className={isLight ? "fixed inset-x-0 top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl" : "fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-black/85 backdrop-blur-xl"}>
+      <header className={isLight ? "fixed inset-x-0 top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl" : "fixed inset-x-0 top-0 z-50 border-b border-white/[0.06] bg-black/60 backdrop-blur-2xl shadow-[0_1px_0_rgba(168,85,247,0.12)]"}>
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-5 lg:px-8">
           <button type="button" onClick={goHome} className="flex items-center gap-3 text-xl font-black">
-            <span className="text-fuchsia-400 drop-shadow-[0_0_16px_rgba(217,70,239,0.95)]">{BRAND_MARK}</span>
+            <span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(217,70,239,0.2)]">{BRAND_MARK}</span>
             <span>{BRAND_NAME}</span>
           </button>
           <nav className={isLight ? "hidden items-center gap-9 text-sm font-black text-slate-500 md:flex" : "hidden items-center gap-9 text-sm font-black text-zinc-400 md:flex"}>
@@ -14907,32 +15041,32 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
       <main className="relative z-10 pt-16">
         <section className="mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-14 px-5 py-16 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
           <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="max-w-2xl">
-            <div className={isLight ? "mb-7 inline-flex items-center gap-2 rounded-full border border-fuchsia-300 bg-fuchsia-50 px-4 py-2 text-xs font-black uppercase tracking-wider text-slate-950" : "mb-7 inline-flex items-center gap-2 rounded-full border border-fuchsia-500/25 bg-fuchsia-500/10 px-4 py-2 text-xs font-black uppercase tracking-wider text-fuchsia-200"}>
-              <Sparkles size={15} />
+            <div className={isLight ? "mb-7 inline-flex items-center gap-2 rounded-full border border-fuchsia-300 bg-fuchsia-50 px-4 py-2 text-xs font-black uppercase tracking-wider text-slate-950" : "eyebrow-badge mb-7"}>
+              <Sparkles size={13} />
               Trading journal for serious growth
             </div>
-            <h1 className="text-6xl font-black leading-[0.94] tracking-tight sm:text-7xl lg:text-8xl">
+            <h1 className="text-6xl font-black leading-[0.93] tracking-tight sm:text-7xl lg:text-8xl">
               Trade<br />
               Smarter<br />
-              <span className="bg-gradient-to-r from-blue-400 via-fuchsia-400 to-emerald-400 bg-clip-text text-transparent">Not Harder</span>
+              <span className={isLight ? "bg-gradient-to-r from-blue-500 via-fuchsia-500 to-emerald-500 bg-clip-text text-transparent" : "text-gradient-hero"}>Not Harder</span>
             </h1>
-            <p className={isLight ? "mt-8 max-w-xl text-lg font-semibold leading-8 text-slate-600 sm:text-xl" : "mt-8 max-w-xl text-lg font-semibold leading-8 text-zinc-400 sm:text-xl"}>
+            <p className={isLight ? "mt-8 max-w-xl text-lg font-semibold leading-8 text-slate-600 sm:text-xl" : "mt-8 max-w-xl text-lg font-semibold leading-[1.75] text-zinc-400 sm:text-xl"}>
               The all-in-one trading journal that tracks your psychology, reveals your edge, and turns every trade into a sharper decision.
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <button type="button" onClick={() => setAuthPage("register")} className={isLight ? "inline-flex h-14 items-center justify-center gap-3 rounded-xl bg-white px-8 text-base font-black text-slate-950 shadow-[0_22px_50px_rgba(15,23,42,0.10)] transition hover:scale-[1.02] hover:bg-slate-50" : "inline-flex h-14 items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-blue-500 to-fuchsia-600 px-8 text-base font-black text-white shadow-[0_22px_50px_rgba(99,102,241,0.28)] transition hover:scale-[1.02]"}>
+              <button type="button" onClick={() => setAuthPage("register")} className={isLight ? "inline-flex h-14 items-center justify-center gap-3 rounded-xl bg-white px-8 text-base font-black text-slate-950 shadow-[0_22px_50px_rgba(15,23,42,0.10)] transition hover:scale-[1.02] hover:bg-slate-50" : "btn-primary-glow inline-flex h-14 items-center justify-center gap-3 rounded-xl px-8 text-base font-black text-white"}>
                 Start Free Trial
                 <ChevronRight size={19} />
               </button>
-              <button type="button" onClick={() => setIsDemoOpen(true)} className={isLight ? "inline-flex h-14 items-center justify-center gap-3 rounded-xl border border-fuchsia-200 bg-white/65 px-8 text-base font-black text-slate-950 transition hover:border-fuchsia-300 hover:bg-white" : "inline-flex h-14 items-center justify-center gap-3 rounded-xl border border-white/15 bg-black/40 px-8 text-base font-black text-white transition hover:border-fuchsia-400/60 hover:bg-white/5"}>
+              <button type="button" onClick={() => setIsDemoOpen(true)} className={isLight ? "inline-flex h-14 items-center justify-center gap-3 rounded-xl border border-fuchsia-200 bg-white/65 px-8 text-base font-black text-slate-950 transition hover:border-fuchsia-300 hover:bg-white" : "btn-ghost-glow inline-flex h-14 items-center justify-center gap-3 rounded-xl px-8 text-base font-black text-white"}>
                 <PlayCircle size={20} />
                 Watch Demo
               </button>
             </div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 24, rotate: -2 }} animate={{ opacity: 1, y: 0, rotate: -2 }} transition={{ delay: 0.1, duration: 0.65 }} className="hero-dashboard-stage relative mx-auto w-full max-w-[660px] py-16">
-            <div className={isLight ? "hero-float-card hero-float-profit absolute left-0 top-12 z-20 rounded-2xl border border-fuchsia-200 bg-white/90 px-6 py-4 shadow-[0_20px_70px_rgba(15,23,42,0.16)] backdrop-blur-xl" : "hero-float-card hero-float-profit absolute left-0 top-12 z-20 rounded-2xl border border-white/10 bg-black/80 px-6 py-4 shadow-[0_20px_70px_rgba(0,0,0,0.55)] backdrop-blur-xl"}>
+          <motion.div initial={{ opacity: 0, y: 24, rotate: -2 }} animate={{ opacity: 1, y: 0, rotate: -2 }} whileHover={{ scale: 1.03, rotate: -1, y: -6 }} transition={{ delay: 0.1, duration: 0.65, hover: { type: "spring", stiffness: 200, damping: 20 } }} className="hero-dashboard-stage relative mx-auto w-full max-w-[660px] py-16">
+            <div className={isLight ? "hero-float-card hero-float-profit absolute left-0 top-12 z-20 rounded-2xl border border-fuchsia-200 bg-white/90 px-6 py-4 shadow-[0_20px_70px_rgba(15,23,42,0.16)] backdrop-blur-xl" : "hero-float-card hero-float-profit float-card-glow absolute left-0 top-12 z-20 rounded-2xl px-6 py-4"}>
               <div className="flex items-center gap-4">
                 <span className="text-3xl font-black text-emerald-400">$</span>
                 <div>
@@ -14941,16 +15075,16 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
                 </div>
               </div>
             </div>
-            <div className={isLight ? "hero-float-card hero-float-streak absolute right-1 top-40 z-20 rounded-2xl border border-fuchsia-200 bg-white/90 px-5 py-6 shadow-[0_20px_70px_rgba(15,23,42,0.16)] backdrop-blur-xl" : "hero-float-card hero-float-streak absolute right-1 top-40 z-20 rounded-2xl border border-white/10 bg-black/80 px-5 py-6 shadow-[0_20px_70px_rgba(0,0,0,0.55)] backdrop-blur-xl"}>
+            <div className={isLight ? "hero-float-card hero-float-streak absolute right-1 top-40 z-20 rounded-2xl border border-fuchsia-200 bg-white/90 px-5 py-6 shadow-[0_20px_70px_rgba(15,23,42,0.16)] backdrop-blur-xl" : "hero-float-card hero-float-streak float-card-glow absolute right-1 top-40 z-20 rounded-2xl px-5 py-6"}>
               <TrendingUp className="text-fuchsia-300" size={24} />
               <div className={isLight ? "mt-3 text-xs font-black text-slate-500" : "mt-3 text-xs font-black text-zinc-500"}>Streak</div>
               <div className="text-2xl font-black text-fuchsia-300">12W</div>
             </div>
-            <div className={isLight ? "hero-float-card hero-float-dd absolute bottom-16 right-12 z-20 rounded-xl border border-slate-200 bg-white/90 px-5 py-3 text-sm font-black text-slate-950 shadow-[0_20px_70px_rgba(15,23,42,0.14)]" : "hero-float-card hero-float-dd absolute bottom-16 right-12 z-20 rounded-xl border border-white/10 bg-black/80 px-5 py-3 text-sm font-black text-blue-300 shadow-[0_20px_70px_rgba(0,0,0,0.55)]"}>
+            <div className={isLight ? "hero-float-card hero-float-dd absolute bottom-16 right-12 z-20 rounded-xl border border-slate-200 bg-white/90 px-5 py-3 text-sm font-black text-slate-950 shadow-[0_20px_70px_rgba(15,23,42,0.14)]" : "hero-float-card hero-float-dd float-card-glow absolute bottom-16 right-12 z-20 rounded-xl px-5 py-3 text-sm font-black text-cyan-300"}>
               Max DD: 3.2%
             </div>
 
-            <div className={isLight ? "hero-dashboard-card relative overflow-hidden rounded-[2rem] border border-fuchsia-200/70 bg-gradient-to-br from-white via-fuchsia-100/60 to-emerald-100/55 p-8 shadow-[0_34px_100px_rgba(126,34,206,0.16)]" : "hero-dashboard-card relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-zinc-900/95 via-purple-950/45 to-emerald-950/55 p-8 shadow-[0_0_90px_rgba(126,34,206,0.23)]"}>
+            <div className={isLight ? "hero-dashboard-card relative overflow-hidden rounded-[2rem] border border-fuchsia-200/70 bg-gradient-to-br from-white via-fuchsia-100/60 to-emerald-100/55 p-8 shadow-[0_34px_100px_rgba(126,34,206,0.16)]" : "hero-dashboard-card glass-card-vivid gradient-border glow-fuchsia relative overflow-hidden rounded-[2rem] p-8"}>
               <div className={isLight ? "absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(217,70,239,0.12),transparent_30%),radial-gradient(circle_at_88%_20%,rgba(16,185,129,0.12),transparent_32%)]" : "absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(217,70,239,0.24),transparent_28%),radial-gradient(circle_at_88%_20%,rgba(16,185,129,0.18),transparent_32%)]"} />
               <div className="relative z-10">
                 <div className="mb-8 flex items-center justify-between">
@@ -14989,9 +15123,9 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
 
         <section id="features" className="mx-auto min-h-screen w-full max-w-7xl scroll-mt-16 px-5 py-24 lg:px-8">
           <div className="max-w-3xl">
-            <div className="text-sm font-black uppercase tracking-[0.22em] text-fuchsia-400">Features</div>
-            <h2 className={isLight ? "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl" : "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-white sm:text-6xl"}>
-              Everything you need.<br />Nothing you don&apos;t.
+            <div className={isLight ? "text-sm font-black uppercase tracking-[0.22em] text-fuchsia-500" : "eyebrow-badge inline-flex mb-2"}>Features</div>
+            <h2 className={isLight ? "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl" : "mt-5 text-5xl font-black leading-[0.97] tracking-tight sm:text-6xl"}>
+              {isLight ? <>Everything you need.<br />Nothing you don&apos;t.</> : <><span className="text-white">Everything you need.</span><br /><span className="text-gradient-primary">Nothing you don&apos;t.</span></>}
             </h2>
           </div>
 
@@ -15006,7 +15140,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
               </p>
             </div>
 
-            <div className={isLight ? "overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white/78 shadow-[0_28px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl" : "overflow-hidden rounded-[1.35rem] border border-white/12 bg-black/55 shadow-[0_28px_90px_rgba(0,0,0,0.55)] backdrop-blur-xl"}>
+            <motion.div whileHover={{ scale: 1.025, y: -8 }} transition={{ type: "spring", stiffness: 220, damping: 22 }} className={isLight ? "overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white/78 shadow-[0_28px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl" : "glass-card gradient-border glow-fuchsia overflow-hidden rounded-[1.35rem]"}>
               <div className={isLight ? "flex items-center justify-between border-b border-slate-200 px-5 py-4" : "flex items-center justify-between border-b border-white/10 px-5 py-4"}>
                 <div className={isLight ? "text-sm font-black text-slate-950" : "text-sm font-black text-white"}>Trade Journal</div>
                 <div className="flex items-center gap-4">
@@ -15043,7 +15177,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
                   ["AAPL", "Long", "NY AM · Trend Follow", "+$340", ["momentum"], "green"],
                   ["CL", "Long", "NY PM · Breakout", "+$210", ["news", "vol"], "green"],
                 ].map(([symbol, side, meta, pnl, tags, tone]) => (
-                  <div key={symbol} className={tone === "red" ? "rounded-2xl border border-red-500/30 bg-red-500/8 p-4" : "rounded-2xl border border-emerald-500/30 bg-emerald-500/8 p-4"}>
+                  <motion.div key={symbol} whileHover={{ scale: 1.03, y: -3 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className={tone === "red" ? "rounded-2xl border border-red-500/30 bg-red-500/8 p-4 cursor-pointer" : "rounded-2xl border border-emerald-500/30 bg-emerald-500/8 p-4 cursor-pointer"}>
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <div className={isLight ? "text-lg font-black text-slate-950" : "text-lg font-black text-white"}>
@@ -15058,19 +15192,19 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
                         <span key={tag} className="rounded-full border border-fuchsia-500/35 bg-fuchsia-500/12 px-2.5 py-1 text-[11px] font-bold text-fuchsia-300">{tag}</span>
                       ))}
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           </div>
         </section>
 
         <section id="how-it-works" className="mx-auto min-h-screen w-full max-w-7xl scroll-mt-16 px-5 py-24 lg:px-8">
           <div className="grid items-start gap-14 lg:grid-cols-[0.9fr_1.1fr]">
             <div className="max-w-xl">
-              <div className="text-sm font-black uppercase tracking-[0.22em] text-fuchsia-400">How it works</div>
-              <h2 className={isLight ? "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl" : "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-white sm:text-6xl"}>
-                From setup to insight<br />in three clean steps.
+              <div className={isLight ? "text-sm font-black uppercase tracking-[0.22em] text-fuchsia-500" : "eyebrow-badge inline-flex mb-2"}>How it works</div>
+              <h2 className={isLight ? "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl" : "mt-5 text-5xl font-black leading-[0.97] tracking-tight sm:text-6xl"}>
+                {isLight ? <>From setup to insight<br />in three clean steps.</> : <><span className="text-white">From setup to insight</span><br /><span className="text-gradient-primary">in three clean steps.</span></>}
               </h2>
               <p className={isLight ? "mt-6 text-lg font-semibold leading-8 text-slate-600" : "mt-6 text-lg font-semibold leading-8 text-zinc-400"}>
                 Critique keeps the flow simple: capture the trade, review the psychology, then use the dashboard to see what is actually improving.
@@ -15082,7 +15216,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
                   ["02", "Review your behavior", "Mark the mistake, emotion, rule follow-through and what you would improve next time."],
                   ["03", "Find your edge", "Filter patterns across your journal and turn repeated problems into a practical focus plan."],
                 ].map(([step, title, copy]) => (
-                  <div key={step} className={isLight ? "rounded-2xl border border-slate-200 bg-white/78 p-5 shadow-sm" : "rounded-2xl border border-white/10 bg-white/[0.03] p-5"}>
+                  <div key={step} className={isLight ? "rounded-2xl border border-slate-200 bg-white/78 p-5 shadow-sm" : "glass-card rounded-2xl p-5 transition-all duration-300 hover:border-purple-500/30"}>
                     <div className="flex gap-4">
                       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/12 text-sm font-black text-fuchsia-300">{step}</span>
                       <div>
@@ -15095,7 +15229,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
               </div>
             </div>
 
-            <div className={isLight ? "relative overflow-hidden rounded-[1.6rem] border border-slate-200 bg-white/80 p-5 shadow-[0_28px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl" : "relative overflow-hidden rounded-[1.6rem] border border-white/12 bg-black/55 p-5 shadow-[0_28px_90px_rgba(0,0,0,0.55)] backdrop-blur-xl"}>
+            <motion.div whileHover={{ scale: 1.025, y: -8 }} transition={{ type: "spring", stiffness: 220, damping: 22 }} className={isLight ? "relative overflow-hidden rounded-[1.6rem] border border-slate-200 bg-white/80 p-5 shadow-[0_28px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl" : "glass-card gradient-border glow-fuchsia relative overflow-hidden rounded-[1.6rem] p-5"}>
               <div className={isLight ? "absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(217,70,239,0.12),transparent_28%),radial-gradient(circle_at_90%_80%,rgba(16,185,129,0.10),transparent_30%)]" : "absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(217,70,239,0.18),transparent_28%),radial-gradient(circle_at_90%_80%,rgba(16,185,129,0.12),transparent_30%)]"} />
               <div className="relative z-10">
                 <div className="mb-5 flex items-center justify-between">
@@ -15155,15 +15289,15 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </section>
 
         <section id="pricing" className="mx-auto min-h-screen w-full max-w-7xl scroll-mt-16 px-5 py-24 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="text-sm font-black uppercase tracking-[0.22em] text-fuchsia-400">Pricing</div>
-            <h2 className={isLight ? "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl" : "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-white sm:text-6xl"}>
-              Simple price.<br />Serious trading clarity.
+            <div className={isLight ? "text-sm font-black uppercase tracking-[0.22em] text-fuchsia-500" : "eyebrow-badge inline-flex mb-2"}>Pricing</div>
+            <h2 className={isLight ? "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl" : "mt-5 text-5xl font-black leading-[0.97] tracking-tight sm:text-6xl"}>
+              {isLight ? <>Simple price.<br />Serious trading clarity.</> : <><span className="text-white">Simple price.</span><br /><span className="text-gradient-primary">Serious trading clarity.</span></>}
             </h2>
             <p className={isLight ? "mx-auto mt-6 max-w-2xl text-lg font-semibold leading-8 text-slate-600" : "mx-auto mt-6 max-w-2xl text-lg font-semibold leading-8 text-zinc-400"}>
               One plan with the core tools you need to journal, review, and improve every trading session.
@@ -15171,7 +15305,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
           </div>
 
           <div className="mx-auto mt-16 grid max-w-5xl items-center gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className={isLight ? "relative overflow-hidden rounded-[1.6rem] border border-fuchsia-200 bg-white/85 p-8 shadow-[0_28px_90px_rgba(15,23,42,0.12)]" : "relative overflow-hidden rounded-[1.6rem] border border-fuchsia-500/25 bg-black/60 p-8 shadow-[0_28px_90px_rgba(0,0,0,0.55)]"}>
+            <div className={isLight ? "relative overflow-hidden rounded-[1.6rem] border border-fuchsia-200 bg-white/85 p-8 shadow-[0_28px_90px_rgba(15,23,42,0.12)]" : "glass-card-vivid gradient-border glow-fuchsia relative overflow-hidden rounded-[1.6rem] p-8"}>
               <div className="absolute right-0 top-0 h-40 w-40 rounded-bl-[4rem] bg-fuchsia-500/12" />
               <div className="relative z-10">
                 <div className="flex items-center justify-between gap-4">
@@ -15229,9 +15363,9 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
         <section id="faq" className="mx-auto min-h-screen w-full max-w-7xl scroll-mt-16 px-5 py-24 lg:px-8">
           <div className="grid gap-14 lg:grid-cols-[0.9fr_1.1fr]">
             <div className="max-w-xl">
-              <div className="text-sm font-black uppercase tracking-[0.22em] text-fuchsia-400">FAQ</div>
-              <h2 className={isLight ? "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl" : "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-white sm:text-6xl"}>
-                Questions before<br />you start?
+              <div className={isLight ? "text-sm font-black uppercase tracking-[0.22em] text-fuchsia-500" : "eyebrow-badge inline-flex mb-2"}>FAQ</div>
+              <h2 className={isLight ? "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl" : "mt-5 text-5xl font-black leading-[0.97] tracking-tight sm:text-6xl"}>
+                {isLight ? <>Questions before<br />you start?</> : <><span className="text-white">Questions before</span><br /><span className="text-gradient-primary">you start?</span></>}
               </h2>
               <p className={isLight ? "mt-6 text-lg font-semibold leading-8 text-slate-600" : "mt-6 text-lg font-semibold leading-8 text-zinc-400"}>
                 The short version: Critique is built to help you keep your journal simple, searchable, and useful after every trading day.
@@ -15281,7 +15415,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
               <div className="flex items-center gap-3">
-                <BrandBolt className="h-8 w-6 drop-shadow-[0_0_14px_rgba(217,70,239,0.75)]" />
+                <BrandBolt className="h-8 w-6 drop-shadow-[0_0_8px_rgba(217,70,239,0.25)]" />
                 <span className={isLight ? "text-base font-black text-slate-950" : "text-base font-black text-white"}>{BRAND_NAME}</span>
               </div>
               <p className="mt-2 max-w-xl leading-6">A trading journal and analytics product for self-review. No investment advice, signals, brokerage, or guaranteed returns.</p>
