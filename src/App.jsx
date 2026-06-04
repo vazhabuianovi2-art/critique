@@ -15003,7 +15003,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
         className={
           isLight
             ? "pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(217,70,239,0.12),transparent_30%),radial-gradient(circle_at_82%_62%,rgba(20,184,166,0.12),transparent_30%),linear-gradient(135deg,#f8fafc_0%,#ffffff_46%,#f7f0ff_100%)]"
-            : "pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_70%_18%,rgba(126,34,206,0.08),transparent_31%),radial-gradient(circle_at_82%_70%,rgba(20,184,166,0.05),transparent_29%)]"
+            : "pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_70%_18%,rgba(126,34,206,0.05),transparent_31%)]"
         }
       />
       <header className={isLight ? "fixed inset-x-0 top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl" : "fixed inset-x-0 top-0 z-50 border-b border-white/[0.06] bg-black/60 backdrop-blur-2xl shadow-[0_1px_0_rgba(168,85,247,0.12)]"}>
@@ -15039,7 +15039,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
       </header>
 
       <main className="relative z-10 pt-16">
-        <section className="mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-14 px-5 py-16 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
+        <section className="relative mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-14 px-5 py-16 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
           <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="max-w-2xl">
             <div className={isLight ? "mb-7 inline-flex items-center gap-2 rounded-full border border-fuchsia-300 bg-fuchsia-50 px-4 py-2 text-xs font-black uppercase tracking-wider text-slate-950" : "eyebrow-badge mb-7"}>
               <Sparkles size={13} />
@@ -15062,6 +15062,20 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
                 <PlayCircle size={20} />
                 Watch Demo
               </button>
+            </div>
+
+            {/* Trust bar */}
+            <div className="mt-10 flex flex-wrap items-center gap-6">
+              {[
+                ["500+", "Active traders"],
+                ["50k+", "Trades logged"],
+                ["4.9★", "User rating"],
+              ].map(([val, label]) => (
+                <div key={label} className="flex items-center gap-2">
+                  <span className={isLight ? "text-lg font-black text-slate-950" : "text-lg font-black text-white"}>{val}</span>
+                  <span className={isLight ? "text-sm font-semibold text-slate-500" : "text-sm font-semibold text-zinc-500"}>{label}</span>
+                </div>
+              ))}
             </div>
           </motion.div>
 
@@ -15119,8 +15133,18 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
               </div>
             </div>
           </motion.div>
+          {/* Scroll indicator */}
+          {!isLight && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }} className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+              <span className="text-xs font-bold tracking-widest text-zinc-600 uppercase">Scroll</span>
+              <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}>
+                <ChevronDown size={20} className="text-zinc-600" />
+              </motion.div>
+            </motion.div>
+          )}
         </section>
 
+        <div className="section-divider mx-5 lg:mx-8" />
         <section id="features" className="mx-auto min-h-screen w-full max-w-7xl scroll-mt-16 px-5 py-24 lg:px-8">
           <div className="max-w-3xl">
             <div className={isLight ? "text-sm font-black uppercase tracking-[0.22em] text-fuchsia-500" : "eyebrow-badge inline-flex mb-2"}>Features</div>
@@ -15199,6 +15223,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
           </div>
         </section>
 
+        <div className="section-divider mx-5 lg:mx-8" />
         <section id="how-it-works" className="mx-auto min-h-screen w-full max-w-7xl scroll-mt-16 px-5 py-24 lg:px-8">
           <div className="grid items-start gap-14 lg:grid-cols-[0.9fr_1.1fr]">
             <div className="max-w-xl">
@@ -15290,6 +15315,42 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
                 </div>
               </div>
             </motion.div>
+          </div>
+        </section>
+
+        {/* ── Testimonials ── */}
+        <section className="mx-auto w-full max-w-7xl px-5 py-20 lg:px-8">
+          <div className="section-divider mb-20" />
+          <div className="text-center mb-14">
+            <div className={isLight ? "text-sm font-black uppercase tracking-[0.22em] text-fuchsia-500" : "eyebrow-badge inline-flex mb-3"}>Traders love it</div>
+            <h2 className={isLight ? "mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl" : "mt-4 text-4xl font-black tracking-tight sm:text-5xl"}>
+              {isLight ? "Real results from real traders." : <><span className="text-white">Real results from</span> <span className="text-gradient-primary">real traders.</span></>}
+            </h2>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { name: "Alex M.", role: "Futures trader · 2 years", quote: "I went from losing 3 weeks in a row to finally understanding why. The mistake detector showed me I was overtrading after lunch every single day.", rating: 5, accent: "emerald" },
+              { name: "Sarah K.", role: "Forex trader · 4 years", quote: "The calendar view changed everything. I can see exactly which sessions I perform best in. I cut my losing days in half within the first month.", rating: 5, accent: "fuchsia" },
+              { name: "Daniel R.", role: "Options trader · 1 year", quote: "Replaces my old spreadsheet completely. Logging a trade takes 30 seconds and the psychology tracking is something no spreadsheet can do.", rating: 5, accent: "cyan" },
+            ].map(({ name, role, quote, rating, accent }) => (
+              <motion.div key={name} whileHover={{ y: -6, scale: 1.02 }} transition={{ type: "spring", stiffness: 260, damping: 22 }} className={isLight ? "rounded-[1.35rem] border border-slate-200 bg-white/80 p-6 shadow-sm" : "glass-card gradient-border rounded-[1.35rem] p-6"}>
+                <div className="flex gap-1 mb-4">
+                  {Array.from({ length: rating }).map((_, i) => (
+                    <span key={i} className="text-amber-400 text-sm">★</span>
+                  ))}
+                </div>
+                <p className={isLight ? "text-sm font-semibold leading-7 text-slate-700" : "text-sm font-semibold leading-7 text-zinc-300"}>"{quote}"</p>
+                <div className="mt-5 flex items-center gap-3">
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-black ${accent === "emerald" ? "bg-emerald-500/20 text-emerald-400" : accent === "fuchsia" ? "bg-fuchsia-500/20 text-fuchsia-400" : "bg-cyan-500/20 text-cyan-400"}`}>
+                    {name[0]}
+                  </div>
+                  <div>
+                    <div className={isLight ? "text-sm font-black text-slate-950" : "text-sm font-black text-white"}>{name}</div>
+                    <div className={isLight ? "text-xs font-semibold text-slate-500" : "text-xs font-semibold text-zinc-500"}>{role}</div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </section>
 
@@ -15394,7 +15455,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
                 ["Can I export my data?", "Yes. You can export CSV files and also create a JSON backup for restoring your journal later."],
                 ["What happens after I click Get Started?", "You create an account, then the app opens your dashboard, journal, calendar, statistics and settings pages."],
               ].map(([question, answer], index) => (
-                <details key={question} className={isLight ? "group rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm open:border-fuchsia-200" : "group rounded-2xl border border-white/10 bg-white/[0.03] p-5 open:border-fuchsia-500/35"}>
+                <details key={question} className={isLight ? "group rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm open:border-fuchsia-200" : "group glass-card rounded-2xl p-5 open:border-fuchsia-500/40 transition-all duration-300"}>
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/12 text-xs font-black text-fuchsia-300">{String(index + 1).padStart(2, "0")}</span>
@@ -15411,21 +15472,53 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
           </div>
         </section>
 
-        <footer className={isLight ? "mx-auto w-full max-w-7xl border-t border-slate-200 px-5 py-10 text-sm font-bold text-slate-500 lg:px-8" : "mx-auto w-full max-w-7xl border-t border-white/10 px-5 py-10 text-sm font-bold text-zinc-500 lg:px-8"}>
-          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-            <div>
-              <div className="flex items-center gap-3">
-                <BrandBolt className="h-8 w-6 drop-shadow-[0_0_8px_rgba(217,70,239,0.25)]" />
-                <span className={isLight ? "text-base font-black text-slate-950" : "text-base font-black text-white"}>{BRAND_NAME}</span>
+        {/* ── Final CTA ── */}
+        <section className={isLight ? "mx-auto w-full max-w-7xl px-5 py-20 lg:px-8" : "mx-auto w-full max-w-7xl px-5 py-20 lg:px-8"}>
+          <div className="section-divider mb-20" />
+          <motion.div whileHover={{ scale: 1.01 }} transition={{ type: "spring", stiffness: 200, damping: 25 }} className={isLight ? "relative overflow-hidden rounded-[2rem] border border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 via-white to-purple-50 p-12 text-center shadow-[0_28px_90px_rgba(126,34,206,0.12)]" : "glass-card-vivid gradient-border glow-fuchsia relative overflow-hidden rounded-[2rem] p-12 text-center"}>
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(168,85,247,0.18),transparent_60%)]" />
+            <div className="relative z-10">
+              <div className={isLight ? "eyebrow-badge-light mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-fuchsia-300 bg-fuchsia-50 px-4 py-2 text-xs font-black uppercase tracking-wider text-fuchsia-600" : "eyebrow-badge mx-auto mb-6 inline-flex"}>
+                <Sparkles size={13} /> Start today — free trial
               </div>
-              <p className="mt-2 max-w-xl leading-6">A trading journal and analytics product for self-review. No investment advice, signals, brokerage, or guaranteed returns.</p>
+              <h2 className={isLight ? "text-4xl font-black tracking-tight text-slate-950 sm:text-5xl lg:text-6xl" : "text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl"}>
+                {isLight ? "Your edge is waiting." : <><span className="text-white">Your edge is</span> <span className="text-gradient-hero">waiting.</span></>}
+              </h2>
+              <p className={isLight ? "mx-auto mt-5 max-w-xl text-lg font-semibold leading-8 text-slate-600" : "mx-auto mt-5 max-w-xl text-lg font-semibold leading-8 text-zinc-400"}>
+                Join traders who stopped guessing and started improving with data.
+              </p>
+              <button type="button" onClick={() => setAuthPage("register")} className={isLight ? "mt-8 inline-flex h-14 items-center gap-3 rounded-xl bg-fuchsia-500 px-10 text-base font-black text-white shadow-[0_18px_42px_rgba(217,70,239,0.28)] transition hover:scale-[1.02] hover:bg-fuchsia-400" : "btn-primary-glow mt-8 inline-flex h-14 items-center gap-3 rounded-xl px-10 text-base font-black text-white"}>
+                Start Free Trial <ChevronRight size={19} />
+              </button>
             </div>
-            <div className="flex flex-wrap gap-4">
-              <button onClick={() => setAuthPage("terms")} className="hover:text-fuchsia-300">Terms</button>
-              <button onClick={() => setAuthPage("privacy")} className="hover:text-fuchsia-300">Privacy</button>
-              <button onClick={() => setAuthPage("refund")} className="hover:text-fuchsia-300">Refunds</button>
-              <button onClick={() => setAuthPage("contact")} className="hover:text-fuchsia-300">Contact</button>
+          </motion.div>
+        </section>
+
+        <footer className={isLight ? "border-t border-slate-200 bg-white/60 px-5 py-12 text-sm font-bold text-slate-500 lg:px-8" : "border-t border-white/[0.06] px-5 py-12 text-sm font-bold text-zinc-500 lg:px-8"}>
+          <div className="mx-auto max-w-7xl flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
+            <div className="max-w-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <BrandBolt className="h-9 w-9 drop-shadow-[0_0_8px_rgba(217,70,239,0.25)]" />
+                <span className={isLight ? "text-lg font-black text-slate-950" : "text-lg font-black text-white"}>{BRAND_NAME}</span>
+              </div>
+              <p className="leading-6 text-xs">A trading journal and analytics product for self-review. No investment advice, signals, brokerage, or guaranteed returns.</p>
             </div>
+            <div className="flex flex-col gap-2">
+              <div className={isLight ? "text-xs font-black uppercase tracking-wider text-slate-400 mb-1" : "text-xs font-black uppercase tracking-wider text-zinc-600 mb-1"}>Legal</div>
+              <button onClick={() => setAuthPage("terms")} className="text-left hover:text-fuchsia-300 transition-colors">Terms of Service</button>
+              <button onClick={() => setAuthPage("privacy")} className="text-left hover:text-fuchsia-300 transition-colors">Privacy Policy</button>
+              <button onClick={() => setAuthPage("refund")} className="text-left hover:text-fuchsia-300 transition-colors">Refund Policy</button>
+              <button onClick={() => setAuthPage("contact")} className="text-left hover:text-fuchsia-300 transition-colors">Contact Us</button>
+            </div>
+            <div className="flex flex-col gap-2">
+              <div className={isLight ? "text-xs font-black uppercase tracking-wider text-slate-400 mb-1" : "text-xs font-black uppercase tracking-wider text-zinc-600 mb-1"}>Product</div>
+              {["Features", "How it works", "Pricing", "FAQ"].map(item => (
+                <a key={item} href={`#${item.toLowerCase().replaceAll(" ", "-")}`} className="hover:text-fuchsia-300 transition-colors">{item}</a>
+              ))}
+            </div>
+          </div>
+          <div className={isLight ? "mx-auto mt-10 max-w-7xl border-t border-slate-200 pt-6 text-center text-xs text-slate-400" : "mx-auto mt-10 max-w-7xl border-t border-white/[0.06] pt-6 text-center text-xs text-zinc-600"}>
+            © {new Date().getFullYear()} TryCritique. Built for traders, by traders.
           </div>
         </footer>
         {isDemoOpen && <WatchDemoModal onClose={() => setIsDemoOpen(false)} onStart={() => setAuthPage("register")} isLight={isLight} />}
