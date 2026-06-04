@@ -7180,7 +7180,7 @@ export default function TradingJournalDashboard() {
     let mounted = true;
     setEconomicCalendar((current) => ({ ...current, loading: !current.events.length, error: "" }));
 
-    fetch("/api/economic-calendar?range=all")
+    fetch("/api/economic-calendar?range=this")
       .then((response) => {
         if (!response.ok) throw new Error(`Economic calendar failed (${response.status})`);
         return response.json();
@@ -9686,9 +9686,7 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], selectedCurrenci
   const newsStats = getNewsPerformanceStats(trades, visibleEvents);
   const activeFilterCount = (normalizedSelectedCurrencies.includes("All") ? 0 : normalizedSelectedCurrencies.length) + (impactFilters.length !== impactOptions.length ? 1 : 0);
   const weekRanges = useMemo(() => ({
-    last: getEconomicCalendarWeekRangeLabel("last") || getEconomicWeekRange(events, "last"),
     this: getEconomicCalendarWeekRangeLabel("this") || getEconomicWeekRange(events, "this"),
-    next: getEconomicCalendarWeekRangeLabel("next") || getEconomicWeekRange(events, "next"),
   }), [events]);
 
   function toggleImpactFilter(impact) {
@@ -9721,11 +9719,9 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], selectedCurrenci
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {["last", "this", "next"].map((week) => (
-            <button key={week} onClick={() => setWeekFilter(week)} className={weekFilter === week ? "rounded-lg border border-fuchsia-400/70 bg-fuchsia-500/18 px-3 py-2 text-sm font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-sm font-black text-zinc-400 hover:border-fuchsia-500/45 hover:text-fuchsia-200"}>
-              {getEconomicWeekLabel(week)}{weekRanges[week] ? `: ${weekRanges[week]}` : ""}
-            </button>
-          ))}
+          <span className="rounded-lg border border-fuchsia-400/70 bg-fuchsia-500/18 px-3 py-2 text-sm font-black text-fuchsia-100">
+            This Week{weekRanges["this"] ? `: ${weekRanges["this"]}` : ""}
+          </span>
           <button onClick={() => setFiltersOpen((open) => !open)} className={filtersOpen ? "rounded-lg border border-fuchsia-400/70 bg-fuchsia-500/18 px-3 py-2 text-sm font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-sm font-black text-zinc-300 hover:border-fuchsia-500/45"}>
             Filters {activeFilterCount ? <span className="ml-1 rounded-full bg-fuchsia-500 px-1.5 py-0.5 text-[10px] text-black">{activeFilterCount}</span> : null}
           </button>
