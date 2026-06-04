@@ -6963,13 +6963,7 @@ export default function TradingJournalDashboard() {
     return { events: [], updatedAt: null, loading: true, error: "" };
   });
   const [economicCalendarRefresh, setEconomicCalendarRefresh] = useState(0);
-  const [profilePhoto, setProfilePhoto] = useState(() => {
-    try {
-      return getStoredProfilePhoto(null);
-    } catch {
-      return "";
-    }
-  });
+  const [profilePhoto, setProfilePhoto] = useState("");
   const profileName = getUserDisplayName(authUser, account?.isPlaceholder ? "User" : account.name || "User");
   const profileInitial = String(profileName || authUser?.email || "U").trim().charAt(0).toUpperCase();
   const canUseAdminTools = hasAdminAccess || isOwnerAdminEmail(authUser?.email);
@@ -7501,6 +7495,7 @@ export default function TradingJournalDashboard() {
     await safeLocalSignOut();
     setIsAuthenticated(false);
     setAuthUser(null);
+    setProfilePhoto("");
     setIsSidebarUserMenuOpen(false);
   }
 
