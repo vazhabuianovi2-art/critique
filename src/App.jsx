@@ -15032,7 +15032,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
               Log In
             </button>
             <button type="button" onClick={() => setAuthPage("register")} className="rounded-xl bg-fuchsia-500 px-4 py-2.5 text-sm font-black text-white shadow-[0_18px_42px_rgba(217,70,239,0.28)] transition hover:bg-fuchsia-400">
-              Get Started
+              Try 7 Days Free
             </button>
           </div>
         </div>
@@ -15064,8 +15064,14 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
               </button>
             </div>
 
+            {/* Free trial note */}
+            <div className={isLight ? "mt-4 flex items-center gap-2 text-sm font-semibold text-slate-500" : "mt-4 flex items-center gap-2 text-sm font-semibold text-zinc-500"}>
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 text-[10px] text-emerald-400">✓</span>
+              7-day free trial — no credit card required
+            </div>
+
             {/* Trust bar */}
-            <div className="mt-10 flex flex-wrap items-center gap-6">
+            <div className="mt-8 flex flex-wrap items-center gap-6">
               {[
                 ["500+", "Active traders"],
                 ["50k+", "Trades logged"],
@@ -15377,9 +15383,18 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
                   <span className="rounded-full border border-emerald-500/30 bg-emerald-500/12 px-3 py-1 text-xs font-black text-emerald-400">Best value</span>
                 </div>
 
-                <div className="mt-10 flex items-end gap-3">
+                {/* 7-day trial banner */}
+                <div className="mt-6 flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-black">7</span>
+                  <div>
+                    <div className="text-sm font-black text-emerald-400">7-day free trial</div>
+                    <div className={isLight ? "text-xs font-semibold text-slate-500" : "text-xs font-semibold text-zinc-500"}>No credit card required to start</div>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex items-end gap-3">
                   <span className={isLight ? "text-7xl font-black tracking-tight text-slate-950" : "text-7xl font-black tracking-tight text-white"}>$10</span>
-                  <span className={isLight ? "pb-3 text-lg font-black text-slate-500" : "pb-3 text-lg font-black text-zinc-400"}>/ month</span>
+                  <span className={isLight ? "pb-3 text-lg font-black text-slate-500" : "pb-3 text-lg font-black text-zinc-400"}>/ month after trial</span>
                 </div>
 
                 <p className={isLight ? "mt-5 text-sm font-semibold leading-6 text-slate-600" : "mt-5 text-sm font-semibold leading-6 text-zinc-400"}>
@@ -15389,10 +15404,11 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
                   Payments are handled by Dodo Payments as Merchant of Record. TryCritique is a journal and analytics tool, not investment advice or trading signals.
                 </p>
 
-                <button type="button" onClick={() => setAuthPage("register")} className="mt-8 flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-sm font-black text-white shadow-[0_18px_36px_rgba(217,70,239,0.24)] transition hover:scale-[1.01]">
-                  Start for $10/month
+                <button type="button" onClick={() => setAuthPage("register")} className="mt-6 flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-sm font-black text-white shadow-[0_18px_36px_rgba(217,70,239,0.24)] transition hover:scale-[1.01]">
+                  Start 7-Day Free Trial
                   <ChevronRight size={18} />
                 </button>
+                <div className="mt-3 text-center text-xs font-semibold text-zinc-500">No credit card · Cancel anytime</div>
               </div>
             </div>
 
@@ -15479,7 +15495,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(168,85,247,0.18),transparent_60%)]" />
             <div className="relative z-10">
               <div className={isLight ? "eyebrow-badge-light mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-fuchsia-300 bg-fuchsia-50 px-4 py-2 text-xs font-black uppercase tracking-wider text-fuchsia-600" : "eyebrow-badge mx-auto mb-6 inline-flex"}>
-                <Sparkles size={13} /> Start today — free trial
+                <Sparkles size={13} /> 7-day free trial — no card required
               </div>
               <h2 className={isLight ? "text-4xl font-black tracking-tight text-slate-950 sm:text-5xl lg:text-6xl" : "text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl"}>
                 {isLight ? "Your edge is waiting." : <><span className="text-white">Your edge is</span> <span className="text-gradient-hero">waiting.</span></>}
@@ -15488,8 +15504,9 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
                 Join traders who stopped guessing and started improving with data.
               </p>
               <button type="button" onClick={() => setAuthPage("register")} className={isLight ? "mt-8 inline-flex h-14 items-center gap-3 rounded-xl bg-fuchsia-500 px-10 text-base font-black text-white shadow-[0_18px_42px_rgba(217,70,239,0.28)] transition hover:scale-[1.02] hover:bg-fuchsia-400" : "btn-primary-glow mt-8 inline-flex h-14 items-center gap-3 rounded-xl px-10 text-base font-black text-white"}>
-                Start Free Trial <ChevronRight size={19} />
+                Start 7-Day Free Trial <ChevronRight size={19} />
               </button>
+              <p className={isLight ? "mt-3 text-sm font-semibold text-slate-500" : "mt-3 text-sm font-semibold text-zinc-500"}>No credit card required · Cancel anytime</p>
             </div>
           </motion.div>
         </section>
