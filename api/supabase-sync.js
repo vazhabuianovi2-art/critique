@@ -64,6 +64,21 @@ export default async function handler(request, response) {
       "Content-Type": "application/json",
     };
 
+    if (action === "loadAll") {
+      // Fetch trades + account in a single round-trip to avoid two cold starts
+      const [tradesRes, accountRes] = await Promise.all([
+        fetch(`${supabaseUrl}/rest/v1/trades?user_id=eq.${userId}&select=id,created_at,trade_data&order=created_at.desc`, { headers }),
+        fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=account_data&limit=1`, { headers }),
+      ]);
+      const [tradesData, accountData] = await Promise.all([
+        tradesRes.json().catch(() => null),
+        accountRes.json().catch(() => null),
+      ]);
+      if (!tradesRes.ok) return json(response, tradesRes.status, { error: tradesData?.message || "Could not load trades." });
+      const accountRow = Array.isArray(accountData) ? accountData[0] : null;
+      return json(response, 200, { ok: true, rows: Array.isArray(tradesData) ? tradesData : [], account: accountRow?.account_data || null });
+    }
+
     if (action === "listTrades") {
       const upstream = await fetch(`${supabaseUrl}/rest/v1/trades?user_id=eq.${userId}&select=id,created_at,trade_data&order=created_at.desc`, {
         headers,

@@ -7074,32 +7074,53 @@ export default function TradingJournalDashboard() {
     setTradesLoading(true);
     setHasLoadedRemoteTrades(false);
     setDataMessage("");
-    setTrades([]);
 
-    loadTradesFromSupabase(authUser.id)
-      .then(async (rows) => {
-        if (!mounted || !Array.isArray(rows)) return;
+    // Show cached trades instantly — user sees data immediately, Supabase loads in background
+    const cachedTrades = readLocalTradesFallback(authUser.id);
+    setTrades(cachedTrades.length ? cachedTrades : []);
+
+    // Single "loadAll" call fetches trades + account together (avoids two separate cold starts)
+    postSupabaseSync("loadAll")
+      .then(async (result) => {
+        if (!mounted) return;
+        const rows = result?.rows || [];
+        const profileAccount = result?.account || null;
+
+        // Update account if server returned one
+        if (profileAccount) {
+          setAccounts((current) => {
+            const normalized = { ...defaultAccount, ...profileAccount, id: profileAccount.id || activeAccountId || defaultAccount.id, balance: Number(profileAccount.balance || defaultAccount.balance) };
+            const exists = current.some((item) => String(item.id) === String(normalized.id));
+            return exists ? current.map((item) => String(item.id) === String(normalized.id) ? normalized : item) : [normalized, ...current];
+          });
+        }
 
         if (rows.length) {
-          const serverTrades = mergeTradesUnique(rows, []);
+          const serverTrades = mergeTradesUnique(rows.map((row) => ({
+            ...(row.trade_data || {}),
+            id: row.id,
+            supabaseId: row.id,
+            createdAt: row.trade_data?.createdAt || new Date(row.created_at).getTime(),
+            screenshots: normalizeScreenshots(row.trade_data || {}),
+            tags: normalizeTags(row.trade_data || {}),
+          })), []);
           setTrades(serverTrades);
           saveLocalTradesFallback(serverTrades, authUser.id);
           saveRestoreCache(authUser.id, { trades: serverTrades, account, routine, theme });
           return;
         }
 
-
-        setTrades([]);
-        setDataMessage("");
+        if (!cachedTrades.length) {
+          setTrades([]);
+          setDataMessage("");
+        }
       })
       .catch(async (error) => {
         if (!mounted) return;
-        const localTrades = readLocalTradesFallback(authUser.id);
-        if (localTrades.length) {
-          setTrades(localTrades);
-          saveRestoreCache(authUser.id, { trades: localTrades, account, routine, theme });
+        // Cached trades already showing — keep them on error
+        if (cachedTrades.length) {
           if (!isSupabaseAuthExpiredError(error)) {
-            console.warn("Supabase trade load failed; using browser backup.", error?.message || error);
+            console.warn("Supabase load failed; showing browser backup.", error?.message || error);
           }
           setDataMessage("");
           return;
@@ -7118,7 +7139,7 @@ export default function TradingJournalDashboard() {
           safeLocalSignOut();
           setDataMessage("Login session expired. Sign in again to resume cloud sync.");
         } else {
-          console.warn("Supabase trade load failed and no browser backup was available.", error?.message || error);
+          console.warn("Supabase load failed and no browser backup available.", error?.message || error);
           setDataMessage("");
         }
       })
@@ -7183,30 +7204,7 @@ export default function TradingJournalDashboard() {
     };
   }, [economicCalendarRefresh]);
 
-  useEffect(() => {
-    if (!supabase || !authUser?.id || !isAuthenticated) return undefined;
-    let mounted = true;
-
-    loadAccountFromSupabase(authUser.id)
-      .then((profileAccount) => {
-        if (!mounted || !profileAccount) return;
-        setAccounts((current) => {
-          const normalized = { ...defaultAccount, ...profileAccount, id: profileAccount.id || activeAccountId || defaultAccount.id, balance: Number(profileAccount.balance || defaultAccount.balance) };
-          const exists = current.some((item) => String(item.id) === String(normalized.id));
-          return exists ? current.map((item) => String(item.id) === String(normalized.id) ? normalized : item) : [normalized, ...current];
-        });
-      })
-      .catch((error) => {
-        if (isSupabaseAuthExpiredError(error)) {
-          return;
-        }
-        console.warn("Could not load account profile from Supabase:", error?.message || error);
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, [authUser?.id, isAuthenticated]);
+  // Account loading is now handled inside the combined loadAll effect above
   useEffect(() => { localStorage.setItem(ROUTINE_KEY, JSON.stringify(routine)); }, [routine]);
   useEffect(() => { localStorage.setItem(THEME_KEY, theme); }, [theme]);
   useEffect(() => {
