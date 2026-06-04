@@ -6931,6 +6931,7 @@ export default function TradingJournalDashboard() {
   const [hasLoadedRemoteTrades, setHasLoadedRemoteTrades] = useState(false);
   const [billingSubscription, setBillingSubscription] = useState(null);
   const [billingLoading, setBillingLoading] = useState(false);
+  const [billingChecked, setBillingChecked] = useState(false);
   const [billingGateMessage, setBillingGateMessage] = useState("");
   const [billingRefreshTick, setBillingRefreshTick] = useState(0);
   const [hasAdminAccess, setHasAdminAccess] = useState(false);
@@ -6955,7 +6956,7 @@ export default function TradingJournalDashboard() {
   const canUseAdminTools = hasAdminAccess || isOwnerAdminEmail(authUser?.email);
   const navItems = useMemo(() => canUseAdminTools ? [...nav, [ShieldCheck, "Admin"]] : nav, [canUseAdminTools]);
   const hasBillingAccess = useMemo(() => canUseAdminTools || isSubscriptionAccessActive(billingSubscription), [canUseAdminTools, billingSubscription]);
-  const shouldGateForBilling = Boolean(isAuthenticated && !billingLoading && !hasBillingAccess);
+  const shouldGateForBilling = Boolean(isAuthenticated && billingChecked && !billingLoading && !hasBillingAccess);
 
   useEffect(() => {
     if (!isAuthenticated || !authUser?.email) {
@@ -6979,6 +6980,7 @@ export default function TradingJournalDashboard() {
     if (!isAuthenticated || (!authUser?.id && !authUser?.email)) {
       setBillingSubscription(null);
       setBillingLoading(false);
+      setBillingChecked(false);
       setBillingGateMessage("");
       return undefined;
     }
@@ -7005,7 +7007,10 @@ export default function TradingJournalDashboard() {
           setBillingGateMessage(error?.message || "Could not check subscription status.");
         }
       } finally {
-        if (!cancelled) setBillingLoading(false);
+        if (!cancelled) {
+          setBillingLoading(false);
+          setBillingChecked(true);
+        }
       }
     }
 
