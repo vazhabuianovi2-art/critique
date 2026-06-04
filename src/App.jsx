@@ -9515,10 +9515,6 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
 
       <EconomicCalendarPanel economicCalendar={economicCalendar} trades={trades} selectedCurrencies={selectedNewsCurrencies} onSelectedCurrenciesChange={setSelectedNewsCurrencies} onRefresh={onRefreshEconomicCalendar} />
 
-      <button onClick={() => onAdd(selectedDate)} className="fixed bottom-24 right-8 z-40 flex h-16 w-16 items-center justify-center rounded-full bg-fuchsia-500 text-3xl font-light text-black shadow-[0_0_30px_rgba(217,70,239,0.48)] transition hover:scale-105 hover:bg-fuchsia-400 lg:bottom-10">
-        +
-      </button>
-
       {dayModalDate && (
         <CalendarDayDetailsModal
           dateKey={dayModalDate}
