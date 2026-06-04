@@ -8047,6 +8047,7 @@ Skipped duplicates: ${duplicateCount}
             profileName={profileName}
             economicCalendar={economicCalendar}
             onRefreshEconomicCalendar={() => setEconomicCalendarRefresh((tick) => tick + 1)}
+            isLoadingTrades={isInitialRemoteDataLoading}
           />
         ) : active === "Journal" ? (
           <JournalPage
@@ -8624,7 +8625,7 @@ function OnboardingChecklist({ trades, account, onOpenJournal, onOpenAccount, on
   );
 }
 
-function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades, onAdd, onView, onStartDay, routine, selectedCalendarDate, onSelectCalendarDate, onViewAllTrades, onOpenJournal, onOpenMistakeDetector, onOpenAccount, profileName = "User", economicCalendar, onRefreshEconomicCalendar }) {
+function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades, onAdd, onView, onStartDay, routine, selectedCalendarDate, onSelectCalendarDate, onViewAllTrades, onOpenJournal, onOpenMistakeDetector, onOpenAccount, profileName = "User", economicCalendar, onRefreshEconomicCalendar, isLoadingTrades = false }) {
   const [performanceMode, setPerformanceMode] = useState("EquityCurve");
   const quote = quotes[new Date().getDate() % quotes.length];
   const checkedCount = routineItems.filter((item) => routine.checked?.[item.id]).length;
@@ -8667,7 +8668,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
         </div>
       </div>
 
-      {(account?.isPlaceholder || trades.length === 0) && (
+      {!isLoadingTrades && (account?.isPlaceholder || trades.length === 0) && (
         <OnboardingChecklist
           trades={trades}
           account={account}
