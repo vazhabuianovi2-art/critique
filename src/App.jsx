@@ -7597,7 +7597,9 @@ export default function TradingJournalDashboard() {
 
   const activeTrades = useMemo(() => getTradesForAccount(trades, account), [trades, account]);
   const accountBalance = useMemo(() => calculateAccountBalance(account, trades), [account, trades]);
-  const isInitialRemoteDataLoading = Boolean(supabase && isAuthenticated && tradesLoading && !hasLoadedRemoteTrades);
+  // Only show loading skeleton when there is genuinely no data yet (no cache).
+  // If localStorage cache already populated trades, skip the skeleton entirely.
+  const isInitialRemoteDataLoading = Boolean(supabase && isAuthenticated && tradesLoading && !hasLoadedRemoteTrades && activeTrades.length === 0);
 
   const filteredTrades = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
