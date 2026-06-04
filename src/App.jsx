@@ -6150,7 +6150,10 @@ function getTopGroup(statsGroup = {}, fallback = "No data") {
 function getWorstMistake(statsGroup = {}) {
   const rows = Object.entries(statsGroup).filter(([name]) => name && name !== "None");
   if (!rows.length) return { name: "No major mistake", count: 0, pnl: 0, losses: 0 };
-  const [name, item] = rows.sort((a, b) => Number(a[1].pnl || 0) - Number(b[1].pnl || 0))[0];
+  // Only consider mistakes that actually appeared on losing trades
+  const lossRows = rows.filter(([, item]) => Number(item.losses || 0) > 0);
+  if (!lossRows.length) return { name: "No loss pattern", count: 0, pnl: 0, losses: 0 };
+  const [name, item] = lossRows.sort((a, b) => Number(a[1].pnl || 0) - Number(b[1].pnl || 0))[0];
   return { name, ...item };
 }
 
@@ -6159,13 +6162,14 @@ function getDashboardInsights(trades = [], stats = {}) {
   const bestStrategy = getTopGroup(stats.strategyStats, "No strategy");
   const worstMistake = getWorstMistake(stats.mistakeStats);
   const streak = getCurrentStreak(trades);
-  const avgRisk = trades.length ? trades.reduce((sum, trade) => sum + Number(trade.risk || 0), 0) / trades.length : 0;
+  const riskTrades = trades.filter((trade) => Number(trade.risk || 0) > 0);
+  const avgRisk = riskTrades.length ? riskTrades.reduce((sum, trade) => sum + Number(trade.risk || 0), 0) / riskTrades.length : 0;
   return [
     { title: "Best Session", value: bestSession.name, detail: `${formatMoney(bestSession.pnl || 0)} · ${bestSession.count || 0} trades`, tone: "emerald", icon: "☀" },
     { title: "Best Strategy", value: bestStrategy.name, detail: `${formatMoney(bestStrategy.pnl || 0)} net P&L`, tone: "fuchsia", icon: "ϟ" },
     { title: "Current Streak", value: streak.count ? `${streak.count} ${streak.type}` : "Neutral", detail: streak.type === "Loss" ? "Slow down and protect capital" : "Stay disciplined", tone: streak.type === "Loss" ? "red" : "emerald", icon: streak.type === "Loss" ? "↘" : "↗" },
     { title: "Avg Risk", value: formatMoney(avgRisk), detail: "Average risk per trade", tone: "amber", icon: "$" },
-    { title: "Mistake Watch", value: worstMistake.name, detail: worstMistake.count ? `${worstMistake.losses || 0} losses · ${formatMoney(worstMistake.pnl || 0)}` : "Clean execution so far", tone: worstMistake.count ? "red" : "emerald", icon: "!" },
+    { title: "Mistake Watch", value: worstMistake.losses ? worstMistake.name : "Clean execution", detail: worstMistake.losses ? `${worstMistake.losses} loss${worstMistake.losses === 1 ? "" : "es"} · ${formatMoney(Math.abs(worstMistake.pnl || 0))} lost` : "No loss pattern detected", tone: worstMistake.losses ? "red" : "emerald", icon: "!" },
   ];
 }
 
