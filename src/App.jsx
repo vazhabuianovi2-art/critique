@@ -8834,7 +8834,7 @@ function DashboardMistakeAlert({ trades, onOpen }) {
   );
 }
 
-function TodaysEventsPanel({ economicCalendar, onRefresh }) {
+function TodaysEventsPanel({ economicCalendar }) {
   const todayKey = formatDateKey(new Date());
   const impactOptions = ["High", "Medium", "Low", "Holiday"];
   const [impactFilters, setImpactFilters] = useState(impactOptions);
@@ -8887,9 +8887,6 @@ function TodaysEventsPanel({ economicCalendar, onRefresh }) {
             <p className="text-sm font-semibold text-zinc-400">Economic news for {todayKey}</p>
           </div>
         </div>
-        <button onClick={onRefresh} className="rounded-xl border border-white/10 bg-black px-3 py-2 text-sm font-black text-zinc-300 transition hover:border-fuchsia-400/60 hover:text-fuchsia-200">
-          <RefreshCwIcon /> Refresh
-        </button>
       </div>
       <div className="mt-5 rounded-xl border border-white/10 bg-black/35 p-4">
         <div className="grid gap-4 lg:grid-cols-[1fr_2fr]">
@@ -9508,6 +9505,7 @@ function CalendarDayDetailsModal({ dateKey, trades = [], events = [], onClose, o
         <div className={resultTone === "win" ? "calendar-day-modal-summary calendar-day-modal-summary-win" : resultTone === "loss" ? "calendar-day-modal-summary calendar-day-modal-summary-loss" : resultTone === "be" ? "calendar-day-modal-summary calendar-day-modal-summary-be" : "calendar-day-modal-summary calendar-day-modal-summary-empty"}>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <CalendarModalMetric value={stats.wins} label="Wins" tone="win" />
+            <CalendarModalMetric value={stats.breakEvens || 0} label="Break Even" tone="be" />
             <CalendarModalMetric value={stats.losses} label="Losses" tone="loss" />
             <CalendarModalMetric value={`${getPnlArrow(stats.pnl)} ${formatMoney(stats.pnl)}`} label="Total P&L" tone={resultTone} />
           </div>
@@ -9539,12 +9537,8 @@ function CalendarDayDetailsModal({ dateKey, trades = [], events = [], onClose, o
             </div>
           </div>
 
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-xl border border-fuchsia-500/45 bg-black px-4 py-2 text-sm font-black text-white">All Trades</span>
-              <span className="rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-2 text-sm font-black text-amber-200">Break Even: {stats.breakEvens || 0}</span>
-            </div>
-            <button onClick={onAdd} className="rounded-xl border border-fuchsia-500/35 bg-fuchsia-500 px-4 py-2 text-sm font-black text-black shadow-[0_0_18px_rgba(217,70,239,0.24)]">+ Add Trade</button>
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <span className="rounded-xl border border-fuchsia-500/45 bg-black px-4 py-2 text-sm font-black text-white">All Trades</span>
           </div>
 
           <div className="max-h-[340px] space-y-3 overflow-y-auto pr-1">
@@ -10624,14 +10618,10 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
       <TopCrumb page="Settings" />
-      <div className="mb-7 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+      <div className="mb-7">
         <div>
           <h1 className="text-4xl font-black tracking-tight text-white">Settings</h1>
           <p className="mt-2 text-base font-semibold text-zinc-400">Manage your account preferences and application settings</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="rounded-xl border border-white/10 bg-zinc-950 px-4 py-2 text-sm font-black text-white">{account?.currency || preferences.currency}</span>
-          <span className={isSupabaseReady ? "rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-2 text-sm font-black text-emerald-300" : "rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-2 text-sm font-black text-amber-300"}>{isSupabaseReady ? "Cloud ready" : "Local mode"}</span>
         </div>
       </div>
       {message && <div className="mb-5 rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 px-4 py-3 text-sm font-bold text-fuchsia-200">{message}</div>}
@@ -12320,7 +12310,6 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
   const [rangeFilter, setRangeFilter] = useState("30 days");
   const [strategyFilter, setStrategyFilter] = useState("All");
   const [activeTab, setActiveTab] = useState("Overview");
-  const [refreshTick, setRefreshTick] = useState(0);
   const allTrades = Array.isArray(trades) ? trades : [];
   const strategyOptions = ["All", ...Array.from(new Set(allTrades.map((trade) => trade.setup).filter(Boolean)))];
   const visibleTrades = useMemo(() => {
@@ -12335,7 +12324,7 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
       const date = new Date(`${getTradeDateKey(trade)}T00:00:00`);
       return !Number.isNaN(date.getTime()) && date >= start && date <= today;
     });
-  }, [allTrades, rangeFilter, strategyFilter, refreshTick]);
+  }, [allTrades, rangeFilter, strategyFilter]);
 
   const stats = useMemo(() => calculateStatistics(visibleTrades), [visibleTrades]);
   const curve = useMemo(() => {
@@ -12373,7 +12362,6 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
         <div className="flex flex-wrap gap-2">
           <Select value={strategyFilter} onChange={(e) => setStrategyFilter(e.target.value)}>{strategyOptions.map((strategy) => <option key={strategy} value={strategy}>{strategy === "All" ? "All Strategies" : strategy}</option>)}</Select>
           <Select value={rangeFilter} onChange={(e) => setRangeFilter(e.target.value)}><option>7 days</option><option>30 days</option><option>90 days</option><option>All time</option></Select>
-          <Button onClick={() => setRefreshTick((tick) => tick + 1)} variant="outline" className="border-white/15 bg-black text-white"><RefreshCwIcon /> Refresh</Button>
         </div>
       }
     >
@@ -12677,7 +12665,7 @@ function SimpleStatsRows({ rows, empty, negative = false }) {
 }
 
 function SimpleMistakeDetectorPage({ trades = [] }) {
-  const [rangeFilter, setRangeFilter] = useState("All time");
+  const [rangeFilter, setRangeFilter] = useState("30 days");
   const allTrades = Array.isArray(trades) ? trades : [];
   const visibleTrades = useMemo(() => {
     const today = new Date();
@@ -12706,7 +12694,7 @@ function SimpleMistakeDetectorPage({ trades = [] }) {
       crumb="Mistake Detector"
       title="Mistake Detector"
       subtitle="A simple coach report. It shows your biggest mistake, why it happens, how much it costs, and what to fix next."
-      action={<Select value={rangeFilter} onChange={(e) => setRangeFilter(e.target.value)}><option>All time</option><option>7 days</option><option>30 days</option><option>90 days</option></Select>}
+      action={<Select value={rangeFilter} onChange={(e) => setRangeFilter(e.target.value)}><option>7 days</option><option>30 days</option><option>90 days</option></Select>}
     >
       <div className="rounded-lg border border-fuchsia-500/25 bg-gradient-to-r from-fuchsia-950/30 via-black to-red-950/10 p-6">
         <div className="text-xs font-black uppercase tracking-[0.18em] text-fuchsia-300">Coach Summary</div>
@@ -12793,8 +12781,7 @@ function SimpleMistakeDetectorPage({ trades = [] }) {
 function StatisticsPage({ stats: initialStats, curve: initialCurve, trades = [], onExport }) {
   const [statisticsTab, setStatisticsTab] = useState("Overview");
   const [strategyFilter, setStrategyFilter] = useState("All");
-  const [rangeFilter, setRangeFilter] = useState("All time");
-  const [refreshTick, setRefreshTick] = useState(0);
+  const [rangeFilter, setRangeFilter] = useState("30 days");
   const allTrades = Array.isArray(trades) ? trades : [];
   const strategyOptions = ["All", ...Array.from(new Set(allTrades.map((trade) => trade.setup).filter(Boolean)))];
   const closedTrades = useMemo(() => {
@@ -12811,16 +12798,16 @@ function StatisticsPage({ stats: initialStats, curve: initialCurve, trades = [],
       start.setHours(0, 0, 0, 0);
       return date >= start && date <= today;
     });
-  }, [allTrades, strategyFilter, rangeFilter, refreshTick]);
+  }, [allTrades, strategyFilter, rangeFilter]);
 
-  const stats = useMemo(() => calculateStatistics(closedTrades), [closedTrades, refreshTick]);
+  const stats = useMemo(() => calculateStatistics(closedTrades), [closedTrades]);
   const curve = useMemo(() => {
     let balance = 0;
     return sortTradesChronologically(closedTrades).map((trade) => {
       balance += Number(trade.pnl || 0);
       return { date: getTradeDateKey(trade), pnl: balance, winRate: stats.winRate };
     });
-  }, [closedTrades, stats.winRate, refreshTick]);
+  }, [closedTrades, stats.winRate]);
 
   const profitFactor = Number(stats.profitFactor || 0);
   const expectancy = stats.trades ? stats.totalPnl / stats.trades : 0;
@@ -12872,10 +12859,10 @@ function StatisticsPage({ stats: initialStats, curve: initialCurve, trades = [],
             </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <Select value={strategyFilter} onChange={(e) => setStrategyFilter(e.target.value)}>{strategyOptions.map((strategy) => <option key={strategy} value={strategy}>{strategy === "All" ? "All Strategies" : strategy}</option>)}</Select>
-              <Select value={rangeFilter} onChange={(e) => setRangeFilter(e.target.value)}><option>Today</option><option>7 days</option><option>90 days</option><option>All time</option></Select>
+              <Select value={rangeFilter} onChange={(e) => setRangeFilter(e.target.value)}><option>Today</option><option>7 days</option><option>30 days</option><option>90 days</option></Select>
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2">
-              <button onClick={() => { setStrategyFilter("All"); setRangeFilter("All time"); }} className="statistics-filter-btn-pro">Clear</button>
+              <button onClick={() => { setStrategyFilter("All"); setRangeFilter("30 days"); }} className="statistics-filter-btn-pro">Clear</button>
               <button onClick={() => exportTradesToCSV(closedTrades)} className="statistics-filter-btn-pro"><Download size={14} className="inline" /> CSV</button>
             </div>
           </div>
@@ -13056,7 +13043,7 @@ function StatDefinitionCard({ title, meaning, good, bad }) {
 
 function MistakeDetectorPage({ trades = [] }) {
   const [strategyFilter, setStrategyFilter] = useState("All");
-  const [rangeFilter, setRangeFilter] = useState("All time");
+  const [rangeFilter, setRangeFilter] = useState("30 days");
   const allTrades = Array.isArray(trades) ? trades : [];
   const strategyOptions = ["All", ...Array.from(new Set(allTrades.map((trade) => trade.setup).filter(Boolean)))];
   const filteredTrades = useMemo(() => {
@@ -13096,8 +13083,8 @@ function MistakeDetectorPage({ trades = [] }) {
           <div className="mb-3 text-xs font-black uppercase tracking-widest text-zinc-500">Report Filters</div>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <Select value={strategyFilter} onChange={(e) => setStrategyFilter(e.target.value)}>{strategyOptions.map((strategy) => <option key={strategy} value={strategy}>{strategy === "All" ? "All Strategies" : strategy}</option>)}</Select>
-            <Select value={rangeFilter} onChange={(e) => setRangeFilter(e.target.value)}><option>Today</option><option>7 days</option><option>30 days</option><option>90 days</option><option>All time</option></Select>
-            <button onClick={() => { setStrategyFilter("All"); setRangeFilter("All time"); }} className="mistake-clear-btn-pro">Clear</button>
+            <Select value={rangeFilter} onChange={(e) => setRangeFilter(e.target.value)}><option>Today</option><option>7 days</option><option>30 days</option><option>90 days</option></Select>
+            <button onClick={() => { setStrategyFilter("All"); setRangeFilter("30 days"); }} className="mistake-clear-btn-pro">Clear</button>
           </div>
         </div>
       </div>
