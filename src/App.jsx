@@ -8682,7 +8682,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
 
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <DashCard title="TOTAL P&L" value={<RotatingPnlValue pnl={stats.totalPnl} balance={accountBalance.startingBalance} />} badge={stats.totalPnl >= 0 ? "↗ Positive P&L" : "↘ Negative P&L"} tone={stats.totalPnl >= 0 ? "emerald" : "amber"} icon="$" />
-        <DashCard title="WIN RATE" value={`${stats.winRate.toFixed(1)}%`} badge={`↗ ${stats.wins}W / ${stats.losses}L`} tone="fuchsia" icon="🏆" />
+        <DashCard title="WIN RATE" value={`${stats.winRate.toFixed(1)}%`} badge={`↗ ${stats.wins}W / ${stats.losses}L${stats.breakEvens ? ` / ${stats.breakEvens}BE` : ""}`} tone="fuchsia" icon="🏆" />
         <DashCard title="TOTAL TRADES" value={stats.trades} badge={`▣ ${stats.trades} closed`} tone="cyan" icon="⌁" />
         <DashCard title="AVG WIN/LOSS" value={`${formatMoney(stats.avgWin)} / ${formatMoney(stats.avgLoss)}`} badge={stats.avgWinLoss >= 999 ? "↗ Positive R:R" : `${stats.avgWinLoss.toFixed(2)} ratio`} tone="amber" icon="↗" />
       </div>
@@ -12358,7 +12358,7 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
           <StatsSectionTitle title="Performance Overview" icon={<BarChart3 size={20} />} className="mt-10" />
           <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             <DashboardStatTile label="Total P&L" value={formatMoney(stats.totalPnl)} badge={stats.totalPnl >= 0 ? "Profit" : "Loss"} tone={stats.totalPnl >= 0 ? "green" : "red"} />
-            <DashboardStatTile label="Win Rate" value={`${stats.winRate.toFixed(1)}%`} badge={`${stats.wins}W/${stats.losses}L`} tone="green" />
+            <DashboardStatTile label="Win Rate" value={`${stats.winRate.toFixed(1)}%`} badge={`${stats.wins}W/${stats.losses}L${stats.breakEvens ? `/${stats.breakEvens}BE` : ""}`} tone="green" />
             <DashboardStatTile label="Trades" value={stats.trades} badge={`${stats.trades} closed`} />
             <DashboardStatTile label="Avg Win" value={formatMoney(stats.avgWin)} tone="green" />
             <DashboardStatTile label="Avg Loss" value={formatMoney(stats.avgLoss)} tone={stats.avgLoss > 0 ? "red" : "neutral"} />
@@ -12899,7 +12899,7 @@ function StatisticsPage({ stats: initialStats, curve: initialCurve, trades = [],
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatisticsMetricCard title="TOTAL P&L" value={formatMoney(stats.totalPnl)} sub="Net result" icon="$" tone={stats.totalPnl >= 0 ? "green" : "red"} />
-              <StatisticsMetricCard title="WIN RATE" value={`${stats.winRate.toFixed(1)}%`} sub={`${stats.wins}W/${stats.losses}L`} icon="◎" tone="green" />
+              <StatisticsMetricCard title="WIN RATE" value={`${stats.winRate.toFixed(1)}%`} sub={`${stats.wins}W/${stats.losses}L${stats.breakEvens ? `/${stats.breakEvens}BE` : ""}`} icon="◎" tone="green" />
               <StatisticsMetricCard title="BREAK EVEN" value={stats.breakEvens || 0} sub={`${(stats.breakEvenRate || 0).toFixed(1)}% BE`} icon="—" tone="amber" />
               <StatisticsMetricCard title="TRADES" value={stats.trades} sub={`${stats.trades} closed`} icon="⌁" tone="white" />
               <StatisticsMetricCard title="AVG WIN" value={formatMoney(stats.avgWin)} sub="Average winner" icon="↗" tone="green" active />
