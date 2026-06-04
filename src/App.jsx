@@ -9041,13 +9041,18 @@ function ActivityStat({ tone, title, value, subtitle, icon }) {
 function PerformanceOverviewChart({ mode, trades, curve, stats }) {
   const chartData = useMemo(() => {
     if (mode === "WinRate") {
+      // Group by date, show cumulative win rate per day (not per trade)
       let total = 0;
       let wins = 0;
-      return sortTradesChronologically(trades).map((trade) => {
-        total += 1;
-        if (Number(trade.pnl) > 0) wins += 1;
-        return { date: getTradeDateKey(trade), value: total ? (wins / total) * 100 : 0 };
-      });
+      return Object.entries(groupTradesByDate(trades))
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([date, dayTrades]) => {
+          dayTrades.forEach((trade) => {
+            total += 1;
+            if (Number(trade.pnl) > 0) wins += 1;
+          });
+          return { date, value: total ? Math.round((wins / total) * 1000) / 10 : 0 };
+        });
     }
     if (mode === "DailyP&L") {
       return Object.entries(groupTradesByDate(trades))
@@ -9081,8 +9086,7 @@ function PerformanceOverviewChart({ mode, trades, curve, stats }) {
             <XAxis dataKey="date" stroke="#94a3b8" tickLine={false} axisLine={{ stroke: "rgba(168,85,247,0.25)" }} />
             <YAxis stroke="#94a3b8" tickLine={false} axisLine={{ stroke: "rgba(168,85,247,0.25)" }} tickFormatter={(value) => (isWinRate ? `${value}%` : `$${value}`)} />
             <Tooltip contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }} formatter={(value) => [isWinRate ? `${Number(value).toFixed(1)}%` : formatMoney(value), mode]} />
-            <Line type="monotone" dataKey="value" stroke={stroke} strokeWidth={4} dot={{ r: 5, fill: stroke, stroke: "#ffffff", strokeWidth: 2 }} activeDot={{ r: 8, fill: "#d946ef", stroke: "#ffffff", strokeWidth: 3 }} />
-            <Line type="monotone" dataKey="value" stroke="#d946ef" strokeWidth={2} dot={false} opacity={0.22} />
+            <Line type="monotone" dataKey="value" name={mode} stroke={stroke} strokeWidth={4} dot={{ r: 5, fill: stroke, stroke: "#ffffff", strokeWidth: 2 }} activeDot={{ r: 8, fill: "#d946ef", stroke: "#ffffff", strokeWidth: 3 }} />
           </LineChart>
         </SafeResponsiveContainer>
       </div>
