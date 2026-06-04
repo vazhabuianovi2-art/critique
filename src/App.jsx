@@ -6240,7 +6240,9 @@ function getMistakeDetectorStats(trades = []) {
     if (mistakes.length) mistakes.forEach((mistake) => addIssue(`mistake-${mistake}`, mistake, trade, "Execution", `Focus on removing ${mistake.toLowerCase()} before increasing size.`, 1.3));
     else addIssue("unclassified", "Unclassified mistake", trade, "Discipline", "Tag the exact mistake after each loss so the detector can become more accurate.", 0.6);
 
-    if (["Early", "Late"].includes(timing)) addIssue(`timing-${timing}`, `${timing} entry timing`, trade, "Execution", timing === "Late" ? "Stop chasing price. Wait for the next valid retracement or skip the trade." : "Do not enter before full confirmation. Let the setup complete first.", 1.4);
+    // Only flag timing as a separate issue if it is not already captured in the mistake tag
+    const timingAlreadyTagged = (timing === "Early" && mistakes.some((m) => /early/i.test(m))) || (timing === "Late" && mistakes.some((m) => /late/i.test(m)));
+    if (!timingAlreadyTagged && ["Early", "Late"].includes(timing)) addIssue(`timing-${timing}`, `${timing} entry timing`, trade, "Execution", timing === "Late" ? "Stop chasing price. Wait for the next valid retracement or skip the trade." : "Do not enter before full confirmation. Let the setup complete first.", 1.4);
     emotions.filter((emotion) => ["Fearful", "Greedy", "FOMO", "Revenge"].includes(emotion)).forEach((emotion) => addIssue(`emotion-${emotion}`, `${emotion} emotion`, trade, "Psychology", "Add a 30-second pause before entry and confirm you are not trading from emotion.", 1.2));
     if (Number(trade.entryQuality || 0) > 0 && Number(trade.entryQuality || 0) <= 2) addIssue("entry-low", "Low entry quality", trade, "Execution", "Wait for full confirmation. Do not enter before the setup is complete.", 1.25);
     if (Number(trade.exitQuality || 0) > 0 && Number(trade.exitQuality || 0) <= 2) addIssue("exit-low", "Low exit quality", trade, "Execution", "Pre-plan partials, target and invalidation before entering the trade.", 1);
@@ -12712,14 +12714,14 @@ function SimpleMistakeDetectorPage({ trades = [] }) {
         <div className="text-xs font-black uppercase tracking-[0.18em] text-fuchsia-300">Coach Summary</div>
         <div className="mt-2 text-3xl font-black text-white">{mainIssue ? translateDetectorText(mainIssue.title) : "No clear mistake yet"}</div>
         <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-zinc-400">
-          {mainIssue ? `${mainIssue.count} losing trades match this pattern. Estimated cost: ${formatMoney(detector.affectedPnl)}.` : "Add losing trades with mistake, emotion, timing and notes so the detector can find patterns."}
+          {mainIssue ? `${mainIssue.count} losing trade${mainIssue.count === 1 ? "" : "s"} match this pattern. Estimated cost: ${formatMoney(Math.abs(detector.affectedPnl || 0))}.` : "Add losing trades with mistake, emotion, timing and notes so the detector can find patterns."}
         </p>
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <SimpleStatCard label="Losses Analyzed" value={losses.length} detail="Only losing trades are used for mistake detection." tone="red" />
         <SimpleStatCard label="Confidence" value={`${detector.confidence || 0}%`} detail="How often the main mistake appears." tone="fuchsia" />
-        <SimpleStatCard label="Lost P&L" value={formatMoney(detector.affectedPnl || 0)} detail="Money connected to this pattern." tone="red" />
+        <SimpleStatCard label="Lost P&L" value={formatMoney(Math.abs(detector.affectedPnl || 0))} detail="Total money lost due to this pattern." tone="red" />
         <SimpleStatCard label="Data Quality" value={`${extra.dataQuality || 0}%`} detail="More filled fields means better analysis." tone={(extra.dataQuality || 0) >= 70 ? "green" : "amber"} />
       </div>
 
@@ -12756,7 +12758,7 @@ function SimpleMistakeDetectorPage({ trades = [] }) {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="font-black text-white">{index + 1}. {translateDetectorText(issue.title)}</div>
-                    <div className="mt-1 text-xs font-bold text-zinc-400">{issue.count} losses · {formatMoney(issue.pnl)}</div>
+                    <div className="mt-1 text-xs font-bold text-zinc-400">{issue.count} loss{issue.count === 1 ? "" : "es"} · {formatMoney(Math.abs(issue.pnl))} lost</div>
                   </div>
                   <span className="rounded-full bg-red-500/15 px-2 py-1 text-xs font-black text-red-300">{losses.length ? Math.round((issue.count / losses.length) * 100) : 0}%</span>
                 </div>
