@@ -8729,10 +8729,10 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
       )}
 
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        <DashCard title="TOTAL P&L" value={<RotatingPnlValue pnl={stats.totalPnl} balance={accountBalance.startingBalance} />} badge={stats.totalPnl >= 0 ? "↗ Positive P&L" : "↘ Negative P&L"} tone={stats.totalPnl >= 0 ? "emerald" : "amber"} icon="$" />
-        <DashCard title="WIN RATE" value={`${stats.winRate.toFixed(1)}%`} badge={`↗ ${stats.wins}W / ${stats.losses}L${stats.breakEvens ? ` / ${stats.breakEvens}BE` : ""}`} tone="fuchsia" icon="🏆" />
-        <DashCard title="TOTAL TRADES" value={stats.trades} badge={`▣ ${stats.trades} closed`} tone="cyan" icon="⌁" />
-        <DashCard title="AVG WIN/LOSS" value={`${formatMoney(stats.avgWin)} / ${formatMoney(stats.avgLoss)}`} badge={stats.avgWinLoss >= 999 ? "↗ Positive R:R" : `${stats.avgWinLoss.toFixed(2)} ratio`} tone="amber" icon="↗" />
+        <DashCard title="TOTAL P&L" value={<RotatingPnlValue pnl={stats.totalPnl} balance={accountBalance.startingBalance} />} badge={stats.totalPnl >= 0 ? "↗ Positive P&L" : "↘ Negative P&L"} tone={stats.totalPnl >= 0 ? "emerald" : "amber"} icon="$" isLoading={isLoadingTrades} />
+        <DashCard title="WIN RATE" value={`${stats.winRate.toFixed(1)}%`} badge={`↗ ${stats.wins}W / ${stats.losses}L${stats.breakEvens ? ` / ${stats.breakEvens}BE` : ""}`} tone="fuchsia" icon="🏆" isLoading={isLoadingTrades} />
+        <DashCard title="TOTAL TRADES" value={stats.trades} badge={`▣ ${stats.trades} closed`} tone="cyan" icon="⌁" isLoading={isLoadingTrades} />
+        <DashCard title="AVG WIN/LOSS" value={`${formatMoney(stats.avgWin)} / ${formatMoney(stats.avgLoss)}`} badge={stats.avgWinLoss >= 999 ? "↗ Positive R:R" : `${stats.avgWinLoss.toFixed(2)} ratio`} tone="amber" icon="↗" isLoading={isLoadingTrades} />
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-[2fr_1fr]">
@@ -8755,9 +8755,9 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
               ))}
             </div>
           </div>
-          <PerformanceOverviewChart mode={performanceMode} trades={trades} curve={curve} stats={stats} />
+          <PerformanceOverviewChart mode={performanceMode} trades={trades} curve={curve} stats={stats} isLoading={isLoadingTrades} />
         </div>
-        <PerformanceScorePanel stats={stats} />
+        <PerformanceScorePanel stats={stats} isLoading={isLoadingTrades} />
       </div>
 
       <QuickInsights insights={getDashboardInsights(trades, stats)} />
@@ -9083,7 +9083,7 @@ function ActivityStat({ tone, title, value, subtitle, icon }) {
   );
 }
 
-function PerformanceOverviewChart({ mode, trades, curve, stats }) {
+function PerformanceOverviewChart({ mode, trades, curve, stats, isLoading = false }) {
   const chartData = useMemo(() => {
     return getDailyPerformanceSeries(trades, mode);
   }, [mode, trades]);
@@ -9096,6 +9096,28 @@ function PerformanceOverviewChart({ mode, trades, curve, stats }) {
   const accent = isWinRate ? "text-fuchsia-400" : isDaily ? "text-amber-400" : "text-emerald-400";
   const stroke = isWinRate ? "#d946ef" : isDaily ? "#f59e0b" : "#22c55e";
   const border = isWinRate ? "border-fuchsia-500/30 bg-fuchsia-950/15" : isDaily ? "border-amber-500/30 bg-amber-950/15" : "border-emerald-500/30 bg-emerald-950/15";
+
+  if (isLoading) {
+    return (
+      <div className="relative z-10 mt-5">
+        <div className={`dashboard-chart-summary relative mb-5 overflow-hidden rounded-2xl border p-5 ${border}`}>
+          <div className="pointer-events-none absolute right-0 top-0 h-24 w-24 rounded-bl-3xl bg-white/5" />
+          <div className="relative z-10 text-xs font-black uppercase tracking-widest text-zinc-400">{mode}</div>
+          <div className="relative z-10 mt-2 h-12 w-36 animate-pulse rounded-xl bg-white/10" />
+          <div className="relative z-10 mt-3 h-4 w-48 animate-pulse rounded-lg bg-white/10" />
+        </div>
+        <div className="dashboard-chart-area h-80 overflow-hidden rounded-2xl border border-white/10 bg-black/25 p-3">
+          <div className="flex h-full flex-col items-center justify-center gap-3 opacity-40">
+            <div className="h-2 w-full animate-pulse rounded-full bg-white/20" />
+            <div className="h-2 w-5/6 animate-pulse rounded-full bg-white/15" />
+            <div className="h-2 w-4/6 animate-pulse rounded-full bg-white/10" />
+            <div className="h-2 w-5/6 animate-pulse rounded-full bg-white/15" />
+            <div className="h-2 w-3/6 animate-pulse rounded-full bg-white/10" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative z-10 mt-5">
@@ -9135,9 +9157,22 @@ function PerformanceOverviewChart({ mode, trades, curve, stats }) {
   );
 }
 
-function PerformanceScorePanel({ stats }) {
+function PerformanceScorePanel({ stats, isLoading = false }) {
   const [hoveredMetric, setHoveredMetric] = useState(null);
   const score = Math.min(100, Math.max(0, Number(stats.score || 0)));
+  if (isLoading) {
+    return (
+      <div className="dashboard-performance-card light-card flex flex-col rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-6 shadow-[0_20px_55px_rgba(217,70,239,0.10)]">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-12 w-12 animate-pulse rounded-xl bg-white/10" />
+          <div><div className="h-5 w-32 animate-pulse rounded-lg bg-white/10" /><div className="mt-2 h-3 w-24 animate-pulse rounded-lg bg-white/10" /></div>
+        </div>
+        <div className="flex flex-1 items-center justify-center">
+          <div className="h-52 w-52 animate-pulse rounded-full bg-white/5 border border-white/10" />
+        </div>
+      </div>
+    );
+  }
   const center = { x: 165, y: 142 };
   const baseMetrics = stats.metrics || {};
   const metricOrder = [
@@ -14436,10 +14471,25 @@ function MiniTradeRow({ trade }) {
 function Meta({ label, value, green, gold, danger }) { return <div><div className="text-xs text-zinc-500">{label}</div><div className={`mt-2 text-lg font-black ${green ? "text-emerald-400" : gold ? "text-amber-400" : danger ? "text-orange-400" : "text-white"}`}>{value}</div></div>; }
 function MiniInfo({ label, value, badge, tone }) { const badgeClass = tone === "red" ? "bg-red-600/90 border border-red-500/70 text-white shadow-[0_0_14px_rgba(239,68,68,0.35)]" : tone === "green" ? "bg-emerald-600/90 border border-emerald-500/70 text-white shadow-[0_0_14px_rgba(16,185,129,0.35)]" : "bg-fuchsia-500 text-black"; return <div className="mb-6"><div className="text-sm font-bold text-zinc-300">{label}</div><div className={badge ? `mt-2 w-fit rounded-full px-3 py-1 text-xs font-black ${badgeClass}` : "mt-2 text-sm text-zinc-400"}>{value}</div></div>; }
 function SideBox({ title, children }) { return <div className="rounded-xl border border-white/10 bg-zinc-950 p-6"><h3 className="mb-5 text-lg font-black">{title}</h3>{children}</div>; }
-function DashCard({ title, value, tone, icon, badge }) {
+function DashCard({ title, value, tone, icon, badge, isLoading = false }) {
   const styles = { emerald: { card: "from-emerald-950/45 via-emerald-950/10 to-black border-emerald-500/45 hover:border-emerald-400/80 hover:shadow-emerald-500/20", icon: "bg-emerald-500/10 text-emerald-400", value: "text-white", line: "text-emerald-400", badge: "bg-emerald-500/20 text-emerald-300", glow: "bg-emerald-500/10" }, fuchsia: { card: "from-fuchsia-950/45 via-fuchsia-950/10 to-black border-fuchsia-500/45 hover:border-fuchsia-400/80 hover:shadow-fuchsia-500/20", icon: "bg-fuchsia-500/10 text-fuchsia-400", value: "text-white", line: "text-violet-400", badge: "bg-emerald-500/20 text-emerald-300", glow: "bg-fuchsia-500/10" }, cyan: { card: "from-cyan-950/45 via-cyan-950/10 to-black border-cyan-500/45 hover:border-cyan-400/80 hover:shadow-cyan-500/20", icon: "bg-cyan-500/10 text-cyan-400", value: "text-white", line: "text-cyan-400", badge: "bg-zinc-700/70 text-zinc-300", glow: "bg-cyan-500/10" }, amber: { card: "from-orange-950/45 via-orange-950/10 to-black border-orange-500/45 hover:border-orange-400/80 hover:shadow-orange-500/20", icon: "bg-amber-500/10 text-amber-400", value: "text-white", line: "text-amber-400", badge: "bg-emerald-500/20 text-emerald-300", glow: "bg-amber-500/10" } };
   const s = styles[tone] || styles.emerald;
   const isCustomValue = React.isValidElement(value);
+  if (isLoading) {
+    return (
+      <div className={`dashboard-dash-card relative overflow-hidden rounded-xl border bg-gradient-to-br p-6 ${s.card}`}>
+        <div className={`absolute right-0 top-0 h-24 w-24 rounded-bl-3xl ${s.glow}`} />
+        <div className="relative z-10 flex items-start justify-between">
+          <div className="w-full">
+            <div className="text-xs font-black uppercase tracking-wider text-zinc-400">{title}</div>
+            <div className="mt-4 h-9 w-32 animate-pulse rounded-lg bg-white/10" />
+          </div>
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-lg font-black opacity-40 ${s.icon}`}>{icon}</div>
+        </div>
+        <div className="relative z-10 mt-4 h-5 w-24 animate-pulse rounded-md bg-white/10" />
+      </div>
+    );
+  }
   return <button className={`dashboard-dash-card group relative overflow-hidden rounded-xl border bg-gradient-to-br p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:scale-[1.025] hover:shadow-2xl ${s.card}`}><div className={`absolute right-0 top-0 h-24 w-24 rounded-bl-3xl ${s.glow}`} /><div className="relative z-10 flex items-start justify-between"><div><div className="text-xs font-black uppercase tracking-wider text-zinc-400">{title}</div><div className={`mt-4 text-3xl font-black ${s.value}`}>{isCustomValue ? value : <AnimatedValue value={value} />}</div></div><div className={`flex h-10 w-10 items-center justify-center rounded-xl text-lg font-black ${s.icon}`}>{icon}</div></div><div className="relative z-10 mt-3 flex items-end justify-between"><span className={`dashboard-card-badge rounded-md border px-2 py-1 text-xs font-black ${s.badge}`}>{badge}</span><svg width="86" height="34" viewBox="0 0 86 34" fill="none" className={`${s.line} opacity-90 transition-transform duration-300 group-hover:scale-110`}><path d="M2 26 C8 28, 11 12, 17 18 S27 27, 33 16 S45 13, 51 18 S61 8, 68 10 S76 5, 84 2" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" /><path d="M2 31 C11 28, 15 20, 22 22 S32 27, 38 19 S49 15, 55 20 S65 11, 72 13 S78 8, 84 7" stroke="currentColor" strokeWidth="1" opacity="0.35" fill="none" strokeLinecap="round" /></svg></div></button>;
 }
 function Chart({ curve, tall }) { return <div className={tall ? "mt-5 h-96" : "mt-5 h-72"}><SafeResponsiveContainer><LineChart data={curve}><CartesianGrid strokeDasharray="3 3" opacity={0.12} /><XAxis dataKey="date" stroke="#777" /><YAxis stroke="#777" /><Tooltip contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }} /><Line type="monotone" dataKey="pnl" stroke="#a855f7" strokeWidth={3} dot={{ r: 5 }} /></LineChart></SafeResponsiveContainer></div>; }
