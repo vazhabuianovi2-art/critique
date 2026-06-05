@@ -8823,17 +8823,17 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
                 const screenshots = normalizeScreenshots(trade);
                 const pnl = Number(trade.pnl || 0);
                 return (
-                  <button key={trade.id} onClick={() => onView(trade)} className="dashboard-recent-row group flex w-full items-center justify-between rounded-xl border border-transparent p-3 text-left transition-all hover:border-fuchsia-500/35 hover:bg-fuchsia-500/8">
-                    <div className="flex items-center gap-4">
-                      <div className="h-16 w-16 overflow-hidden rounded-xl border border-white/10 bg-zinc-900">
+                  <button key={trade.id} onClick={() => onView(trade)} className="dashboard-recent-row group flex w-full items-center justify-between gap-2 rounded-xl border border-transparent p-3 text-left transition-all hover:border-fuchsia-500/35 hover:bg-fuchsia-500/8">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-zinc-900">
                         {screenshots.length ? <img src={screenshots[0]} alt="Trade" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-zinc-500"><Camera size={18} /></div>}
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2"><span className="text-xl font-black">{trade.pair}</span><span className="rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 px-2.5 py-1 text-xs font-black text-fuchsia-100">{trade.setup}</span></div>
-                        <div className="mt-1 text-sm font-semibold text-zinc-400">{trade.quantity} shares • {trade.date}</div>
+                      <div className="min-w-0">
+                        <div className="flex min-w-0 items-center gap-2"><span className="truncate text-lg font-black">{trade.pair}</span><span className="shrink-0 rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 px-2 py-0.5 text-xs font-black text-fuchsia-100">{trade.setup}</span></div>
+                        <div className="mt-0.5 truncate text-sm font-semibold text-zinc-400">{trade.quantity ? `${trade.quantity} lots` : ""}{trade.quantity && trade.date ? " • " : ""}{trade.date}</div>
                       </div>
                     </div>
-                    <div className={`rounded-xl border px-3 py-2 font-black ${getPnlPillClass(pnl)}`}>{getPnlArrow(pnl)} {formatMoney(pnl)}</div>
+                    <div className={`shrink-0 rounded-xl border px-3 py-2 text-sm font-black ${getPnlPillClass(pnl)}`}>{getPnlArrow(pnl)} {formatMoney(pnl)}</div>
                   </button>
                 );
               })}
