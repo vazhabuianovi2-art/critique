@@ -99,6 +99,17 @@ async function saveDodoSubscription(subscription) {
   const subscriptionId = subscription?.subscription_id || subscription?.id;
   if (!subscriptionId) throw new Error("Dodo subscription id is missing.");
 
+  // Calculate trial_end: prefer explicit field, fall back to created_at + trial_period_days
+  const trialDays = Number(subscription?.trial_period_days || 0);
+  const explicitTrialEnd = subscription?.trial_end || subscription?.trial_ends_at || subscription?.trial_end_date || null;
+  let trialEnd = explicitTrialEnd ? normalizeDodoDate(explicitTrialEnd) : null;
+  if (!trialEnd && trialDays > 0) {
+    const base = subscription?.created_at || subscription?.start_date || new Date().toISOString();
+    const computed = new Date(base);
+    computed.setDate(computed.getDate() + trialDays);
+    trialEnd = computed.toISOString();
+  }
+
   return upsertBillingSubscription({
     provider: "dodo",
     user_id: metadata.user_id || null,
@@ -108,12 +119,12 @@ async function saveDodoSubscription(subscription) {
     dodo_product_id: subscription?.product_id || subscription?.product?.product_id || null,
     plan: getDodoPlan(subscription),
     status: subscription?.status || "unknown",
-    current_period_start: normalizeDodoDate(subscription?.previous_billing_date || subscription?.created_at),
-    current_period_end: normalizeDodoDate(subscription?.next_billing_date || subscription?.expires_at),
-    trial_start: subscription?.trial_period_days ? normalizeDodoDate(subscription?.created_at) : null,
-    trial_end: normalizeDodoDate(subscription?.trial_end || subscription?.trial_ends_at),
-    cancel_at_period_end: Boolean(subscription?.cancel_at_next_billing_date),
-    canceled_at: normalizeDodoDate(subscription?.cancelled_at),
+    current_period_start: normalizeDodoDate(subscription?.previous_billing_date || subscription?.start_date || subscription?.created_at),
+    current_period_end: normalizeDodoDate(subscription?.next_billing_date || subscription?.next_payment_date || subscription?.expires_at),
+    trial_start: trialDays > 0 ? normalizeDodoDate(subscription?.created_at || subscription?.start_date) : null,
+    trial_end: trialEnd,
+    cancel_at_period_end: Boolean(subscription?.cancel_at_next_billing_date || subscription?.cancel_at_period_end),
+    canceled_at: normalizeDodoDate(subscription?.cancelled_at || subscription?.canceled_at),
     updated_at: new Date().toISOString(),
   });
 }
