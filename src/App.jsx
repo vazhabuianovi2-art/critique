@@ -6950,7 +6950,7 @@ export default function TradingJournalDashboard() {
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(() => formatDateKey(new Date()));
   const [theme, setTheme] = useState(() => {
     try {
-      return localStorage.getItem(THEME_KEY) || "light";
+      return localStorage.getItem(THEME_KEY) || "dark";
     } catch {
       return "dark";
     }
