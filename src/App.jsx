@@ -305,6 +305,24 @@ async function getCurrentAccessToken() {
   return refreshed?.data?.session?.access_token || "";
 }
 
+function getSubscriptionBadge(subscription) {
+  if (!subscription) return { label: "No active plan", detail: null, tone: "zinc" };
+  const status = String(subscription.status || "").toLowerCase();
+  const now = Date.now();
+  const trialEndMs = subscription.trial_end ? new Date(subscription.trial_end).getTime() : 0;
+  const isAdmin = String(subscription.provider || "").toLowerCase() === "admin";
+  if (isAdmin) return { label: "Admin Pro", detail: null, tone: "emerald" };
+  if (["trialing", "on_trial"].includes(status) && trialEndMs > now) {
+    const daysLeft = Math.max(1, Math.ceil((trialEndMs - now) / (1000 * 60 * 60 * 24)));
+    return { label: "Free Trial", detail: `${daysLeft} day${daysLeft === 1 ? "" : "s"} left`, tone: "fuchsia" };
+  }
+  if (status === "active") {
+    const plan = subscription.plan === "yearly" ? "Pro Yearly" : "Pro Monthly";
+    return { label: plan, detail: "Active", tone: "emerald" };
+  }
+  return { label: "No active plan", detail: null, tone: "zinc" };
+}
+
 function isSubscriptionAccessActive(subscription) {
   if (!subscription) return false;
   const status = String(subscription.status || "").toLowerCase();
@@ -8045,7 +8063,7 @@ Skipped duplicates: ${duplicateCount}
               </div>
               <div className="min-w-0">
                 <div className="truncate text-sm font-black text-white">{profileName}</div>
-                <div className="text-xs font-semibold text-zinc-400">Pro Trial</div>
+                {(() => { const b = getSubscriptionBadge(billingSubscription); return <div className={`text-xs font-semibold ${b.tone === "emerald" ? "text-emerald-400" : b.tone === "fuchsia" ? "text-fuchsia-400" : "text-zinc-400"}`}>{b.label}{b.detail ? ` · ${b.detail}` : ""}</div>; })()}
               </div>
             </div>
             <span className={isSidebarUserMenuOpen ? "text-zinc-400 transition rotate-180" : "text-zinc-400 transition"}>⌄</span>
@@ -11802,20 +11820,35 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
               <div className="mt-2 truncate text-lg font-black text-white">{authUser?.email || "No email found"}</div>
               <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.04] p-4">
                 <div className="text-xs font-black uppercase tracking-[0.16em] text-zinc-500">Current Plan</div>
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <span className="text-lg font-black capitalize text-white">
-                    {statusLoading ? "Checking..." : subscription ? `${isAdminGrantedPlan ? "Admin Pro" : subscription.plan || "Pro"} - ${subscriptionStatus || "active"}` : "No active plan yet"}
-                  </span>
-                  {isAdminGrantedPlan && <span className="rounded-full bg-emerald-500/15 px-2 py-1 text-xs font-black text-emerald-200">Free admin access</span>}
-                  {subscription?.cancel_at_period_end && <span className="rounded-full bg-amber-500/15 px-2 py-1 text-xs font-black text-amber-200">Cancels soon</span>}
-                </div>
-                <div className="mt-1 text-sm font-semibold text-zinc-400">
-                  {isAdminGrantedPlan
-                    ? `Access granted until ${subscriptionDateText || "admin removes it"}`
-                    : subscriptionDateText
-                      ? `${subscription?.status === "trialing" ? "Trial ends" : "Current period ends"} ${subscriptionDateText}`
-                      : "Start a plan to unlock saved subscription details."}
-                </div>
+                {(() => {
+                  if (statusLoading) return <div className="text-lg font-black text-zinc-400">Checking...</div>;
+                  const b = getSubscriptionBadge(subscription);
+                  const statusNorm = String(subscription?.status || "").toLowerCase();
+                  const isTrialing = ["trialing", "on_trial"].includes(statusNorm);
+                  const trialEndMs = subscription?.trial_end ? new Date(subscription.trial_end).getTime() : 0;
+                  const daysLeft = isTrialing && trialEndMs ? Math.max(1, Math.ceil((trialEndMs - Date.now()) / (1000 * 60 * 60 * 24))) : 0;
+                  return (
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`text-xl font-black ${b.tone === "emerald" ? "text-emerald-300" : b.tone === "fuchsia" ? "text-fuchsia-300" : "text-white"}`}>{b.label}</span>
+                        {isTrialing && daysLeft > 0 && (
+                          <span className="rounded-full border border-fuchsia-500/35 bg-fuchsia-500/15 px-3 py-1 text-xs font-black text-fuchsia-200">{daysLeft} day{daysLeft === 1 ? "" : "s"} remaining</span>
+                        )}
+                        {isAdminGrantedPlan && <span className="rounded-full bg-emerald-500/15 px-2 py-1 text-xs font-black text-emerald-200">Free admin access</span>}
+                        {subscription?.cancel_at_period_end && <span className="rounded-full bg-amber-500/15 px-2 py-1 text-xs font-black text-amber-200">Cancels soon</span>}
+                      </div>
+                      <div className="mt-1 text-sm font-semibold text-zinc-400">
+                        {isAdminGrantedPlan
+                          ? `Access granted until ${subscriptionDateText || "admin removes it"}`
+                          : isTrialing && subscriptionDateText
+                            ? `Free trial ends on ${subscriptionDateText}`
+                            : subscriptionDateText
+                              ? `Current period ends ${subscriptionDateText}`
+                              : "Start a plan to unlock saved subscription details."}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
               <button
                 onClick={openBillingPortal}
