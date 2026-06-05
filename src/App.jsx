@@ -4303,51 +4303,24 @@ const THEME_STYLE_CSS = `
     }
 
     .calendar-day-result-stack .rounded-md {
-      font-size: .55rem !important;
-      padding: .1rem .2rem !important;
+      font-size: .6rem !important;
+      padding: .1rem .25rem !important;
     }
 
-    .calendar-trade-count {
-      font-size: .5rem !important;
-      padding-block: .1rem !important;
+    .calendar-trade-count,
+    .calendar-weekend-icon,
+    .calendar-empty-dash {
+      display: none !important;
     }
 
-    .calendar-week-header {
-      padding-block: .7rem !important;
-      font-size: .64rem !important;
-    }
-
-    .calendar-day-simple,
-    .calendar-week-summary-pro {
-      min-height: 104px !important;
-      border-radius: .9rem !important;
-      padding: .65rem !important;
-    }
-
-    .calendar-day-top-row {
-      top: .65rem;
-      left: .65rem;
-      right: .65rem;
-    }
-
-    .calendar-day-result-stack {
-      left: .65rem;
-      right: .65rem;
-      bottom: .65rem;
-      gap: .35rem;
-    }
-
-    .calendar-day-number,
-    .calendar-day-number-muted {
-      height: 1.65rem !important;
-      min-width: 1.65rem !important;
-      border-radius: .65rem !important;
-      font-size: .84rem !important;
+    .calendar-day-simple {
+      min-height: 54px !important;
+      border-radius: .55rem !important;
+      padding: .1rem !important;
     }
 
     .calendar-day-event-pill {
-      max-width: 4.25rem;
-      padding: .2rem .45rem !important;
+      display: none !important;
     }
 
     .calendar-day-modal-pro {
@@ -9526,7 +9499,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                   const hasTrade = dayTrades.length > 0;
 
                   return (
-                    <button key={cell.key} onClick={() => openDayDetails(cell.key)} className={`${getCalendarDayVisual(dayStats, isWeekend, selected)} h-[76px] xl:h-[116px] rounded-xl`}>
+                    <button key={cell.key} onClick={() => openDayDetails(cell.key)} className={`${getCalendarDayVisual(dayStats, isWeekend, selected)} h-14 xl:h-[116px] rounded-xl`}>
                       <div className="calendar-day-top-row flex items-start justify-between gap-3">
                         <div className={cell.isCurrentMonth ? "calendar-day-number font-black text-white" : "calendar-day-number-muted font-black text-zinc-500"}>{cell.day}</div>
                         <div className="flex min-w-0 items-center gap-2">
@@ -9551,7 +9524,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                         </div>
                       ) : (
                         <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 text-center text-zinc-600">
-                          {isWeekend ? <span className="text-lg opacity-80">🏖️</span> : <span className="calendar-empty-dash text-2xl">–</span>}
+                          {isWeekend ? <span className="calendar-weekend-icon text-lg opacity-80">🏖️</span> : <span className="calendar-empty-dash text-2xl">–</span>}
                         </div>
                       )}
                     </button>
