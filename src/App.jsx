@@ -77,6 +77,8 @@ const USER_TRADES_BACKUP_KEY_PREFIX = "critique_user_trades_last_nonempty_v1";
 const DELETED_TRADES_KEY_PREFIX = "critique_deleted_trades_v1";
 const REMEMBER_EMAIL_KEY = "critique_remember_email_v1";
 const PROFILE_PHOTO_KEY = "critique_profile_photo_v1";
+const PROFILE_NAME_KEY = "critique_profile_name_v1";
+const TRADING_PREFERENCES_KEY = "critique_settings_preferences_v1";
 const CUSTOM_STRATEGIES_KEY = "critique_custom_strategies_v1";
 const ECONOMIC_CALENDAR_CACHE_KEY = "critique_economic_calendar_v1";
 const MAX_SCREENSHOTS = 5;
@@ -564,7 +566,17 @@ function formatDisplayName(value, fallback = "User") {
 
 function getUserDisplayName(user, fallback = "User") {
   const metadata = user?.user_metadata || {};
-  return formatDisplayName(metadata.full_name || metadata.name || metadata.user_name || user?.email, fallback);
+  let savedName = "";
+  try {
+    savedName = localStorage.getItem(getProfileNameKey(user?.id)) || "";
+  } catch {
+    savedName = "";
+  }
+  return formatDisplayName(savedName || metadata.full_name || metadata.name || metadata.user_name || user?.email, fallback);
+}
+
+function getProfileNameKey(userId) {
+  return userId ? `${PROFILE_NAME_KEY}_${userId}` : PROFILE_NAME_KEY;
 }
 
 function getProfilePhotoKey(userId) {
@@ -5411,6 +5423,20 @@ const createAccountPlaceholder = {
   isPlaceholder: true,
 };
 
+function readTradingPreferences() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(TRADING_PREFERENCES_KEY) || "null") || {};
+    const savedRisk = Number(saved.defaultRisk);
+    return {
+      timezone: normalizeTimezoneValue(saved.timezone || "Asia/Tbilisi"),
+      defaultSession: TRADING_SESSIONS.includes(saved.defaultSession) ? saved.defaultSession : "",
+      defaultRisk: Number.isFinite(savedRisk) && savedRisk >= 0 ? String(savedRisk) : "200",
+    };
+  } catch {
+    return { timezone: "Asia/Tbilisi", defaultSession: "", defaultRisk: "200" };
+  }
+}
+
 const emptyForm = {
   symbol: "",
   direction: "Buy",
@@ -5437,6 +5463,17 @@ const emptyForm = {
   exitQuality: "3",
   screenshots: [],
 };
+
+function createEmptyTradeForm(dateOverride) {
+  const preferences = readTradingPreferences();
+  return {
+    ...emptyForm,
+    date: typeof dateOverride === "string" ? dateOverride : formatDateKey(new Date()),
+    session: preferences.defaultSession || "Select trading session",
+    risk: preferences.defaultRisk,
+    screenshots: [],
+  };
+}
 
 const nav = [
   [LayoutDashboard, "Dashboard"],
@@ -6956,7 +6993,7 @@ export default function TradingJournalDashboard() {
   });
   const [editingTradeId, setEditingTradeId] = useState(null);
   const [tradeDeleteTarget, setTradeDeleteTarget] = useState(null);
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState(() => createEmptyTradeForm());
   const [viewTrade, setViewTrade] = useState(null);
   const [importPreview, setImportPreview] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -7691,7 +7728,7 @@ export default function TradingJournalDashboard() {
     tradeSavingRef.current = false;
     setIsTradeSaving(false);
     setEditingTradeId(null);
-    setForm({ ...emptyForm, date: typeof dateOverride === "string" ? dateOverride : formatDateKey(new Date()), screenshots: [] });
+    setForm(createEmptyTradeForm(dateOverride));
     setIsTradeModalOpen(true);
   }
   function openEditTrade(trade) {
@@ -7711,7 +7748,7 @@ export default function TradingJournalDashboard() {
     tradeSavingRef.current = false;
     setIsTradeSaving(false);
     setEditingTradeId(null);
-    setForm({ ...emptyForm, screenshots: [] });
+    setForm(createEmptyTradeForm());
     setIsTradeModalOpen(false);
   }
   async function saveTrade() {
@@ -8208,6 +8245,16 @@ Skipped duplicates: ${duplicateCount}
             onSignOut={handleSignOut}
             profilePhoto={profilePhoto}
             setProfilePhoto={setProfilePhoto}
+            onProfileNameChange={(name, nextUser) => {
+              if (nextUser) {
+                setAuthUser(nextUser);
+                return;
+              }
+              setAuthUser((current) => current ? {
+                ...current,
+                user_metadata: { ...(current.user_metadata || {}), full_name: name },
+              } : current);
+            }}
           />
         ) : active === "Admin" && canUseAdminTools ? (
           <AdminAccessPage />
@@ -10547,7 +10594,24 @@ function getTimezoneOptions() {
     });
 }
 
-function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, isSupabaseReady, onOpenAccount, onBackup, onRestore, onSignOut, profilePhoto, setProfilePhoto }) {
+function SettingsPasswordInput({ visible, onToggle, className = "", ...props }) {
+  return (
+    <div className="relative">
+      <Input type={visible ? "text" : "password"} {...props} className={`pr-12 ${className}`} />
+      <button
+        type="button"
+        onClick={onToggle}
+        className="absolute right-2 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-white/10 hover:text-fuchsia-200"
+        aria-label={visible ? "Hide password" : "Show password"}
+        title={visible ? "Hide password" : "Show password"}
+      >
+        {visible ? <EyeOff size={17} /> : <Eye size={17} />}
+      </button>
+    </div>
+  );
+}
+
+function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, isSupabaseReady, onOpenAccount, onBackup, onRestore, onSignOut, profilePhoto, setProfilePhoto, onProfileNameChange }) {
   const profileName = getUserDisplayName(authUser, account?.isPlaceholder ? "User" : account?.name || "User");
   const profileInitials = profileName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join("") || "U";
   const currentBalance = Number(accountBalance?.currentBalance || account?.balance || 0);
@@ -10560,17 +10624,11 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
   const [message, setMessage] = useState("");
   const [passwordMessage, setPasswordMessage] = useState("");
   const [passwordStatus, setPasswordStatus] = useState("");
-  const [showSettingsPasswords, setShowSettingsPasswords] = useState(false);
-  const [preferences, setPreferences] = useState(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem("critique_settings_preferences_v1") || "null") || {};
-      return { currency: saved.currency || account?.currency || "USD", timezone: normalizeTimezoneValue(saved.timezone || "Asia/Tbilisi"), weekStartsOn: saved.weekStartsOn || "Monday" };
-    } catch {
-      return { currency: account?.currency || "USD", timezone: "Asia/Tbilisi", weekStartsOn: "Monday" };
-    }
-  });
+  const [visiblePasswords, setVisiblePasswords] = useState({ current: false, new: false, confirm: false });
+  const [preferences, setPreferences] = useState(readTradingPreferences);
   const timezoneOptions = useMemo(() => getTimezoneOptions(), []);
-  useEffect(() => { localStorage.setItem("critique_settings_preferences_v1", JSON.stringify(preferences)); }, [preferences]);
+  useEffect(() => { localStorage.setItem(TRADING_PREFERENCES_KEY, JSON.stringify(preferences)); }, [preferences]);
+  useEffect(() => { setFullName(profileName); }, [profileName]);
 
   async function uploadProfilePhoto(event) {
     const file = event.target.files?.[0];
@@ -10616,14 +10674,25 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
 
   async function saveName() {
     setMessage("");
-    if (!fullName.trim()) {
+    const nextName = fullName.trim();
+    if (!nextName) {
       setMessage("Name cannot be empty.");
       return;
     }
+    try {
+      localStorage.setItem(getProfileNameKey(authUser?.id), nextName);
+    } catch {
+      // The in-memory profile still updates when browser storage is unavailable.
+    }
+    onProfileNameChange?.(nextName);
     if (supabase && authUser?.id) {
-      const { error } = await supabase.auth.updateUser({ data: { full_name: fullName.trim() } });
-      if (error) {
-        setMessage(error.message || "Could not save name.");
+      try {
+        const { data, error } = await supabase.auth.updateUser({ data: { full_name: nextName } });
+        if (error) throw error;
+        if (data?.user) onProfileNameChange?.(nextName, data.user);
+      } catch (error) {
+        console.warn("Profile name saved locally; cloud sync is temporarily unavailable.", error?.message || error);
+        setMessage("Profile name saved. Cloud sync will retry after your connection is restored.");
         return;
       }
     }
@@ -10700,9 +10769,18 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
   }
 
   function savePreferences() {
-    const next = { ...preferences, timezone: normalizeTimezoneValue(preferences.timezone) };
+    const risk = Number(preferences.defaultRisk);
+    if (!Number.isFinite(risk) || risk < 0) {
+      setMessage("Default risk must be zero or greater.");
+      return;
+    }
+    const next = {
+      timezone: normalizeTimezoneValue(preferences.timezone),
+      defaultSession: TRADING_SESSIONS.includes(preferences.defaultSession) ? preferences.defaultSession : "",
+      defaultRisk: String(risk),
+    };
     setPreferences(next);
-    localStorage.setItem("critique_settings_preferences_v1", JSON.stringify(next));
+    localStorage.setItem(TRADING_PREFERENCES_KEY, JSON.stringify(next));
     setMessage("Trading preferences saved.");
   }
 
@@ -10747,18 +10825,12 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
           </div>
           <div className="mt-4 flex justify-end"><Button onClick={saveName} className="bg-fuchsia-500 text-black"><Save size={16} /> Save Name</Button></div>
           <div className="my-8 h-px bg-white/10" />
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="text-lg font-black text-white">Change Password</h3>
-            <button type="button" onClick={() => setShowSettingsPasswords((current) => !current)} className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-black px-3 py-2 text-xs font-black text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-200" aria-label={showSettingsPasswords ? "Hide passwords" : "Show passwords"}>
-              {showSettingsPasswords ? <EyeOff size={16} /> : <Eye size={16} />}
-              {showSettingsPasswords ? "Hide" : "Show"}
-            </button>
-          </div>
+          <h3 className="text-lg font-black text-white">Change Password</h3>
           <div className="mt-5 grid gap-4">
-            <Field label="Current Password"><Input type={showSettingsPasswords ? "text" : "password"} autoComplete="current-password" value={currentPassword} onChange={(event) => { setCurrentPassword(event.target.value); setPasswordMessage(""); setPasswordStatus(""); }} placeholder="Enter your current password" className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
+            <Field label="Current Password"><SettingsPasswordInput visible={visiblePasswords.current} onToggle={() => setVisiblePasswords((current) => ({ ...current, current: !current.current }))} autoComplete="current-password" value={currentPassword} onChange={(event) => { setCurrentPassword(event.target.value); setPasswordMessage(""); setPasswordStatus(""); }} placeholder="Enter your current password" className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="New Password"><Input type={showSettingsPasswords ? "text" : "password"} autoComplete="new-password" value={newPassword} onChange={(event) => { setNewPassword(event.target.value); setPasswordMessage(""); setPasswordStatus(""); }} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
-              <Field label="Confirm Password"><Input type={showSettingsPasswords ? "text" : "password"} autoComplete="new-password" value={confirmPassword} onChange={(event) => { setConfirmPassword(event.target.value); setPasswordMessage(""); setPasswordStatus(""); }} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
+              <Field label="New Password"><SettingsPasswordInput visible={visiblePasswords.new} onToggle={() => setVisiblePasswords((current) => ({ ...current, new: !current.new }))} autoComplete="new-password" value={newPassword} onChange={(event) => { setNewPassword(event.target.value); setPasswordMessage(""); setPasswordStatus(""); }} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
+              <Field label="Confirm Password"><SettingsPasswordInput visible={visiblePasswords.confirm} onToggle={() => setVisiblePasswords((current) => ({ ...current, confirm: !current.confirm }))} autoComplete="new-password" value={confirmPassword} onChange={(event) => { setConfirmPassword(event.target.value); setPasswordMessage(""); setPasswordStatus(""); }} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
             </div>
           </div>
           {passwordMessage && <div className={`mt-4 ${passwordMessageClass}`}>{passwordMessage}</div>}
@@ -10771,10 +10843,16 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
           </SettingsPanel>
           <SettingsPanel icon={<Target size={25} />} title="Trading Preferences" subtitle="Default settings for trading">
             <div className="mt-7 space-y-5">
-              <Field label="Default Account"><Select value={account?.name || "Trading Account"} onChange={onOpenAccount}><option>{account?.name || "Trading Account"}</option></Select></Field>
-              <Field label="Currency"><Select value={preferences.currency} onChange={(event) => setPreferences((current) => ({ ...current, currency: event.target.value }))}><option value="USD">USD ($)</option><option value="EUR">EUR</option><option value="GBP">GBP</option></Select></Field>
               <Field label="Timezone"><Select value={normalizeTimezoneValue(preferences.timezone)} onChange={(event) => setPreferences((current) => ({ ...current, timezone: event.target.value }))}>{timezoneOptions.map((zone) => <option key={zone.value} value={zone.value}>{zone.label}</option>)}</Select></Field>
-              <Field label="Week Starts On"><Select value={preferences.weekStartsOn} onChange={(event) => setPreferences((current) => ({ ...current, weekStartsOn: event.target.value }))}><option>Monday</option><option>Sunday</option></Select></Field>
+              <Field label="Default Trading Session">
+                <Select value={preferences.defaultSession} onChange={(event) => setPreferences((current) => ({ ...current, defaultSession: event.target.value }))}>
+                  <option value="">Choose per trade</option>
+                  {TRADING_SESSIONS.map((session) => <option key={session} value={session}>{session}</option>)}
+                </Select>
+              </Field>
+              <Field label={`Default Risk (${account?.currency || "USD"})`}>
+                <Input type="number" min="0" step="1" inputMode="decimal" value={preferences.defaultRisk} onChange={(event) => setPreferences((current) => ({ ...current, defaultRisk: event.target.value }))} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" />
+              </Field>
             </div>
             <div className="mt-5 flex justify-end"><Button onClick={savePreferences} className="bg-fuchsia-500 text-black"><Save size={16} /> Save Preferences</Button></div>
           </SettingsPanel>
