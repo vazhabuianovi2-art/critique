@@ -8544,19 +8544,19 @@ function TradeListRow({ trade, onView, onEdit, onRemove }) {
     <div className="group relative overflow-hidden rounded-xl border border-fuchsia-500/35 bg-gradient-to-br from-zinc-950 via-black to-black p-5 shadow-[0_0_18px_rgba(217,70,239,0.10)] transition-all duration-300 hover:border-fuchsia-400/80 hover:shadow-2xl hover:shadow-fuchsia-500/20">
       <div className="absolute right-0 top-0 h-20 w-20 rounded-bl-[2rem] bg-fuchsia-500/10" />
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent" />
-      <div className="relative z-10 flex items-center justify-between gap-5">
+      <div className="relative z-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-5">
         <div className="flex min-w-0 items-center gap-3">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-fuchsia-500/35 bg-fuchsia-500/15 text-sm font-black text-fuchsia-300">{trade.pair}</span>
           <span className={`rounded-full border px-3 py-1 text-xs font-black tracking-wider ${getTradeDirectionClass(trade.direction)}`}>{trade.direction}</span>
           <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-black text-white">{trade.setup}</span>
           {tags.map((tag) => <span key={tag} className="hidden rounded-full bg-white/5 px-2 py-1 text-xs text-zinc-400 xl:inline">{tag}</span>)}
         </div>
-        <div className="flex items-center gap-7 text-sm text-zinc-400">
+        <div className="flex flex-wrap items-center gap-3 text-sm text-zinc-400 sm:gap-7">
           <span className="journal-list-metric-chip">Qty {trade.quantity}</span>
           <span className="journal-list-metric-chip">◎ 1:{Math.abs(rr).toFixed(1)}</span>
           <span className="text-fuchsia-300">⌖ {trade.session || "—"}</span>
           <span>{trade.date}</span>
-          <span className={`min-w-28 text-right text-xl font-black ${getPnlToneClass(pnl)}`}>{getPnlArrow(pnl)} {formatMoney(pnl)}</span>
+          <span className={`text-right text-xl font-black sm:min-w-28 ${getPnlToneClass(pnl)}`}>{getPnlArrow(pnl)} {formatMoney(pnl)}</span>
           <div className="flex gap-2">
             <button onClick={onView} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Eye size={16} /></button>
             <button onClick={onEdit} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Edit3 size={16} /></button>
