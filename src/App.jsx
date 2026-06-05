@@ -8271,7 +8271,9 @@ function MobileBottomNav({ active, setActive, onAdd, setTradeViewMode, lockedToB
   ];
   return (
     <div className="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-40 border-t border-fuchsia-500/25 bg-black/95 px-2 py-2 backdrop-blur lg:hidden">
-      <button onClick={onAdd} className="mobile-nav-fab absolute -top-7 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-2xl bg-fuchsia-500 text-white shadow-[0_0_28px_rgba(217,70,239,.48)]"><Plus size={24} /></button>
+      {active !== "Calendar" && (
+        <button onClick={onAdd} className="mobile-nav-fab absolute -top-7 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-2xl bg-fuchsia-500 text-white shadow-[0_0_28px_rgba(217,70,239,.48)]"><Plus size={24} /></button>
+      )}
       <div className="grid grid-cols-5 gap-1">
         {items.map(([Icon, label]) => {
           const isAdd = false;
@@ -9616,8 +9618,9 @@ function CalendarDayDetailsModal({ dateKey, trades = [], events = [], onClose, o
             </div>
           </div>
 
-          <div className="mb-4 flex flex-wrap items-center gap-2">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <span className="rounded-xl border border-fuchsia-500/45 bg-black px-4 py-2 text-sm font-black text-white">All Trades</span>
+            <button onClick={onAdd} className="flex items-center gap-2 rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 px-4 py-2 text-sm font-black text-fuchsia-300 transition hover:border-fuchsia-400/70 hover:bg-fuchsia-500/25 hover:text-white"><Plus size={14} /> Add Trade</button>
           </div>
 
           <div className="max-h-[340px] space-y-3 overflow-y-auto pr-1">
@@ -12524,7 +12527,7 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
                     <div className="truncate font-black text-white">{row.country} · {row.name}</div>
                     <div className="text-xs font-semibold text-zinc-500">{row.trades} trades · {row.count} event match{row.count === 1 ? "" : "es"}</div>
                   </div>
-                  <div className={row.pnl >= 0 ? "font-black text-emerald-400" : "font-black text-red-400"}>{formatMoney(row.pnl)}</div>
+                  <div className={`shrink-0 whitespace-nowrap ${row.pnl >= 0 ? "font-black text-emerald-400" : "font-black text-red-400"}`}>{formatMoney(row.pnl)}</div>
                 </div>
               )) : <div className="text-sm font-semibold text-zinc-500">No news-day trade matches yet.</div>}
             </SimplePanel>
@@ -12532,11 +12535,11 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
               {newsStats.currencyRows.length ? newsStats.currencyRows.slice(0, 8).map((row) => (
                 <div key={row.name} className="mb-3 rounded-xl border border-white/10 bg-black/35 px-4 py-3">
                   <div className="flex items-start justify-between gap-4">
-                    <div>
+                    <div className="min-w-0">
                       <div className="font-black text-white">{row.name}</div>
                       <div className="text-xs font-semibold text-zinc-500">{row.trades} trades on matching event days</div>
                     </div>
-                    <div className={row.pnl >= 0 ? "font-black text-emerald-400" : "font-black text-red-400"}>{formatMoney(row.pnl)}</div>
+                    <div className={`shrink-0 whitespace-nowrap ${row.pnl >= 0 ? "font-black text-emerald-400" : "font-black text-red-400"}`}>{formatMoney(row.pnl)}</div>
                   </div>
                   <div className="mt-3 grid gap-2 text-xs font-black sm:grid-cols-3">
                     <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-emerald-200">
