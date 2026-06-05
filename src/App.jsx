@@ -11527,15 +11527,6 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
     "Priority product updates",
   ];
 
-  const setupItems = [
-    "DODO_PAYMENTS_API_KEY",
-    "DODO_MONTHLY_PRODUCT_ID",
-    "DODO_YEARLY_PRODUCT_ID",
-    "DODO_PAYMENTS_WEBHOOK_KEY",
-    "DODO_PAYMENTS_ENVIRONMENT",
-    "DODO_BUSINESS_ID",
-    "VITE_SITE_URL",
-  ];
 
   const subscriptionStatus = String(subscription?.status || "").replaceAll("_", " ");
   const isAdminGrantedPlan = String(subscription?.provider || "").toLowerCase() === "admin";
@@ -11836,19 +11827,6 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
               </button>
             </div>
 
-            <div className="mt-6 rounded-lg border border-amber-500/25 bg-amber-500/10 p-5">
-              <div className="font-black text-amber-200">Go-live checklist</div>
-              <p className="mt-2 text-sm font-semibold leading-6 text-amber-100/80">
-                Add these values in Vercel before live checkout. Without them, the page stays safe and shows a setup message.
-              </p>
-              <div className="mt-4 grid gap-2">
-                {setupItems.map((item) => (
-                  <div key={item} className="rounded-md border border-amber-500/20 bg-black/30 px-3 py-2 font-mono text-xs font-bold text-amber-100">
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
           </section>
         </div>
       </div>
