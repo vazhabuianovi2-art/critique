@@ -6904,6 +6904,15 @@ export default function TradingJournalDashboard() {
     setActiveRaw(page);
     try { localStorage.setItem(ACTIVE_PAGE_KEY, page); } catch {}
   };
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [active]);
   const [tradeViewMode, setTradeViewMode] = useState(null);
   const [trades, setTrades] = useState(() => {
     try {
