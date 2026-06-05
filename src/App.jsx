@@ -4267,6 +4267,7 @@ const THEME_STYLE_CSS = `
     }
 
     .calendar-shell-pro > .grid {
+      min-width: 0 !important;
       gap: .25rem !important;
     }
 
