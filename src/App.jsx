@@ -7524,6 +7524,8 @@ export default function TradingJournalDashboard() {
     setAuthUser(null);
     setProfilePhoto("");
     setIsSidebarUserMenuOpen(false);
+    try { localStorage.removeItem(ACTIVE_PAGE_KEY); } catch {}
+    setActiveRaw("Dashboard");
   }
 
   async function handleSaveAccountSettings(nextAccount) {
