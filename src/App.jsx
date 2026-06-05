@@ -4266,15 +4266,49 @@ const THEME_STYLE_CSS = `
       line-height: 1.45 !important;
     }
 
-    .calendar-shell-pro {
-      overflow-x: auto !important;
-      -webkit-overflow-scrolling: touch;
-      scroll-snap-type: x proximity;
+    .calendar-shell-pro > .grid {
+      gap: .25rem !important;
     }
 
-    .calendar-shell-pro > .grid {
-      min-width: 880px !important;
-      gap: .55rem !important;
+    .calendar-day-top-row {
+      top: .35rem !important;
+      left: .35rem !important;
+      right: .35rem !important;
+    }
+
+    .calendar-day-result-stack {
+      left: .35rem !important;
+      right: .35rem !important;
+      bottom: .3rem !important;
+      gap: .2rem !important;
+    }
+
+    .calendar-day-number,
+    .calendar-day-number-muted {
+      height: 1.3rem !important;
+      min-width: 1.3rem !important;
+      font-size: .68rem !important;
+      border-radius: .4rem !important;
+    }
+
+    .calendar-week-header {
+      font-size: .58rem !important;
+      padding-block: .55rem !important;
+      letter-spacing: .03em !important;
+    }
+
+    .calendar-day-event-pill {
+      display: none !important;
+    }
+
+    .calendar-day-result-stack .rounded-md {
+      font-size: .55rem !important;
+      padding: .1rem .2rem !important;
+    }
+
+    .calendar-trade-count {
+      font-size: .5rem !important;
+      padding-block: .1rem !important;
     }
 
     .calendar-week-header {
@@ -4338,7 +4372,7 @@ const THEME_STYLE_CSS = `
     }
 
     .calendar-shell-pro > .grid {
-      min-width: 820px !important;
+      gap: .2rem !important;
     }
 
     .calendar-week-summary-pro .text-lg {
@@ -9465,10 +9499,10 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
         worstMonthDay={worstMonthDay}
       />
 
-      <div className="calendar-shell-pro calendar-neon-panel mt-7 overflow-x-auto rounded-2xl border border-white/10 bg-black p-6 shadow-[0_0_34px_rgba(217,70,239,0.10)]">
-        <div className="grid min-w-[1120px] grid-cols-[repeat(7,minmax(0,1fr))_170px] gap-3">
+      <div className="calendar-shell-pro calendar-neon-panel mt-7 rounded-2xl border border-white/10 bg-black p-4 shadow-[0_0_34px_rgba(217,70,239,0.10)] xl:overflow-x-auto xl:p-6">
+        <div className="grid min-w-0 grid-cols-7 gap-1 xl:min-w-[1120px] xl:grid-cols-[repeat(7,minmax(0,1fr))_170px] xl:gap-3">
           {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN", "WEEK"].map((day) => (
-            <div key={day} className={`calendar-week-header rounded-lg border py-3 text-center text-xs font-black tracking-widest ${day === "SUN" || day === "SAT" || day === "WEEK" ? "calendar-week-header-special border-fuchsia-500/35 bg-fuchsia-500/12 text-fuchsia-300" : "border-white/10 bg-white/5 text-zinc-400"}`}>
+            <div key={day} className={`calendar-week-header rounded-lg border py-3 text-center text-xs font-black tracking-widest ${day === "WEEK" ? "hidden xl:block" : ""} ${day === "SUN" || day === "SAT" || day === "WEEK" ? "calendar-week-header-special border-fuchsia-500/35 bg-fuchsia-500/12 text-fuchsia-300" : "border-white/10 bg-white/5 text-zinc-400"}`}>
               {day}
             </div>
           ))}
@@ -9491,7 +9525,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                   const hasTrade = dayTrades.length > 0;
 
                   return (
-                    <button key={cell.key} onClick={() => openDayDetails(cell.key)} className={`${getCalendarDayVisual(dayStats, isWeekend, selected)} h-[116px] rounded-xl`}>
+                    <button key={cell.key} onClick={() => openDayDetails(cell.key)} className={`${getCalendarDayVisual(dayStats, isWeekend, selected)} h-[76px] xl:h-[116px] rounded-xl`}>
                       <div className="calendar-day-top-row flex items-start justify-between gap-3">
                         <div className={cell.isCurrentMonth ? "calendar-day-number font-black text-white" : "calendar-day-number-muted font-black text-zinc-500"}>{cell.day}</div>
                         <div className="flex min-w-0 items-center gap-2">
@@ -9522,7 +9556,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                     </button>
                   );
                 })}
-                <div className="calendar-week-summary calendar-week-summary-pro relative h-[116px] overflow-hidden rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/12 p-3 shadow-[0_0_18px_rgba(217,70,239,0.12)]">
+                <div className="calendar-week-summary calendar-week-summary-pro hidden xl:block relative h-[116px] overflow-hidden rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/12 p-3 shadow-[0_0_18px_rgba(217,70,239,0.12)]">
                   <div className="absolute right-0 top-0 h-16 w-16 rounded-bl-2xl bg-fuchsia-500/12" />
                   {weekStats.count ? (
                     <div className="relative z-10 flex h-full flex-col items-center justify-center">
