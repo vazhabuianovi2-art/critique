@@ -6113,9 +6113,14 @@ function resizeImageToDataUrl(file, maxSize = 512, quality = 0.82) {
 
 async function uploadScreenshotsForTrade(event, form, setForm) {
   const files = Array.from(event.target.files || []).filter((file) => file.type.startsWith("image/"));
+  if (!files.length) return;
   const current = normalizeScreenshots(form);
   const slots = Math.max(MAX_SCREENSHOTS - current.length, 0);
-  const uploaded = await Promise.all(files.slice(0, slots).map(fileToBase64));
+  if (slots <= 0) return;
+  // Resize to max 1200px and compress to JPEG 80% — keeps charts readable but reduces file size ~90%
+  const uploaded = (await Promise.all(
+    files.slice(0, slots).map((file) => resizeImageToDataUrl(file, 1200, 0.80).catch(() => null))
+  )).filter(Boolean);
   setForm({ ...form, screenshots: [...current, ...uploaded].slice(0, MAX_SCREENSHOTS) });
   event.target.value = "";
 }
