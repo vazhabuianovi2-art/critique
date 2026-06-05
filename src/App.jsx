@@ -12377,20 +12377,20 @@ function SimplePageShell({ crumb, title, subtitle, action, children }) {
 function SimpleStatCard({ label, value, detail, tone = "fuchsia" }) {
   const color = tone === "green" ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-300" : tone === "red" ? "border-red-500/25 bg-red-500/10 text-red-300" : tone === "amber" ? "border-amber-500/25 bg-amber-500/10 text-amber-300" : "border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300";
   return (
-    <div className={`stats-interactive-card ${tone === "green" ? "stats-card-green" : tone === "amber" ? "stats-card-amber" : "stats-card-purple"} rounded-lg border p-5 ${color}`}>
+    <div className={`stats-interactive-card min-w-0 ${tone === "green" ? "stats-card-green" : tone === "amber" ? "stats-card-amber" : "stats-card-purple"} rounded-lg border p-5 ${color}`}>
       <div className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500">{label}</div>
       <div className="mt-3 text-3xl font-black text-white">{value}</div>
-      <div className="mt-2 text-sm font-semibold leading-6 text-zinc-400">{detail}</div>
+      <div className="mt-2 truncate text-sm font-semibold leading-6 text-zinc-400">{detail}</div>
     </div>
   );
 }
 
 function SimplePanel({ title, subtitle, children, icon }) {
   return (
-    <section className="rounded-lg border border-white/12 bg-[#070707] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.18)] transition-all duration-300 hover:border-fuchsia-500/25 hover:shadow-[0_24px_70px_rgba(217,70,239,0.08)]">
-      <div className="mb-5 flex items-start gap-3">
-        {icon && <div className="text-fuchsia-400">{icon}</div>}
-        <div>
+    <section className="min-w-0 overflow-hidden rounded-lg border border-white/12 bg-[#070707] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.18)] transition-all duration-300 hover:border-fuchsia-500/25 hover:shadow-[0_24px_70px_rgba(217,70,239,0.08)]">
+      <div className="mb-5 flex min-w-0 items-start gap-3">
+        {icon && <div className="shrink-0 text-fuchsia-400">{icon}</div>}
+        <div className="min-w-0">
           <h2 className="text-2xl font-black text-white">{title}</h2>
           {subtitle && <p className="mt-1 text-sm font-semibold leading-6 text-zinc-400">{subtitle}</p>}
         </div>
@@ -12527,14 +12527,14 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
               <RefreshCwIcon /> Refresh News
             </button>
           </div>
-          <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-5 grid min-w-0 gap-5 md:grid-cols-2 xl:grid-cols-4">
             <SimpleStatCard label="Best News Day" value={newsStats.best ? formatMoney(newsStats.best.pnl) : "$0"} detail={newsStats.best ? `${newsStats.best.event.country} · ${newsStats.best.event.title}` : "No trades on event days yet."} tone="green" />
             <SimpleStatCard label="Worst News Day" value={newsStats.worst ? formatMoney(newsStats.worst.pnl) : "$0"} detail={newsStats.worst ? `${newsStats.worst.event.country} · ${newsStats.worst.event.title}` : "No losing event day yet."} tone="amber" />
             <SimpleStatCard label="Event Days Traded" value={newsStats.rows.length} detail={`${newsStats.totalNewsTrades || 0} trades on ${newsStats.totalEventCount || 0} loaded events.`} tone="fuchsia" />
             <SimpleStatCard label="Top Currency" value={newsStats.currencyRows[0]?.name || "No data"} detail={newsStats.currencyRows[0] ? `${formatMoney(newsStats.currencyRows[0].pnl)} across ${newsStats.currencyRows[0].trades} trades` : "Trade on news days to measure."} tone="green" />
           </div>
 
-          <div className="mt-6 grid gap-6 xl:grid-cols-2">
+          <div className="mt-6 grid min-w-0 gap-6 xl:grid-cols-2">
             <SimplePanel title="Best News Events" subtitle="Event names that matched your strongest trading days." icon={<TrendingUp size={24} />}>
               {newsStats.eventRows.length ? newsStats.eventRows.slice(0, 6).map((row) => (
                 <div key={`${row.country}-${row.name}`} className="mb-2 flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-black/35 px-4 py-3">
