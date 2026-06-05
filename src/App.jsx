@@ -10887,32 +10887,12 @@ function TawkToWidget({ authUser }) {
     window.Tawk_API = window.Tawk_API || {};
     window.Tawk_LoadStart = window.Tawk_LoadStart || new Date();
 
-    // On mobile push the bubble above the bottom nav bar (≈80px)
-    // Poll until TawkTo creates its container, then reposition it
-    let attempts = 0;
-    const tawkPoller = setInterval(() => {
-      attempts++;
-      if (attempts > 40) { clearInterval(tawkPoller); return; } // give up after 20 s
-      if (window.innerWidth > 1024) { clearInterval(tawkPoller); return; } // desktop: skip
-      // TawkTo creates a fixed div wrapping the minimized chat button
-      const el =
-        document.querySelector("#tawkchat-minified-container") ||
-        document.querySelector(".tawk-min-container") ||
-        document.querySelector("div[id^='tawkchat']") ||
-        (() => {
-          const iframes = document.querySelectorAll("iframe[id^='tawk']");
-          for (const iframe of iframes) {
-            const parent = iframe.parentElement;
-            if (parent && window.getComputedStyle(parent).position === "fixed") return parent;
-          }
-          return null;
-        })();
-      if (el) {
-        el.style.setProperty("bottom", "80px", "important");
-        el.style.setProperty("z-index", "38", "important");
-        clearInterval(tawkPoller);
+    // On mobile hide the TawkTo bubble entirely — users can reach Support via the app's Support page
+    window.Tawk_API.onLoad = function () {
+      if (window.innerWidth <= 1024 && typeof window.Tawk_API.hideWidget === "function") {
+        window.Tawk_API.hideWidget();
       }
-    }, 500);
+    };
 
     if (document.getElementById("tawk-to-widget-script")) return;
 
