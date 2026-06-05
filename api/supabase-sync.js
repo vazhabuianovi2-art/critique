@@ -45,6 +45,7 @@ export default async function handler(request, response) {
     const serviceRoleKey = stripBom(process.env.SUPABASE_SERVICE_ROLE_KEY);
 
     if (!supabaseUrl || !anonKey || !serviceRoleKey) {
+      console.error("[sync] MISSING ENV: url=", !!supabaseUrl, "anon=", !!anonKey, "svc=", !!serviceRoleKey);
       return json(response, 500, { error: "Supabase sync API is not configured." });
     }
 
@@ -56,7 +57,9 @@ export default async function handler(request, response) {
 
     const user = await getUserFromToken(supabaseUrl, anonKey, accessToken);
     const userId = user?.id;
+    console.log("[sync] action=", action, "userId=", userId ? userId.slice(0,8)+"..." : "NULL");
     if (!userId) {
+      console.error("[sync] getUserFromToken returned null — anonKey len=", anonKey.length, "first=", anonKey.charCodeAt(0).toString(16));
       return authExpired(response);
     }
 
