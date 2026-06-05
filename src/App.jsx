@@ -315,8 +315,10 @@ function isSubscriptionAccessActive(subscription) {
   const hasFuturePaidPeriod = Boolean(periodEndMs && periodEndMs > now);
 
   if (["trialing", "on_trial"].includes(status)) return hasFutureTrial || hasFuturePaidPeriod;
-  if (status === "active") return periodEndMs ? hasFuturePaidPeriod : true;
-  if (subscription.cancel_at_period_end) return hasFuturePaidPeriod;
+  if (status === "active") {
+    if (subscription.cancel_at_period_end) return hasFuturePaidPeriod;
+    return periodEndMs ? hasFuturePaidPeriod : true;
+  }
   return false;
 }
 
@@ -11856,6 +11858,9 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
 
 function getAccessSuspendedCopy(subscription) {
   const status = String(subscription?.status || "").toLowerCase();
+  const now = Date.now();
+  const trialEndMs = subscription?.trial_end ? new Date(subscription.trial_end).getTime() : 0;
+  const trialExpired = Boolean(trialEndMs && trialEndMs <= now);
   const expiredDate = subscription?.trial_end || subscription?.current_period_end || subscription?.canceled_at || "";
   const expiredText = expiredDate
     ? new Date(expiredDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
@@ -11866,26 +11871,31 @@ function getAccessSuspendedCopy(subscription) {
       title: "Activate Pro",
       detail: "Start a subscription to unlock your trading workspace.",
       badge: "Subscription required",
+      isNewUser: true,
     };
   }
 
-  if (status === "trialing" || status === "on_trial") {
+  // Trial ended — status may be "trialing" (just expired), "on_trial", "past_due", "expired", or "canceled"
+  if (["trialing", "on_trial"].includes(status) || trialExpired) {
     return {
       title: "Trial Expired",
-      detail: expiredText ? `Your trial ended on ${expiredText}. Subscribe to regain access.` : "Your trial ended. Subscribe to regain access.",
+      detail: expiredText ? `Your 7-day trial ended on ${expiredText}. Subscribe to keep your data and regain full access.` : "Your 7-day trial has ended. Subscribe to continue.",
       badge: "Trial ended",
+      isNewUser: false,
     };
   }
 
   return {
     title: "Access Suspended",
-    detail: expiredText ? `Expired on ${expiredText}. Reactivate your subscription to continue.` : "Reactivate your subscription to continue.",
+    detail: expiredText ? `Your subscription expired on ${expiredText}. Reactivate to continue.` : "Reactivate your subscription to continue.",
     badge: "Payment required",
+    isNewUser: false,
   };
 }
 
 function AccessSuspendedOverlay({ subscription, loadingPlan, onStartCheckout, onSignOut }) {
   const copy = getAccessSuspendedCopy(subscription);
+  const primaryLabel = copy.isNewUser ? "Start Free Trial" : "Subscribe Now";
   const perks = [
     [Database, "Data safe"],
     [ShieldCheck, "Account secure"],
@@ -11931,7 +11941,7 @@ function AccessSuspendedOverlay({ subscription, loadingPlan, onStartCheckout, on
             className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-fuchsia-300/60 bg-fuchsia-500 px-4 py-3 text-sm font-black text-black shadow-[0_0_28px_rgba(217,70,239,0.35)] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <CreditCard size={16} />
-            {loadingPlan === "monthly" ? "Opening checkout..." : (subscription ? "Reactivate Monthly" : "Start Free Trial")}
+            {loadingPlan === "monthly" ? "Opening checkout..." : primaryLabel}
           </button>
           <button
             type="button"
