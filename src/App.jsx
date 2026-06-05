@@ -10887,6 +10887,28 @@ function TawkToWidget({ authUser }) {
     window.Tawk_API = window.Tawk_API || {};
     window.Tawk_LoadStart = window.Tawk_LoadStart || new Date();
 
+    // On mobile push the bubble above the bottom nav bar (≈80px)
+    window.Tawk_API.onLoad = function () {
+      if (typeof window.Tawk_API.customStyle === "function") {
+        window.Tawk_API.customStyle({ zIndex: 38 });
+      }
+      // Inject CSS to push the chat bubble above the mobile bottom nav
+      if (!document.getElementById("tawk-mobile-offset")) {
+        const s = document.createElement("style");
+        s.id = "tawk-mobile-offset";
+        s.textContent = `
+          @media (max-width: 1024px) {
+            .tawk-min-container,
+            div[class*="tawk"],
+            iframe[id*="tawk"] {
+              bottom: 80px !important;
+            }
+          }
+        `;
+        document.head.appendChild(s);
+      }
+    };
+
     if (document.getElementById("tawk-to-widget-script")) return;
 
     const script = document.createElement("script");
