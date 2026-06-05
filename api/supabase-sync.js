@@ -38,9 +38,11 @@ export default async function handler(request, response) {
   }
 
   try {
-    const supabaseUrl = String(process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "").replace(/\/+$/, "");
-    const anonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    // Strip UTF-8 BOM (﻿ / ﻿) that can be accidentally pasted into Vercel env vars
+    const stripBom = (s) => String(s || "").replace(/^﻿/, "").trim();
+    const supabaseUrl = stripBom(process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL).replace(/\/+$/, "");
+    const anonKey = stripBom(process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY);
+    const serviceRoleKey = stripBom(process.env.SUPABASE_SERVICE_ROLE_KEY);
 
     if (!supabaseUrl || !anonKey || !serviceRoleKey) {
       return json(response, 500, { error: "Supabase sync API is not configured." });

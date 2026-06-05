@@ -108,7 +108,8 @@ const SETUP_QUALITY_OPTIONS = ["A+", "A", "B", "C", "D"];
 
 function getEnvValue(key) {
   try {
-    return String(import.meta.env?.[key] || "").trim();
+    // Strip UTF-8 BOM (﻿) that may be pasted accidentally into Vercel env vars
+    return String(import.meta.env?.[key] || "").replace(/^﻿/, "").trim();
   } catch {
     return "";
   }
