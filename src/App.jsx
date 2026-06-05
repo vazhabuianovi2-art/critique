@@ -10888,26 +10888,31 @@ function TawkToWidget({ authUser }) {
     window.Tawk_LoadStart = window.Tawk_LoadStart || new Date();
 
     // On mobile push the bubble above the bottom nav bar (≈80px)
-    window.Tawk_API.onLoad = function () {
-      if (typeof window.Tawk_API.customStyle === "function") {
-        window.Tawk_API.customStyle({ zIndex: 38 });
-      }
-      // Inject CSS to push the chat bubble above the mobile bottom nav
-      if (!document.getElementById("tawk-mobile-offset")) {
-        const s = document.createElement("style");
-        s.id = "tawk-mobile-offset";
-        s.textContent = `
-          @media (max-width: 1024px) {
-            .tawk-min-container,
-            div[class*="tawk"],
-            iframe[id*="tawk"] {
-              bottom: 80px !important;
-            }
+    // Poll until TawkTo creates its container, then reposition it
+    let attempts = 0;
+    const tawkPoller = setInterval(() => {
+      attempts++;
+      if (attempts > 40) { clearInterval(tawkPoller); return; } // give up after 20 s
+      if (window.innerWidth > 1024) { clearInterval(tawkPoller); return; } // desktop: skip
+      // TawkTo creates a fixed div wrapping the minimized chat button
+      const el =
+        document.querySelector("#tawkchat-minified-container") ||
+        document.querySelector(".tawk-min-container") ||
+        document.querySelector("div[id^='tawkchat']") ||
+        (() => {
+          const iframes = document.querySelectorAll("iframe[id^='tawk']");
+          for (const iframe of iframes) {
+            const parent = iframe.parentElement;
+            if (parent && window.getComputedStyle(parent).position === "fixed") return parent;
           }
-        `;
-        document.head.appendChild(s);
+          return null;
+        })();
+      if (el) {
+        el.style.setProperty("bottom", "80px", "important");
+        el.style.setProperty("z-index", "38", "important");
+        clearInterval(tawkPoller);
       }
-    };
+    }, 500);
 
     if (document.getElementById("tawk-to-widget-script")) return;
 
