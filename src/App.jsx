@@ -8505,7 +8505,7 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
         </div>
       ) : (
         <>
-          <div className="journal-search-panel mt-6 flex items-center gap-0 rounded-xl border border-white/10 bg-[#0c0c0c] px-4">
+          <div className="journal-search-panel mt-6 flex items-center gap-0 rounded-xl border border-white/10 bg-black px-4">
             <Search size={16} className="shrink-0 text-zinc-500" />
             <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search trades, symbols, strategies..." className="flex-1 border-0 bg-transparent py-3 text-zinc-200 placeholder:text-zinc-600 focus-visible:ring-0" />
             <div className="h-5 w-px bg-white/10 mx-3" />
@@ -8545,7 +8545,7 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
             <StatCard title="Avg R:R" value={`1:${stats.avgRR.toFixed(1)}`} gold />
             <StatCard title="Total P&L" value={formatMoney(stats.totalPnl)} green />
           </div>
-          <div className="journal-sort-panel mt-5 rounded-xl border border-white/10 bg-black/30 p-4">
+          <div className="journal-sort-panel mt-5 rounded-xl border border-white/10 bg-black p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 text-sm text-zinc-400">
                 <span>Sort by:</span>
