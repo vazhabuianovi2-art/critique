@@ -9981,7 +9981,7 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
   const strategyOptions = [...new Set([...DEFAULT_STRATEGIES, ...customStrategies, form.strategy].filter(Boolean).filter((item) => !String(item).startsWith("Select")))];
-  const currencyOptions = ["%", "USD", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF"];
+  const currencyOptions = ["%", "USD"];
   const accountBalanceNum = Number(accountBalance?.currentBalance || accountBalance?.startingBalance || 0);
   const isPercentRisk = form.currency === "%";
   // If % mode: risk entered as % of balance → convert to $
