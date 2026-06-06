@@ -72,6 +72,7 @@ const ROUTINE_KEY = "critique_pre_trade_routine_v1";
 const THEME_KEY = "critique_theme_mode_v1";
 const ACTIVE_PAGE_KEY = "critique_active_page_v1";
 const SIDEBAR_COLLAPSED_KEY = "critique_sidebar_collapsed_v1";
+const STRATEGIES_OBJ_KEY = "critique_strategies_objects_v1";
 const RESTORE_CACHE_PREFIX = "critique_last_successful_restore_v1";
 const USER_TRADES_KEY_PREFIX = "critique_user_trades_v2";
 const USER_TRADES_BACKUP_KEY_PREFIX = "critique_user_trades_last_nonempty_v1";
@@ -6908,6 +6909,17 @@ export default function TradingJournalDashboard() {
     if (pendingAccountDraft && String(pendingAccountDraft.id) === String(activeAccountId)) return pendingAccountDraft;
     return accounts[0] || createAccountPlaceholder;
   }, [accounts, activeAccountId, pendingAccountDraft]);
+  const [isStrategiesModalOpen, setIsStrategiesModalOpen] = useState(false);
+  const [strategiesObjects, setStrategiesObjects] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(STRATEGIES_OBJ_KEY) || "[]"); } catch { return []; }
+  });
+  function saveStrategiesObjects(next) {
+    setStrategiesObjects(next);
+    localStorage.setItem(STRATEGIES_OBJ_KEY, JSON.stringify(next));
+    // sync names into CUSTOM_STRATEGIES_KEY so existing strategy dropdown stays in sync
+    const names = next.map((s) => s.name);
+    localStorage.setItem(CUSTOM_STRATEGIES_KEY, JSON.stringify(names));
+  }
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isAccountSwitcherOpen, setIsAccountSwitcherOpen] = useState(false);
   const [accountDeleteTarget, setAccountDeleteTarget] = useState(null);
@@ -8215,7 +8227,8 @@ Skipped duplicates: ${duplicateCount}
       <TawkToWidget authUser={authUser} />
       <input ref={importFileRef} type="file" accept=".csv,text/csv" onChange={importTradesFromFile} className="hidden" />
       <input ref={backupFileRef} type="file" accept=".json,application/json" onChange={restoreBackupFromFile} className="hidden" />
-      {isTradeModalOpen && <AddTradeModal isEditing={Boolean(editingTradeId)} isSaving={isTradeSaving} form={form} setForm={setForm} onClose={closeTradeModal} onSave={saveTrade} account={account} accountBalance={accountBalance} />}
+      {isTradeModalOpen && <AddTradeModal isEditing={Boolean(editingTradeId)} isSaving={isTradeSaving} form={form} setForm={setForm} onClose={closeTradeModal} onSave={saveTrade} account={account} accountBalance={accountBalance} onOpenStrategies={() => setIsStrategiesModalOpen(true)} strategiesObjects={strategiesObjects} />}
+      {isStrategiesModalOpen && <TradingStrategiesModal strategies={strategiesObjects} onSave={saveStrategiesObjects} onClose={() => setIsStrategiesModalOpen(false)} />}
       {importPreview && <ImportPreviewModal preview={importPreview} onConfirm={confirmImportTrades} onClose={() => setImportPreview(null)} />}
       {isRoutineOpen && <PreTradeRoutineModal routine={routine} setRoutine={setRoutine} onClose={() => setIsRoutineOpen(false)} />}
       {isAccountModalOpen && <AccountModal account={account} accountBalance={accountBalance} onSaveAccount={handleSaveAccountSettings} onClose={closeAccountModal} />}
@@ -9963,7 +9976,7 @@ function CalendarGuide() {
   );
 }
 
-function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, onSave, account, accountBalance }) {
+function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, onSave, account, accountBalance, onOpenStrategies, strategiesObjects = [] }) {
   const rr = Number(form.risk) ? (Number(form.pnl || 0) / Number(form.risk)).toFixed(2) : "—";
   const screenshots = normalizeScreenshots(form);
   const riskWarnings = getRiskWarnings(form, accountBalance);
@@ -9980,7 +9993,9 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
   const [newStrategyName, setNewStrategyName] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
-  const strategyOptions = [...new Set([...DEFAULT_STRATEGIES, ...customStrategies, form.strategy].filter(Boolean).filter((item) => !String(item).startsWith("Select")))];
+  // Merge strategiesObjects names + customStrategies (legacy) + form.strategy
+  const strategyObjNames = strategiesObjects.map((s) => s.name);
+  const strategyOptions = [...new Set([...strategyObjNames, ...customStrategies, form.strategy].filter(Boolean).filter((item) => !String(item).startsWith("Select")))];
   const currencyOptions = ["%", "USD"];
   const accountBalanceNum = Number(accountBalance?.currentBalance || accountBalance?.startingBalance || 0);
   const isPercentRisk = form.currency === "%";
@@ -10142,14 +10157,12 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
 
           <div className="space-y-5">
             <Field label="Strategy">
-              <Select value={form.strategy || ""} onChange={(e) => updateField("strategy", e.target.value)}>
-                <option value="">Select strategy</option>
-                {strategyOptions.map((strategyOption) => <option key={strategyOption}>{strategyOption}</option>)}
-              </Select>
-              <div className="mt-2 flex gap-2">
-                <Input value={newStrategyName} onChange={(e) => setNewStrategyName(e.target.value)} placeholder="Add new strategy name" className={inputPurpleClass()} />
-                <button type="button" onClick={addCustomStrategy} className="shrink-0 rounded-md border border-fuchsia-500/35 bg-fuchsia-500/15 px-4 text-sm font-black text-fuchsia-200 transition hover:bg-fuchsia-500 hover:text-black">Add</button>
-              </div>
+              <StrategyDropdown
+                value={form.strategy || ""}
+                options={strategyOptions}
+                onChange={(value) => updateField("strategy", value)}
+                onAddNew={onOpenStrategies}
+              />
               <FieldError text={shownErrors.strategy} />
             </Field>
 
@@ -10245,6 +10258,190 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
         <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
           <Button variant="ghost" onClick={onClose} className="text-white hover:bg-white/10">Cancel</Button>
           <Button onClick={handleSaveClick} disabled={isSaving} className="bg-fuchsia-500 text-black hover:bg-fuchsia-400 disabled:cursor-not-allowed disabled:opacity-40">{isSaving ? <RefreshCwIcon /> : <Plus size={16} />} {isSaving ? "Saving..." : isEditing ? "Update Trade" : "Save Trade"}</Button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+function StrategyDropdown({ value, options = [], onChange, onAddNew }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    function handleClickOutside(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+  const selected = value || "";
+  return (
+    <div ref={ref} className="relative">
+      <button type="button" onClick={() => setOpen((o) => !o)}
+        className="flex h-10 w-full items-center justify-between rounded-md border border-white/15 bg-black px-3 text-left text-sm text-zinc-200 outline-none transition hover:border-fuchsia-400/50">
+        <span className="font-semibold">{selected || "Select strategy"}</span>
+        <ChevronDown size={15} className={`text-zinc-400 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="absolute left-0 top-11 z-[9999] w-full overflow-hidden rounded-xl border border-white/10 bg-[#0e0e0e] shadow-[0_18px_55px_rgba(0,0,0,0.9)]">
+          {options.length === 0 && (
+            <div className="px-4 py-3 text-sm text-zinc-500">No strategies yet</div>
+          )}
+          {options.map((opt) => (
+            <button key={opt} type="button" onMouseDown={(e) => { e.preventDefault(); onChange(opt); setOpen(false); }}
+              className={`flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition hover:text-white ${value === opt ? "font-bold text-white" : "text-zinc-300"}`}>
+              <span className="w-4 shrink-0 text-xs text-fuchsia-400">{value === opt ? "✓" : ""}</span>
+              {opt}
+            </button>
+          ))}
+          <div className="border-t border-white/8">
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); setOpen(false); onAddNew?.(); }}
+              className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-semibold text-fuchsia-400 transition hover:text-fuchsia-300">
+              <ListChecks size={14} /> Add New Strategy
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TradingStrategiesModal({ strategies = [], onSave, onClose }) {
+  const [list, setList] = useState(strategies);
+  const [selected, setSelected] = useState(null); // index or "new"
+  const [draft, setDraft] = useState({ name: "", description: "", items: [] });
+  const [newItem, setNewItem] = useState("");
+
+  function startNew() {
+    setSelected("new");
+    setDraft({ name: "", description: "", items: [] });
+  }
+  function selectStrategy(idx) {
+    setSelected(idx);
+    setDraft({ ...list[idx] });
+  }
+  function addChecklistItem() {
+    const text = newItem.trim();
+    if (!text) return;
+    setDraft((d) => ({ ...d, items: [...(d.items || []), { id: Date.now(), text, checked: false }] }));
+    setNewItem("");
+  }
+  function removeItem(id) {
+    setDraft((d) => ({ ...d, items: d.items.filter((item) => item.id !== id) }));
+  }
+  function save() {
+    if (!draft.name.trim()) return;
+    let next;
+    if (selected === "new") {
+      next = [...list, { id: Date.now(), name: draft.name.trim(), description: draft.description, items: draft.items || [] }];
+    } else {
+      next = list.map((s, i) => i === selected ? { ...s, ...draft, name: draft.name.trim() } : s);
+    }
+    setList(next);
+    onSave(next);
+    setSelected(null);
+  }
+  function deleteStrategy(idx) {
+    if (!window.confirm(`Delete strategy "${list[idx].name}"?`)) return;
+    const next = list.filter((_, i) => i !== idx);
+    setList(next);
+    onSave(next);
+    setSelected(null);
+  }
+
+  return (
+    <div className="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto bg-black/80 p-4 backdrop-blur-md sm:items-center">
+      <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
+        className="w-full max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] shadow-2xl">
+        {/* Header */}
+        <div className="flex items-start justify-between border-b border-white/8 p-6">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300"><ListChecks size={18} /></span>
+            <div>
+              <h2 className="text-xl font-bold text-zinc-100">Trading Strategies</h2>
+              <p className="mt-0.5 text-sm text-zinc-500">Manage your trading strategies and their pre-trade checklists</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-zinc-400 hover:text-white"><X size={20} /></button>
+        </div>
+        <div className="flex" style={{ minHeight: "520px" }}>
+          {/* Left panel */}
+          <div className="w-72 shrink-0 border-r border-white/8 p-4">
+            <button onClick={startNew} className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-black px-4 py-3 text-sm font-bold text-zinc-200 transition hover:border-fuchsia-500/40 hover:text-fuchsia-200">
+              <Plus size={15} /> New Strategy
+            </button>
+            <div className="mt-3 space-y-2">
+              {list.map((s, i) => (
+                <button key={s.id || i} onClick={() => selectStrategy(i)}
+                  className={`w-full rounded-xl border p-3 text-left transition ${selected === i ? "border-fuchsia-500/40 bg-fuchsia-500/8" : "border-white/8 bg-black/40 hover:border-white/15"}`}>
+                  <div className="text-sm font-bold text-zinc-200">{s.name}</div>
+                  <div className="mt-1 flex items-center gap-1.5 text-xs text-zinc-500">
+                    <ListChecks size={11} /> {(s.items || []).length} items
+                  </div>
+                </button>
+              ))}
+              {list.length === 0 && <p className="mt-4 text-xs text-zinc-600">No strategies yet. Create your first one!</p>}
+            </div>
+          </div>
+          {/* Right panel */}
+          <div className="flex-1 p-6">
+            {selected === null ? (
+              <div className="flex h-full flex-col items-center justify-center text-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-zinc-500"><ListChecks size={28} /></div>
+                <p className="mt-4 text-sm font-semibold text-zinc-500">Select a strategy to edit</p>
+                <p className="mt-1 text-xs text-zinc-600">or create a new one to get started</p>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-sm font-semibold text-zinc-300">Strategy Name <span className="text-red-400">*</span></label>
+                  <Input value={draft.name} onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
+                    placeholder="e.g., Scalping, Trend Following, Breakout..." className="mt-2 border-white/15 bg-black focus-visible:border-fuchsia-400" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-zinc-300">Description <span className="text-xs font-normal text-zinc-500">(Optional)</span></label>
+                  <Textarea value={draft.description} onChange={(e) => setDraft((d) => ({ ...d, description: e.target.value }))}
+                    placeholder="Describe your trading strategy, entry/exit rules, timeframes, etc..." rows={4}
+                    className="mt-2 border-white/15 bg-black focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-zinc-300"><ListChecks size={15} className="text-fuchsia-400" /> Pre-Trade Checklist</div>
+                    <span className="rounded-full bg-white/8 px-2.5 py-1 text-xs font-bold text-zinc-400">{(draft.items || []).length} items</span>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <Input value={newItem} onChange={(e) => setNewItem(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addChecklistItem(); } }}
+                      placeholder="Add a checklist item and press Enter..." className="border-white/15 bg-black focus-visible:border-fuchsia-400" />
+                    <button type="button" onClick={addChecklistItem}
+                      className="shrink-0 rounded-xl bg-fuchsia-500 px-4 py-2 text-sm font-bold text-black transition hover:bg-fuchsia-400">+ Add</button>
+                  </div>
+                  {(draft.items || []).length === 0 ? (
+                    <div className="mt-3 rounded-xl border border-dashed border-white/10 p-6 text-center text-sm text-zinc-600">No checklist items yet. Add your first one above!</div>
+                  ) : (
+                    <div className="mt-3 space-y-2">
+                      {draft.items.map((item) => (
+                        <div key={item.id} className="flex items-center justify-between rounded-xl border border-white/8 bg-black/40 px-4 py-2.5">
+                          <span className="text-sm text-zinc-300">{item.text}</span>
+                          <button type="button" onClick={() => removeItem(item.id)} className="ml-3 text-zinc-600 hover:text-red-400"><X size={14} /></button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center justify-between border-t border-white/8 pt-5">
+                  {selected !== "new" && (
+                    <button type="button" onClick={() => deleteStrategy(selected)} className="text-sm text-red-400 hover:text-red-300">Delete Strategy</button>
+                  )}
+                  <div className="ml-auto flex gap-3">
+                    <button type="button" onClick={() => setSelected(null)} className="rounded-xl border border-white/15 bg-black px-5 py-2.5 text-sm font-bold text-zinc-300 hover:text-white">Cancel</button>
+                    <button type="button" onClick={save} disabled={!draft.name.trim()}
+                      className="flex items-center gap-2 rounded-xl bg-fuchsia-500 px-5 py-2.5 text-sm font-bold text-black transition hover:bg-fuchsia-400 disabled:opacity-40">
+                      <BookOpen size={14} /> {selected === "new" ? "Create" : "Save"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </motion.div>
     </div>
