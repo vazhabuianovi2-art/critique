@@ -5334,6 +5334,22 @@ const defaultAccount = {
   description: "Practice trading with virtual money",
 };
 
+const ACCOUNT_TYPE_OPTIONS = [
+  { emoji: "💰", type: "Live Account", description: "Real money trading account" },
+  { emoji: "🎯", type: "Demo Account", description: "Practice trading with virtual money" },
+  { emoji: "📈", type: "Backtesting", description: "Historical strategy testing" },
+  { emoji: "🏆", type: "Funded Account", description: "Prop firm or funded trading account" },
+  { emoji: "📋", type: "Paper Trading", description: "Simulated trading environment" },
+];
+
+function getAccountTypeOption(type) {
+  return ACCOUNT_TYPE_OPTIONS.find((option) => option.type === type) || ACCOUNT_TYPE_OPTIONS[1];
+}
+
+function getAccountTypeLabel(type) {
+  return String(type || "Demo Account").replace(/\s+Account$/i, "").toLowerCase();
+}
+
 const createAccountPlaceholder = {
   ...defaultAccount,
   id: "create-account",
@@ -7587,10 +7603,10 @@ export default function TradingJournalDashboard() {
     const newAccount = {
       ...defaultAccount,
       id: `acc-${Date.now()}`,
-      name: accounts.length ? `Account ${accounts.length + 1}` : "",
+      name: "",
       type: "Demo Account",
-      balance: 50000,
-      description: accounts.length ? "Another trading account" : "My first trading account",
+      balance: 10000,
+      description: "",
     };
     setPendingAccountDraft(newAccount);
     setActiveAccountId(newAccount.id);
@@ -7622,8 +7638,8 @@ export default function TradingJournalDashboard() {
     setAccountDeleteTarget(null);
   }
 
-  function closeAccountModal() {
-    if (pendingAccountDraft && String(activeAccountId) === String(pendingAccountDraft.id)) {
+  function closeAccountModal({ saved = false } = {}) {
+    if (!saved && pendingAccountDraft && String(activeAccountId) === String(pendingAccountDraft.id)) {
       setPendingAccountDraft(null);
       setActiveAccountId(accounts[0]?.id || "");
     }
@@ -7707,6 +7723,9 @@ export default function TradingJournalDashboard() {
     tradeSavingRef.current = false;
     setIsTradeSaving(false);
     setEditingTradeId(trade.id);
+    if (trade.accountId && accounts.some((item) => String(item.id) === String(trade.accountId))) {
+      setActiveAccountId(trade.accountId);
+    }
     setForm(formFromTrade(trade));
     setIsTradeModalOpen(true);
   }
@@ -8240,11 +8259,11 @@ Skipped duplicates: ${duplicateCount}
       <TawkToWidget authUser={authUser} />
       <input ref={importFileRef} type="file" accept=".csv,text/csv" onChange={importTradesFromFile} className="hidden" />
       <input ref={backupFileRef} type="file" accept=".json,application/json" onChange={restoreBackupFromFile} className="hidden" />
-      {isTradeModalOpen && <AddTradeModal isEditing={Boolean(editingTradeId)} isSaving={isTradeSaving} form={form} setForm={setForm} onClose={closeTradeModal} onSave={saveTrade} account={account} accountBalance={accountBalance} onOpenStrategies={() => setIsStrategiesModalOpen(true)} strategiesObjects={strategiesObjects} />}
+      {isTradeModalOpen && <AddTradeModal isEditing={Boolean(editingTradeId)} isSaving={isTradeSaving} form={form} setForm={setForm} onClose={closeTradeModal} onSave={saveTrade} account={account} accounts={accounts} trades={trades} accountBalance={accountBalance} onSelectAccount={setActiveAccountId} onAddAccount={createNewAccount} onOpenStrategies={() => setIsStrategiesModalOpen(true)} strategiesObjects={strategiesObjects} />}
       {isStrategiesModalOpen && <TradingStrategiesModal strategies={strategiesObjects} onSave={saveStrategiesObjects} onClose={() => setIsStrategiesModalOpen(false)} />}
       {importPreview && <ImportPreviewModal preview={importPreview} onConfirm={confirmImportTrades} onClose={() => setImportPreview(null)} />}
       {isRoutineOpen && <PreTradeRoutineModal routine={routine} setRoutine={setRoutine} onClose={() => setIsRoutineOpen(false)} />}
-      {isAccountModalOpen && <AccountModal account={account} accountBalance={accountBalance} onSaveAccount={handleSaveAccountSettings} onClose={closeAccountModal} />}
+      {isAccountModalOpen && <AccountModal account={account} isNew={Boolean(pendingAccountDraft)} onSaveAccount={handleSaveAccountSettings} onClose={closeAccountModal} />}
       {tradeDeleteTarget && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-5 backdrop-blur-sm">
           <motion.div initial={{ opacity: 0, scale: 0.96, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="w-full max-w-sm rounded-2xl border border-red-500/30 bg-gradient-to-br from-zinc-950 via-black to-[#140607] p-5 shadow-[0_24px_70px_rgba(0,0,0,0.75)] ring-1 ring-red-500/10">
@@ -9989,7 +10008,7 @@ function CalendarGuide() {
   );
 }
 
-function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, onSave, account, accountBalance, onOpenStrategies, strategiesObjects = [] }) {
+function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, onSave, account, accounts = [], trades = [], accountBalance, onSelectAccount, onAddAccount, onOpenStrategies, strategiesObjects = [] }) {
   const rr = Number(form.risk) ? (Number(form.pnl || 0) / Number(form.risk)).toFixed(2) : "—";
   const screenshots = normalizeScreenshots(form);
   const riskWarnings = getRiskWarnings(form, accountBalance);
@@ -10180,10 +10199,14 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
             </Field>
 
             <Field label="Account">
-              <div className="flex h-10 w-full items-center justify-between rounded-md border border-white/15 bg-black px-3 text-sm text-white">
-                <span className="font-black">{account.name} • {account.currency} {Number(accountBalance?.currentBalance ?? account.balance).toLocaleString()}</span>
-                <ChevronDown size={16} className="text-fuchsia-300" />
-              </div>
+              <AccountDropdown
+                account={account}
+                accounts={accounts}
+                trades={trades}
+                accountBalance={accountBalance}
+                onChange={onSelectAccount}
+                onAddNew={onAddAccount}
+              />
             </Field>
 
             <Field label="Result">
@@ -10273,6 +10296,94 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
           <Button onClick={handleSaveClick} disabled={isSaving} className="bg-fuchsia-500 text-black hover:bg-fuchsia-400 disabled:cursor-not-allowed disabled:opacity-40">{isSaving ? <RefreshCwIcon /> : <Plus size={16} />} {isSaving ? "Saving..." : isEditing ? "Update Trade" : "Save Trade"}</Button>
         </div>
       </motion.div>
+    </div>
+  );
+}
+
+function AccountDropdown({ account, accounts = [], trades = [], accountBalance, onChange, onAddNew }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const selectedType = getAccountTypeOption(account?.type);
+  const selectedBalance = Number(accountBalance?.currentBalance ?? account?.balance ?? 0);
+
+  useEffect(() => {
+    function handleOutsideClick(event) {
+      if (ref.current && !ref.current.contains(event.target)) setOpen(false);
+    }
+    function handleEscape(event) {
+      if (event.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+        className={`flex h-10 w-full items-center justify-between rounded-md border bg-black px-3 text-left transition ${open ? "border-white/20" : "border-white/15 hover:border-white/25"}`}
+      >
+        <span className="flex min-w-0 items-center gap-2.5">
+          <span className="shrink-0 text-sm">{selectedType.emoji}</span>
+          <span className="truncate text-sm font-black text-white">{account?.name || "Account"}</span>
+          <span className="truncate text-xs font-semibold text-zinc-400">
+            {account?.currency || "USD"} {selectedBalance.toLocaleString()} <span className="text-fuchsia-400">•</span> {getAccountTypeLabel(account?.type)}
+          </span>
+        </span>
+        <ChevronDown size={15} className={`ml-3 shrink-0 text-zinc-500 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <motion.div
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          role="listbox"
+          className="absolute left-0 top-[44px] z-[100] w-full overflow-hidden rounded-md border border-white/15 bg-[#09090b] py-1 shadow-[0_18px_55px_rgba(0,0,0,0.9)]"
+        >
+          {accounts.map((item) => {
+            const isSelected = String(item.id) === String(account?.id);
+            const itemBalance = calculateAccountBalance(item, trades);
+            const typeOption = getAccountTypeOption(item.type);
+            return (
+              <button
+                key={item.id}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => {
+                  onChange?.(item.id);
+                  setOpen(false);
+                }}
+                className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition hover:bg-white/[0.04]"
+              >
+                <span className="flex w-4 shrink-0 items-center justify-center text-white">{isSelected ? <Check size={16} strokeWidth={2} /> : null}</span>
+                <span className="shrink-0 text-sm">{typeOption.emoji}</span>
+                <span className="truncate text-sm font-black text-zinc-200">{item.name || "Account"}</span>
+                <span className="truncate text-xs font-semibold text-zinc-500">
+                  {item.currency || "USD"} {Number(itemBalance.currentBalance || 0).toLocaleString()} <span className="text-zinc-600">•</span> {getAccountTypeLabel(item.type)}
+                </span>
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              onAddNew?.();
+            }}
+            className="flex w-full items-center gap-3 px-9 py-2.5 text-left text-sm font-semibold text-fuchsia-400 transition hover:bg-fuchsia-500/[0.06] hover:text-fuchsia-300"
+          >
+            <Plus size={15} /> Add New Account
+          </button>
+        </motion.div>
+      )}
     </div>
   );
 }
@@ -12615,16 +12726,8 @@ function BillingPage({ account, authUser }) {
   );
 }
 
-function AccountModal({ account, accountBalance, onSaveAccount, onClose }) {
+function AccountModal({ account, isNew = false, onSaveAccount, onClose }) {
   const [draft, setDraft] = useState(account);
-  const types = [
-    ["💰", "Live Account", "Real money trading account"],
-    ["🎯", "Demo Account", "Practice trading with virtual money"],
-    ["📈", "Backtesting", "Historical strategy testing"],
-    ["🏆", "Funded Account", "Prop firm or funded trading account"],
-    ["📋", "Paper Trading", "Simulated trading environment"],
-  ];
-
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
 
@@ -12639,45 +12742,60 @@ function AccountModal({ account, accountBalance, onSaveAccount, onClose }) {
       return;
     }
 
-    onClose();
+    onClose({ saved: true });
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-6 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[110] flex items-start justify-center overflow-y-auto bg-black/80 px-4 py-5 backdrop-blur-md sm:py-7">
       <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
+        initial={{ opacity: 0, scale: 0.97, y: 8 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="light-card max-h-[90vh] w-full max-w-[520px] overflow-y-auto rounded-xl border border-white/15 bg-black p-6"
+        className="account-modal-scroll w-full max-w-[500px] overflow-y-auto rounded-lg border border-[#292b31] bg-[#030303] px-6 py-5 shadow-[0_26px_90px_rgba(0,0,0,0.88)] sm:max-h-[calc(100vh-56px)]"
       >
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-black">Create / Edit Account</h2>
-          <button onClick={onClose} className="text-zinc-400 hover:text-white"><X /></button>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="flex items-center gap-2 text-[21px] font-black text-white">
+              <CreditCard size={20} className="text-fuchsia-400" />
+              {isNew ? "Create New Account" : "Edit Account"}
+            </h2>
+            <p className="mt-2 max-w-[410px] text-[15px] leading-[22px] text-zinc-400">
+              Set up a new trading account to organize and track your trades across different platforms or strategies.
+            </p>
+          </div>
+          <button type="button" onClick={() => onClose()} className="mt-1 shrink-0 text-zinc-500 transition hover:text-white" aria-label="Close account modal"><X size={17} /></button>
         </div>
-        <Field label="Account Type">
-          <div className="mt-2 space-y-3">
-            {types.map(([emoji, type, desc]) => (
+
+        <div className="mt-5">
+          <div className="text-sm font-bold text-white">Account Type</div>
+          <div className="mt-3 space-y-2">
+            {ACCOUNT_TYPE_OPTIONS.map(({ emoji, type, description }) => {
+              const selected = draft.type === type;
+              return (
               <button
                 key={type}
                 type="button"
                 onClick={() => setDraft({ ...draft, type })}
-                className={`account-type-card flex w-full items-center gap-4 rounded-lg border p-4 text-left ${draft.type === type ? "border-fuchsia-500 bg-fuchsia-950/30" : "border-white/15 bg-zinc-950"}`}
+                className={`account-type-card flex min-h-[64px] w-full items-center gap-4 rounded-lg border px-4 py-3 text-left transition ${selected ? "border-fuchsia-500 bg-fuchsia-950/[0.10] shadow-[0_0_0_1px_rgba(178,75,243,0.15)]" : "border-[#292b31] bg-[#09090b] hover:border-fuchsia-500/45"}`}
               >
-                <span className="text-2xl">{emoji}</span>
-                <div>
-                  <div className="font-bold">
+                <span className="w-7 shrink-0 text-[22px]">{emoji}</span>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 text-[15px] font-bold text-white">
                     {type}
-                    {draft.type === type && <span className="ml-2 rounded-full bg-fuchsia-500 px-2 py-1 text-xs text-black">Selected</span>}
+                    {selected && <span className="rounded-full bg-fuchsia-500 px-2.5 py-0.5 text-[11px] font-black text-black">Selected</span>}
                   </div>
-                  <div className="text-xs text-zinc-400">{desc}</div>
+                  <div className="mt-0.5 text-xs text-zinc-400">{description}</div>
                 </div>
               </button>
-            ))}
+              );
+            })}
           </div>
-        </Field>
+        </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-4">
+        <div className="my-6 h-px bg-white/10" />
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Account Name">
-            <Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className="border-white/15 bg-black focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" />
+            <Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="e.g., My Live Account" className="h-10 border-[#292b31] bg-black text-white placeholder:text-zinc-500 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" />
           </Field>
           <Field label="Currency">
             <Select value={draft.currency} onChange={(e) => setDraft({ ...draft, currency: e.target.value })}>
@@ -12688,43 +12806,23 @@ function AccountModal({ account, accountBalance, onSaveAccount, onClose }) {
           </Field>
         </div>
 
-        <Field label="Starting / Current Balance">
-          <Input value={draft.balance} onChange={(e) => setDraft({ ...draft, balance: e.target.value })} placeholder="E.g., 5200" className="border-white/15 bg-black focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" />
-        </Field>
+        <div className="mt-5">
+          <Field label={<span className="flex items-center gap-2"><span className="text-lg font-normal">$</span> Starting Balance</span>}>
+            <Input type="number" min="0" value={draft.balance} onChange={(e) => setDraft({ ...draft, balance: e.target.value })} placeholder="10000" className="h-10 border-[#292b31] bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" />
+          </Field>
+        </div>
 
-        <Field label="Description (Optional)">
-          <Textarea value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} className="border-white/15 bg-zinc-900" />
-        </Field>
-
-        <div className="light-card-soft mt-5 rounded-xl border border-white/10 bg-zinc-950 p-4">
-          <div className="text-sm font-bold">Account Preview:</div>
-          <div className="mt-4 flex items-center justify-between">
-            <div>
-              <div className="font-bold">🎯 {draft.name || "Account Name"}</div>
-              <div className="text-xs text-zinc-400">{draft.type}</div>
-            </div>
-            <div className="text-right">
-              <div className="text-xl font-black">{draft.currency} {Number(draft.balance || 0).toLocaleString()}</div>
-              <div className="text-xs text-zinc-400">Base Balance</div>
-            </div>
-          </div>
-          <div className="mt-4 rounded-lg border border-emerald-500/20 bg-emerald-950/20 p-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-zinc-400">Current balance with trades</span>
-              <span className="font-black text-emerald-400">{draft.currency} {Number(Number(draft.balance || 0) + Number(accountBalance?.tradePnl || 0)).toLocaleString()}</span>
-            </div>
-            <div className="mt-1 flex justify-between text-xs">
-              <span className="text-zinc-500">Trade P&L impact</span>
-              <span className={Number(accountBalance?.tradePnl || 0) >= 0 ? "text-emerald-400" : "text-red-400"}>{formatMoney(accountBalance?.tradePnl || 0)}</span>
-            </div>
-          </div>
+        <div className="mt-5">
+          <Field label={<span className="flex items-center gap-2"><BookOpen size={15} /> Description (Optional)</span>}>
+            <Textarea rows={3} value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} placeholder="Add notes about this account, trading strategy, or purpose..." className="min-h-[86px] resize-none border-[#292b31] bg-[#09090b] text-white placeholder:text-zinc-500 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" />
+          </Field>
         </div>
 
         {saveError && <div className="mt-5 rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-300">{saveError}</div>}
 
-        <div className="mt-6 grid grid-cols-2 gap-3">
-          <Button variant="outline" onClick={onClose} className="border-white/15 bg-black text-white">Cancel</Button>
-          <Button onClick={saveAccount} disabled={saving} className="bg-fuchsia-500 text-black disabled:cursor-not-allowed disabled:opacity-50"><Plus size={16} /> {saving ? "Saving..." : "Save Account"}</Button>
+        <div className="mt-6 flex items-center justify-end gap-3 border-t border-white/10 pt-5">
+          <Button variant="outline" onClick={() => onClose()} className="border-white/15 bg-black px-5 text-white">Cancel</Button>
+          <Button onClick={saveAccount} disabled={saving} className="bg-fuchsia-500 px-5 text-black hover:bg-fuchsia-400 disabled:cursor-not-allowed disabled:opacity-50"><Plus size={16} /> {saving ? "Saving..." : isNew ? "Create Account" : "Save Changes"}</Button>
         </div>
       </motion.div>
     </div>
