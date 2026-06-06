@@ -1608,6 +1608,27 @@ const THEME_STYLE_CSS = `
     text-shadow: none !important;
   }
 
+  /* Trade Type: green Buy / red Sell with a colored dot (Sydview style) */
+  .custom-select-option-buy span,
+  .custom-select-selected.custom-select-option-buy span,
+  .custom-select-active.custom-select-option-buy span,
+  .light-theme .custom-select-option-buy span { color: #34d399 !important; }
+  .custom-select-option-sell span,
+  .custom-select-selected.custom-select-option-sell span,
+  .custom-select-active.custom-select-option-sell span,
+  .light-theme .custom-select-option-sell span { color: #f87171 !important; }
+  .custom-select-option-buy::before,
+  .custom-select-option-sell::before {
+    content: "";
+    display: inline-block;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 9999px;
+    flex-shrink: 0;
+  }
+  .custom-select-option-buy::before { background: #34d399; box-shadow: 0 0 8px rgba(52,211,153,0.6); }
+  .custom-select-option-sell::before { background: #f87171; box-shadow: 0 0 8px rgba(248,113,113,0.6); }
+
   .custom-select-option:not(.custom-select-active):hover,
   .custom-select-option:not(.custom-select-active):hover span {
     color: #ffffff !important;
@@ -10039,9 +10060,18 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
   });
   const [newStrategyName, setNewStrategyName] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
   const strategyOptions = [...new Set([...DEFAULT_STRATEGIES, ...customStrategies, form.strategy].filter(Boolean).filter((item) => !String(item).startsWith("Select")))];
   const currencyOptions = ["USD", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF"];
   const activeResult = normalizeTradeResult(form.result) || getResultFromPnl(form.pnl);
+  const shownErrors = showErrors ? formErrors : {};
+  function handleSaveClick() {
+    if (hasFormErrors) {
+      setShowErrors(true);
+      return;
+    }
+    onSave();
+  }
 
   function updateField(key, value) {
     if (key === "pnl") {
@@ -10106,25 +10136,25 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <Field label="Symbol">
               <Input autoFocus value={form.symbol} onChange={(e) => updateField("symbol", e.target.value.toUpperCase())} placeholder="E.g., MNQ, MES" className={inputPurpleClass("uppercase")} />
-              <FieldError text={formErrors.symbol} />
+              <FieldError text={shownErrors.symbol} />
             </Field>
             <Field label="Trade Type">
               <Select value={form.direction} onChange={(e) => updateField("direction", e.target.value)}><option>Buy</option><option>Sell</option></Select>
             </Field>
             <Field label="Quantity">
               <Input value={form.quantity} onChange={(e) => updateField("quantity", e.target.value)} className={inputPurpleClass()} />
-              <FieldError text={formErrors.quantity} />
+              <FieldError text={shownErrors.quantity} />
             </Field>
             <Field label="P&L">
               <MoneyInput value={form.pnl} onChange={(e) => updateField("pnl", e.target.value)} />
-              <FieldError text={formErrors.pnl} />
+              <FieldError text={shownErrors.pnl} />
             </Field>
             <Field label="Risk">
               <div className="flex gap-2">
                 <div className="flex-1"><MoneyInput value={form.risk} onChange={(e) => updateField("risk", e.target.value)} /></div>
                 <div className="w-24"><Select value={form.currency} onChange={(e) => updateField("currency", e.target.value)}>{currencyOptions.map((currencyOption) => <option key={currencyOption}>{currencyOption}</option>)}</Select></div>
               </div>
-              <FieldError text={formErrors.risk} />
+              <FieldError text={shownErrors.risk} />
               <p className="mt-1.5 text-xs font-semibold text-zinc-500">Risk amount in {form.currency || "USD"}</p>
             </Field>
             <Field label="R:R Ratio">
@@ -10133,7 +10163,7 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
             </Field>
             <div>
               <DateFilterField label="Trade Date" value={form.date} onChange={(value) => updateField("date", value)} />
-              <FieldError text={formErrors.date} />
+              <FieldError text={shownErrors.date} />
             </div>
             <Field label="Entry Time">
               <Input value={form.entryTime} onChange={(e) => updateField("entryTime", e.target.value)} placeholder="0930" className={inputPurpleClass()} />
@@ -10148,7 +10178,7 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
                 <option>Select trading session</option>
                 {TRADING_SESSIONS.map((sessionOption) => <option key={sessionOption}>{sessionOption}</option>)}
               </Select>
-              <FieldError text={formErrors.session} />
+              <FieldError text={shownErrors.session} />
             </Field>
           </div>
           {riskWarnings.length > 0 && (
@@ -10178,7 +10208,7 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
                 <Input value={newStrategyName} onChange={(e) => setNewStrategyName(e.target.value)} placeholder="Add new strategy name" className={inputPurpleClass()} />
                 <button type="button" onClick={addCustomStrategy} className="shrink-0 rounded-md border border-fuchsia-500/35 bg-fuchsia-500/15 px-4 text-sm font-black text-fuchsia-200 transition hover:bg-fuchsia-500 hover:text-black">Add</button>
               </div>
-              <FieldError text={formErrors.strategy} />
+              <FieldError text={shownErrors.strategy} />
             </Field>
 
             <Field label="Account">
@@ -10272,7 +10302,7 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
 
         <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
           <Button variant="ghost" onClick={onClose} className="text-white hover:bg-white/10">Cancel</Button>
-          <Button onClick={onSave} disabled={hasFormErrors || isSaving} className="bg-fuchsia-500 text-black hover:bg-fuchsia-400 disabled:cursor-not-allowed disabled:opacity-40">{isSaving ? <RefreshCwIcon /> : <Plus size={16} />} {isSaving ? "Saving..." : isEditing ? "Update Trade" : "Save Trade"}</Button>
+          <Button onClick={handleSaveClick} disabled={isSaving} className="bg-fuchsia-500 text-black hover:bg-fuchsia-400 disabled:cursor-not-allowed disabled:opacity-40">{isSaving ? <RefreshCwIcon /> : <Plus size={16} />} {isSaving ? "Saving..." : isEditing ? "Update Trade" : "Save Trade"}</Button>
         </div>
       </motion.div>
     </div>
