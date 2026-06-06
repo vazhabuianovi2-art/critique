@@ -10111,7 +10111,7 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
   }
 
   return (
-    <div className="trade-modal-shell fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/80 px-3 py-8 backdrop-blur-md sm:px-6">
+    <div className="trade-modal-shell fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-black/80 px-3 py-8 backdrop-blur-md sm:px-6">
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}

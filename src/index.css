@@ -52,3 +52,11 @@ select:disabled,
 input:disabled {
   cursor: not-allowed;
 }
+
+/* Hide scrollbar everywhere but keep scroll functional */
+* {
+  scrollbar-width: none; /* Firefox */
+}
+*::-webkit-scrollbar {
+  display: none; /* Chrome / Safari / Edge */
+}
