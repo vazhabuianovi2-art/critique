@@ -10110,12 +10110,10 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
               <FieldError text={shownErrors.date} />
             </div>
             <Field label="Entry Time">
-              <Input value={form.entryTime} onChange={(e) => updateField("entryTime", e.target.value)} placeholder="0930" className={inputPurpleClass()} />
-              <p className="mt-1.5 text-xs font-semibold text-zinc-500">Just type numbers (e.g., 0930 → 09:30)</p>
+              <Input value={form.entryTime} onChange={(e) => updateField("entryTime", formatTimeInput(e.target.value))} placeholder="09:30" className={inputPurpleClass()} />
             </Field>
             <Field label="Exit Time">
-              <Input value={form.exitTime} onChange={(e) => updateField("exitTime", e.target.value)} placeholder="1600" className={inputPurpleClass()} />
-              <p className="mt-1.5 text-xs font-semibold text-zinc-500">Just type numbers (e.g., 1600 → 16:00)</p>
+              <Input value={form.exitTime} onChange={(e) => updateField("exitTime", formatTimeInput(e.target.value))} placeholder="16:00" className={inputPurpleClass()} />
             </Field>
             <Field label="Trading Session">
               <Select value={form.session} onChange={(e) => updateField("session", e.target.value)}>
@@ -14684,6 +14682,13 @@ function TopPill({ label, value, green, red }) {
 }
 function Section({ title, icon, children }) { return <div className="mt-6 rounded-xl border border-white/10 bg-[#0a0a0a] p-6"><h3 className="mb-5 flex items-center gap-3 text-lg font-bold text-white"><span className="flex h-9 w-9 items-center justify-center rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300">{icon}</span>{title}</h3>{children}</div>; }
 function Field({ label, children }) { return <label className="block text-sm font-semibold text-white"><span className="mb-2 block">{label}</span>{children}</label>; }
+function formatTimeInput(raw) {
+  // strips non-digits, limits to 4, inserts colon after 2 digits
+  const digits = String(raw).replace(/\D/g, "").slice(0, 4);
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+}
+
 function inputPurpleClass(extra = "") {
   return `border-white/15 bg-black text-white outline-none transition-all focus-visible:border-fuchsia-400 focus-visible:ring-2 focus-visible:ring-fuchsia-500/45 focus-visible:ring-offset-0 focus-visible:shadow-[0_0_16px_rgba(178,74,242,0.30)] ${extra}`;
 }
