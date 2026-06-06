@@ -1581,7 +1581,7 @@ const THEME_STYLE_CSS = `
   .custom-select-option:not(.custom-select-active):hover,
   .custom-select-option:not(.custom-select-active):hover span {
     color: #ffffff !important;
-    background: rgba(255,255,255,0.07) !important;
+    background: transparent !important;
   }
 
   .custom-select-active,
