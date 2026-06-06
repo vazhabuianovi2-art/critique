@@ -8104,7 +8104,7 @@ Skipped duplicates: ${duplicateCount}
               setTradeViewMode(null);
               setActive(shouldGateForBilling ? "Billing" : "Dashboard");
             }}
-            className="flex items-center gap-3 rounded-xl text-left text-xl font-black transition hover:text-fuchsia-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/60"
+            className="flex items-center gap-3 rounded-xl text-left text-xl font-black transition hover:text-fuchsia-200 focus:outline-none focus-visible:outline-none"
             aria-label="Go to dashboard"
           >
             <span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(178,74,242,0.2)]">{BRAND_MARK}</span><span className="sidebar-label tracking-tight">{BRAND_NAME}</span>
@@ -8422,7 +8422,7 @@ Skipped duplicates: ${duplicateCount}
 function MobileHeader({ onAdd }) {
   return (
     <div className="mobile-header-pro mb-6 flex items-center justify-between rounded-2xl border border-fuchsia-500/25 bg-black p-4 lg:hidden">
-      <button type="button" onClick={requestDashboardNavigation} className="flex items-center gap-3 rounded-xl text-left text-xl font-black transition hover:text-fuchsia-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/60" aria-label="Go to dashboard"><span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(178,74,242,0.2)]">{BRAND_MARK}</span><span className="tracking-tight">{BRAND_NAME}</span></button>
+      <button type="button" onClick={requestDashboardNavigation} className="flex items-center gap-3 rounded-xl text-left text-xl font-black transition hover:text-fuchsia-200 focus:outline-none focus-visible:outline-none" aria-label="Go to dashboard"><span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(178,74,242,0.2)]">{BRAND_MARK}</span><span className="tracking-tight">{BRAND_NAME}</span></button>
       <button onClick={onAdd} className="mobile-add-trade-button inline-flex items-center gap-2 rounded-xl bg-fuchsia-500 px-3 py-2 text-sm font-black text-white shadow-[0_0_18px_rgba(178,74,242,0.25)]"><Plus size={15} /> Add</button>
     </div>
   );
@@ -8467,7 +8467,7 @@ function MobileBottomNav({ active, setActive, onAdd, setTradeViewMode, lockedToB
 function TopCrumb({ page, className = "mb-8" }) {
   return (
     <div className={`flex items-center gap-3 text-sm font-semibold ${className}`}>
-      <button type="button" onClick={requestDashboardNavigation} className="flex items-center gap-3 rounded-lg transition hover:text-fuchsia-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/60" aria-label="Go to dashboard">
+      <button type="button" onClick={requestDashboardNavigation} className="flex items-center gap-3 rounded-lg transition hover:text-fuchsia-200 focus:outline-none focus-visible:outline-none" aria-label="Go to dashboard">
         <span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(178,74,242,0.2)]">{BRAND_MARK}</span>
         <span className="tracking-tight">{BRAND_NAME}</span>
       </button>
