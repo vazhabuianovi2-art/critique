@@ -455,7 +455,7 @@ function BrandBolt({ className = "" }) {
       <defs>
         <linearGradient id="bb-bg" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
           <stop stopColor="#4c1d95" />
-          <stop offset="1" stopColor="#86198f" />
+          <stop offset="1" stopColor="#720cb0" />
         </linearGradient>
       </defs>
 
@@ -466,12 +466,12 @@ function BrandBolt({ className = "" }) {
       <g>
         <animateTransform attributeName="transform" type="rotate"
           from="0 18 18" to="360 18 18" dur="12s" repeatCount="indefinite" />
-        <circle cx="18" cy="18" r="14" stroke="#e879f9" strokeOpacity="0.3"
+        <circle cx="18" cy="18" r="14" stroke="#c270f5" strokeOpacity="0.3"
           strokeWidth="0.8" strokeDasharray="3.5 5" fill="none" />
       </g>
 
       {/* Inner soft glow — breathing */}
-      <circle cx="18" cy="18" r="9" fill="#c026d3" fillOpacity="0.18">
+      <circle cx="18" cy="18" r="9" fill="#9e1aef" fillOpacity="0.18">
         <animate attributeName="r" values="8;10.5;8" dur="5s" repeatCount="indefinite" />
         <animate attributeName="fill-opacity" values="0.12;0.28;0.12" dur="5s" repeatCount="indefinite" />
       </circle>
@@ -707,8 +707,8 @@ const THEME_STYLE_CSS = `
   .light-theme aside.fixed {
     background: linear-gradient(180deg, #ffffff 0%, #fbf7ff 52%, #f7edff 100%) !important;
     color: #0f172a !important;
-    border-right-color: rgba(168, 85, 247, 0.22) !important;
-    box-shadow: 12px 0 35px rgba(168, 85, 247, 0.08) !important;
+    border-right-color: rgba(178, 74, 242, 0.22) !important;
+    box-shadow: 12px 0 35px rgba(178, 74, 242, 0.08) !important;
   }
 
   .light-theme .bg-black,
@@ -724,7 +724,7 @@ const THEME_STYLE_CSS = `
   .light-theme .light-card {
     background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 55%, #f8fbff 100%) !important;
     color: #0f172a !important;
-    border-color: rgba(168, 85, 247, 0.22) !important;
+    border-color: rgba(178, 74, 242, 0.22) !important;
     box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08) !important;
   }
 
@@ -770,7 +770,7 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .auth-shell [class*="text-fuchsia-300"] {
-    color: #c026d3 !important;
+    color: #9e1aef !important;
   }
 
   .light-theme .auth-shell [class*="text-emerald-300"],
@@ -791,8 +791,8 @@ const THEME_STYLE_CSS = `
   }
 
   @keyframes authGlowPulse {
-    0%, 100% { box-shadow: 0 0 28px rgba(217,70,239,.18), inset 0 1px 0 rgba(255,255,255,.08); }
-    50% { box-shadow: 0 0 54px rgba(217,70,239,.36), inset 0 1px 0 rgba(255,255,255,.12); }
+    0%, 100% { box-shadow: 0 0 28px rgba(178, 74, 242,.18), inset 0 1px 0 rgba(255,255,255,.08); }
+    50% { box-shadow: 0 0 54px rgba(178, 74, 242,.36), inset 0 1px 0 rgba(255,255,255,.12); }
   }
 
   @keyframes authShimmer {
@@ -837,7 +837,7 @@ const THEME_STYLE_CSS = `
 
   .auth-brand-button:hover {
     transform: translateY(-2px);
-    filter: drop-shadow(0 0 18px rgba(217,70,239,.34));
+    filter: drop-shadow(0 0 18px rgba(178, 74, 242,.34));
   }
 
   .auth-hero-mark {
@@ -904,7 +904,7 @@ const THEME_STYLE_CSS = `
 
   .hero-dashboard-stage:hover .hero-metric-card {
     transform: translateY(-6px);
-    border-color: rgba(217, 70, 239, 0.38);
+    border-color: rgba(178, 74, 242, 0.38);
   }
 
   .hero-dashboard-stage:hover .hero-progress-fill {
@@ -943,8 +943,8 @@ const THEME_STYLE_CSS = `
     background: rgba(12, 4, 28, 0.6);
     backdrop-filter: blur(32px);
     -webkit-backdrop-filter: blur(32px);
-    border: 1px solid rgba(168,85,247,0.2);
-    box-shadow: 0 0 0 1px rgba(168,85,247,0.08), 0 24px 64px rgba(126,34,206,0.25), inset 0 1px 0 rgba(255,255,255,0.07);
+    border: 1px solid rgba(178, 74, 242,0.2);
+    box-shadow: 0 0 0 1px rgba(178, 74, 242,0.08), 0 24px 64px rgba(126,34,206,0.25), inset 0 1px 0 rgba(255,255,255,0.07);
   }
   .gradient-border {
     position: relative;
@@ -955,33 +955,33 @@ const THEME_STYLE_CSS = `
     inset: 0;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, rgba(168,85,247,0.6), rgba(217,70,239,0.4), rgba(20,184,166,0.3));
+    background: linear-gradient(135deg, rgba(178, 74, 242,0.6), rgba(178, 74, 242,0.4), rgba(20,184,166,0.3));
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
   }
   .glow-fuchsia {
-    box-shadow: 0 0 40px rgba(217,70,239,0.18), 0 24px 64px rgba(126,34,206,0.22);
+    box-shadow: 0 0 40px rgba(178, 74, 242,0.18), 0 24px 64px rgba(126,34,206,0.22);
   }
   .glow-fuchsia:hover {
-    box-shadow: 0 0 60px rgba(217,70,239,0.28), 0 24px 80px rgba(126,34,206,0.3);
+    box-shadow: 0 0 60px rgba(178, 74, 242,0.28), 0 24px 80px rgba(126,34,206,0.3);
   }
   .text-gradient-primary {
-    background: linear-gradient(135deg, #c084fc 0%, #e879f9 40%, #67e8f9 100%);
+    background: linear-gradient(135deg, #c084fc 0%, #c270f5 40%, #67e8f9 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .text-gradient-hero {
-    background: linear-gradient(100deg, #818cf8 0%, #c084fc 35%, #e879f9 65%, #34d399 100%);
+    background: linear-gradient(100deg, #818cf8 0%, #c084fc 35%, #c270f5 65%, #34d399 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .section-divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(168,85,247,0.35), rgba(217,70,239,0.35), transparent);
+    background: linear-gradient(90deg, transparent, rgba(178, 74, 242,0.35), rgba(178, 74, 242,0.35), transparent);
     margin: 0;
   }
   .eyebrow-badge {
@@ -994,18 +994,18 @@ const THEME_STYLE_CSS = `
     font-weight: 900;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(217,70,239,0.12));
-    border: 1px solid rgba(217,70,239,0.28);
-    color: #e879f9;
-    box-shadow: 0 0 20px rgba(217,70,239,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
+    background: linear-gradient(135deg, rgba(178, 74, 242,0.15), rgba(178, 74, 242,0.12));
+    border: 1px solid rgba(178, 74, 242,0.28);
+    color: #c270f5;
+    box-shadow: 0 0 20px rgba(178, 74, 242,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
   }
   .btn-primary-glow {
-    background: linear-gradient(135deg, #7c3aed, #a855f7, #d946ef);
-    box-shadow: 0 4px 24px rgba(168,85,247,0.35), 0 0 0 1px rgba(217,70,239,0.3);
+    background: linear-gradient(135deg, #7c3aed, #a855f7, #b24af2);
+    box-shadow: 0 4px 24px rgba(178, 74, 242,0.35), 0 0 0 1px rgba(178, 74, 242,0.3);
     transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
   }
   .btn-primary-glow:hover {
-    box-shadow: 0 8px 40px rgba(168,85,247,0.5), 0 0 0 1px rgba(217,70,239,0.5);
+    box-shadow: 0 8px 40px rgba(178, 74, 242,0.5), 0 0 0 1px rgba(178, 74, 242,0.5);
     transform: translateY(-1px);
   }
   .btn-ghost-glow {
@@ -1014,9 +1014,9 @@ const THEME_STYLE_CSS = `
     transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
   }
   .btn-ghost-glow:hover {
-    background: rgba(168,85,247,0.1);
-    border-color: rgba(168,85,247,0.4);
-    box-shadow: 0 0 20px rgba(168,85,247,0.15);
+    background: rgba(178, 74, 242,0.1);
+    border-color: rgba(178, 74, 242,0.4);
+    box-shadow: 0 0 20px rgba(178, 74, 242,0.15);
   }
   @keyframes shimmer {
     0% { background-position: -200% center; }
@@ -1026,7 +1026,7 @@ const THEME_STYLE_CSS = `
     background: rgba(8, 3, 18, 0.75);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(168,85,247,0.18);
+    border: 1px solid rgba(178, 74, 242,0.18);
     box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07);
   }
 
@@ -1105,16 +1105,16 @@ const THEME_STYLE_CSS = `
 
   .stats-card-purple {
     background: linear-gradient(145deg, rgba(20,7,31,0.92), rgba(4,4,6,0.96) 48%, rgba(37,12,58,0.72));
-    border-color: rgba(217,70,239,0.22);
+    border-color: rgba(178, 74, 242,0.22);
   }
 
   .stats-card-purple::after {
-    background: rgba(217,70,239,0.24);
+    background: rgba(178, 74, 242,0.24);
   }
 
   .stats-card-purple:hover {
-    border-color: rgba(217,70,239,0.48);
-    box-shadow: 0 26px 80px rgba(217,70,239,0.15), inset 0 1px 0 rgba(255,255,255,0.06);
+    border-color: rgba(178, 74, 242,0.48);
+    box-shadow: 0 26px 80px rgba(178, 74, 242,0.15), inset 0 1px 0 rgba(255,255,255,0.06);
   }
 
   .light-theme .stats-interactive-card {
@@ -1125,7 +1125,7 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .stats-interactive-card::before {
-    background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,.22) 34%, rgba(217,70,239,.18) 50%, rgba(16,185,129,.08) 64%, transparent 100%) !important;
+    background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,.22) 34%, rgba(178, 74, 242,.18) 50%, rgba(16,185,129,.08) 64%, transparent 100%) !important;
   }
 
   .light-theme .stats-interactive-card::after {
@@ -1162,17 +1162,17 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .stats-card-purple {
-    background: linear-gradient(145deg, #ffffff 0%, #faf5ff 55%, #fdf4ff 100%) !important;
-    border-color: rgba(217,70,239,.25) !important;
+    background: linear-gradient(145deg, #ffffff 0%, #faf5ff 55%, #f9f1fe 100%) !important;
+    border-color: rgba(178, 74, 242,.25) !important;
   }
 
   .light-theme .stats-card-purple::after {
-    background: rgba(217,70,239,.15) !important;
+    background: rgba(178, 74, 242,.15) !important;
   }
 
   .light-theme .stats-card-purple:hover {
-    border-color: rgba(217,70,239,.46) !important;
-    box-shadow: 0 22px 54px rgba(217,70,239,.15), 0 0 0 1px rgba(217,70,239,.10) inset !important;
+    border-color: rgba(178, 74, 242,.46) !important;
+    box-shadow: 0 22px 54px rgba(178, 74, 242,.15), 0 0 0 1px rgba(178, 74, 242,.10) inset !important;
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -1196,7 +1196,7 @@ const THEME_STYLE_CSS = `
 
   .light-theme [class*="from-fuchsia-950"] {
     --tw-gradient-from: #faf5ff !important;
-    --tw-gradient-via: #fdf4ff !important;
+    --tw-gradient-via: #f9f1fe !important;
     --tw-gradient-to: #ffffff !important;
   }
 
@@ -1254,26 +1254,26 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .account-type-card:hover {
-    border-color: rgba(217, 70, 239, 0.45) !important;
-    box-shadow: 0 10px 24px rgba(168, 85, 247, 0.10) !important;
+    border-color: rgba(178, 74, 242, 0.45) !important;
+    box-shadow: 0 10px 24px rgba(178, 74, 242, 0.10) !important;
   }
 
   .light-theme .account-type-card.border-fuchsia-500 {
-    background: linear-gradient(135deg, #faf5ff 0%, #ffffff 55%, #fdf4ff 100%) !important;
-    border-color: rgba(217, 70, 239, 0.75) !important;
+    background: linear-gradient(135deg, #faf5ff 0%, #ffffff 55%, #f9f1fe 100%) !important;
+    border-color: rgba(178, 74, 242, 0.75) !important;
   }
 
   .light-theme .date-picker-trigger {
     background: #ffffff !important;
     color: #0f172a !important;
-    border-color: rgba(168, 85, 247, 0.32) !important;
-    box-shadow: 0 8px 22px rgba(168, 85, 247, 0.08) !important;
+    border-color: rgba(178, 74, 242, 0.32) !important;
+    box-shadow: 0 8px 22px rgba(178, 74, 242, 0.08) !important;
   }
 
   .light-theme .date-picker-trigger:hover,
   .light-theme .date-picker-trigger:focus {
-    border-color: rgba(217, 70, 239, 0.65) !important;
-    box-shadow: 0 0 0 2px rgba(217, 70, 239, 0.12), 0 10px 25px rgba(168, 85, 247, 0.12) !important;
+    border-color: rgba(178, 74, 242, 0.65) !important;
+    box-shadow: 0 0 0 2px rgba(178, 74, 242, 0.12), 0 10px 25px rgba(178, 74, 242, 0.12) !important;
   }
 
   .light-theme .date-picker-value {
@@ -1289,7 +1289,7 @@ const THEME_STYLE_CSS = `
   .light-theme .date-picker-popover {
     background: #ffffff !important;
     color: #0f172a !important;
-    border-color: rgba(217, 70, 239, 0.40) !important;
+    border-color: rgba(178, 74, 242, 0.40) !important;
     box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16) !important;
     opacity: 1 !important;
     isolation: isolate !important;
@@ -1311,9 +1311,9 @@ const THEME_STYLE_CSS = `
 
   .light-theme .date-picker-nav {
     background: #ffffff !important;
-    color: #86198f !important;
-    border-color: rgba(168, 85, 247, 0.30) !important;
-    box-shadow: 0 8px 20px rgba(168, 85, 247, 0.10) !important;
+    color: #720cb0 !important;
+    border-color: rgba(178, 74, 242, 0.30) !important;
+    box-shadow: 0 8px 20px rgba(178, 74, 242, 0.10) !important;
   }
 
   .light-theme .date-picker-weekdays {
@@ -1323,7 +1323,7 @@ const THEME_STYLE_CSS = `
   .light-theme .date-picker-day-current {
     background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%) !important;
     color: #ffffff !important;
-    border: 1px solid rgba(168, 85, 247, 0.34) !important;
+    border: 1px solid rgba(178, 74, 242, 0.34) !important;
   }
 
   .light-theme .date-picker-day-muted {
@@ -1351,7 +1351,7 @@ const THEME_STYLE_CSS = `
   .light-theme .date-picker-day-current {
     background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%) !important;
     color: #ffffff !important;
-    border: 1px solid rgba(168, 85, 247, 0.42) !important;
+    border: 1px solid rgba(178, 74, 242, 0.42) !important;
   }
 
   .light-theme .date-picker-day-muted {
@@ -1361,10 +1361,10 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .date-picker-day-selected {
-    background: linear-gradient(135deg, #a855f7, #d946ef) !important;
+    background: linear-gradient(135deg, #a855f7, #b24af2) !important;
     color: #ffffff !important;
-    border-color: rgba(168, 85, 247, 0.70) !important;
-    box-shadow: 0 8px 20px rgba(168, 85, 247, 0.24) !important;
+    border-color: rgba(178, 74, 242, 0.70) !important;
+    box-shadow: 0 8px 20px rgba(178, 74, 242, 0.24) !important;
   }
 
   .light-theme .date-picker-day-selected .date-picker-day-number {
@@ -1372,36 +1372,36 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .date-picker-day-selected:hover {
-    background: #c026d3 !important;
+    background: #9e1aef !important;
     color: #ffffff !important;
   }
 
   .light-theme .date-picker-day:hover:not(.date-picker-day-selected) {
-    background: rgba(217, 70, 239, 0.14) !important;
-    color: #86198f !important;
+    background: rgba(178, 74, 242, 0.14) !important;
+    color: #720cb0 !important;
   }
 
   .light-theme .date-picker-day:hover:not(.date-picker-day-selected) .date-picker-day-number {
-    color: #86198f !important;
+    color: #720cb0 !important;
   }
 
   .light-theme .custom-select-trigger {
     background: #ffffff !important;
     color: #0f172a !important;
-    border-color: rgba(168, 85, 247, 0.32) !important;
-    box-shadow: 0 8px 22px rgba(168, 85, 247, 0.08) !important;
+    border-color: rgba(178, 74, 242, 0.32) !important;
+    box-shadow: 0 8px 22px rgba(178, 74, 242, 0.08) !important;
   }
 
   .light-theme .custom-select-trigger:hover,
   .light-theme .custom-select-trigger:focus {
-    border-color: rgba(217, 70, 239, 0.65) !important;
-    box-shadow: 0 0 0 2px rgba(217, 70, 239, 0.12), 0 10px 25px rgba(168, 85, 247, 0.12) !important;
+    border-color: rgba(178, 74, 242, 0.65) !important;
+    box-shadow: 0 0 0 2px rgba(178, 74, 242, 0.12), 0 10px 25px rgba(178, 74, 242, 0.12) !important;
   }
 
   .light-theme .custom-select-menu {
     background: #ffffff !important;
     color: #0f172a !important;
-    border-color: rgba(217, 70, 239, 0.38) !important;
+    border-color: rgba(178, 74, 242, 0.38) !important;
     box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16) !important;
   }
 
@@ -1416,8 +1416,8 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .custom-select-option:hover {
-    background: rgba(217, 70, 239, 0.10) !important;
-    color: #86198f !important;
+    background: rgba(178, 74, 242, 0.10) !important;
+    color: #720cb0 !important;
   }
 
   .light-theme .custom-select-option.bg-fuchsia-500,
@@ -1476,7 +1476,7 @@ const THEME_STYLE_CSS = `
   .custom-select-option-ny-pm span,
   .light-theme .custom-select-option-ny-pm,
   .light-theme .custom-select-option-ny-pm span {
-    color: #a21caf !important;
+    color: #8a0fd7 !important;
     font-weight: 900 !important;
   }
 
@@ -1524,15 +1524,15 @@ const THEME_STYLE_CSS = `
   .custom-select-option-emotional-trade:hover,
   .custom-select-option-bad-risk-management:hover,
   .custom-select-option-moved-stop-loss:hover {
-    background: rgba(217, 70, 239, 0.10) !important;
-    color: #86198f !important;
+    background: rgba(178, 74, 242, 0.10) !important;
+    color: #720cb0 !important;
   }
 
   .custom-select-option-asia:hover { background: rgba(29, 78, 216, 0.12) !important; }
   .custom-select-option-london:hover { background: rgba(220, 38, 38, 0.12) !important; }
   .custom-select-option-ny-am:hover { background: rgba(4, 120, 87, 0.14) !important; }
   .custom-select-option-lunch:hover { background: rgba(180, 83, 9, 0.12) !important; }
-  .custom-select-option-ny-pm:hover { background: rgba(162, 28, 175, 0.14) !important; }
+  .custom-select-option-ny-pm:hover { background: rgba(138, 15, 215, 0.14) !important; }
   .custom-select-option-pre-market:hover { background: rgba(8, 145, 178, 0.12) !important; }
 
   .custom-select-selected.custom-select-option-asia,
@@ -1544,7 +1544,7 @@ const THEME_STYLE_CSS = `
   .custom-select-selected.custom-select-option-lunch,
   .custom-select-selected.custom-select-option-lunch span { color: #b45309 !important; }
   .custom-select-selected.custom-select-option-ny-pm,
-  .custom-select-selected.custom-select-option-ny-pm span { color: #a21caf !important; }
+  .custom-select-selected.custom-select-option-ny-pm span { color: #8a0fd7 !important; }
   .custom-select-selected.custom-select-option-pre-market,
   .custom-select-selected.custom-select-option-pre-market span { color: #0891b2 !important; }
 
@@ -1583,7 +1583,7 @@ const THEME_STYLE_CSS = `
   .custom-select-menu {
     background: #030303 !important;
     scrollbar-width: thin;
-    scrollbar-color: rgba(217,70,239,.65) rgba(24,24,27,.95);
+    scrollbar-color: rgba(178, 74, 242,.65) rgba(24,24,27,.95);
   }
 
   .custom-select-menu::-webkit-scrollbar {
@@ -1596,7 +1596,7 @@ const THEME_STYLE_CSS = `
   }
 
   .custom-select-menu::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #d946ef, #10b981);
+    background: linear-gradient(180deg, #b24af2, #10b981);
     border-radius: 999px;
   }
 
@@ -1611,7 +1611,7 @@ const THEME_STYLE_CSS = `
   .custom-select-option:not(.custom-select-active):hover,
   .custom-select-option:not(.custom-select-active):hover span {
     color: #ffffff !important;
-    background: linear-gradient(90deg, rgba(217,70,239,.20), rgba(16,185,129,.10)) !important;
+    background: linear-gradient(90deg, rgba(178, 74, 242,.20), rgba(16,185,129,.10)) !important;
   }
 
   .custom-select-active,
@@ -1642,13 +1642,13 @@ const THEME_STYLE_CSS = `
   .light-theme .account-sidebar-card {
     background: #ffffff !important;
     color: #0f172a !important;
-    border-color: rgba(168, 85, 247, 0.28) !important;
-    box-shadow: 0 10px 28px rgba(168, 85, 247, 0.10) !important;
+    border-color: rgba(178, 74, 242, 0.28) !important;
+    box-shadow: 0 10px 28px rgba(178, 74, 242, 0.10) !important;
   }
 
   .light-theme .account-sidebar-card:hover {
-    border-color: rgba(217, 70, 239, 0.55) !important;
-    box-shadow: 0 14px 34px rgba(168, 85, 247, 0.16) !important;
+    border-color: rgba(178, 74, 242, 0.55) !important;
+    box-shadow: 0 14px 34px rgba(178, 74, 242, 0.16) !important;
   }
 
   .light-theme input,
@@ -1674,7 +1674,7 @@ const THEME_STYLE_CSS = `
   .light-theme .shadow-\[0_0_28px_rgba\(217\,70\,239\,0\.22\)\],
   .light-theme .shadow-\[0_0_45px_rgba\(168\,85\,247\,0\.13\)\],
   .light-theme .shadow-\[0_0_35px_rgba\(16\,185\,129\,0\.08\)\] {
-    box-shadow: 0 16px 40px rgba(168, 85, 247, 0.12) !important;
+    box-shadow: 0 16px 40px rgba(178, 74, 242, 0.12) !important;
   }
 
   .light-theme .bg-fuchsia-500.text-black,
@@ -1690,7 +1690,7 @@ const THEME_STYLE_CSS = `
 
   .light-theme {
     --tooltip-bg: #ffffff;
-    --tooltip-border: rgba(168, 85, 247, 0.32);
+    --tooltip-border: rgba(178, 74, 242, 0.32);
     --tooltip-text: #0f172a;
   }
 
@@ -1710,18 +1710,18 @@ const THEME_STYLE_CSS = `
 
   .light-theme .date-picker-popover .text-fuchsia-300,
   .light-theme .date-picker-popover .text-fuchsia-200 {
-    color: #d946ef !important;
+    color: #b24af2 !important;
   }
 
   .light-theme .view-all-button {
-    background: #d946ef !important;
+    background: #b24af2 !important;
     color: #ffffff !important;
-    border-color: rgba(217, 70, 239, 0.70) !important;
-    box-shadow: 0 10px 24px rgba(217, 70, 239, 0.20) !important;
+    border-color: rgba(178, 74, 242, 0.70) !important;
+    box-shadow: 0 10px 24px rgba(178, 74, 242, 0.20) !important;
   }
 
   .light-theme .view-all-button:hover {
-    background: #c026d3 !important;
+    background: #9e1aef !important;
     color: #ffffff !important;
   }
 
@@ -1738,9 +1738,9 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .activity-stat-fuchsia {
-    background: linear-gradient(135deg, #faf5ff 0%, #ffffff 55%, #f5d0fe 100%) !important;
-    border-color: rgba(217, 70, 239, 0.55) !important;
-    color: #c026d3 !important;
+    background: linear-gradient(135deg, #faf5ff 0%, #ffffff 55%, #e7c6fb 100%) !important;
+    border-color: rgba(178, 74, 242, 0.55) !important;
+    color: #9e1aef !important;
   }
 
   .activity-day-cell {
@@ -1749,7 +1749,7 @@ const THEME_STYLE_CSS = `
 
   .activity-day-empty {
     background: linear-gradient(135deg, rgba(24,24,27,0.82) 0%, rgba(0,0,0,0.92) 58%, rgba(88,28,135,0.16) 100%) !important;
-    border-color: rgba(168, 85, 247, 0.18) !important;
+    border-color: rgba(178, 74, 242, 0.18) !important;
   }
 
   .activity-day-win {
@@ -1779,7 +1779,7 @@ const THEME_STYLE_CSS = `
   }
 
   .activity-day-selected.activity-day-breakeven {
-    box-shadow: 0 0 0 2px rgba(217,70,239,.55), 0 0 30px rgba(245,158,11,0.38) !important;
+    box-shadow: 0 0 0 2px rgba(178, 74, 242,.55), 0 0 30px rgba(245,158,11,0.38) !important;
   }
 
   .activity-day-loss:hover {
@@ -1787,17 +1787,17 @@ const THEME_STYLE_CSS = `
   }
 
   .activity-day-selected.activity-day-win {
-    box-shadow: 0 0 0 2px rgba(217,70,239,.55), 0 0 30px rgba(16,185,129,0.38) !important;
+    box-shadow: 0 0 0 2px rgba(178, 74, 242,.55), 0 0 30px rgba(16,185,129,0.38) !important;
   }
 
   .activity-day-selected.activity-day-loss {
-    box-shadow: 0 0 0 2px rgba(217,70,239,.55), 0 0 30px rgba(239,68,68,0.38) !important;
+    box-shadow: 0 0 0 2px rgba(178, 74, 242,.55), 0 0 30px rgba(239,68,68,0.38) !important;
   }
 
   .light-theme .activity-day-empty {
-    background: linear-gradient(135deg, #ffffff 0%, #faf5ff 58%, #f5d0fe 100%) !important;
-    border-color: rgba(168, 85, 247, 0.28) !important;
-    box-shadow: inset 0 0 18px rgba(217, 70, 239, 0.08) !important;
+    background: linear-gradient(135deg, #ffffff 0%, #faf5ff 58%, #e7c6fb 100%) !important;
+    border-color: rgba(178, 74, 242, 0.28) !important;
+    box-shadow: inset 0 0 18px rgba(178, 74, 242, 0.08) !important;
   }
 
   .light-theme .activity-day-win {
@@ -1869,28 +1869,28 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .trade-tag {
-    background: linear-gradient(135deg, rgba(217, 70, 239, 0.20), rgba(168, 85, 247, 0.10)) !important;
-    border-color: rgba(217, 70, 239, 0.55) !important;
-    color: #86198f !important;
-    box-shadow: 0 8px 20px rgba(217, 70, 239, 0.16) !important;
+    background: linear-gradient(135deg, rgba(178, 74, 242, 0.20), rgba(178, 74, 242, 0.10)) !important;
+    border-color: rgba(178, 74, 242, 0.55) !important;
+    color: #720cb0 !important;
+    box-shadow: 0 8px 20px rgba(178, 74, 242, 0.16) !important;
   }
 
   .light-theme .trade-analysis-note {
     background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 58%, #f8fbff 100%) !important;
     color: #0f172a !important;
-    border: 1px solid rgba(168, 85, 247, 0.24) !important;
-    box-shadow: 0 10px 28px rgba(168, 85, 247, 0.08) !important;
+    border: 1px solid rgba(178, 74, 242, 0.24) !important;
+    box-shadow: 0 10px 28px rgba(178, 74, 242, 0.08) !important;
   }
 
   .light-theme .best-performance-card {
     background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 52%, #f3e8ff 100%) !important;
-    border-color: rgba(217, 70, 239, 0.30) !important;
-    box-shadow: 0 12px 30px rgba(168, 85, 247, 0.10) !important;
+    border-color: rgba(178, 74, 242, 0.30) !important;
+    box-shadow: 0 12px 30px rgba(178, 74, 242, 0.10) !important;
   }
 
   .light-theme .best-performance-card:hover {
-    border-color: rgba(217, 70, 239, 0.75) !important;
-    box-shadow: 0 0 32px rgba(217, 70, 239, 0.22) !important;
+    border-color: rgba(178, 74, 242, 0.75) !important;
+    box-shadow: 0 0 32px rgba(178, 74, 242, 0.22) !important;
   }
 
   .light-theme .best-performance-card .text-white {
@@ -1909,7 +1909,7 @@ const THEME_STYLE_CSS = `
   .weekday-card-active {
     transform: translateY(-4px);
     background: linear-gradient(135deg, rgba(0,0,0,.94), rgba(12,8,18,.94) 48%, rgba(88,28,135,.30));
-    box-shadow: 0 0 26px rgba(217,70,239,.16);
+    box-shadow: 0 0 26px rgba(178, 74, 242,.16);
   }
 
   .strategy-detail-card,
@@ -1924,7 +1924,7 @@ const THEME_STYLE_CSS = `
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(217,70,239,.08), transparent 45%, rgba(16,185,129,.035));
+    background: linear-gradient(135deg, rgba(178, 74, 242,.08), transparent 45%, rgba(16,185,129,.035));
     pointer-events: none;
   }
 
@@ -1944,14 +1944,14 @@ const THEME_STYLE_CSS = `
 
   .statistics-tab:hover {
     color: #fff;
-    background: rgba(217,70,239,.10);
-    box-shadow: 0 0 18px rgba(217,70,239,.10);
+    background: rgba(178, 74, 242,.10);
+    box-shadow: 0 0 18px rgba(178, 74, 242,.10);
   }
 
   .statistics-tab-active {
     color: #ffffff;
-    background: linear-gradient(135deg, rgba(217,70,239,.95), rgba(168,85,247,.78));
-    box-shadow: 0 0 22px rgba(217,70,239,.28), inset 0 1px 0 rgba(255,255,255,.18);
+    background: linear-gradient(135deg, rgba(178, 74, 242,.95), rgba(178, 74, 242,.78));
+    box-shadow: 0 0 22px rgba(178, 74, 242,.28), inset 0 1px 0 rgba(255,255,255,.18);
   }
 
   .statistics-tab-icon {
@@ -2003,7 +2003,7 @@ const THEME_STYLE_CSS = `
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: linear-gradient(135deg, rgba(217,70,239,.12), transparent 42%, rgba(16,185,129,.04));
+    background: linear-gradient(135deg, rgba(178, 74, 242,.12), transparent 42%, rgba(16,185,129,.04));
   }
 
   .dashboard-panel > *,
@@ -2037,8 +2037,8 @@ const THEME_STYLE_CSS = `
 
   .dashboard-performance-card:hover,
   .dashboard-score-card:hover {
-    border-color: rgba(217,70,239,.55) !important;
-    box-shadow: 0 0 34px rgba(217,70,239,.16), 0 20px 55px rgba(16,185,129,.08) !important;
+    border-color: rgba(178, 74, 242,.55) !important;
+    box-shadow: 0 0 34px rgba(178, 74, 242,.16), 0 20px 55px rgba(16,185,129,.08) !important;
   }
 
   .dashboard-chart-summary {
@@ -2069,14 +2069,14 @@ const THEME_STYLE_CSS = `
   .light-theme .dashboard-chart-summary {
     background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 55%, #f8fbff 100%) !important;
     color: #0f172a !important;
-    border-color: rgba(217,70,239,.28) !important;
-    box-shadow: 0 18px 42px rgba(168,85,247,.10) !important;
+    border-color: rgba(178, 74, 242,.28) !important;
+    box-shadow: 0 18px 42px rgba(178, 74, 242,.10) !important;
   }
 
   .light-theme .dashboard-section-icon {
-    background: rgba(217,70,239,.12) !important;
-    color: #c026d3 !important;
-    border-color: rgba(217,70,239,.35) !important;
+    background: rgba(178, 74, 242,.12) !important;
+    color: #9e1aef !important;
+    border-color: rgba(178, 74, 242,.35) !important;
   }
 
   .dashboard-primary-btn,
@@ -2092,15 +2092,15 @@ const THEME_STYLE_CSS = `
   .dashboard-inspiration {
     backdrop-filter: blur(10px);
     background: rgba(14,4,22,.78) !important;
-    border-color: rgba(217,70,239,.20) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 12px 32px rgba(217,70,239,.08) !important;
+    border-color: rgba(178, 74, 242,.20) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 12px 32px rgba(178, 74, 242,.08) !important;
   }
 
   .dashboard-dash-card::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,.08), transparent 42%, rgba(217,70,239,.08));
+    background: linear-gradient(135deg, rgba(255,255,255,.08), transparent 42%, rgba(178, 74, 242,.08));
     opacity: 0;
     transition: opacity .25s ease;
     pointer-events: none;
@@ -2121,20 +2121,20 @@ const THEME_STYLE_CSS = `
   .light-theme .dashboard-routine-card {
     background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 55%, #f8fbff 100%) !important;
     color: #0f172a !important;
-    border-color: rgba(217,70,239,.28) !important;
-    box-shadow: 0 18px 42px rgba(168,85,247,.10) !important;
+    border-color: rgba(178, 74, 242,.28) !important;
+    box-shadow: 0 18px 42px rgba(178, 74, 242,.10) !important;
   }
 
   .light-theme .dashboard-inspiration {
     background: linear-gradient(135deg, #ffffff 0%, #faf5ff 100%) !important;
     color: #0f172a !important;
-    border-color: rgba(217,70,239,.24) !important;
+    border-color: rgba(178, 74, 242,.24) !important;
   }
 
   .light-theme .dashboard-dash-card {
     background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 54%, #f8fbff 100%) !important;
     color: #0f172a !important;
-    box-shadow: 0 14px 34px rgba(168,85,247,.10) !important;
+    box-shadow: 0 14px 34px rgba(178, 74, 242,.10) !important;
   }
 
   .journal-action-btn {
@@ -2142,9 +2142,9 @@ const THEME_STYLE_CSS = `
   }
 
   .journal-action-btn:hover {
-    border-color: rgba(217,70,239,.65) !important;
-    color: #f0abfc !important;
-    box-shadow: 0 0 18px rgba(217,70,239,.16) !important;
+    border-color: rgba(178, 74, 242,.65) !important;
+    color: #d6a0f8 !important;
+    box-shadow: 0 0 18px rgba(178, 74, 242,.16) !important;
     transform: translateY(-1px);
   }
 
@@ -2153,30 +2153,30 @@ const THEME_STYLE_CSS = `
   }
 
   .journal-add-btn:hover {
-    background: #c026d3 !important;
-    box-shadow: 0 0 26px rgba(217,70,239,.34) !important;
+    background: #9e1aef !important;
+    box-shadow: 0 0 26px rgba(178, 74, 242,.34) !important;
     transform: translateY(-1px) scale(1.02);
   }
 
   .journal-empty {
-    box-shadow: 0 18px 42px rgba(217,70,239,.10);
+    box-shadow: 0 18px 42px rgba(178, 74, 242,.10);
   }
 
   .fullscreen-toggle-button {
     backdrop-filter: blur(14px);
-    background: linear-gradient(135deg, rgba(217,70,239,.18), rgba(5,5,5,.92) 48%, rgba(34,197,94,.12)) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 14px 36px rgba(0,0,0,.35), 0 0 24px rgba(217,70,239,.16);
+    background: linear-gradient(135deg, rgba(178, 74, 242,.18), rgba(5,5,5,.92) 48%, rgba(34,197,94,.12)) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 14px 36px rgba(0,0,0,.35), 0 0 24px rgba(178, 74, 242,.16);
   }
 
   .fullscreen-toggle-button:hover {
     transform: translateY(-1px) scale(1.03);
-    border-color: rgba(240,171,252,.75) !important;
+    border-color: rgba(214, 160, 248,.75) !important;
     color: #ffffff !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 18px 44px rgba(0,0,0,.42), 0 0 30px rgba(217,70,239,.25);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 18px 44px rgba(0,0,0,.42), 0 0 30px rgba(178, 74, 242,.25);
   }
 
   .onboarding-checklist {
-    box-shadow: 0 18px 45px rgba(16,185,129,.08), 0 0 30px rgba(217,70,239,.08);
+    box-shadow: 0 18px 45px rgba(16,185,129,.08), 0 0 30px rgba(178, 74, 242,.08);
   }
 
   .onboarding-step {
@@ -2185,21 +2185,21 @@ const THEME_STYLE_CSS = `
 
   .onboarding-step:hover {
     transform: translateY(-1px);
-    border-color: rgba(217,70,239,.45);
+    border-color: rgba(178, 74, 242,.45);
   }
 
   .journal-metric-box {
-    background: linear-gradient(135deg, rgba(217,70,239,.14), rgba(88,28,135,.10) 55%, rgba(0,0,0,.22)) !important;
+    background: linear-gradient(135deg, rgba(178, 74, 242,.14), rgba(88,28,135,.10) 55%, rgba(0,0,0,.22)) !important;
   }
 
   .journal-list-metric-chip {
-    border: 1px solid rgba(217,70,239,.35);
-    background: rgba(217,70,239,.12);
-    color: #f0abfc;
+    border: 1px solid rgba(178, 74, 242,.35);
+    background: rgba(178, 74, 242,.12);
+    color: #d6a0f8;
     border-radius: 999px;
     padding: .35rem .7rem;
     font-weight: 900;
-    box-shadow: 0 0 14px rgba(217,70,239,.10);
+    box-shadow: 0 0 14px rgba(178, 74, 242,.10);
   }
 
   .light-theme .journal-hero,
@@ -2209,26 +2209,26 @@ const THEME_STYLE_CSS = `
   .light-theme .onboarding-checklist {
     background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 55%, #f8fbff 100%) !important;
     color: #0f172a !important;
-    border-color: rgba(217,70,239,.28) !important;
-    box-shadow: 0 18px 42px rgba(168,85,247,.10) !important;
+    border-color: rgba(178, 74, 242,.28) !important;
+    box-shadow: 0 18px 42px rgba(178, 74, 242,.10) !important;
   }
 
   .light-theme .onboarding-step {
     background: rgba(255,255,255,.82) !important;
-    border-color: rgba(168,85,247,.20) !important;
+    border-color: rgba(178, 74, 242,.20) !important;
   }
 
   .light-theme .fullscreen-toggle-button {
     background: linear-gradient(135deg, #ffffff 0%, #faf5ff 54%, #ecfdf5 100%) !important;
-    color: #86198f !important;
-    border-color: rgba(168,85,247,.32) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 14px 34px rgba(126,34,206,.14), 0 0 18px rgba(217,70,239,.12) !important;
+    color: #720cb0 !important;
+    border-color: rgba(178, 74, 242,.32) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 14px 34px rgba(126,34,206,.14), 0 0 18px rgba(178, 74, 242,.12) !important;
   }
 
   .light-theme .journal-metric-box {
     background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 52%, #f3e8ff 100%) !important;
-    border-color: rgba(217,70,239,.38) !important;
-    box-shadow: 0 10px 24px rgba(217,70,239,.10) !important;
+    border-color: rgba(178, 74, 242,.38) !important;
+    box-shadow: 0 10px 24px rgba(178, 74, 242,.10) !important;
   }
 
   .light-theme .journal-metric-box .text-white {
@@ -2237,27 +2237,27 @@ const THEME_STYLE_CSS = `
 
   .light-theme .journal-list-metric-chip {
     background: linear-gradient(135deg, #ffffff, #faf5ff) !important;
-    color: #86198f !important;
-    border-color: rgba(217,70,239,.40) !important;
-    box-shadow: 0 8px 20px rgba(217,70,239,.10) !important;
+    color: #720cb0 !important;
+    border-color: rgba(178, 74, 242,.40) !important;
+    box-shadow: 0 8px 20px rgba(178, 74, 242,.10) !important;
   }
 
   .light-theme .journal-hero-icon {
-    background: rgba(217,70,239,.12) !important;
-    border-color: rgba(217,70,239,.35) !important;
-    color: #c026d3 !important;
+    background: rgba(178, 74, 242,.12) !important;
+    border-color: rgba(178, 74, 242,.35) !important;
+    color: #9e1aef !important;
   }
 
   .light-theme .journal-action-btn {
     background: #ffffff !important;
     color: #0f172a !important;
-    border-color: rgba(168,85,247,.28) !important;
+    border-color: rgba(178, 74, 242,.28) !important;
   }
 
   .light-theme .journal-action-btn:hover {
     background: #faf5ff !important;
-    color: #86198f !important;
-    border-color: rgba(217,70,239,.55) !important;
+    color: #720cb0 !important;
+    border-color: rgba(178, 74, 242,.55) !important;
   }
 
   .light-theme .journal-add-btn,
@@ -2284,8 +2284,8 @@ const THEME_STYLE_CSS = `
 
   .light-theme .statistics-tabs {
     background: #ffffff !important;
-    border-color: rgba(217,70,239,.28) !important;
-    box-shadow: 0 14px 34px rgba(168,85,247,.10) !important;
+    border-color: rgba(178, 74, 242,.28) !important;
+    box-shadow: 0 14px 34px rgba(178, 74, 242,.10) !important;
   }
 
   .light-theme .statistics-tab {
@@ -2293,14 +2293,14 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .statistics-tab:hover {
-    color: #86198f !important;
-    background: rgba(217,70,239,.10) !important;
+    color: #720cb0 !important;
+    background: rgba(178, 74, 242,.10) !important;
   }
 
   .light-theme .statistics-tab-active {
     color: #ffffff !important;
-    background: linear-gradient(135deg, #d946ef, #a855f7) !important;
-    box-shadow: 0 0 22px rgba(217,70,239,.22) !important;
+    background: linear-gradient(135deg, #b24af2, #a855f7) !important;
+    box-shadow: 0 0 22px rgba(178, 74, 242,.22) !important;
   }
 
   .statistics-strategy-panel,
@@ -2316,7 +2316,7 @@ const THEME_STYLE_CSS = `
   .light-theme .charts-pro-card {
     background: linear-gradient(135deg, #ffffff, #fbf7ff 55%, #f3e8ff) !important;
     color: #0f172a !important;
-    border: 1px solid rgba(168,85,247,.22) !important;
+    border: 1px solid rgba(178, 74, 242,.22) !important;
   }
 
   .statistics-pattern-pro {
@@ -2327,25 +2327,25 @@ const THEME_STYLE_CSS = `
 
   .weekday-card-pro:hover,
   .weekday-card-pro.weekday-card-active {
-    box-shadow: 0 0 30px rgba(217,70,239,.18), inset 0 1px 0 rgba(255,255,255,.05) !important;
+    box-shadow: 0 0 30px rgba(178, 74, 242,.18), inset 0 1px 0 rgba(255,255,255,.05) !important;
   }
 
   .light-theme .statistics-pattern-pro {
     background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 55%, #f8fbff 100%) !important;
-    border-color: rgba(217, 70, 239, 0.26) !important;
-    box-shadow: 0 18px 42px rgba(168,85,247,.10) !important;
+    border-color: rgba(178, 74, 242, 0.26) !important;
+    box-shadow: 0 18px 42px rgba(178, 74, 242,.10) !important;
   }
 
   .light-theme .weekday-card-pro {
     background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 58%, #f3e8ff 100%) !important;
-    border-color: rgba(168, 85, 247, 0.24) !important;
-    box-shadow: 0 12px 30px rgba(168,85,247,.08) !important;
+    border-color: rgba(178, 74, 242, 0.24) !important;
+    box-shadow: 0 12px 30px rgba(178, 74, 242,.08) !important;
   }
 
   .light-theme .weekday-card-pro:hover,
   .light-theme .weekday-card-pro.weekday-card-active {
-    border-color: rgba(217,70,239,.65) !important;
-    box-shadow: 0 0 28px rgba(217,70,239,.16) !important;
+    border-color: rgba(178, 74, 242,.65) !important;
+    box-shadow: 0 0 28px rgba(178, 74, 242,.16) !important;
   }
 
   .light-theme .weekday-card-pro .text-white {
@@ -2361,37 +2361,37 @@ const THEME_STYLE_CSS = `
   .strategy-detail-pro:hover,
   .strategy-rank-row:hover,
   .charts-pro-card:hover {
-    box-shadow: 0 0 30px rgba(217,70,239,.18), inset 0 1px 0 rgba(255,255,255,.05) !important;
+    box-shadow: 0 0 30px rgba(178, 74, 242,.18), inset 0 1px 0 rgba(255,255,255,.05) !important;
   }
 
   .light-theme .statistics-strategy-panel,
   .light-theme .charts-pro-card {
     background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 55%, #f8fbff 100%) !important;
-    border-color: rgba(217, 70, 239, 0.26) !important;
-    box-shadow: 0 18px 42px rgba(168,85,247,.10) !important;
+    border-color: rgba(178, 74, 242, 0.26) !important;
+    box-shadow: 0 18px 42px rgba(178, 74, 242,.10) !important;
   }
 
   .light-theme .strategy-rank-row,
   .light-theme .strategy-detail-pro {
     background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 58%, #f3e8ff 100%) !important;
-    border-color: rgba(168, 85, 247, 0.24) !important;
+    border-color: rgba(178, 74, 242, 0.24) !important;
   }
 
   .light-theme .statistics-chart-panel {
     background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 58%, #f8fbff 100%) !important;
     color: #0f172a !important;
-    border: 1px solid rgba(168, 85, 247, 0.20) !important;
-    box-shadow: 0 16px 42px rgba(168, 85, 247, 0.10) !important;
+    border: 1px solid rgba(178, 74, 242, 0.20) !important;
+    box-shadow: 0 16px 42px rgba(178, 74, 242, 0.10) !important;
   }
 
   .light-theme .statistics-timeline-card {
     background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 48%, #f3e8ff 100%) !important;
-    border-color: rgba(217, 70, 239, 0.32) !important;
+    border-color: rgba(178, 74, 242, 0.32) !important;
   }
 
   .light-theme .statistics-timeline-card:hover {
-    border-color: rgba(217, 70, 239, 0.70) !important;
-    box-shadow: 0 0 34px rgba(217, 70, 239, 0.18) !important;
+    border-color: rgba(178, 74, 242, 0.70) !important;
+    box-shadow: 0 0 34px rgba(178, 74, 242, 0.18) !important;
   }
 
   .light-theme .statistics-winloss-card {
@@ -2421,28 +2421,28 @@ const THEME_STYLE_CSS = `
   .light-theme .calendar-selected-pro {
     background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 56%, #f8fbff 100%) !important;
     color: #0f172a !important;
-    border-color: rgba(168, 85, 247, 0.28) !important;
-    box-shadow: 0 18px 42px rgba(168, 85, 247, 0.10) !important;
+    border-color: rgba(178, 74, 242, 0.28) !important;
+    box-shadow: 0 18px 42px rgba(178, 74, 242, 0.10) !important;
   }
 
   .light-theme .calendar-nav-button {
     background: #ffffff !important;
-    color: #86198f !important;
-    border: 1px solid rgba(168, 85, 247, 0.30) !important;
-    box-shadow: 0 8px 22px rgba(168, 85, 247, 0.10) !important;
+    color: #720cb0 !important;
+    border: 1px solid rgba(178, 74, 242, 0.30) !important;
+    box-shadow: 0 8px 22px rgba(178, 74, 242, 0.10) !important;
   }
 
   .light-theme .calendar-top-pill {
     background: #ffffff !important;
     color: #0f172a !important;
-    border-color: rgba(168, 85, 247, 0.30) !important;
-    box-shadow: 0 8px 22px rgba(168, 85, 247, 0.08) !important;
+    border-color: rgba(178, 74, 242, 0.30) !important;
+    box-shadow: 0 8px 22px rgba(178, 74, 242, 0.08) !important;
   }
 
   .light-theme .calendar-top-pill-neutral {
     background: linear-gradient(135deg, #ffffff 0%, #faf5ff 100%) !important;
-    color: #86198f !important;
-    border-color: rgba(217, 70, 239, 0.35) !important;
+    color: #720cb0 !important;
+    border-color: rgba(178, 74, 242, 0.35) !important;
   }
 
   .light-theme .calendar-top-pill-green {
@@ -2474,7 +2474,7 @@ const THEME_STYLE_CSS = `
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: linear-gradient(135deg, rgba(217,70,239,.10), transparent 42%, rgba(16,185,129,.04));
+    background: linear-gradient(135deg, rgba(178, 74, 242,.10), transparent 42%, rgba(16,185,129,.04));
   }
 
   .calendar-shell-pro > *,
@@ -2543,9 +2543,9 @@ const THEME_STYLE_CSS = `
   }
 
   .calendar-day-empty {
-    border-color: rgba(217, 70, 239, 0.34) !important;
-    background: radial-gradient(circle at top right, rgba(217,70,239,.13), #050505 48%) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 0 16px rgba(217,70,239,.12) !important;
+    border-color: rgba(178, 74, 242, 0.34) !important;
+    background: radial-gradient(circle at top right, rgba(178, 74, 242,.13), #050505 48%) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 0 16px rgba(178, 74, 242,.12) !important;
   }
 
   .calendar-day-win {
@@ -2567,15 +2567,15 @@ const THEME_STYLE_CSS = `
   }
 
   .calendar-day-weekend {
-    border-color: rgba(217, 70, 239, 0.32) !important;
-    background: radial-gradient(circle at top right, rgba(217,70,239,.12), #070707 50%) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 0 16px rgba(217,70,239,.12) !important;
+    border-color: rgba(178, 74, 242, 0.32) !important;
+    background: radial-gradient(circle at top right, rgba(178, 74, 242,.12), #070707 50%) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 0 16px rgba(178, 74, 242,.12) !important;
   }
 
   .calendar-day-empty:hover,
   .calendar-day-weekend:hover {
-    border-color: rgba(217,70,239,.34) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 0 16px rgba(217,70,239,.12) !important;
+    border-color: rgba(178, 74, 242,.34) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 0 16px rgba(178, 74, 242,.12) !important;
   }
 
   .calendar-day-win:hover {
@@ -2591,8 +2591,8 @@ const THEME_STYLE_CSS = `
   }
 
   .calendar-day-selected {
-    border-color: rgba(217, 70, 239, 0.85) !important;
-    box-shadow: 0 0 0 1px rgba(217,70,239,0.32), 0 0 28px rgba(217,70,239,0.28) !important;
+    border-color: rgba(178, 74, 242, 0.85) !important;
+    box-shadow: 0 0 0 1px rgba(178, 74, 242,0.32), 0 0 28px rgba(178, 74, 242,0.28) !important;
   }
 
   .calendar-neon-panel::after {
@@ -2601,17 +2601,17 @@ const THEME_STYLE_CSS = `
     inset: -1px;
     pointer-events: none;
     border-radius: inherit;
-    box-shadow: inset 0 0 22px rgba(217,70,239,.10), 0 0 28px rgba(217,70,239,.10);
+    box-shadow: inset 0 0 22px rgba(178, 74, 242,.10), 0 0 28px rgba(178, 74, 242,.10);
   }
 
   .calendar-week-header {
-    box-shadow: 0 0 14px rgba(217,70,239,.08) !important;
+    box-shadow: 0 0 14px rgba(178, 74, 242,.08) !important;
   }
 
   .light-theme .calendar-day-empty {
     background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 55%, #f5f3ff 100%) !important;
-    border-color: rgba(168, 85, 247, 0.28) !important;
-    box-shadow: 0 10px 24px rgba(168,85,247,.08) !important;
+    border-color: rgba(178, 74, 242, 0.28) !important;
+    box-shadow: 0 10px 24px rgba(178, 74, 242,.08) !important;
   }
 
   .light-theme .calendar-day-win {
@@ -2633,13 +2633,13 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .calendar-day-weekend {
-    background: linear-gradient(135deg, #faf5ff 0%, #ffffff 58%, #f5d0fe 100%) !important;
-    border-color: rgba(217, 70, 239, 0.32) !important;
+    background: linear-gradient(135deg, #faf5ff 0%, #ffffff 58%, #e7c6fb 100%) !important;
+    border-color: rgba(178, 74, 242, 0.32) !important;
   }
 
   .light-theme .calendar-day-number {
     color: #0f172a !important;
-    background: rgba(168, 85, 247, 0.10) !important;
+    background: rgba(178, 74, 242, 0.10) !important;
   }
 
   .light-theme .calendar-day-number-muted {
@@ -2659,9 +2659,9 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .calendar-week-summary {
-    background: linear-gradient(135deg, #faf5ff 0%, #ffffff 55%, #f5d0fe 100%) !important;
-    border-color: rgba(217, 70, 239, 0.42) !important;
-    box-shadow: 0 12px 30px rgba(217,70,239,0.10) !important;
+    background: linear-gradient(135deg, #faf5ff 0%, #ffffff 55%, #e7c6fb 100%) !important;
+    border-color: rgba(178, 74, 242, 0.42) !important;
+    box-shadow: 0 12px 30px rgba(178, 74, 242,0.10) !important;
   }
 
   .light-theme .calendar-week-header {
@@ -2671,14 +2671,14 @@ const THEME_STYLE_CSS = `
 
   .light-theme .calendar-week-header-special {
     background: linear-gradient(135deg, #faf5ff, #ffffff) !important;
-    color: #c026d3 !important;
-    border-color: rgba(217,70,239,0.35) !important;
+    color: #9e1aef !important;
+    border-color: rgba(178, 74, 242,0.35) !important;
   }
 
   .light-theme .light-tooltip {
     background: #ffffff !important;
     color: #0f172a !important;
-    border-color: rgba(168, 85, 247, 0.32) !important;
+    border-color: rgba(178, 74, 242, 0.32) !important;
     box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16) !important;
   }
 
@@ -2692,8 +2692,8 @@ const THEME_STYLE_CSS = `
   .light-theme [role="button"][class*="bg-black"] {
     background: #ffffff !important;
     color: #0f172a !important;
-    border-color: rgba(168, 85, 247, 0.30) !important;
-    box-shadow: 0 8px 22px rgba(168, 85, 247, 0.08) !important;
+    border-color: rgba(178, 74, 242, 0.30) !important;
+    box-shadow: 0 8px 22px rgba(178, 74, 242, 0.08) !important;
   }
 
   .light-theme button[class*="bg-black"]:hover,
@@ -2701,8 +2701,8 @@ const THEME_STYLE_CSS = `
   .light-theme button[class*="bg-zinc-900"]:hover {
     background: #faf5ff !important;
     color: #0f172a !important;
-    border-color: rgba(217, 70, 239, 0.55) !important;
-    box-shadow: 0 12px 30px rgba(168, 85, 247, 0.14) !important;
+    border-color: rgba(178, 74, 242, 0.55) !important;
+    box-shadow: 0 12px 30px rgba(178, 74, 242, 0.14) !important;
   }
 
   .light-theme button[class*="bg-fuchsia-500"],
@@ -2723,7 +2723,7 @@ const THEME_STYLE_CSS = `
   .light-theme .grid > div[class*="bg-black"] {
     background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 58%, #f8fbff 100%) !important;
     color: #0f172a !important;
-    border-color: rgba(168, 85, 247, 0.22) !important;
+    border-color: rgba(178, 74, 242, 0.22) !important;
   }
 
   .light-theme .fixed .bg-black,
@@ -2736,9 +2736,9 @@ const THEME_STYLE_CSS = `
   .light-theme .rounded-full[class*="bg-white/5"],
   .light-theme .rounded-md[class*="bg-white/10"],
   .light-theme .rounded-md[class*="bg-white/5"] {
-    background: rgba(168, 85, 247, 0.10) !important;
+    background: rgba(178, 74, 242, 0.10) !important;
     color: #0f172a !important;
-    border-color: rgba(168, 85, 247, 0.20) !important;
+    border-color: rgba(178, 74, 242, 0.20) !important;
   }
 
   .trade-context-modern {
@@ -2750,7 +2750,7 @@ const THEME_STYLE_CSS = `
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: radial-gradient(circle at top left, rgba(217,70,239,.12), transparent 34%), radial-gradient(circle at bottom right, rgba(16,185,129,.07), transparent 30%);
+    background: radial-gradient(circle at top left, rgba(178, 74, 242,.12), transparent 34%), radial-gradient(circle at bottom right, rgba(16,185,129,.07), transparent 30%);
   }
 
   .trade-context-modern > * {
@@ -2767,9 +2767,9 @@ const THEME_STYLE_CSS = `
   }
 
   .trade-context-card:hover {
-    border-color: rgba(217,70,239,.38);
-    background: linear-gradient(135deg, rgba(217,70,239,.075), rgba(0,0,0,.44));
-    box-shadow: 0 0 18px rgba(217,70,239,.10);
+    border-color: rgba(178, 74, 242,.38);
+    background: linear-gradient(135deg, rgba(178, 74, 242,.075), rgba(0,0,0,.44));
+    box-shadow: 0 0 18px rgba(178, 74, 242,.10);
   }
 
   .trade-context-modern label > span:first-child {
@@ -2802,8 +2802,8 @@ const THEME_STYLE_CSS = `
   .trade-context-modern .custom-select-trigger:focus,
   .trade-context-input:hover,
   .trade-context-input:focus {
-    border-color: rgba(217,70,239,.50) !important;
-    box-shadow: 0 0 0 1px rgba(217,70,239,.12), 0 0 18px rgba(217,70,239,.10) !important;
+    border-color: rgba(178, 74, 242,.50) !important;
+    box-shadow: 0 0 0 1px rgba(178, 74, 242,.12), 0 0 18px rgba(178, 74, 242,.10) !important;
   }
 
   .trade-context-modern .custom-select-selected,
@@ -2815,8 +2815,8 @@ const THEME_STYLE_CSS = `
     border-radius: 1rem !important;
     padding: .35rem !important;
     background: #060606 !important;
-    border-color: rgba(217,70,239,.28) !important;
-    box-shadow: 0 18px 45px rgba(0,0,0,.90), 0 0 20px rgba(217,70,239,.10) !important;
+    border-color: rgba(178, 74, 242,.28) !important;
+    box-shadow: 0 18px 45px rgba(0,0,0,.90), 0 0 20px rgba(178, 74, 242,.10) !important;
   }
 
   .trade-context-modern .custom-select-option {
@@ -2832,8 +2832,8 @@ const THEME_STYLE_CSS = `
   }
 
   .trade-context-modern .custom-select-option:hover {
-    background: rgba(217,70,239,.12) !important;
-    color: #f5d0fe !important;
+    background: rgba(178, 74, 242,.12) !important;
+    color: #e7c6fb !important;
   }
 
   .trade-context-modern .custom-select-active {
@@ -2863,7 +2863,7 @@ const THEME_STYLE_CSS = `
   .light-theme .trade-context-card {
     background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 58%, #ffffff 100%) !important;
     color: #0f172a !important;
-    border-color: rgba(168,85,247,.24) !important;
+    border-color: rgba(178, 74, 242,.24) !important;
   }
 
   .light-theme .trade-context-modern .custom-select-trigger,
@@ -2892,8 +2892,8 @@ const THEME_STYLE_CSS = `
   .light-theme .trade-context-modern .custom-select-option:hover,
   .light-theme .trade-context-modern .custom-select-active {
     background: #f8fafc !important;
-    color: #86198f !important;
-    border: 1px solid rgba(217,70,239,.24) !important;
+    color: #720cb0 !important;
+    border: 1px solid rgba(178, 74, 242,.24) !important;
   }
 
   .light-theme .trade-context-modern .custom-select-option-no,
@@ -2906,10 +2906,10 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .segmented-choice-active {
-    background: linear-gradient(135deg, #d946ef 0%, #a855f7 100%) !important;
-    border-color: rgba(192,38,211,.72) !important;
+    background: linear-gradient(135deg, #b24af2 0%, #a855f7 100%) !important;
+    border-color: rgba(158, 26, 239,.72) !important;
     color: #ffffff !important;
-    box-shadow: 0 10px 26px rgba(168,85,247,.22), 0 0 0 3px rgba(217,70,239,.10) !important;
+    box-shadow: 0 10px 26px rgba(178, 74, 242,.22), 0 0 0 3px rgba(178, 74, 242,.10) !important;
   }
 
   .light-theme .segmented-choice-idle {
@@ -2919,8 +2919,8 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .segmented-choice-idle:hover {
-    border-color: rgba(217,70,239,.38) !important;
-    color: #86198f !important;
+    border-color: rgba(178, 74, 242,.38) !important;
+    color: #720cb0 !important;
     background: #faf5ff !important;
   }
 
@@ -2976,7 +2976,7 @@ const THEME_STYLE_CSS = `
   .session-neon-lunch:hover,
   .session-active-lunch { border-color: rgba(251,191,36,.55) !important; background: rgba(245,158,11,.16) !important; box-shadow: inset 0 0 18px rgba(245,158,11,.12), 0 0 16px rgba(245,158,11,.18) !important; }
   .session-neon-nypm:hover,
-  .session-active-nypm { border-color: rgba(244,114,182,.60) !important; background: rgba(217,70,239,.16) !important; box-shadow: inset 0 0 18px rgba(217,70,239,.12), 0 0 16px rgba(217,70,239,.20) !important; }
+  .session-active-nypm { border-color: rgba(244,114,182,.60) !important; background: rgba(178, 74, 242,.16) !important; box-shadow: inset 0 0 18px rgba(178, 74, 242,.12), 0 0 16px rgba(178, 74, 242,.20) !important; }
   .session-neon-premarket:hover,
   .session-active-premarket { border-color: rgba(34,211,238,.55) !important; background: rgba(6,182,212,.16) !important; box-shadow: inset 0 0 18px rgba(6,182,212,.12), 0 0 16px rgba(6,182,212,.18) !important; }
 
@@ -2992,15 +2992,15 @@ const THEME_STYLE_CSS = `
     display: inline-flex;
     align-items: center;
     border-radius: 999px;
-    border: 1px solid rgba(217,70,239,.28);
-    background: rgba(217,70,239,.12);
+    border: 1px solid rgba(178, 74, 242,.28);
+    background: rgba(178, 74, 242,.12);
     padding: .18rem .45rem;
     font-size: .62rem;
     font-weight: 950;
-    color: #f0abfc;
+    color: #d6a0f8;
     letter-spacing: .08em;
     vertical-align: middle;
-    box-shadow: 0 0 14px rgba(217,70,239,.12);
+    box-shadow: 0 0 14px rgba(178, 74, 242,.12);
   }
 
   @keyframes pnlSwitcherSlide {
@@ -3014,7 +3014,7 @@ const THEME_STYLE_CSS = `
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
     animation: animatedNumberPop .95s ease both;
-    text-shadow: 0 0 18px rgba(217,70,239,.22), 0 0 28px rgba(255,255,255,.08);
+    text-shadow: 0 0 18px rgba(178, 74, 242,.22), 0 0 28px rgba(255,255,255,.08);
   }
 
   @keyframes animatedNumberPop {
@@ -3032,8 +3032,8 @@ const THEME_STYLE_CSS = `
     padding: 0;
     isolation: isolate;
     background: linear-gradient(135deg, rgba(0,0,0,.56), rgba(88,28,135,.14) 50%, rgba(0,0,0,.54));
-    border: 1px solid rgba(217,70,239,.25);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 0 28px rgba(217,70,239,.10);
+    border: 1px solid rgba(178, 74, 242,.25);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 0 28px rgba(178, 74, 242,.10);
   }
 
   .moving-text-wrap::before {
@@ -3042,7 +3042,7 @@ const THEME_STYLE_CSS = `
     inset: 0;
     z-index: 1;
     pointer-events: none;
-    background: radial-gradient(circle at 12% 50%, rgba(217,70,239,.18), transparent 28%), radial-gradient(circle at 88% 50%, rgba(34,197,94,.10), transparent 26%);
+    background: radial-gradient(circle at 12% 50%, rgba(178, 74, 242,.18), transparent 28%), radial-gradient(circle at 88% 50%, rgba(34,197,94,.10), transparent 26%);
   }
 
   .moving-text-wrap::after {
@@ -3053,7 +3053,7 @@ const THEME_STYLE_CSS = `
     top: 0;
     height: 1px;
     z-index: 2;
-    background: linear-gradient(to right, transparent, rgba(217,70,239,.85), transparent);
+    background: linear-gradient(to right, transparent, rgba(178, 74, 242,.85), transparent);
   }
 
   .moving-text-track {
@@ -3094,7 +3094,7 @@ const THEME_STYLE_CSS = `
     font-style: italic;
     color: #ffffff;
     letter-spacing: .01em;
-    text-shadow: 0 0 16px rgba(217,70,239,.50), 0 0 22px rgba(255,255,255,.10);
+    text-shadow: 0 0 16px rgba(178, 74, 242,.50), 0 0 22px rgba(255,255,255,.10);
   }
 
   .moving-text-spark {
@@ -3105,12 +3105,12 @@ const THEME_STYLE_CSS = `
     align-items: center;
     justify-content: center;
     border-radius: 999px;
-    border: 1px solid rgba(217,70,239,.44);
-    background: rgba(217,70,239,.14);
-    color: #f0abfc;
+    border: 1px solid rgba(178, 74, 242,.44);
+    background: rgba(178, 74, 242,.14);
+    color: #d6a0f8;
     font-size: .72rem;
     font-style: normal;
-    box-shadow: 0 0 18px rgba(217,70,239,.24), inset 0 1px 0 rgba(255,255,255,.10);
+    box-shadow: 0 0 18px rgba(178, 74, 242,.24), inset 0 1px 0 rgba(255,255,255,.10);
     animation: inspirationSpark 2.4s ease-in-out infinite;
     will-change: transform, filter, opacity;
   }
@@ -3122,8 +3122,8 @@ const THEME_STYLE_CSS = `
   .daily-inspiration-star {
     display: inline-block;
     animation: inspirationStarTwinkle 1.9s ease-in-out infinite;
-    color: #f0abfc;
-    filter: drop-shadow(0 0 10px rgba(217,70,239,.7));
+    color: #d6a0f8;
+    filter: drop-shadow(0 0 10px rgba(178, 74, 242,.7));
   }
 
   .daily-inspiration-star:last-child {
@@ -3173,10 +3173,10 @@ const THEME_STYLE_CSS = `
     position: relative;
     overflow: hidden;
     border-radius: 2rem;
-    border: 1px solid rgba(217,70,239,.26);
+    border: 1px solid rgba(178, 74, 242,.26);
     background: linear-gradient(135deg, rgba(10,3,16,.98), rgba(0,0,0,.96) 52%, rgba(20,8,28,.98));
     padding: 1.4rem;
-    box-shadow: 0 24px 70px rgba(217,70,239,.13), inset 0 1px 0 rgba(255,255,255,.05);
+    box-shadow: 0 24px 70px rgba(178, 74, 242,.13), inset 0 1px 0 rgba(255,255,255,.05);
   }
 
   .mistake-coach-hero::before {
@@ -3184,7 +3184,7 @@ const THEME_STYLE_CSS = `
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: radial-gradient(circle at top left, rgba(217,70,239,.18), transparent 32%), radial-gradient(circle at bottom right, rgba(16,185,129,.10), transparent 34%);
+    background: radial-gradient(circle at top left, rgba(178, 74, 242,.18), transparent 32%), radial-gradient(circle at bottom right, rgba(16,185,129,.10), transparent 34%);
   }
 
   .coach-flow-step,
@@ -3215,16 +3215,16 @@ const THEME_STYLE_CSS = `
     align-items: center;
     justify-content: center;
     border-radius: .8rem;
-    border: 1px solid rgba(217,70,239,.35);
-    background: rgba(217,70,239,.14);
-    color: #f0abfc;
+    border: 1px solid rgba(178, 74, 242,.35);
+    background: rgba(178, 74, 242,.14);
+    color: #d6a0f8;
     font-size: .8rem;
     font-weight: 950;
   }
 
   .coach-summary-card {
     border-radius: 1.6rem;
-    border-color: rgba(217,70,239,.24);
+    border-color: rgba(178, 74, 242,.24);
     background: linear-gradient(135deg, rgba(255,255,255,.055), rgba(0,0,0,.38));
     padding: 1.25rem;
   }
@@ -3264,8 +3264,8 @@ const THEME_STYLE_CSS = `
   .mistake-guide-panel {
     overflow: hidden;
     border-radius: 1.75rem;
-    border-color: rgba(217,70,239,.20);
-    background: linear-gradient(135deg, rgba(217,70,239,.08), rgba(0,0,0,.22));
+    border-color: rgba(178, 74, 242,.20);
+    background: linear-gradient(135deg, rgba(178, 74, 242,.08), rgba(0,0,0,.22));
     padding: 1.15rem;
   }
 
@@ -3286,10 +3286,10 @@ const THEME_STYLE_CSS = `
     position: relative;
     overflow: hidden;
     border-radius: 2rem;
-    border: 1px solid rgba(217,70,239,.22);
+    border: 1px solid rgba(178, 74, 242,.22);
     background: linear-gradient(135deg, rgba(10,3,16,.96), rgba(0,0,0,.96) 52%, rgba(16,5,23,.96));
     padding: 1.25rem;
-    box-shadow: 0 22px 60px rgba(217,70,239,.10), inset 0 1px 0 rgba(255,255,255,.04);
+    box-shadow: 0 22px 60px rgba(178, 74, 242,.10), inset 0 1px 0 rgba(255,255,255,.04);
   }
 
   .mistake-hero-clean::before,
@@ -3298,7 +3298,7 @@ const THEME_STYLE_CSS = `
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: radial-gradient(circle at top left, rgba(239,68,68,.13), transparent 32%), radial-gradient(circle at bottom right, rgba(217,70,239,.12), transparent 34%);
+    background: radial-gradient(circle at top left, rgba(239,68,68,.13), transparent 32%), radial-gradient(circle at bottom right, rgba(178, 74, 242,.12), transparent 34%);
   }
 
   .mistake-hero-clean > *,
@@ -3404,7 +3404,7 @@ const THEME_STYLE_CSS = `
 
   .light-theme .mistake-hero-clean::before,
   .light-theme .mistake-panel-clean::before {
-    background: radial-gradient(circle at top left, rgba(239,68,68,.08), transparent 32%), radial-gradient(circle at bottom right, rgba(217,70,239,.08), transparent 34%) !important;
+    background: radial-gradient(circle at top left, rgba(239,68,68,.08), transparent 32%), radial-gradient(circle at bottom right, rgba(178, 74, 242,.08), transparent 34%) !important;
   }
 
   .light-theme .issue-clean-card,
@@ -3424,7 +3424,7 @@ const THEME_STYLE_CSS = `
   .light-theme,
   .light-theme main.app-main,
   .light-theme body {
-    background: radial-gradient(circle at top left, rgba(217,70,239,.10), transparent 30%), linear-gradient(135deg, #f7f8fc 0%, #ffffff 44%, #f8fafc 100%) !important;
+    background: radial-gradient(circle at top left, rgba(178, 74, 242,.10), transparent 30%), linear-gradient(135deg, #f7f8fc 0%, #ffffff 44%, #f8fafc 100%) !important;
     color: #111827 !important;
   }
 
@@ -3446,18 +3446,18 @@ const THEME_STYLE_CSS = `
   .light-theme aside.fixed button:hover:not(.bg-fuchsia-500),
   .light-theme .account-sidebar-card:hover {
     background: #faf5ff !important;
-    border-color: rgba(217,70,239,.30) !important;
-    box-shadow: 0 14px 32px rgba(168,85,247,.12) !important;
+    border-color: rgba(178, 74, 242,.30) !important;
+    box-shadow: 0 14px 32px rgba(178, 74, 242,.12) !important;
   }
 
   .light-theme aside.fixed button.bg-fuchsia-500,
   .light-theme .journal-add-btn,
   .light-theme .dashboard-primary-btn,
   .light-theme button[class*="bg-fuchsia-500"] {
-    background: linear-gradient(135deg, #d946ef, #8b5cf6) !important;
+    background: linear-gradient(135deg, #b24af2, #8b5cf6) !important;
     color: #ffffff !important;
     border-color: transparent !important;
-    box-shadow: 0 14px 30px rgba(217,70,239,.24) !important;
+    box-shadow: 0 14px 30px rgba(178, 74, 242,.24) !important;
   }
 
   .light-theme .dashboard-hero,
@@ -3491,7 +3491,7 @@ const THEME_STYLE_CSS = `
   .light-theme .journal-hero,
   .light-theme .calendar-hero-pro {
     background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(250,245,255,.92) 55%, rgba(255,255,255,.96)) !important;
-    border-color: rgba(217,70,239,.20) !important;
+    border-color: rgba(178, 74, 242,.20) !important;
   }
 
   .light-theme .dashboard-hero::before,
@@ -3502,14 +3502,14 @@ const THEME_STYLE_CSS = `
   .light-theme .journal-search-panel::before,
   .light-theme .journal-sort-panel::before,
   .light-theme .trade-context-modern::before {
-    background: radial-gradient(circle at top left, rgba(217,70,239,.10), transparent 34%), radial-gradient(circle at bottom right, rgba(16,185,129,.055), transparent 30%) !important;
+    background: radial-gradient(circle at top left, rgba(178, 74, 242,.10), transparent 34%), radial-gradient(circle at bottom right, rgba(16,185,129,.055), transparent 30%) !important;
   }
 
   .light-theme .dashboard-inspiration,
   .light-theme .moving-text-wrap {
     background: linear-gradient(135deg, #ffffff, #faf5ff 55%, #ffffff) !important;
-    border-color: rgba(217,70,239,.18) !important;
-    box-shadow: 0 12px 30px rgba(168,85,247,.10), inset 0 1px 0 rgba(255,255,255,.85) !important;
+    border-color: rgba(178, 74, 242,.18) !important;
+    box-shadow: 0 12px 30px rgba(178, 74, 242,.10), inset 0 1px 0 rgba(255,255,255,.85) !important;
   }
 
   .light-theme .moving-text-item {
@@ -3518,10 +3518,10 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .moving-text-spark {
-    background: rgba(217,70,239,.10) !important;
-    color: #c026d3 !important;
-    border-color: rgba(217,70,239,.26) !important;
-    box-shadow: 0 10px 22px rgba(217,70,239,.10) !important;
+    background: rgba(178, 74, 242,.10) !important;
+    color: #9e1aef !important;
+    border-color: rgba(178, 74, 242,.26) !important;
+    box-shadow: 0 10px 22px rgba(178, 74, 242,.10) !important;
   }
 
   .light-theme .dashboard-dash-card,
@@ -3549,8 +3549,8 @@ const THEME_STYLE_CSS = `
   .light-theme .weekday-card-pro:hover,
   .light-theme .trade-card:hover,
   .light-theme .trade-context-card:hover {
-    border-color: rgba(217,70,239,.34) !important;
-    box-shadow: 0 18px 44px rgba(168,85,247,.14) !important;
+    border-color: rgba(178, 74, 242,.34) !important;
+    box-shadow: 0 18px 44px rgba(178, 74, 242,.14) !important;
   }
 
   .light-theme .text-white,
@@ -3571,7 +3571,7 @@ const THEME_STYLE_CSS = `
   .light-theme .text-fuchsia-300,
   .light-theme .text-fuchsia-400,
   .light-theme .text-fuchsia-500 {
-    color: #c026d3 !important;
+    color: #9e1aef !important;
   }
 
   .light-theme .text-emerald-300,
@@ -3607,8 +3607,8 @@ const THEME_STYLE_CSS = `
   .light-theme textarea:focus,
   .light-theme .custom-select-trigger:focus,
   .light-theme .date-picker-trigger:focus {
-    border-color: rgba(217,70,239,.55) !important;
-    box-shadow: 0 0 0 3px rgba(217,70,239,.12), 0 12px 28px rgba(168,85,247,.12) !important;
+    border-color: rgba(178, 74, 242,.55) !important;
+    box-shadow: 0 0 0 3px rgba(178, 74, 242,.12), 0 12px 28px rgba(178, 74, 242,.12) !important;
   }
 
   .light-theme .custom-select-menu,
@@ -3616,14 +3616,14 @@ const THEME_STYLE_CSS = `
   .light-theme .light-tooltip {
     background: rgba(255,255,255,.98) !important;
     color: #111827 !important;
-    border-color: rgba(217,70,239,.22) !important;
+    border-color: rgba(178, 74, 242,.22) !important;
     box-shadow: 0 24px 60px rgba(15,23,42,.16) !important;
   }
 
   .light-theme .custom-select-option:hover,
   .light-theme .custom-select-active {
     background: #faf5ff !important;
-    color: #86198f !important;
+    color: #720cb0 !important;
   }
 
   .light-theme .dashboard-chart-area,
@@ -3659,8 +3659,8 @@ const THEME_STYLE_CSS = `
 
   .light-theme .calendar-day-selected,
   .light-theme .date-picker-day-selected {
-    border-color: rgba(217,70,239,.70) !important;
-    box-shadow: 0 0 0 3px rgba(217,70,239,.12), 0 14px 30px rgba(168,85,247,.16) !important;
+    border-color: rgba(178, 74, 242,.70) !important;
+    box-shadow: 0 0 0 3px rgba(178, 74, 242,.12), 0 14px 30px rgba(178, 74, 242,.16) !important;
   }
 
   .light-theme .pnl-switcher-label,
@@ -3668,13 +3668,13 @@ const THEME_STYLE_CSS = `
   .light-theme .journal-list-metric-chip,
   .light-theme .calendar-top-pill-neutral {
     background: #faf5ff !important;
-    color: #86198f !important;
-    border-color: rgba(217,70,239,.24) !important;
-    box-shadow: 0 8px 20px rgba(217,70,239,.08) !important;
+    color: #720cb0 !important;
+    border-color: rgba(178, 74, 242,.24) !important;
+    box-shadow: 0 8px 20px rgba(178, 74, 242,.08) !important;
   }
 
   .light-theme .calendar-page-pro {
-    background: radial-gradient(circle at top left, rgba(217,70,239,.08), transparent 26%), linear-gradient(135deg, #f8fafc 0%, #ffffff 46%, #f9fafb 100%) !important;
+    background: radial-gradient(circle at top left, rgba(178, 74, 242,.08), transparent 26%), linear-gradient(135deg, #f8fafc 0%, #ffffff 46%, #f9fafb 100%) !important;
     color: #111827 !important;
   }
 
@@ -3744,7 +3744,7 @@ const THEME_STYLE_CSS = `
 
   .light-theme .moving-text-spark {
     background: #f8fafc !important;
-    color: #a21caf !important;
+    color: #8a0fd7 !important;
     border-color: rgba(226,232,240,.96) !important;
     box-shadow: none !important;
   }
@@ -3863,7 +3863,7 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .pretrade-routine-item:hover {
-    border-color: rgba(217,70,239,.26) !important;
+    border-color: rgba(178, 74, 242,.26) !important;
     box-shadow: 0 16px 36px rgba(15,23,42,.08) !important;
   }
 
@@ -3903,7 +3903,7 @@ const THEME_STYLE_CSS = `
     background: rgba(255,255,255,.97) !important;
     color: #111827 !important;
     border-color: rgba(226,232,240,.95) !important;
-    box-shadow: 0 24px 70px rgba(15,23,42,.16), 0 0 0 1px rgba(217,70,239,.08) inset !important;
+    box-shadow: 0 24px 70px rgba(15,23,42,.16), 0 0 0 1px rgba(178, 74, 242,.08) inset !important;
     ring-color: transparent !important;
   }
 
@@ -3923,13 +3923,13 @@ const THEME_STYLE_CSS = `
   .light-theme .account-switcher-menu button:hover,
   .light-theme .sidebar-user-menu button:hover {
     background: #faf5ff !important;
-    border-color: rgba(217,70,239,.26) !important;
-    color: #86198f !important;
+    border-color: rgba(178, 74, 242,.26) !important;
+    color: #720cb0 !important;
   }
 
   .light-theme .account-switcher-menu .bg-fuchsia-500,
   .light-theme .sidebar-user-menu .bg-fuchsia-500 {
-    background: linear-gradient(135deg, #d946ef, #8b5cf6) !important;
+    background: linear-gradient(135deg, #b24af2, #8b5cf6) !important;
     color: #ffffff !important;
   }
 
@@ -3968,13 +3968,13 @@ const THEME_STYLE_CSS = `
   .light-theme .calendar-shell-pro::before,
   .light-theme .mistake-panel-clean::before,
   .light-theme .mistake-coach-hero::before {
-    background: radial-gradient(circle at top left, rgba(217,70,239,.10), transparent 34%), radial-gradient(circle at bottom right, rgba(16,185,129,.08), transparent 36%) !important;
+    background: radial-gradient(circle at top left, rgba(178, 74, 242,.10), transparent 34%), radial-gradient(circle at bottom right, rgba(16,185,129,.08), transparent 36%) !important;
   }
 
   /* Calendar day details modal */
   .calendar-day-modal-pro {
     background: linear-gradient(135deg, #050505 0%, #090909 52%, #07030b 100%) !important;
-    box-shadow: 0 26px 90px rgba(0,0,0,.80), 0 0 34px rgba(217,70,239,.10) !important;
+    box-shadow: 0 26px 90px rgba(0,0,0,.80), 0 0 34px rgba(178, 74, 242,.10) !important;
   }
 
   .calendar-day-modal-head {
@@ -4010,7 +4010,7 @@ const THEME_STYLE_CSS = `
   .calendar-modal-status-win { border-color: rgba(251,146,60,.40); background: rgba(251,146,60,.14); color: #fdba74; }
   .calendar-modal-status-loss { border-color: rgba(248,113,113,.40); background: rgba(248,113,113,.14); color: #fca5a5; }
   .calendar-modal-status-be { border-color: rgba(245,158,11,.40); background: rgba(245,158,11,.14); color: #fcd34d; }
-  .calendar-modal-status-empty { border-color: rgba(217,70,239,.35); background: rgba(217,70,239,.12); color: #f0abfc; }
+  .calendar-modal-status-empty { border-color: rgba(178, 74, 242,.35); background: rgba(178, 74, 242,.12); color: #d6a0f8; }
 
   .calendar-day-modal-summary {
     margin: 2rem 1.5rem 1rem;
@@ -4022,7 +4022,7 @@ const THEME_STYLE_CSS = `
   .calendar-day-modal-summary-win { border-color: rgba(16,185,129,.32); background: rgba(16,185,129,.10); }
   .calendar-day-modal-summary-loss { border-color: rgba(239,68,68,.32); background: rgba(239,68,68,.10); }
   .calendar-day-modal-summary-be { border-color: rgba(245,158,11,.32); background: rgba(245,158,11,.10); }
-  .calendar-day-modal-summary-empty { border-color: rgba(217,70,239,.28); background: rgba(217,70,239,.08); }
+  .calendar-day-modal-summary-empty { border-color: rgba(178, 74, 242,.28); background: rgba(178, 74, 242,.08); }
 
   .calendar-modal-trade-row {
     position: relative;
@@ -4073,7 +4073,7 @@ const THEME_STYLE_CSS = `
   /* 10/10 Calendar premium polish */
   .calendar-hero-pro {
     border-radius: 2rem !important;
-    border-color: rgba(217,70,239,.20) !important;
+    border-color: rgba(178, 74, 242,.20) !important;
     background: linear-gradient(135deg, rgba(13,13,16,.97), rgba(7,7,9,.98) 52%, rgba(18,12,24,.94)) !important;
     box-shadow: 0 24px 70px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05) !important;
   }
@@ -4083,7 +4083,7 @@ const THEME_STYLE_CSS = `
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: radial-gradient(circle at top left, rgba(217,70,239,.13), transparent 33%), radial-gradient(circle at bottom right, rgba(16,185,129,.075), transparent 34%);
+    background: radial-gradient(circle at top left, rgba(178, 74, 242,.13), transparent 33%), radial-gradient(circle at bottom right, rgba(16,185,129,.075), transparent 34%);
   }
 
   .calendar-hero-stats-pro {
@@ -4142,8 +4142,8 @@ const THEME_STYLE_CSS = `
     position: relative;
     overflow: hidden;
     border-radius: 1.75rem;
-    border-color: rgba(217,70,239,.18);
-    background: linear-gradient(135deg, rgba(217,70,239,.075), rgba(255,255,255,.035) 42%, rgba(16,185,129,.045));
+    border-color: rgba(178, 74, 242,.18);
+    background: linear-gradient(135deg, rgba(178, 74, 242,.075), rgba(255,255,255,.035) 42%, rgba(16,185,129,.045));
     padding: 1.25rem;
     box-shadow: 0 18px 46px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.04);
   }
@@ -4153,7 +4153,7 @@ const THEME_STYLE_CSS = `
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: radial-gradient(circle at top left, rgba(217,70,239,.10), transparent 34%), radial-gradient(circle at bottom right, rgba(16,185,129,.06), transparent 34%);
+    background: radial-gradient(circle at top left, rgba(178, 74, 242,.10), transparent 34%), radial-gradient(circle at bottom right, rgba(16,185,129,.06), transparent 34%);
   }
 
   .calendar-guide-pro > * { position: relative; z-index: 1; }
@@ -4208,32 +4208,32 @@ const THEME_STYLE_CSS = `
 
   .light-theme .account-create-button {
     background: linear-gradient(135deg, #faf5ff 0%, #ffffff 100%) !important;
-    border: 1px solid rgba(217,70,239,.28) !important;
-    color: #86198f !important;
+    border: 1px solid rgba(178, 74, 242,.28) !important;
+    color: #720cb0 !important;
   }
 
   .light-theme .account-create-button:hover {
     background: linear-gradient(135deg, #f3e8ff 0%, #ffffff 100%) !important;
-    border-color: rgba(217,70,239,.48) !important;
+    border-color: rgba(178, 74, 242,.48) !important;
   }
 
   .light-theme .account-create-button .account-create-icon {
-    background: linear-gradient(135deg, #d946ef, #a855f7) !important;
+    background: linear-gradient(135deg, #b24af2, #a855f7) !important;
     color: #ffffff !important;
-    box-shadow: 0 10px 24px rgba(168,85,247,.22) !important;
+    box-shadow: 0 10px 24px rgba(178, 74, 242,.22) !important;
   }
 
   .light-theme .account-create-button .text-fuchsia-300,
   .light-theme .account-create-button .text-zinc-400 {
-    color: #86198f !important;
+    color: #720cb0 !important;
   }
 
   .light-theme .segmented-choice-active,
   .light-theme .segmented-choice-active.font-black {
-    background: linear-gradient(135deg, #d946ef 0%, #a855f7 100%) !important;
-    border-color: rgba(192,38,211,.72) !important;
+    background: linear-gradient(135deg, #b24af2 0%, #a855f7 100%) !important;
+    border-color: rgba(158, 26, 239,.72) !important;
     color: #ffffff !important;
-    box-shadow: 0 10px 26px rgba(168,85,247,.22), 0 0 0 3px rgba(217,70,239,.10) !important;
+    box-shadow: 0 10px 26px rgba(178, 74, 242,.22), 0 0 0 3px rgba(178, 74, 242,.10) !important;
   }
 
   .calendar-day-event-pill {
@@ -4405,8 +4405,8 @@ const THEME_STYLE_CSS = `
 
   .calendar-day-simple:hover {
     transform: translateY(-2px) !important;
-    border-color: rgba(217,70,239,.55) !important;
-    box-shadow: 0 16px 34px rgba(217,70,239,.12), inset 0 1px 0 rgba(255,255,255,.05) !important;
+    border-color: rgba(178, 74, 242,.55) !important;
+    box-shadow: 0 16px 34px rgba(178, 74, 242,.12), inset 0 1px 0 rgba(255,255,255,.05) !important;
   }
 
   .calendar-day-number,
@@ -4421,18 +4421,18 @@ const THEME_STYLE_CSS = `
   .calendar-week-summary-pro {
     min-height: 128px !important;
     border-radius: 1.1rem !important;
-    background: rgba(217,70,239,.075) !important;
+    background: rgba(178, 74, 242,.075) !important;
   }
 
   .calendar-day-win { background: linear-gradient(135deg, rgba(16,185,129,.18), rgba(0,0,0,.22)) !important; }
   .calendar-day-loss { background: linear-gradient(135deg, rgba(239,68,68,.18), rgba(0,0,0,.22)) !important; }
   .calendar-day-breakeven { background: linear-gradient(135deg, rgba(245,158,11,.16), rgba(0,0,0,.22)) !important; }
   .calendar-day-empty,
-  .calendar-day-weekend { background: linear-gradient(135deg, rgba(217,70,239,.09), rgba(0,0,0,.24)) !important; }
+  .calendar-day-weekend { background: linear-gradient(135deg, rgba(178, 74, 242,.09), rgba(0,0,0,.24)) !important; }
 
   .calendar-day-selected {
-    border-color: rgba(217,70,239,.85) !important;
-    box-shadow: 0 0 0 1px rgba(217,70,239,.30), 0 0 34px rgba(217,70,239,.24) !important;
+    border-color: rgba(178, 74, 242,.85) !important;
+    box-shadow: 0 0 0 1px rgba(178, 74, 242,.30), 0 0 34px rgba(178, 74, 242,.24) !important;
   }
 
   .light-theme .calendar-summary-card-pro,
@@ -4447,13 +4447,13 @@ const THEME_STYLE_CSS = `
 
   .light-theme .calendar-hero-pro {
     background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(250,245,255,.92) 55%, rgba(255,255,255,.96)) !important;
-    border-color: rgba(217,70,239,.20) !important;
+    border-color: rgba(178, 74, 242,.20) !important;
     box-shadow: 0 18px 45px rgba(15,23,42,.075) !important;
   }
 
   .light-theme .calendar-guide-pro::before,
   .light-theme .calendar-hero-pro::before {
-    background: radial-gradient(circle at top left, rgba(217,70,239,.055), transparent 32%), radial-gradient(circle at bottom right, rgba(16,185,129,.045), transparent 34%) !important;
+    background: radial-gradient(circle at top left, rgba(178, 74, 242,.055), transparent 32%), radial-gradient(circle at bottom right, rgba(16,185,129,.045), transparent 34%) !important;
   }
 
   .light-theme .calendar-legend-pro span {
@@ -4486,7 +4486,7 @@ const THEME_STYLE_CSS = `
     position: relative;
     overflow: hidden;
     border-radius: 2rem;
-    border: 1px solid rgba(217,70,239,.18);
+    border: 1px solid rgba(178, 74, 242,.18);
     background: linear-gradient(135deg, rgba(13,13,16,.96), rgba(7,7,9,.98) 52%, rgba(18,12,24,.94));
     padding: 1.45rem;
     box-shadow: 0 22px 60px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05);
@@ -4497,7 +4497,7 @@ const THEME_STYLE_CSS = `
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: radial-gradient(circle at top left, rgba(217,70,239,.12), transparent 33%), radial-gradient(circle at bottom right, rgba(16,185,129,.08), transparent 34%);
+    background: radial-gradient(circle at top left, rgba(178, 74, 242,.12), transparent 33%), radial-gradient(circle at bottom right, rgba(16,185,129,.08), transparent 34%);
   }
 
   .stats-flow-step-pro,
@@ -4529,16 +4529,16 @@ const THEME_STYLE_CSS = `
     align-items: center;
     justify-content: center;
     border-radius: .8rem;
-    border: 1px solid rgba(217,70,239,.35);
-    background: rgba(217,70,239,.14);
-    color: #f0abfc;
+    border: 1px solid rgba(178, 74, 242,.35);
+    background: rgba(178, 74, 242,.14);
+    color: #d6a0f8;
     font-size: .8rem;
     font-weight: 950;
   }
 
   .statistics-filter-pro {
     border-radius: 1.6rem;
-    border-color: rgba(217,70,239,.24);
+    border-color: rgba(178, 74, 242,.24);
     background: linear-gradient(135deg, rgba(255,255,255,.055), rgba(0,0,0,.38));
     padding: 1.25rem;
   }
@@ -4546,17 +4546,17 @@ const THEME_STYLE_CSS = `
   .statistics-filter-btn-pro {
     min-height: 2.55rem;
     border-radius: .8rem;
-    border: 1px solid rgba(217,70,239,.28);
-    background: rgba(217,70,239,.10);
-    color: #f0abfc;
+    border: 1px solid rgba(178, 74, 242,.28);
+    background: rgba(178, 74, 242,.10);
+    color: #d6a0f8;
     font-size: .82rem;
     font-weight: 950;
     transition: all .2s ease;
   }
 
   .statistics-filter-btn-pro:hover {
-    border-color: rgba(217,70,239,.55);
-    background: rgba(217,70,239,.16);
+    border-color: rgba(178, 74, 242,.55);
+    background: rgba(178, 74, 242,.16);
     transform: translateY(-1px);
   }
 
@@ -4620,7 +4620,7 @@ const THEME_STYLE_CSS = `
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: radial-gradient(circle at top left, rgba(217,70,239,.08), transparent 34%), radial-gradient(circle at bottom right, rgba(16,185,129,.05), transparent 34%);
+    background: radial-gradient(circle at top left, rgba(178, 74, 242,.08), transparent 34%), radial-gradient(circle at bottom right, rgba(16,185,129,.05), transparent 34%);
   }
 
   .statistics-command-main-pro > *,
@@ -4649,7 +4649,7 @@ const THEME_STYLE_CSS = `
   .stats-hero-good { border-color: rgba(16,185,129,.24); background: rgba(16,185,129,.075); }
   .stats-hero-bad { border-color: rgba(239,68,68,.24); background: rgba(239,68,68,.075); }
   .stats-hero-warn { border-color: rgba(245,158,11,.24); background: rgba(245,158,11,.075); }
-  .stats-hero-main { border-color: rgba(217,70,239,.24); background: rgba(217,70,239,.075); }
+  .stats-hero-main { border-color: rgba(178, 74, 242,.24); background: rgba(178, 74, 242,.075); }
 
   .stats-insight-card {
     border-radius: 1.15rem;
@@ -4659,14 +4659,14 @@ const THEME_STYLE_CSS = `
   .stats-insight-good { border-color: rgba(16,185,129,.24); background: rgba(16,185,129,.075); }
   .stats-insight-bad { border-color: rgba(239,68,68,.24); background: rgba(239,68,68,.075); }
   .stats-insight-warn { border-color: rgba(245,158,11,.24); background: rgba(245,158,11,.075); }
-  .stats-insight-main { border-color: rgba(217,70,239,.24); background: rgba(217,70,239,.075); }
+  .stats-insight-main { border-color: rgba(178, 74, 242,.24); background: rgba(178, 74, 242,.075); }
 
   .stats-beginner-guide-pro {
     position: relative;
     overflow: hidden;
     border-radius: 1.8rem;
-    border: 1px solid rgba(217,70,239,.18);
-    background: linear-gradient(135deg, rgba(217,70,239,.075), rgba(255,255,255,.035) 42%, rgba(16,185,129,.045));
+    border: 1px solid rgba(178, 74, 242,.18);
+    background: linear-gradient(135deg, rgba(178, 74, 242,.075), rgba(255,255,255,.035) 42%, rgba(16,185,129,.045));
     padding: 1.25rem;
     box-shadow: 0 18px 46px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.04);
   }
@@ -4676,7 +4676,7 @@ const THEME_STYLE_CSS = `
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: radial-gradient(circle at top left, rgba(217,70,239,.10), transparent 34%), radial-gradient(circle at bottom right, rgba(16,185,129,.06), transparent 34%);
+    background: radial-gradient(circle at top left, rgba(178, 74, 242,.10), transparent 34%), radial-gradient(circle at bottom right, rgba(16,185,129,.06), transparent 34%);
   }
 
   .stats-beginner-guide-pro > * {
@@ -4693,10 +4693,10 @@ const THEME_STYLE_CSS = `
 
   .stats-reading-order-pro span {
     border-radius: 999px;
-    border: 1px solid rgba(217,70,239,.24);
-    background: rgba(217,70,239,.10);
+    border: 1px solid rgba(178, 74, 242,.24);
+    background: rgba(178, 74, 242,.10);
     padding: .65rem .85rem;
-    color: #f0abfc;
+    color: #d6a0f8;
     font-size: .78rem;
     font-weight: 950;
     text-align: center;
@@ -4717,9 +4717,9 @@ const THEME_STYLE_CSS = `
     align-items: center;
     justify-content: center;
     border-radius: 999px;
-    border: 1px solid rgba(217,70,239,.28);
-    background: rgba(217,70,239,.12);
-    color: #f0abfc;
+    border: 1px solid rgba(178, 74, 242,.28);
+    background: rgba(178, 74, 242,.12);
+    color: #d6a0f8;
     font-size: .72rem;
     font-weight: 950;
   }
@@ -4745,14 +4745,14 @@ const THEME_STYLE_CSS = `
   }
 
   .statistics-tab-pro:hover {
-    background: rgba(217,70,239,.10);
+    background: rgba(178, 74, 242,.10);
     color: #fff;
   }
 
   .statistics-tab-pro-active {
-    background: linear-gradient(135deg, rgba(217,70,239,.95), rgba(168,85,247,.78));
+    background: linear-gradient(135deg, rgba(178, 74, 242,.95), rgba(178, 74, 242,.78));
     color: #fff;
-    box-shadow: 0 0 22px rgba(217,70,239,.22), inset 0 1px 0 rgba(255,255,255,.18);
+    box-shadow: 0 0 22px rgba(178, 74, 242,.22), inset 0 1px 0 rgba(255,255,255,.18);
   }
 
   .statistics-tab-icon-pro {
@@ -4787,21 +4787,21 @@ const THEME_STYLE_CSS = `
   .light-theme .statistics-hero-pro::before,
   .light-theme .statistics-command-main-pro::before,
   .light-theme .statistics-command-side-pro::before {
-    background: radial-gradient(circle at top left, rgba(217,70,239,.055), transparent 32%), radial-gradient(circle at bottom right, rgba(16,185,129,.045), transparent 34%) !important;
+    background: radial-gradient(circle at top left, rgba(178, 74, 242,.055), transparent 32%), radial-gradient(circle at bottom right, rgba(16,185,129,.045), transparent 34%) !important;
   }
 
   .light-theme .stats-reading-order-pro span,
   .light-theme .stats-help-dot-pro {
     background: #faf5ff !important;
-    border-color: rgba(217,70,239,.22) !important;
-    color: #86198f !important;
+    border-color: rgba(178, 74, 242,.22) !important;
+    color: #720cb0 !important;
   }
 
   .light-theme .statistics-filter-btn-pro {
     background: #faf5ff !important;
-    border-color: rgba(217,70,239,.22) !important;
-    color: #86198f !important;
-    box-shadow: 0 8px 20px rgba(217,70,239,.08) !important;
+    border-color: rgba(178, 74, 242,.22) !important;
+    color: #720cb0 !important;
+    box-shadow: 0 8px 20px rgba(178, 74, 242,.08) !important;
   }
 
   .light-theme .statistics-status-strip-pro b,
@@ -4817,7 +4817,7 @@ const THEME_STYLE_CSS = `
 
   .light-theme .statistics-tab-pro:hover {
     background: #faf5ff !important;
-    color: #86198f !important;
+    color: #720cb0 !important;
   }
 
   .light-theme .statistics-tab-pro-active,
@@ -4869,9 +4869,9 @@ const THEME_STYLE_CSS = `
     align-items: center;
     justify-content: center;
     border-radius: 1.1rem;
-    border: 1px solid rgba(217,70,239,.32);
-    background: rgba(217,70,239,.10);
-    color: #f0abfc;
+    border: 1px solid rgba(178, 74, 242,.32);
+    background: rgba(178, 74, 242,.10);
+    color: #d6a0f8;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
   }
 
@@ -4890,17 +4890,17 @@ const THEME_STYLE_CSS = `
   .mistake-clear-btn-pro {
     min-height: 2.5rem;
     border-radius: .75rem;
-    border: 1px solid rgba(217,70,239,.28);
-    background: rgba(217,70,239,.10);
-    color: #f0abfc;
+    border: 1px solid rgba(178, 74, 242,.28);
+    background: rgba(178, 74, 242,.10);
+    color: #d6a0f8;
     font-size: .875rem;
     font-weight: 950;
     transition: all .2s ease;
   }
 
   .mistake-clear-btn-pro:hover {
-    border-color: rgba(217,70,239,.55);
-    background: rgba(217,70,239,.16);
+    border-color: rgba(178, 74, 242,.55);
+    background: rgba(178, 74, 242,.16);
     transform: translateY(-1px);
   }
 
@@ -4965,10 +4965,10 @@ const THEME_STYLE_CSS = `
   .mistake-page-divider-pro span {
     margin: 0 .9rem;
     border-radius: 999px;
-    border: 1px solid rgba(217,70,239,.22);
-    background: rgba(217,70,239,.08);
+    border: 1px solid rgba(178, 74, 242,.22);
+    background: rgba(178, 74, 242,.08);
     padding: .35rem .7rem;
-    color: #f0abfc;
+    color: #d6a0f8;
   }
 
   .mistake-coach-hero,
@@ -4980,13 +4980,13 @@ const THEME_STYLE_CSS = `
   }
 
   .mistake-coach-hero {
-    border-color: rgba(217,70,239,.18) !important;
+    border-color: rgba(178, 74, 242,.18) !important;
     background: linear-gradient(135deg, rgba(13,13,16,.96), rgba(7,7,9,.98) 52%, rgba(18,12,24,.94)) !important;
     box-shadow: 0 22px 60px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05) !important;
   }
 
   .mistake-coach-hero::before {
-    background: radial-gradient(circle at top left, rgba(217,70,239,.105), transparent 33%), radial-gradient(circle at bottom right, rgba(16,185,129,.075), transparent 34%) !important;
+    background: radial-gradient(circle at top left, rgba(178, 74, 242,.105), transparent 33%), radial-gradient(circle at bottom right, rgba(16,185,129,.075), transparent 34%) !important;
   }
 
   .mistake-panel-clean,
@@ -5058,12 +5058,12 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .mistake-page-icon-pro {
-    color: #c026d3 !important;
+    color: #9e1aef !important;
     background: #faf5ff !important;
   }
 
   .light-theme .mistake-clear-btn-pro {
-    color: #86198f !important;
+    color: #720cb0 !important;
   }
 
   .light-theme .mistake-status-strip-pro b {
@@ -5077,8 +5077,8 @@ const THEME_STYLE_CSS = `
 
   .light-theme .mistake-page-divider-pro span {
     background: #faf5ff !important;
-    border-color: rgba(217,70,239,.22) !important;
-    color: #86198f !important;
+    border-color: rgba(178, 74, 242,.22) !important;
+    color: #720cb0 !important;
   }
 
   .light-theme .mistake-coach-hero,
@@ -5097,7 +5097,7 @@ const THEME_STYLE_CSS = `
 
   .light-theme .mistake-coach-hero::before,
   .light-theme .mistake-panel-clean::before {
-    background: radial-gradient(circle at top left, rgba(217,70,239,.055), transparent 32%), radial-gradient(circle at bottom right, rgba(16,185,129,.045), transparent 34%) !important;
+    background: radial-gradient(circle at top left, rgba(178, 74, 242,.055), transparent 32%), radial-gradient(circle at bottom right, rgba(16,185,129,.045), transparent 34%) !important;
   }
 
   .light-theme .issue-clean-card-active,
@@ -5136,14 +5136,14 @@ const THEME_STYLE_CSS = `
   .light-theme .trade-context-modern .custom-select-option:hover,
   .light-theme .trade-context-modern .custom-select-active {
     background: #f8fafc !important;
-    color: #86198f !important;
-    border-color: rgba(217,70,239,.24) !important;
+    color: #720cb0 !important;
+    border-color: rgba(178, 74, 242,.24) !important;
   }
 
   .light-theme .date-picker-popover .date-picker-day-current {
     background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%) !important;
     color: #ffffff !important;
-    border-color: rgba(168,85,247,.42) !important;
+    border-color: rgba(178, 74, 242,.42) !important;
   }
 
   .light-theme .date-picker-popover .date-picker-day-current .date-picker-day-number {
@@ -5151,7 +5151,7 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .date-picker-popover .date-picker-day-selected {
-    background: linear-gradient(135deg, #9333ea 0%, #d946ef 100%) !important;
+    background: linear-gradient(135deg, #9333ea 0%, #b24af2 100%) !important;
     color: #ffffff !important;
     border-color: rgba(147,51,234,.74) !important;
     box-shadow: 0 10px 24px rgba(147,51,234,.24) !important;
@@ -5186,7 +5186,7 @@ const THEME_STYLE_CSS = `
       z-index: 35 !important;
       border-radius: 1.15rem !important;
       padding: .8rem .9rem !important;
-      box-shadow: 0 16px 34px rgba(0,0,0,.28), 0 0 22px rgba(217,70,239,.12) !important;
+      box-shadow: 0 16px 34px rgba(0,0,0,.28), 0 0 22px rgba(178, 74, 242,.12) !important;
     }
 
     .mobile-add-trade-button {
@@ -5196,13 +5196,13 @@ const THEME_STYLE_CSS = `
 
     .mobile-bottom-nav {
       border-radius: 1.15rem 1.15rem 0 0 !important;
-      box-shadow: 0 -18px 45px rgba(0,0,0,.42), 0 -1px 0 rgba(217,70,239,.22) !important;
+      box-shadow: 0 -18px 45px rgba(0,0,0,.42), 0 -1px 0 rgba(178, 74, 242,.22) !important;
     }
 
     .mobile-nav-fab {
       border: 1px solid rgba(255,255,255,.14) !important;
-      background: linear-gradient(135deg, #f0abfc, #d946ef 48%, #7c3aed) !important;
-      box-shadow: 0 16px 34px rgba(217,70,239,.34), 0 0 0 6px rgba(0,0,0,.65) !important;
+      background: linear-gradient(135deg, #d6a0f8, #b24af2 48%, #7c3aed) !important;
+      box-shadow: 0 16px 34px rgba(178, 74, 242,.34), 0 0 0 6px rgba(0,0,0,.65) !important;
     }
 
     .fullscreen-toggle-button {
@@ -6938,7 +6938,7 @@ if (typeof window !== "undefined" && !window.__CRITIQUE_VIDEO_STYLE_TESTS_RAN__)
 export default function TradingJournalDashboard() {
   useEffect(() => {
     document.title = BRAND_NAME;
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="bg" x1="8" x2="58" y1="6" y2="60" gradientUnits="userSpaceOnUse"><stop stop-color="#050007"/><stop offset="0.58" stop-color="#16051f"/><stop offset="1" stop-color="#04150d"/></linearGradient><linearGradient id="bolt" x1="19" x2="46" y1="8" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="#f0abfc"/><stop offset="0.42" stop-color="#d946ef"/><stop offset="1" stop-color="#22c55e"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#bg)"/><rect x="6" y="6" width="52" height="52" rx="13" fill="none" stroke="#d946ef" stroke-opacity=".45" stroke-width="2"/><path d="M38 6 14 38h15l-5 20 27-36H34L38 6Z" fill="url(#bolt)"/><path d="M34 14 22 35h10l-3 13 13-22h-9l1-12Z" fill="#050007" fill-opacity=".68"/></svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="bg" x1="8" x2="58" y1="6" y2="60" gradientUnits="userSpaceOnUse"><stop stop-color="#050007"/><stop offset="0.58" stop-color="#16051f"/><stop offset="1" stop-color="#04150d"/></linearGradient><linearGradient id="bolt" x1="19" x2="46" y1="8" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="#d6a0f8"/><stop offset="0.42" stop-color="#b24af2"/><stop offset="1" stop-color="#22c55e"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#bg)"/><rect x="6" y="6" width="52" height="52" rx="13" fill="none" stroke="#b24af2" stroke-opacity=".45" stroke-width="2"/><path d="M38 6 14 38h15l-5 20 27-36H34L38 6Z" fill="url(#bolt)"/><path d="M34 14 22 35h10l-3 13 13-22h-9l1-12Z" fill="#050007" fill-opacity=".68"/></svg>`;
     let link = document.querySelector("link[rel~='icon']");
     if (!link) {
       link = document.createElement("link");
@@ -7980,7 +7980,7 @@ Skipped duplicates: ${duplicateCount}
     return (
       <div className={theme === "light" ? "light-theme flex min-h-screen items-center justify-center bg-black text-white" : "flex min-h-screen items-center justify-center bg-black text-white"}>
         <style>{THEME_STYLE_CSS}</style>
-        <div className="rounded-2xl border border-fuchsia-500/25 bg-black p-6 text-center shadow-[0_0_35px_rgba(217,70,239,0.16)]">
+        <div className="rounded-2xl border border-fuchsia-500/25 bg-black p-6 text-center shadow-[0_0_35px_rgba(178, 74, 242,0.16)]">
           <div className="text-3xl text-fuchsia-400">{BRAND_MARK}</div>
           <div className="mt-3 text-sm font-black text-zinc-300">Loading secure session...</div>
         </div>
@@ -8023,7 +8023,7 @@ Skipped duplicates: ${duplicateCount}
             className="flex items-center gap-3 rounded-xl text-left text-xl font-black transition hover:text-fuchsia-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/60"
             aria-label="Go to dashboard"
           >
-            <span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(217,70,239,0.2)]">{BRAND_MARK}</span><span className="sidebar-label tracking-tight">{BRAND_NAME}</span>
+            <span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(178, 74, 242,0.2)]">{BRAND_MARK}</span><span className="sidebar-label tracking-tight">{BRAND_NAME}</span>
           </button>
           <button
             onClick={() => { setIsSidebarCollapsed((collapsed) => !collapsed); setIsSidebarUserMenuOpen(false); setIsAccountSwitcherOpen(false); }}
@@ -8090,7 +8090,7 @@ Skipped duplicates: ${duplicateCount}
         </div>
         <div className="sidebar-nav mt-6 space-y-2">
           {navItems.map(([Icon, label]) => (
-            <button key={label} title={label} onClick={() => { setActive(shouldGateForBilling ? "Billing" : label); setTradeViewMode(null); }} className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-[1.035] hover:border hover:border-fuchsia-500/30 hover:shadow-[0_0_22px_rgba(217,70,239,0.18)]" : ""} ${active === label && !tradeViewMode ? "bg-fuchsia-500 text-black font-black" : "text-zinc-300 hover:bg-white/5"}`}>
+            <button key={label} title={label} onClick={() => { setActive(shouldGateForBilling ? "Billing" : label); setTradeViewMode(null); }} className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-[1.035] hover:border hover:border-fuchsia-500/30 hover:shadow-[0_0_22px_rgba(178, 74, 242,0.18)]" : ""} ${active === label && !tradeViewMode ? "bg-fuchsia-500 text-black font-black" : "text-zinc-300 hover:bg-white/5"}`}>
               <Icon size={18} /> <span className="sidebar-label">{label}</span>
             </button>
           ))}
@@ -8350,8 +8350,8 @@ Skipped duplicates: ${duplicateCount}
 function MobileHeader({ onAdd }) {
   return (
     <div className="mobile-header-pro mb-6 flex items-center justify-between rounded-2xl border border-fuchsia-500/25 bg-black p-4 lg:hidden">
-      <button type="button" onClick={requestDashboardNavigation} className="flex items-center gap-3 rounded-xl text-left text-xl font-black transition hover:text-fuchsia-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/60" aria-label="Go to dashboard"><span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(217,70,239,0.2)]">{BRAND_MARK}</span><span className="tracking-tight">{BRAND_NAME}</span></button>
-      <button onClick={onAdd} className="mobile-add-trade-button inline-flex items-center gap-2 rounded-xl bg-fuchsia-500 px-3 py-2 text-sm font-black text-white shadow-[0_0_18px_rgba(217,70,239,0.25)]"><Plus size={15} /> Add</button>
+      <button type="button" onClick={requestDashboardNavigation} className="flex items-center gap-3 rounded-xl text-left text-xl font-black transition hover:text-fuchsia-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/60" aria-label="Go to dashboard"><span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(178, 74, 242,0.2)]">{BRAND_MARK}</span><span className="tracking-tight">{BRAND_NAME}</span></button>
+      <button onClick={onAdd} className="mobile-add-trade-button inline-flex items-center gap-2 rounded-xl bg-fuchsia-500 px-3 py-2 text-sm font-black text-white shadow-[0_0_18px_rgba(178, 74, 242,0.25)]"><Plus size={15} /> Add</button>
     </div>
   );
 }
@@ -8367,7 +8367,7 @@ function MobileBottomNav({ active, setActive, onAdd, setTradeViewMode, lockedToB
   return (
     <div className="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-40 border-t border-fuchsia-500/25 bg-black/95 px-2 py-2 backdrop-blur lg:hidden">
       {active !== "Calendar" && (
-        <button onClick={onAdd} className="mobile-nav-fab absolute -top-7 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-2xl bg-fuchsia-500 text-white shadow-[0_0_28px_rgba(217,70,239,.48)]"><Plus size={24} /></button>
+        <button onClick={onAdd} className="mobile-nav-fab absolute -top-7 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-2xl bg-fuchsia-500 text-white shadow-[0_0_28px_rgba(178, 74, 242,.48)]"><Plus size={24} /></button>
       )}
       <div className="grid grid-cols-5 gap-1">
         {items.map(([Icon, label]) => {
@@ -8380,7 +8380,7 @@ function MobileBottomNav({ active, setActive, onAdd, setTradeViewMode, lockedToB
                 setTradeViewMode(null);
                 setActive(lockedToBilling ? "Billing" : label);
               }}
-              className={isAdd ? "mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-fuchsia-500 text-white shadow-[0_0_22px_rgba(217,70,239,.38)]" : selected ? "flex flex-col items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 px-1 py-2 text-fuchsia-300 transition-all duration-200 hover:scale-110" : `flex flex-col items-center justify-center rounded-xl px-1 py-2 text-zinc-500 transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-110 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" : "hover:text-zinc-300"}`}
+              className={isAdd ? "mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-fuchsia-500 text-white shadow-[0_0_22px_rgba(178, 74, 242,.38)]" : selected ? "flex flex-col items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 px-1 py-2 text-fuchsia-300 transition-all duration-200 hover:scale-110" : `flex flex-col items-center justify-center rounded-xl px-1 py-2 text-zinc-500 transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-110 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" : "hover:text-zinc-300"}`}
             >
               <Icon size={18} />
               <span className="mt-1 text-[8px] font-black leading-tight">{label === "Mistake Detector" ? "Mistake" : label}</span>
@@ -8396,7 +8396,7 @@ function TopCrumb({ page, className = "mb-8" }) {
   return (
     <div className={`flex items-center gap-3 text-sm font-semibold ${className}`}>
       <button type="button" onClick={requestDashboardNavigation} className="flex items-center gap-3 rounded-lg transition hover:text-fuchsia-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/60" aria-label="Go to dashboard">
-        <span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(217,70,239,0.2)]">{BRAND_MARK}</span>
+        <span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(178, 74, 242,0.2)]">{BRAND_MARK}</span>
         <span className="tracking-tight">{BRAND_NAME}</span>
       </button>
       <span className="text-zinc-500">/</span>
@@ -8429,9 +8429,9 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
       <TopCrumb page="Journal" />
-      <div className="journal-hero flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-6 shadow-[0_18px_45px_rgba(217,70,239,0.10)]">
+      <div className="journal-hero flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-6 shadow-[0_18px_45px_rgba(178, 74, 242,0.10)]">
         <div className="flex items-center gap-4">
-          <div className="journal-hero-icon rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 p-3 text-fuchsia-300 shadow-[0_0_18px_rgba(217,70,239,0.18)]"><BookOpen /></div>
+          <div className="journal-hero-icon rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 p-3 text-fuchsia-300 shadow-[0_0_18px_rgba(178, 74, 242,0.18)]"><BookOpen /></div>
           <div><h1 className="text-3xl font-black">Trading Journal</h1><p className="text-zinc-400">v • Track and analyze your trades efficiently</p></div>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -8440,16 +8440,16 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
           <Button onClick={onExport} variant="outline" className="journal-action-btn border-white/15 bg-black text-white"><Download size={16} /> CSV</Button>
           <Button onClick={onBackup} variant="outline" className="journal-action-btn journal-backup-btn border-emerald-500/35 bg-emerald-500/10 text-emerald-300"><Download size={16} /> Backup</Button>
           <Button onClick={onRestore} variant="outline" className="journal-action-btn border-amber-500/35 bg-amber-500/10 text-amber-300"><Upload size={16} /> Restore</Button>
-          <Button onClick={onAdd} className="journal-add-btn bg-fuchsia-500 text-white shadow-[0_0_18px_rgba(217,70,239,0.22)]"><Plus size={16} /> Add Trade</Button>
+          <Button onClick={onAdd} className="journal-add-btn bg-fuchsia-500 text-white shadow-[0_0_18px_rgba(178, 74, 242,0.22)]"><Plus size={16} /> Add Trade</Button>
         </div>
       </div>
-      <div className="journal-search-panel mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-zinc-950 via-black to-[#100716] p-4 shadow-[0_16px_38px_rgba(217,70,239,0.08)]">
+      <div className="journal-search-panel mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-zinc-950 via-black to-[#100716] p-4 shadow-[0_16px_38px_rgba(178, 74, 242,0.08)]">
         <div className="flex flex-col gap-4 lg:flex-row">
-          <div className="group relative flex flex-1 items-center gap-3 overflow-hidden rounded-xl border border-fuchsia-500/35 bg-gradient-to-br from-zinc-950 via-black to-black px-4 py-3 text-zinc-400 shadow-[0_0_22px_rgba(217,70,239,0.12)] transition-all duration-300 hover:border-fuchsia-400/80 hover:shadow-2xl hover:shadow-fuchsia-500/25 focus-within:border-fuchsia-400/90 focus-within:shadow-[0_0_28px_rgba(217,70,239,0.28)]"><div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent" /><div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300 shadow-[0_0_14px_rgba(217,70,239,0.18)]"><Search size={18} /></div><Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search trades, symbols, strategies..." className="relative z-10 border-0 bg-transparent text-white placeholder:text-zinc-500 focus-visible:ring-0" /></div>
-          <Button onClick={() => setShowFilters(!showFilters)} variant="outline" className={showFilters ? "border-fuchsia-500/60 bg-fuchsia-500 text-white font-black shadow-[0_0_18px_rgba(217,70,239,0.28)] hover:bg-fuchsia-400" : "border-fuchsia-500/35 bg-fuchsia-500/15 text-fuchsia-300 font-black hover:border-fuchsia-400/70 hover:bg-fuchsia-500/25 hover:text-white"}><Filter size={16} /> Filters <ChevronDown size={15} className={showFilters ? "rotate-180 transition-transform" : "transition-transform"} /></Button>
+          <div className="group relative flex flex-1 items-center gap-3 overflow-hidden rounded-xl border border-fuchsia-500/35 bg-gradient-to-br from-zinc-950 via-black to-black px-4 py-3 text-zinc-400 shadow-[0_0_22px_rgba(178, 74, 242,0.12)] transition-all duration-300 hover:border-fuchsia-400/80 hover:shadow-2xl hover:shadow-fuchsia-500/25 focus-within:border-fuchsia-400/90 focus-within:shadow-[0_0_28px_rgba(178, 74, 242,0.28)]"><div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent" /><div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300 shadow-[0_0_14px_rgba(178, 74, 242,0.18)]"><Search size={18} /></div><Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search trades, symbols, strategies..." className="relative z-10 border-0 bg-transparent text-white placeholder:text-zinc-500 focus-visible:ring-0" /></div>
+          <Button onClick={() => setShowFilters(!showFilters)} variant="outline" className={showFilters ? "border-fuchsia-500/60 bg-fuchsia-500 text-white font-black shadow-[0_0_18px_rgba(178, 74, 242,0.28)] hover:bg-fuchsia-400" : "border-fuchsia-500/35 bg-fuchsia-500/15 text-fuchsia-300 font-black hover:border-fuchsia-400/70 hover:bg-fuchsia-500/25 hover:text-white"}><Filter size={16} /> Filters <ChevronDown size={15} className={showFilters ? "rotate-180 transition-transform" : "transition-transform"} /></Button>
         </div>
         {showFilters && (
-          <div className="mt-6 rounded-xl border border-fuchsia-500/45 bg-gradient-to-br from-zinc-950 via-black to-black p-5 shadow-[0_0_28px_rgba(217,70,239,0.22)] ring-1 ring-fuchsia-500/15">
+          <div className="mt-6 rounded-xl border border-fuchsia-500/45 bg-gradient-to-br from-zinc-950 via-black to-black p-5 shadow-[0_0_28px_rgba(178, 74, 242,0.22)] ring-1 ring-fuchsia-500/15">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <Field label="Result"><Select value={filters.result} onChange={(e) => setFilters({ ...filters, result: e.target.value })}><option>All</option>{TRADE_RESULT_OPTIONS.map((result) => <option key={result}>{result}</option>)}</Select></Field>
               <Field label="Type"><Select value={filters.direction} onChange={(e) => setFilters({ ...filters, direction: e.target.value })}><option>All</option><option>Buy</option><option>Sell</option></Select></Field>
@@ -8477,17 +8477,17 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
         <StatCard title="Avg R:R" value={`1:${stats.avgRR.toFixed(1)}`} gold />
         <StatCard title="Total P&L" value={formatMoney(stats.totalPnl)} green />
       </div>
-      <div className="journal-sort-panel mt-6 rounded-2xl border border-fuchsia-500/35 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-4 shadow-[0_0_22px_rgba(217,70,239,0.12)]">
+      <div className="journal-sort-panel mt-6 rounded-2xl border border-fuchsia-500/35 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-4 shadow-[0_0_22px_rgba(178, 74, 242,0.12)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 text-sm text-zinc-400">
             <span>Sort by:</span>
             <div className="w-36"><Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}><option>Date</option><option>P&L</option><option>Symbol</option><option>Result</option></Select></div>
-            <button onClick={() => setSortDirection(sortDirection === "asc" ? "desc" : "asc")} className="rounded-lg border border-fuchsia-500/35 bg-fuchsia-950/25 px-3 py-2 font-black text-fuchsia-300 shadow-[0_0_14px_rgba(217,70,239,0.12)] transition hover:border-fuchsia-400/80 hover:bg-fuchsia-500 hover:text-black hover:shadow-[0_0_20px_rgba(217,70,239,0.28)]">{sortDirection === "asc" ? "↑" : "↓"}</button>
+            <button onClick={() => setSortDirection(sortDirection === "asc" ? "desc" : "asc")} className="rounded-lg border border-fuchsia-500/35 bg-fuchsia-950/25 px-3 py-2 font-black text-fuchsia-300 shadow-[0_0_14px_rgba(178, 74, 242,0.12)] transition hover:border-fuchsia-400/80 hover:bg-fuchsia-500 hover:text-black hover:shadow-[0_0_20px_rgba(178, 74, 242,0.28)]">{sortDirection === "asc" ? "↑" : "↓"}</button>
           </div>
           <div className="flex items-center gap-3 text-sm text-zinc-400">
             <span>View:</span>
-            <button onClick={() => setViewMode("grid")} className={viewMode === "grid" ? "rounded-lg border border-fuchsia-400 bg-fuchsia-500 px-3 py-2 font-black text-black shadow-[0_0_18px_rgba(217,70,239,0.35)]" : "rounded-lg border border-fuchsia-500/35 bg-fuchsia-950/20 px-3 py-2 text-fuchsia-300 transition hover:border-fuchsia-400/80 hover:bg-fuchsia-500/20"}>▦</button>
-            <button onClick={() => setViewMode("list")} className={viewMode === "list" ? "rounded-lg border border-fuchsia-400 bg-fuchsia-500 px-3 py-2 font-black text-black shadow-[0_0_18px_rgba(217,70,239,0.35)]" : "rounded-lg border border-fuchsia-500/35 bg-fuchsia-950/20 px-3 py-2 text-fuchsia-300 transition hover:border-fuchsia-400/80 hover:bg-fuchsia-500/20"}>☷</button>
+            <button onClick={() => setViewMode("grid")} className={viewMode === "grid" ? "rounded-lg border border-fuchsia-400 bg-fuchsia-500 px-3 py-2 font-black text-black shadow-[0_0_18px_rgba(178, 74, 242,0.35)]" : "rounded-lg border border-fuchsia-500/35 bg-fuchsia-950/20 px-3 py-2 text-fuchsia-300 transition hover:border-fuchsia-400/80 hover:bg-fuchsia-500/20"}>▦</button>
+            <button onClick={() => setViewMode("list")} className={viewMode === "list" ? "rounded-lg border border-fuchsia-400 bg-fuchsia-500 px-3 py-2 font-black text-black shadow-[0_0_18px_rgba(178, 74, 242,0.35)]" : "rounded-lg border border-fuchsia-500/35 bg-fuchsia-950/20 px-3 py-2 text-fuchsia-300 transition hover:border-fuchsia-400/80 hover:bg-fuchsia-500/20"}>☷</button>
           </div>
         </div>
       </div>
@@ -8511,7 +8511,7 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
           </div>
           <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
             {!isJournalEmpty && <Button variant="outline" onClick={resetJournalFilters} className="border-white/15 bg-black text-white">Clear Filters</Button>}
-            <Button onClick={onAdd} className="bg-fuchsia-500 font-black text-white shadow-[0_0_18px_rgba(217,70,239,0.22)]"><Plus size={16} /> {isJournalEmpty ? "Add First Trade" : "Add Trade"}</Button>
+            <Button onClick={onAdd} className="bg-fuchsia-500 font-black text-white shadow-[0_0_18px_rgba(178, 74, 242,0.22)]"><Plus size={16} /> {isJournalEmpty ? "Add First Trade" : "Add Trade"}</Button>
           </div>
         </div>
       )}
@@ -8559,7 +8559,7 @@ function DateFilterField({ label, value, onChange }) {
         <button
           type="button"
           onClick={toggleDatePicker}
-          className="date-picker-trigger flex h-10 w-full items-center gap-3 rounded-md border border-white/15 bg-black px-3 text-left text-sm text-white outline-none transition-all hover:border-fuchsia-400 focus:border-fuchsia-400 focus:shadow-[0_0_14px_rgba(217,70,239,0.16)]"
+          className="date-picker-trigger flex h-10 w-full items-center gap-3 rounded-md border border-white/15 bg-black px-3 text-left text-sm text-white outline-none transition-all hover:border-fuchsia-400 focus:border-fuchsia-400 focus:shadow-[0_0_14px_rgba(178, 74, 242,0.16)]"
         >
           <Calendar size={15} className="shrink-0 text-fuchsia-300/80" />
           <span className={value ? "date-picker-value text-white" : "date-picker-placeholder text-zinc-500"}>{value || "mm/dd/yyyy"}</span>
@@ -8613,7 +8613,7 @@ function TradeCard({ trade, onView, onEdit, onRemove }) {
   const rr = getTradeRR(trade);
   const tags = normalizeTags(trade).slice(0, 3);
   return (
-    <div className="trade-card group relative overflow-hidden rounded-2xl border border-fuchsia-500/35 bg-gradient-to-br from-zinc-950 via-black to-black shadow-[0_0_22px_rgba(217,70,239,0.12)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-fuchsia-400/80 hover:shadow-2xl hover:shadow-fuchsia-500/25">
+    <div className="trade-card group relative overflow-hidden rounded-2xl border border-fuchsia-500/35 bg-gradient-to-br from-zinc-950 via-black to-black shadow-[0_0_22px_rgba(178, 74, 242,0.12)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-fuchsia-400/80 hover:shadow-2xl hover:shadow-fuchsia-500/25">
       <div className="absolute right-0 top-0 h-28 w-28 rounded-bl-[2rem] bg-fuchsia-500/10" />
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent" />
       <button onClick={onView} className="trade-screenshot-area relative block h-48 w-full overflow-hidden bg-zinc-900 text-left">
@@ -8624,7 +8624,7 @@ function TradeCard({ trade, onView, onEdit, onRemove }) {
       <div className="relative z-10 p-5">
         <div className="flex items-start justify-between gap-3"><div><div className="text-xs font-bold uppercase tracking-wider text-zinc-500">{trade.date} • {trade.session || "No session"}</div><div className="mt-2 text-lg font-black text-white">{trade.setup}</div><div className="mt-1 text-xs text-zinc-400">{trade.accountName || "v"} • {trade.accountType || "Account"}</div></div><span className={`rounded-full border px-3 py-1 text-xs font-black ${getTradeResultClass(result)}`}>{result}</span></div>
         <div className="mt-4 grid grid-cols-3 gap-3"><MetricBox label="Risk" value={formatMoney(trade.risk)} tone="fuchsia" /><MetricBox label="R:R" value={`${rr.toFixed(2)}R`} tone="fuchsia" /><MetricBox label="Qty" value={trade.quantity} tone="fuchsia" /></div>
-        <div className="mt-4 flex flex-wrap gap-2">{tags.length ? tags.map((tag) => <span key={tag} className="trade-tag rounded-full border border-fuchsia-500/35 bg-fuchsia-500/15 px-3 py-1.5 text-xs font-black text-fuchsia-200 shadow-[0_0_10px_rgba(217,70,239,0.16)]">#{tag}</span>) : <span className="text-xs text-zinc-500">No tags</span>}</div>
+        <div className="mt-4 flex flex-wrap gap-2">{tags.length ? tags.map((tag) => <span key={tag} className="trade-tag rounded-full border border-fuchsia-500/35 bg-fuchsia-500/15 px-3 py-1.5 text-xs font-black text-fuchsia-200 shadow-[0_0_10px_rgba(178, 74, 242,0.16)]">#{tag}</span>) : <span className="text-xs text-zinc-500">No tags</span>}</div>
         <div className="mt-5 flex items-center justify-between gap-5 border-t border-white/10 pt-4"><div className="flex min-w-0 flex-wrap items-center gap-2 text-xs"><span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 font-bold text-emerald-200">{trade.emotion || "No emotion"}</span><span className={trade.mistake && trade.mistake !== "None" ? "rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1.5 font-bold text-red-300" : "rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 font-bold text-emerald-300"}>{trade.mistake || "None"}</span></div><div className="ml-auto flex shrink-0 gap-2"><button onClick={onView} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Eye size={16} /></button><button onClick={onEdit} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Edit3 size={16} /></button><button onClick={onRemove} className="rounded-lg border border-red-500/20 bg-red-500/10 p-2 text-red-400 transition hover:border-red-500/60"><Trash2 size={16} /></button></div></div>
       </div>
     </div>
@@ -8638,7 +8638,7 @@ function TradeListRow({ trade, onView, onEdit, onRemove }) {
   const rr = getTradeRR(trade);
   const tags = normalizeTags(trade).slice(0, 2);
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-fuchsia-500/35 bg-gradient-to-br from-zinc-950 via-black to-black p-5 shadow-[0_0_18px_rgba(217,70,239,0.10)] transition-all duration-300 hover:border-fuchsia-400/80 hover:shadow-2xl hover:shadow-fuchsia-500/20">
+    <div className="group relative overflow-hidden rounded-xl border border-fuchsia-500/35 bg-gradient-to-br from-zinc-950 via-black to-black p-5 shadow-[0_0_18px_rgba(178, 74, 242,0.10)] transition-all duration-300 hover:border-fuchsia-400/80 hover:shadow-2xl hover:shadow-fuchsia-500/20">
       <div className="absolute right-0 top-0 h-20 w-20 rounded-bl-[2rem] bg-fuchsia-500/10" />
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent" />
       <div className="relative z-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-5">
@@ -8667,7 +8667,7 @@ function TradeListRow({ trade, onView, onEdit, onRemove }) {
 
 function MetricBox({ label, value, tone }) {
   return (
-    <div className="journal-metric-box group relative overflow-hidden rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 p-3 shadow-[0_0_14px_rgba(217,70,239,0.10)] transition-all duration-300 hover:-translate-y-0.5 hover:border-fuchsia-400/75 hover:bg-fuchsia-500/15 hover:shadow-[0_0_22px_rgba(217,70,239,0.22)]">
+    <div className="journal-metric-box group relative overflow-hidden rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 p-3 shadow-[0_0_14px_rgba(178, 74, 242,0.10)] transition-all duration-300 hover:-translate-y-0.5 hover:border-fuchsia-400/75 hover:bg-fuchsia-500/15 hover:shadow-[0_0_22px_rgba(178, 74, 242,0.22)]">
       <div className="pointer-events-none absolute right-0 top-0 h-10 w-10 rounded-bl-2xl bg-fuchsia-500/10" />
       <div className="relative z-10 text-xs font-black uppercase tracking-wider text-fuchsia-300">{label}</div>
       <div className="relative z-10 mt-1 text-xl font-black text-white">{value}</div>
@@ -8705,7 +8705,7 @@ function TradeDetailsPage({ trade, account, onBack, onEdit, onDelete, onExport }
           <button
             type="button"
             onClick={() => setActiveIndex(null)}
-            className="fixed right-4 top-4 z-[130] flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-zinc-950/90 text-white shadow-[0_0_26px_rgba(217,70,239,0.28)] backdrop-blur transition hover:border-fuchsia-400/70 hover:bg-fuchsia-500 hover:text-black sm:right-8 sm:top-8"
+            className="fixed right-4 top-4 z-[130] flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-zinc-950/90 text-white shadow-[0_0_26px_rgba(178, 74, 242,0.28)] backdrop-blur transition hover:border-fuchsia-400/70 hover:bg-fuchsia-500 hover:text-black sm:right-8 sm:top-8"
             aria-label="Close screenshot preview"
             title="Close"
           >
@@ -8793,7 +8793,7 @@ function OnboardingChecklist({ trades, account, onOpenJournal, onOpenAccount, on
               <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-fuchsia-400 transition-all duration-500" style={{ width: `${progress}%` }} />
             </div>
           </div>
-          <Button onClick={nextStep.action} className="bg-fuchsia-500 px-5 py-3 font-black text-white shadow-[0_0_22px_rgba(217,70,239,0.22)]"><BookOpen size={16} /> {nextStep.actionLabel}</Button>
+          <Button onClick={nextStep.action} className="bg-fuchsia-500 px-5 py-3 font-black text-white shadow-[0_0_22px_rgba(178, 74, 242,0.22)]"><BookOpen size={16} /> {nextStep.actionLabel}</Button>
         </div>
       </div>
       <div className="mt-5 grid gap-3 lg:grid-cols-3">
@@ -8827,14 +8827,14 @@ function DashboardEmptyState({ onAddTrade, onOpenJournal }) {
           <div className="absolute h-32 w-32 rounded-full bg-fuchsia-500/10 blur-2xl" aria-hidden="true" />
           <div className="absolute right-1 top-0 flex h-9 w-9 items-center justify-center rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 shadow-[0_0_16px_rgba(16,185,129,0.25)]" aria-hidden="true"><BarChart3 size={16} /></div>
           <div className="absolute left-1 top-12 flex h-9 w-9 items-center justify-center rounded-full border border-sky-500/40 bg-sky-500/15 text-sky-300 shadow-[0_0_16px_rgba(56,189,248,0.25)]" aria-hidden="true"><Target size={16} /></div>
-          <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-fuchsia-500/35 bg-fuchsia-500/10 text-fuchsia-300 shadow-[0_0_34px_rgba(217,70,239,0.28)]"><TrendingUp size={34} /></div>
+          <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-fuchsia-500/35 bg-fuchsia-500/10 text-fuchsia-300 shadow-[0_0_34px_rgba(178, 74, 242,0.28)]"><TrendingUp size={34} /></div>
         </div>
 
         <h2 className="text-3xl font-black text-white sm:text-4xl">Welcome to <span className="bg-gradient-to-r from-fuchsia-300 to-fuchsia-500 bg-clip-text text-transparent">{BRAND_NAME}</span>!</h2>
         <p className="mt-4 max-w-md text-base font-semibold leading-relaxed text-zinc-400">Your trading journey starts here. Log your first trade to see your performance analytics, track your progress, and unlock powerful insights.</p>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Button onClick={onAddTrade} className="bg-fuchsia-500 px-6 py-3 font-black text-white shadow-[0_0_24px_rgba(217,70,239,0.28)]"><Plus size={18} /> Log Your First Trade</Button>
+          <Button onClick={onAddTrade} className="bg-fuchsia-500 px-6 py-3 font-black text-white shadow-[0_0_24px_rgba(178, 74, 242,0.28)]"><Plus size={18} /> Log Your First Trade</Button>
           <Button onClick={onOpenJournal} className="border border-white/15 bg-black px-6 py-3 font-black text-white hover:bg-white/5">Explore Journal</Button>
         </div>
 
@@ -8867,14 +8867,14 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
         <TopCrumb page="Dashboard" className="" />
       </div>
 
-      <div className="dashboard-hero rounded-2xl border border-fuchsia-500/35 bg-gradient-to-r from-fuchsia-950/35 via-black to-[#08040d] p-5 shadow-[0_0_38px_rgba(168,85,247,0.12)]">
+      <div className="dashboard-hero rounded-2xl border border-fuchsia-500/35 bg-gradient-to-r from-fuchsia-950/35 via-black to-[#08040d] p-5 shadow-[0_0_38px_rgba(178, 74, 242,0.12)]">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div>
             <h1 className="text-3xl font-black xl:text-4xl">Welcome back, {getFirstDisplayName(profileName)}! <span className="waving-hand" aria-hidden="true">👋</span></h1>
             <p className="mt-3 flex items-center gap-2 text-base font-semibold text-zinc-400">▣ {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Button onClick={onOpenJournal} className="dashboard-primary-btn bg-fuchsia-500 px-5 py-3 font-black text-black shadow-[0_0_24px_rgba(217,70,239,0.28)]">▣ Log Trades</Button>
+            <Button onClick={onOpenJournal} className="dashboard-primary-btn bg-fuchsia-500 px-5 py-3 font-black text-black shadow-[0_0_24px_rgba(178, 74, 242,0.28)]">▣ Log Trades</Button>
             <Button onClick={onStartDay} className="dashboard-start-btn border border-emerald-500/45 bg-black px-5 py-3 font-black text-white hover:bg-emerald-500/15">Start Your Day</Button>
           </div>
         </div>
@@ -8908,7 +8908,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-[2fr_1fr]">
-        <div className="dashboard-performance-card light-card rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-6 shadow-[0_20px_55px_rgba(217,70,239,0.10)]">
+        <div className="dashboard-performance-card light-card rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-6 shadow-[0_20px_55px_rgba(178, 74, 242,0.10)]">
           <div className="relative z-10 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex items-center gap-4">
               <div className="dashboard-performance-icon flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-black text-fuchsia-300"><TrendingUp size={22} /></div>
@@ -8936,7 +8936,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
 
       <div className="mt-8 grid grid-cols-1 items-stretch gap-6 xl:grid-cols-[2fr_1fr]">
         <div className="flex h-full min-h-0 flex-col gap-6">
-          <div className="dashboard-recent-card light-card relative flex flex-1 flex-col overflow-hidden rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-6 shadow-[0_20px_55px_rgba(217,70,239,0.10)]">
+          <div className="dashboard-recent-card light-card relative flex flex-1 flex-col overflow-hidden rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-6 shadow-[0_20px_55px_rgba(178, 74, 242,0.10)]">
             <div className="relative z-10 mb-5 flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="dashboard-recent-icon flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/15 text-fuchsia-300"><TrendingUp size={22} /></div>
@@ -9057,7 +9057,7 @@ function TodaysEventsPanel({ economicCalendar }) {
   }
 
   return (
-    <section className="mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#100719] via-black to-[#04110d] p-5 shadow-[0_18px_45px_rgba(217,70,239,0.10)]">
+    <section className="mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#100719] via-black to-[#04110d] p-5 shadow-[0_18px_45px_rgba(178, 74, 242,0.10)]">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 text-fuchsia-300"><Calendar size={20} /></div>
@@ -9119,7 +9119,7 @@ function QuickInsights({ insights }) {
     red: "border-red-500/30 bg-red-500/10 text-red-300",
   };
   return (
-    <section className="quick-insights-section mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-5 shadow-[0_18px_45px_rgba(217,70,239,0.10)]">
+    <section className="quick-insights-section mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-5 shadow-[0_18px_45px_rgba(178, 74, 242,0.10)]">
       <div className="mb-4 flex items-center justify-between">
         <SectionTitle title="Quick Insights" icon={<Target size={18} />} />
         <span className="rounded-full border border-fuchsia-500/25 bg-fuchsia-500/10 px-3 py-1 text-xs font-black text-fuchsia-300">Auto analysis</span>
@@ -9156,7 +9156,7 @@ function TradingActivityPanel({ trades, selectedDate, onSelectDate }) {
   );
 
   return (
-    <div className="dashboard-activity-card light-card relative flex h-full min-h-0 flex-col overflow-visible rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-5 shadow-[0_20px_55px_rgba(217,70,239,0.10)]">
+    <div className="dashboard-activity-card light-card relative flex h-full min-h-0 flex-col overflow-visible rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-5 shadow-[0_20px_55px_rgba(178, 74, 242,0.10)]">
       <div className="relative z-10 flex items-start justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/15 text-fuchsia-300">
@@ -9178,7 +9178,7 @@ function TradingActivityPanel({ trades, selectedDate, onSelectDate }) {
       <div className="relative z-10 mt-4 rounded-2xl border border-fuchsia-500/18 bg-black/40 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
         <div className="mb-4 grid grid-cols-5 gap-3 text-center text-xs font-black">
           {["MON", "TUE", "WED", "THU", "FRI"].map((day) => (
-            <div key={day} className="rounded-xl border border-fuchsia-500/25 bg-gradient-to-br from-fuchsia-950/45 via-black to-black py-2 text-fuchsia-300 shadow-[0_0_14px_rgba(217,70,239,0.10)]">
+            <div key={day} className="rounded-xl border border-fuchsia-500/25 bg-gradient-to-br from-fuchsia-950/45 via-black to-black py-2 text-fuchsia-300 shadow-[0_0_14px_rgba(178, 74, 242,0.10)]">
               {day}
             </div>
           ))}
@@ -9245,7 +9245,7 @@ function ActivityStat({ tone, title, value, subtitle, icon }) {
   };
   const s = styles[tone] || styles.fuchsia;
   return (
-    <div className={`activity-stat-${tone} group relative min-h-[118px] overflow-hidden rounded-2xl border p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-fuchsia-400/55 hover:shadow-[0_0_22px_rgba(217,70,239,0.16)] ${s.card}`}>
+    <div className={`activity-stat-${tone} group relative min-h-[118px] overflow-hidden rounded-2xl border p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-fuchsia-400/55 hover:shadow-[0_0_22px_rgba(178, 74, 242,0.16)] ${s.card}`}>
       <div className="pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full bg-white/5 blur-xl" />
       <div className="relative z-10 flex items-center justify-between gap-2">
         <div className="min-w-0 text-[11px] font-black uppercase tracking-wider text-zinc-400">{title}</div>
@@ -9268,7 +9268,7 @@ function PerformanceOverviewChart({ mode, trades, curve, stats, isLoading = fals
   const headline = isWinRate ? `${stats.winRate.toFixed(1)}%` : isDaily ? formatMoney(latestValue) : formatMoney(stats.totalPnl);
   const subtitle = isWinRate ? "Current cumulative win rate" : isDaily ? "Daily profit / loss by trading day" : "Current cumulative equity curve";
   const accent = isWinRate ? "text-fuchsia-400" : isDaily ? "text-amber-400" : "text-emerald-400";
-  const stroke = isWinRate ? "#d946ef" : isDaily ? "#f59e0b" : "#22c55e";
+  const stroke = isWinRate ? "#b24af2" : isDaily ? "#f59e0b" : "#22c55e";
   const border = isWinRate ? "border-fuchsia-500/30 bg-fuchsia-950/15" : isDaily ? "border-amber-500/30 bg-amber-950/15" : "border-emerald-500/30 bg-emerald-950/15";
 
   if (isLoading) {
@@ -9309,10 +9309,10 @@ function PerformanceOverviewChart({ mode, trades, curve, stats, isLoading = fals
               dataKey="chartKey"
               stroke="#94a3b8"
               tickLine={false}
-              axisLine={{ stroke: "rgba(168,85,247,0.25)" }}
+              axisLine={{ stroke: "rgba(178, 74, 242,0.25)" }}
               tickFormatter={(value, index) => chartData[index]?.date || value}
             />
-            <YAxis stroke="#94a3b8" tickLine={false} axisLine={{ stroke: "rgba(168,85,247,0.25)" }} tickFormatter={(value) => (isWinRate ? `${value}%` : `$${value}`)} />
+            <YAxis stroke="#94a3b8" tickLine={false} axisLine={{ stroke: "rgba(178, 74, 242,0.25)" }} tickFormatter={(value) => (isWinRate ? `${value}%` : `$${value}`)} />
             <Tooltip
               contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }}
               formatter={(value) => [isWinRate ? `${Number(value).toFixed(1)}%` : formatMoney(value), mode]}
@@ -9323,7 +9323,7 @@ function PerformanceOverviewChart({ mode, trades, curve, stats, isLoading = fals
                 return point.date || "";
               }}
             />
-            <Line type="monotone" dataKey="value" name={mode} stroke={stroke} strokeWidth={4} dot={{ r: 5, fill: stroke, stroke: "#ffffff", strokeWidth: 2 }} activeDot={{ r: 8, fill: "#d946ef", stroke: "#ffffff", strokeWidth: 3 }} />
+            <Line type="monotone" dataKey="value" name={mode} stroke={stroke} strokeWidth={4} dot={{ r: 5, fill: stroke, stroke: "#ffffff", strokeWidth: 2 }} activeDot={{ r: 8, fill: "#b24af2", stroke: "#ffffff", strokeWidth: 3 }} />
           </LineChart>
         </SafeResponsiveContainer>
       </div>
@@ -9336,7 +9336,7 @@ function PerformanceScorePanel({ stats, isLoading = false }) {
   const score = Math.min(100, Math.max(0, Number(stats.score || 0)));
   if (isLoading) {
     return (
-      <div className="dashboard-performance-card light-card flex flex-col rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-6 shadow-[0_20px_55px_rgba(217,70,239,0.10)]">
+      <div className="dashboard-performance-card light-card flex flex-col rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-6 shadow-[0_20px_55px_rgba(178, 74, 242,0.10)]">
         <div className="flex items-center gap-3 mb-4">
           <div className="h-12 w-12 animate-pulse rounded-xl bg-white/10" />
           <div><div className="h-5 w-32 animate-pulse rounded-lg bg-white/10" /><div className="mt-2 h-3 w-24 animate-pulse rounded-lg bg-white/10" /></div>
@@ -9378,7 +9378,7 @@ function PerformanceScorePanel({ stats, isLoading = false }) {
       <div className="pointer-events-none absolute bottom-0 left-0 h-36 w-36 rounded-tr-[4rem] bg-fuchsia-500/8 blur-3xl" />
 
       <div className="relative z-10 flex items-start gap-4">
-        <div className="dashboard-section-icon flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/15 text-fuchsia-300 shadow-[0_0_18px_rgba(217,70,239,0.25)]">
+        <div className="dashboard-section-icon flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/15 text-fuchsia-300 shadow-[0_0_18px_rgba(178, 74, 242,0.25)]">
           <span className="text-2xl font-black">ⓘ</span>
         </div>
         <div>
@@ -9554,22 +9554,22 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
         <TopCrumb page="Calendar" />
       </div>
 
-      <div className="calendar-hero-pro calendar-neon-panel relative overflow-hidden rounded-2xl border border-fuchsia-500/40 bg-gradient-to-r from-fuchsia-950/35 via-black to-red-950/10 p-7 shadow-[0_0_38px_rgba(217,70,239,0.20)]">
+      <div className="calendar-hero-pro calendar-neon-panel relative overflow-hidden rounded-2xl border border-fuchsia-500/40 bg-gradient-to-r from-fuchsia-950/35 via-black to-red-950/10 p-7 shadow-[0_0_38px_rgba(178, 74, 242,0.20)]">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-400/75 to-transparent" />
         <div className="relative z-10 flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
           <div>
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-fuchsia-500/25 bg-fuchsia-500/10 px-3 py-1 text-xs font-black uppercase tracking-widest text-fuchsia-300">
-              <span className="h-2 w-2 rounded-full bg-fuchsia-400 shadow-[0_0_12px_rgba(217,70,239,.85)]" /> Calendar Intelligence
+              <span className="h-2 w-2 rounded-full bg-fuchsia-400 shadow-[0_0_12px_rgba(178, 74, 242,.85)]" /> Calendar Intelligence
             </div>
             <div className="flex flex-wrap items-center gap-4">
-              <button onClick={() => setCalendarMonth(new Date(year, monthIndex - 1, 1))} className="calendar-nav-button flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-black text-zinc-300 shadow-[0_0_14px_rgba(217,70,239,0.10)] transition hover:border-fuchsia-400/70 hover:text-fuchsia-200">
+              <button onClick={() => setCalendarMonth(new Date(year, monthIndex - 1, 1))} className="calendar-nav-button flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-black text-zinc-300 shadow-[0_0_14px_rgba(178, 74, 242,0.10)] transition hover:border-fuchsia-400/70 hover:text-fuchsia-200">
                 <ChevronLeft size={20} />
               </button>
               <div className="min-w-[240px]">
                 <h1 className="text-3xl font-black tracking-tight text-white xl:text-5xl">{monthName}</h1>
                 <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-zinc-400">Track trading days, weekly performance, best/worst days and selected day details in one clean view.</p>
               </div>
-              <button onClick={() => setCalendarMonth(new Date(year, monthIndex + 1, 1))} className="calendar-nav-button flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-black text-zinc-300 shadow-[0_0_14px_rgba(217,70,239,0.10)] transition hover:border-fuchsia-400/70 hover:text-fuchsia-200">
+              <button onClick={() => setCalendarMonth(new Date(year, monthIndex + 1, 1))} className="calendar-nav-button flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-black text-zinc-300 shadow-[0_0_14px_rgba(178, 74, 242,0.10)] transition hover:border-fuchsia-400/70 hover:text-fuchsia-200">
                 <ChevronRight size={20} />
               </button>
             </div>
@@ -9579,7 +9579,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
             <TopPill label="TRADES:" value={monthStats.count} />
             <TopPill label="P&L:" value={formatMoney(monthStats.pnl)} green={monthStats.pnl >= 0} red={monthStats.pnl < 0} />
             <TopPill label="WIN:" value={`${monthStats.winRate.toFixed(0)}%`} />
-            <button onClick={goToday} className="calendar-top-pill rounded-xl border border-white/15 bg-black px-4 py-3 text-sm font-black text-white shadow-[0_0_16px_rgba(217,70,239,0.10)] transition hover:border-fuchsia-400/60">
+            <button onClick={goToday} className="calendar-top-pill rounded-xl border border-white/15 bg-black px-4 py-3 text-sm font-black text-white shadow-[0_0_16px_rgba(178, 74, 242,0.10)] transition hover:border-fuchsia-400/60">
               ▣ Today
             </button>
           </div>
@@ -9594,7 +9594,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
         worstMonthDay={worstMonthDay}
       />
 
-      <div className="calendar-shell-pro calendar-neon-panel mt-7 rounded-2xl border border-white/10 bg-black p-4 shadow-[0_0_34px_rgba(217,70,239,0.10)] xl:overflow-x-auto xl:p-6">
+      <div className="calendar-shell-pro calendar-neon-panel mt-7 rounded-2xl border border-white/10 bg-black p-4 shadow-[0_0_34px_rgba(178, 74, 242,0.10)] xl:overflow-x-auto xl:p-6">
         <div className="grid min-w-0 grid-cols-7 gap-1 xl:min-w-[1120px] xl:grid-cols-[repeat(7,minmax(0,1fr))_170px] xl:gap-3">
           {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN", "WEEK"].map((day) => (
             <div key={day} className={`calendar-week-header rounded-lg border py-3 text-center text-xs font-black tracking-widest ${day === "WEEK" ? "hidden xl:block" : ""} ${day === "SUN" || day === "SAT" || day === "WEEK" ? "calendar-week-header-special border-fuchsia-500/35 bg-fuchsia-500/12 text-fuchsia-300" : "border-white/10 bg-white/5 text-zinc-400"}`}>
@@ -9625,12 +9625,12 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                         <div className={cell.isCurrentMonth ? "calendar-day-number font-black text-white" : "calendar-day-number-muted font-black text-zinc-500"}>{cell.day}</div>
                         <div className="flex min-w-0 items-center gap-2">
                           {dayEvents.length > 0 && (
-                            <div className="calendar-day-event-pill flex items-center gap-1.5 rounded-full border border-white/10 bg-black/75 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-zinc-200 shadow-[0_0_12px_rgba(217,70,239,0.12)]">
+                            <div className="calendar-day-event-pill flex items-center gap-1.5 rounded-full border border-white/10 bg-black/75 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-zinc-200 shadow-[0_0_12px_rgba(178, 74, 242,0.12)]">
                               <ImpactFolderIcon impact={primaryEventImpact} />
                               {dayEvents.length}
                             </div>
                           )}
-                          {selected && <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-fuchsia-400 shadow-[0_0_14px_rgba(217,70,239,0.95)]" />}
+                          {selected && <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-fuchsia-400 shadow-[0_0_14px_rgba(178, 74, 242,0.95)]" />}
                         </div>
                       </div>
 
@@ -9651,7 +9651,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                     </button>
                   );
                 })}
-                <div className="calendar-week-summary calendar-week-summary-pro hidden xl:block relative h-[116px] overflow-hidden rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/12 p-3 shadow-[0_0_18px_rgba(217,70,239,0.12)]">
+                <div className="calendar-week-summary calendar-week-summary-pro hidden xl:block relative h-[116px] overflow-hidden rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/12 p-3 shadow-[0_0_18px_rgba(178, 74, 242,0.12)]">
                   <div className="absolute right-0 top-0 h-16 w-16 rounded-bl-2xl bg-fuchsia-500/12" />
                   {weekStats.count ? (
                     <div className="relative z-10 flex h-full flex-col items-center justify-center">
@@ -9726,7 +9726,7 @@ function CalendarDayDetailsModal({ dateKey, trades = [], events = [], onClose, o
         </div>
 
         <div className="p-5">
-          <div className="mb-5 rounded-2xl border border-fuchsia-500/25 bg-black/35 p-4 shadow-[0_0_18px_rgba(217,70,239,0.08)]">
+          <div className="mb-5 rounded-2xl border border-fuchsia-500/25 bg-black/35 p-4 shadow-[0_0_18px_rgba(178, 74, 242,0.08)]">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <div>
                 <div className="text-xs font-black uppercase tracking-[0.22em] text-fuchsia-300">Economic Events</div>
@@ -9861,7 +9861,7 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], selectedCurrenci
   }
 
   return (
-    <section className="economic-calendar-panel mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#100719] via-black to-[#050307] p-5 shadow-[0_20px_55px_rgba(217,70,239,0.10)]">
+    <section className="economic-calendar-panel mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#100719] via-black to-[#050307] p-5 shadow-[0_20px_55px_rgba(178, 74, 242,0.10)]">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div className="flex items-start gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 text-fuchsia-300"><TrendingUp size={22} /></div>
@@ -10139,10 +10139,10 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
           )}
         </Section>
 
-        <div className="trade-context-modern mt-6 overflow-visible rounded-[1.6rem] border border-fuchsia-500/30 bg-gradient-to-br from-[#09030d] via-black to-[#050505] p-6 shadow-[0_0_30px_rgba(217,70,239,0.10)]">
+        <div className="trade-context-modern mt-6 overflow-visible rounded-[1.6rem] border border-fuchsia-500/30 bg-gradient-to-br from-[#09030d] via-black to-[#050505] p-6 shadow-[0_0_30px_rgba(178, 74, 242,0.10)]">
           <div className="mb-6 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-fuchsia-500/35 bg-fuchsia-500/12 text-fuchsia-300 shadow-[0_0_16px_rgba(217,70,239,0.18)]"><Target size={18} /></span>
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-fuchsia-500/35 bg-fuchsia-500/12 text-fuchsia-300 shadow-[0_0_16px_rgba(178, 74, 242,0.18)]"><Target size={18} /></span>
               <div>
                 <h3 className="text-xl font-black text-white">Strategy & Trade Context</h3>
                 <p className="mt-1 text-xs font-bold text-zinc-500">Clean selection fields for setup, mindset and execution quality.</p>
@@ -10288,7 +10288,7 @@ function SegmentedChoice({ value, options = [], onChange, tone = "strategy" }) {
   const base = "rounded-xl border px-3 py-2 text-xs font-black transition-all duration-200 hover:scale-[1.02]";
   const toneClass = {
     session: {
-      active: "border-fuchsia-400/70 bg-gradient-to-r from-fuchsia-500/25 to-emerald-500/15 text-fuchsia-100 shadow-[0_0_18px_rgba(217,70,239,.18)]",
+      active: "border-fuchsia-400/70 bg-gradient-to-r from-fuchsia-500/25 to-emerald-500/15 text-fuchsia-100 shadow-[0_0_18px_rgba(178, 74, 242,.18)]",
       idle: "border-white/10 bg-black/35 text-zinc-400 hover:border-fuchsia-500/35 hover:text-fuchsia-200",
     },
     strategy: {
@@ -10296,7 +10296,7 @@ function SegmentedChoice({ value, options = [], onChange, tone = "strategy" }) {
       idle: "border-white/10 bg-black/35 text-zinc-400 hover:border-emerald-500/35 hover:text-emerald-200",
     },
     quality: {
-      active: "border-fuchsia-400/70 bg-gradient-to-r from-fuchsia-500/25 to-purple-500/20 text-fuchsia-100 shadow-[0_0_18px_rgba(217,70,239,.16)]",
+      active: "border-fuchsia-400/70 bg-gradient-to-r from-fuchsia-500/25 to-purple-500/20 text-fuchsia-100 shadow-[0_0_18px_rgba(178, 74, 242,.16)]",
       idle: "border-white/10 bg-black/35 text-zinc-400 hover:border-fuchsia-500/35 hover:text-fuchsia-200",
     },
   }[tone] || {
@@ -10952,7 +10952,7 @@ function SettingsPage({ account, accountBalance, authUser, theme, setTheme, isSu
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
       <TopCrumb page="Settings" />
-      <div className="light-card rounded-3xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-6 shadow-[0_18px_45px_rgba(217,70,239,0.10)]">
+      <div className="light-card rounded-3xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-6 shadow-[0_18px_45px_rgba(178, 74, 242,0.10)]">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="flex items-center gap-3">
@@ -11376,7 +11376,7 @@ function SupportCenterPage({ authUser }) {
         {error && <div className="mb-5 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200">{error}</div>}
 
         <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
-          <form onSubmit={submitReport} className="rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12061a] via-black to-[#04100c] p-6 shadow-[0_20px_60px_rgba(217,70,239,0.12)]">
+          <form onSubmit={submitReport} className="rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12061a] via-black to-[#04100c] p-6 shadow-[0_20px_60px_rgba(178, 74, 242,0.12)]">
             <div className="flex items-center gap-3">
               <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/10 text-fuchsia-300"><MessageSquare size={24} /></span>
               <div>
@@ -11900,7 +11900,7 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
           </div>
         )}
 
-        <section className="rounded-lg border border-fuchsia-500/25 bg-gradient-to-br from-[#13071e] via-black to-[#04100c] p-6 shadow-[0_18px_70px_rgba(217,70,239,0.10)]">
+        <section className="rounded-lg border border-fuchsia-500/25 bg-gradient-to-br from-[#13071e] via-black to-[#04100c] p-6 shadow-[0_18px_70px_rgba(178, 74, 242,0.10)]">
           <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-fuchsia-300">
@@ -11914,7 +11914,7 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
                 <button
                   onClick={() => startCheckout("monthly")}
                   disabled={Boolean(loadingPlan)}
-                  className="rounded-lg bg-fuchsia-500 px-5 py-3 text-sm font-black text-black shadow-[0_16px_36px_rgba(217,70,239,0.28)] transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-lg bg-fuchsia-500 px-5 py-3 text-sm font-black text-black shadow-[0_16px_36px_rgba(178, 74, 242,0.28)] transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {loadingPlan === "monthly" ? "Opening..." : "Start Monthly"}
                 </button>
@@ -11934,7 +11934,7 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
                   key={plan.id}
                   className={`rounded-lg border p-5 ${
                     plan.featured
-                      ? "border-fuchsia-400/45 bg-fuchsia-500/10 shadow-[0_16px_40px_rgba(217,70,239,0.15)]"
+                      ? "border-fuchsia-400/45 bg-fuchsia-500/10 shadow-[0_16px_40px_rgba(178, 74, 242,0.15)]"
                       : "border-white/10 bg-black/45"
                   }`}
                 >
@@ -12092,7 +12092,7 @@ function AccessSuspendedOverlay({ subscription, loadingPlan, onStartCheckout, on
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/86 p-5 backdrop-blur-md">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(127,29,29,0.20),transparent_34%),radial-gradient(circle_at_75%_75%,rgba(217,70,239,0.10),transparent_30%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(127,29,29,0.20),transparent_34%),radial-gradient(circle_at_75%_75%,rgba(178, 74, 242,0.10),transparent_30%)]" />
       <motion.div
         initial={{ opacity: 0, y: 16, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -12126,7 +12126,7 @@ function AccessSuspendedOverlay({ subscription, loadingPlan, onStartCheckout, on
             type="button"
             onClick={() => onStartCheckout?.("monthly")}
             disabled={Boolean(loadingPlan)}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-fuchsia-300/60 bg-fuchsia-500 px-4 py-3 text-sm font-black text-black shadow-[0_0_28px_rgba(217,70,239,0.35)] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-fuchsia-300/60 bg-fuchsia-500 px-4 py-3 text-sm font-black text-black shadow-[0_0_28px_rgba(178, 74, 242,0.35)] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <CreditCard size={16} />
             {loadingPlan === "monthly" ? "Opening checkout..." : primaryLabel}
@@ -12188,7 +12188,7 @@ function BillingPagePro({ account, authUser }) {
           </div>
         </div>
 
-        <section className="overflow-hidden rounded-lg border border-fuchsia-500/30 bg-gradient-to-r from-fuchsia-950/35 via-[#13071e] to-black p-6 shadow-[0_18px_70px_rgba(217,70,239,0.12)]">
+        <section className="overflow-hidden rounded-lg border border-fuchsia-500/30 bg-gradient-to-r from-fuchsia-950/35 via-[#13071e] to-black p-6 shadow-[0_18px_70px_rgba(178, 74, 242,0.12)]">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-fuchsia-500/20 text-fuchsia-300"><Sparkles size={26} /></div>
@@ -12197,7 +12197,7 @@ function BillingPagePro({ account, authUser }) {
                 <p className="text-sm font-semibold text-zinc-400">Expires on May 25, 2026</p>
               </div>
             </div>
-            <span className="rounded-full bg-fuchsia-500 px-6 py-3 text-lg font-black text-black shadow-[0_14px_30px_rgba(217,70,239,0.28)]">2 days left</span>
+            <span className="rounded-full bg-fuchsia-500 px-6 py-3 text-lg font-black text-black shadow-[0_14px_30px_rgba(178, 74, 242,0.28)]">2 days left</span>
           </div>
           <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10">
             <div className="h-full w-[74%] rounded-full bg-gradient-to-r from-fuchsia-400 to-purple-600" />
@@ -12336,7 +12336,7 @@ function BillingPage({ account, authUser }) {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
       <TopCrumb page="Billing" />
-      <div className="light-card rounded-3xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-6 shadow-[0_18px_45px_rgba(217,70,239,0.10)]">
+      <div className="light-card rounded-3xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-6 shadow-[0_18px_45px_rgba(178, 74, 242,0.10)]">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-3">
             <div className="rounded-2xl border border-fuchsia-500/35 bg-fuchsia-500/15 p-3 text-fuchsia-300"><CreditCard /></div>
@@ -12539,7 +12539,7 @@ function SimpleStatCard({ label, value, detail, tone = "fuchsia" }) {
 
 function SimplePanel({ title, subtitle, children, icon }) {
   return (
-    <section className="min-w-0 overflow-hidden rounded-lg border border-white/12 bg-[#070707] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.18)] transition-all duration-300 hover:border-fuchsia-500/25 hover:shadow-[0_24px_70px_rgba(217,70,239,0.08)]">
+    <section className="min-w-0 overflow-hidden rounded-lg border border-white/12 bg-[#070707] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.18)] transition-all duration-300 hover:border-fuchsia-500/25 hover:shadow-[0_24px_70px_rgba(178, 74, 242,0.08)]">
       <div className="mb-5 flex min-w-0 items-start gap-3">
         {icon && <div className="shrink-0 text-fuchsia-400">{icon}</div>}
         <div className="min-w-0">
@@ -12814,7 +12814,7 @@ function WeekdayTile({ day }) {
   const hasTrades = day.count > 0;
   const tone = !hasTrades ? "border-white/10 from-black via-black to-zinc-950/40" : day.pnl >= 0 ? "border-emerald-500/25 from-emerald-950/30 via-black to-fuchsia-950/10" : "border-red-500/25 from-red-950/25 via-black to-fuchsia-950/10";
   return (
-    <button type="button" className={`group relative min-h-[230px] overflow-hidden rounded-xl border bg-gradient-to-br p-5 text-left shadow-[0_16px_45px_rgba(0,0,0,0.20)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-fuchsia-400/70 hover:shadow-[0_0_28px_rgba(217,70,239,0.18)] ${tone}`}>
+    <button type="button" className={`group relative min-h-[230px] overflow-hidden rounded-xl border bg-gradient-to-br p-5 text-left shadow-[0_16px_45px_rgba(0,0,0,0.20)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-fuchsia-400/70 hover:shadow-[0_0_28px_rgba(178, 74, 242,0.18)] ${tone}`}>
       <div className="pointer-events-none absolute right-0 top-0 h-20 w-20 rounded-bl-3xl bg-fuchsia-500/10 transition group-hover:bg-fuchsia-500/16" />
       <div className="relative z-10 flex items-start justify-between">
         <div>
@@ -12844,7 +12844,7 @@ function StrategyStatsCard({ name, item, winRate, avgRR, pnl }) {
   const losses = Number(item.losses || 0);
   const breakEvens = Number(item.breakEvens || 0);
   return (
-    <button type="button" className={`group relative min-h-[220px] overflow-hidden rounded-xl border bg-gradient-to-br p-5 text-left shadow-[0_16px_45px_rgba(0,0,0,0.20)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-fuchsia-400/70 hover:shadow-[0_0_28px_rgba(217,70,239,0.18)] ${pnl >= 0 ? "border-emerald-500/25 from-emerald-950/25 via-black to-fuchsia-950/10" : "border-red-500/25 from-red-950/25 via-black to-fuchsia-950/10"}`}>
+    <button type="button" className={`group relative min-h-[220px] overflow-hidden rounded-xl border bg-gradient-to-br p-5 text-left shadow-[0_16px_45px_rgba(0,0,0,0.20)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-fuchsia-400/70 hover:shadow-[0_0_28px_rgba(178, 74, 242,0.18)] ${pnl >= 0 ? "border-emerald-500/25 from-emerald-950/25 via-black to-fuchsia-950/10" : "border-red-500/25 from-red-950/25 via-black to-fuchsia-950/10"}`}>
       <div className="pointer-events-none absolute right-0 top-0 h-20 w-20 rounded-bl-3xl bg-fuchsia-500/10 transition group-hover:bg-fuchsia-500/16" />
       <div className="relative z-10 flex items-start justify-between gap-4">
         <div className="min-w-0">
@@ -13048,7 +13048,7 @@ function StatisticsPage({ stats: initialStats, curve: initialCurve, trades = [],
         <div className="relative z-10 grid grid-cols-1 gap-6 xl:grid-cols-[1.15fr_.85fr] xl:items-center">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-fuchsia-500/25 bg-fuchsia-500/10 px-3 py-1 text-xs font-black uppercase tracking-widest text-fuchsia-300">
-              <span className="h-2 w-2 rounded-full bg-fuchsia-400 shadow-[0_0_12px_rgba(217,70,239,.85)]" /> Performance Intelligence
+              <span className="h-2 w-2 rounded-full bg-fuchsia-400 shadow-[0_0_12px_rgba(178, 74, 242,.85)]" /> Performance Intelligence
             </div>
             <h1 className="mt-4 text-4xl font-black tracking-tight text-white xl:text-5xl">Statistics that actually explain your trading.</h1>
             <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-zinc-400">
@@ -13348,7 +13348,7 @@ function MistakeDetector({ trades = [] }) {
         <div className="relative z-10 grid grid-cols-1 gap-6 xl:grid-cols-[1.15fr_.85fr] xl:items-center">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-fuchsia-500/25 bg-fuchsia-500/10 px-3 py-1 text-xs font-black uppercase tracking-widest text-fuchsia-300">
-              <span className="h-2 w-2 rounded-full bg-fuchsia-400 shadow-[0_0_12px_rgba(217,70,239,.85)]" /> AI Trading Coach
+              <span className="h-2 w-2 rounded-full bg-fuchsia-400 shadow-[0_0_12px_rgba(178, 74, 242,.85)]" /> AI Trading Coach
             </div>
             <h2 className="mt-4 text-3xl font-black text-white xl:text-5xl">Your mistake report, simplified.</h2>
             <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-zinc-400">
@@ -13702,10 +13702,10 @@ function CompactPanel({ title, badge, children }) {
       badge: "rounded-full border border-cyan-400/35 bg-cyan-500/12 px-3 py-1 text-[11px] font-black text-cyan-200 shadow-[0_0_14px_rgba(6,182,212,0.12)]",
     },
     fuchsia: {
-      panel: "relative overflow-hidden rounded-[2rem] border border-fuchsia-500/25 bg-gradient-to-br from-[#0a0310] via-black to-[#180723] p-5 shadow-[0_20px_65px_rgba(217,70,239,0.10)]",
+      panel: "relative overflow-hidden rounded-[2rem] border border-fuchsia-500/25 bg-gradient-to-br from-[#0a0310] via-black to-[#180723] p-5 shadow-[0_20px_65px_rgba(178, 74, 242,0.10)]",
       glow: "bg-fuchsia-500/14",
       line: "via-fuchsia-300/70",
-      badge: "rounded-full border border-fuchsia-400/30 bg-fuchsia-500/12 px-3 py-1 text-[11px] font-black text-fuchsia-200 shadow-[0_0_14px_rgba(217,70,239,0.12)]",
+      badge: "rounded-full border border-fuchsia-400/30 bg-fuchsia-500/12 px-3 py-1 text-[11px] font-black text-fuchsia-200 shadow-[0_0_14px_rgba(178, 74, 242,0.12)]",
     },
   };
   const s = styles[tone] || styles.fuchsia;
@@ -14033,7 +14033,7 @@ function BestPerformanceCard({ title, value, detail, badge, icon, accent }) {
     cyan: "text-cyan-400 bg-cyan-500/10",
   };
   return (
-    <button className="best-performance-card group relative overflow-hidden rounded-xl border border-fuchsia-500/18 bg-gradient-to-br from-[#160b1f] via-[#09060d] to-black p-5 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-fuchsia-400/80 hover:shadow-[0_0_30px_rgba(217,70,239,0.28)]">
+    <button className="best-performance-card group relative overflow-hidden rounded-xl border border-fuchsia-500/18 bg-gradient-to-br from-[#160b1f] via-[#09060d] to-black p-5 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-fuchsia-400/80 hover:shadow-[0_0_30px_rgba(178, 74, 242,0.28)]">
       <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
         <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/18 via-transparent to-fuchsia-900/20" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-400 to-transparent" />
@@ -14056,7 +14056,7 @@ function StatisticsPerformanceTimeline({ curve, stats }) {
   const lastPoint = chartData[chartData.length - 1];
   const change = Number(stats.totalPnl || lastPoint?.pnl || 0);
   return (
-    <div className="statistics-chart-panel statistics-timeline-card group relative overflow-hidden rounded-xl border border-fuchsia-500/20 bg-gradient-to-br from-[#13081d] via-black to-[#030104] p-6 transition-all duration-300 hover:border-fuchsia-400/70 hover:shadow-[0_0_36px_rgba(217,70,239,0.20)]">
+    <div className="statistics-chart-panel statistics-timeline-card group relative overflow-hidden rounded-xl border border-fuchsia-500/20 bg-gradient-to-br from-[#13081d] via-black to-[#030104] p-6 transition-all duration-300 hover:border-fuchsia-400/70 hover:shadow-[0_0_36px_rgba(178, 74, 242,0.20)]">
       <div className="pointer-events-none absolute right-0 top-0 h-40 w-40 rounded-bl-[4rem] bg-fuchsia-500/10 blur-xl" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-400/70 to-transparent" />
       <div className="relative z-10 flex items-start justify-between">
@@ -14083,11 +14083,11 @@ function StatisticsPerformanceTimeline({ curve, stats }) {
       <div className="relative z-10 mt-6 h-72 rounded-xl border border-white/10 bg-black/30 p-3">
         <SafeResponsiveContainer>
           <LineChart data={chartData} margin={{ top: 18, right: 20, left: 8, bottom: 6 }}>
-            <CartesianGrid strokeDasharray="4 6" stroke="rgba(168,85,247,0.24)" vertical={false} />
-            <XAxis dataKey="date" stroke="#94a3b8" tickLine={false} axisLine={{ stroke: "rgba(168,85,247,0.28)" }} />
-            <YAxis stroke="#94a3b8" tickLine={false} axisLine={{ stroke: "rgba(168,85,247,0.28)" }} tickFormatter={(value) => `$${value}`} />
+            <CartesianGrid strokeDasharray="4 6" stroke="rgba(178, 74, 242,0.24)" vertical={false} />
+            <XAxis dataKey="date" stroke="#94a3b8" tickLine={false} axisLine={{ stroke: "rgba(178, 74, 242,0.28)" }} />
+            <YAxis stroke="#94a3b8" tickLine={false} axisLine={{ stroke: "rgba(178, 74, 242,0.28)" }} tickFormatter={(value) => `$${value}`} />
             <Tooltip contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }} formatter={(value) => [formatMoney(value), "Equity"]} />
-            <Line type="monotone" dataKey="pnl" stroke="#d946ef" strokeWidth={4} dot={{ r: 5, fill: "#22c55e", stroke: "#ffffff", strokeWidth: 2 }} activeDot={{ r: 8, fill: "#d946ef", stroke: "#ffffff", strokeWidth: 3 }} />
+            <Line type="monotone" dataKey="pnl" stroke="#b24af2" strokeWidth={4} dot={{ r: 5, fill: "#22c55e", stroke: "#ffffff", strokeWidth: 2 }} activeDot={{ r: 8, fill: "#b24af2", stroke: "#ffffff", strokeWidth: 3 }} />
             <Line type="monotone" dataKey="pnl" stroke="#22c55e" strokeWidth={2} dot={false} opacity={0.45} />
           </LineChart>
         </SafeResponsiveContainer>
@@ -14169,7 +14169,7 @@ function StatisticsWinLossCircle({ stats }) {
 
   return (
     <div className="flex h-72 items-center justify-center">
-      <div className="statistics-winloss-circle group relative flex h-60 w-60 items-center justify-center rounded-[2rem] border border-fuchsia-500/25 bg-gradient-to-br from-[#050005] via-black to-[#08020b] shadow-[0_0_45px_rgba(217,70,239,0.12)] transition-all duration-300 hover:border-fuchsia-400/65 hover:shadow-[0_0_55px_rgba(217,70,239,0.22)]">
+      <div className="statistics-winloss-circle group relative flex h-60 w-60 items-center justify-center rounded-[2rem] border border-fuchsia-500/25 bg-gradient-to-br from-[#050005] via-black to-[#08020b] shadow-[0_0_45px_rgba(178, 74, 242,0.12)] transition-all duration-300 hover:border-fuchsia-400/65 hover:shadow-[0_0_55px_rgba(178, 74, 242,0.22)]">
         <div className="pointer-events-none absolute -inset-4 rounded-[2.4rem] bg-gradient-to-br from-emerald-500/12 via-transparent to-red-500/12 blur-2xl opacity-80" />
         <div className="pointer-events-none absolute inset-4 rounded-[1.6rem] border border-white/10 bg-black/35" />
         <div className="pointer-events-none absolute inset-x-8 top-6 h-px bg-gradient-to-r from-transparent via-fuchsia-400/70 to-transparent" />
@@ -14200,9 +14200,9 @@ function StatisticsWinLossCircle({ stats }) {
           {!hasWins && hasLosses && <circle cx="110" cy="110" r={radius} fill="none" stroke="url(#lossNeonGradient)" strokeWidth="14" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset="0" filter="url(#softGlow)" />}
         </svg>
 
-        <div className="relative z-10 flex h-36 w-36 flex-col items-center justify-center rounded-full border border-white/10 bg-black shadow-[inset_0_0_28px_rgba(217,70,239,0.08),0_0_24px_rgba(0,0,0,0.7)]">
+        <div className="relative z-10 flex h-36 w-36 flex-col items-center justify-center rounded-full border border-white/10 bg-black shadow-[inset_0_0_28px_rgba(178, 74, 242,0.08),0_0_24px_rgba(0,0,0,0.7)]">
           <div className="text-[10px] font-black uppercase tracking-[0.22em] text-zinc-500">Win Rate</div>
-          <div className={hasWins ? "mt-2 text-5xl font-black leading-none text-emerald-400 drop-shadow-[0_0_16px_rgba(16,185,129,0.75)]" : hasLosses ? "mt-2 text-5xl font-black leading-none text-red-400 drop-shadow-[0_0_16px_rgba(239,68,68,0.75)]" : "mt-2 text-5xl font-black leading-none text-fuchsia-200 drop-shadow-[0_0_14px_rgba(217,70,239,0.55)]"}>
+          <div className={hasWins ? "mt-2 text-5xl font-black leading-none text-emerald-400 drop-shadow-[0_0_16px_rgba(16,185,129,0.75)]" : hasLosses ? "mt-2 text-5xl font-black leading-none text-red-400 drop-shadow-[0_0_16px_rgba(239,68,68,0.75)]" : "mt-2 text-5xl font-black leading-none text-fuchsia-200 drop-shadow-[0_0_14px_rgba(178, 74, 242,0.55)]"}>
             {winRate.toFixed(1)}<span className="text-xl">%</span>
           </div>
           <div className="mt-3 flex items-center gap-2 text-xs font-black text-zinc-400">
@@ -14343,7 +14343,7 @@ function PatternDayCard({ day, isActive, dayStats }) {
     emerald: "from-emerald-950/40 to-emerald-950/10 border-emerald-500/35",
   };
   return (
-    <button className={`weekday-card weekday-card-pro group relative min-h-[245px] overflow-hidden rounded-2xl border bg-gradient-to-br via-black p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-fuchsia-400/80 hover:shadow-[0_0_30px_rgba(217,70,239,0.20)] ${toneClass[day.tone]} ${isActive ? "weekday-card-active" : ""}`}>
+    <button className={`weekday-card weekday-card-pro group relative min-h-[245px] overflow-hidden rounded-2xl border bg-gradient-to-br via-black p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-fuchsia-400/80 hover:shadow-[0_0_30px_rgba(178, 74, 242,0.20)] ${toneClass[day.tone]} ${isActive ? "weekday-card-active" : ""}`}>
       <div className="pointer-events-none absolute right-0 top-0 h-20 w-20 rounded-bl-[2rem] bg-white/5" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-400/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
       <div className="relative z-10 flex items-start justify-between">
@@ -14434,7 +14434,7 @@ function StatisticsStrategiesView({ stats }) {
                 const itemWinRate = item.count ? ((item.wins || 0) / item.count) * 100 : 0;
                 const width = Math.max(8, Math.min(100, Math.abs(item.pnl || 0) / Math.max(1, Math.abs(bestStats.pnl || 1)) * 100));
                 return (
-                  <button key={name} className="strategy-rank-row group relative w-full overflow-hidden rounded-xl border border-white/10 bg-black/40 p-4 text-left transition-all duration-300 hover:-translate-y-1 hover:border-fuchsia-400/70 hover:shadow-[0_0_24px_rgba(217,70,239,.18)]">
+                  <button key={name} className="strategy-rank-row group relative w-full overflow-hidden rounded-xl border border-white/10 bg-black/40 p-4 text-left transition-all duration-300 hover:-translate-y-1 hover:border-fuchsia-400/70 hover:shadow-[0_0_24px_rgba(178, 74, 242,.18)]">
                     <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-fuchsia-500/18 to-transparent" style={{ width: `${width}%` }} />
                     <div className="relative z-10 grid grid-cols-[44px_1fr_100px_120px_80px] items-center gap-3">
                       <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-fuchsia-500/15 text-sm font-black text-fuchsia-300">#{index + 1}</div>
@@ -14525,14 +14525,14 @@ function StatisticsRiskView({ stats, trades = [] }) {
           <div className="mt-5 h-80 rounded-xl border border-white/10 bg-black/25 p-3">
             <SafeResponsiveContainer>
               <BarChart data={chartRows} margin={{ top: 20, right: 24, left: 8, bottom: 8 }}>
-                <CartesianGrid strokeDasharray="4 6" stroke="rgba(217,70,239,.20)" vertical={false} />
+                <CartesianGrid strokeDasharray="4 6" stroke="rgba(178, 74, 242,.20)" vertical={false} />
                 <XAxis dataKey="date" stroke="#64748b" tickLine={false} />
                 <YAxis stroke="#64748b" tickLine={false} tickFormatter={(value) => `$${value}`} />
                 <Tooltip
                   contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }}
                   formatter={(value, name) => [formatMoney(value), name]}
                 />
-                <Bar dataKey="risk" fill="#d946ef" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="risk" fill="#b24af2" radius={[8, 8, 0, 0]} />
                 <Bar dataKey="pnl" fill="#22c55e" radius={[8, 8, 0, 0]} />
               </BarChart>
             </SafeResponsiveContainer>
@@ -14568,7 +14568,7 @@ function StatisticsChartsView({ stats, curve, trades = [] }) {
     <section className="mt-10 grid grid-cols-1 gap-8 xl:grid-cols-2">
       <div className="statistics-chart-panel charts-pro-card rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-black via-[#020605] to-[#050b13] p-6">
         <div className="flex items-start justify-between"><SectionTitle title="Performance Timeline" icon={<TrendingUp size={18} />} /><span className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-xs font-black text-emerald-300">Equity</span></div>
-        <div className="mt-5 h-80 rounded-xl border border-white/10 bg-black/25 p-3"><SafeResponsiveContainer><LineChart data={curve} margin={{ top: 18, right: 20, left: 8, bottom: 6 }}><CartesianGrid strokeDasharray="4 6" stroke="rgba(16,185,129,.20)" vertical={false} /><XAxis dataKey="date" stroke="#64748b" tickLine={false} /><YAxis stroke="#64748b" tickLine={false} tickFormatter={(v) => `$${v}`} /><Tooltip contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }} formatter={(value) => [formatMoney(value), "Cumulative P&L"]} /><Line type="monotone" dataKey="pnl" stroke="#10b981" strokeWidth={4} dot={{ r: 5, fill: "#6366f1", stroke: "#ffffff", strokeWidth: 2 }} activeDot={{ r: 8, fill: "#d946ef", stroke: "#ffffff", strokeWidth: 3 }} /></LineChart></SafeResponsiveContainer></div>
+        <div className="mt-5 h-80 rounded-xl border border-white/10 bg-black/25 p-3"><SafeResponsiveContainer><LineChart data={curve} margin={{ top: 18, right: 20, left: 8, bottom: 6 }}><CartesianGrid strokeDasharray="4 6" stroke="rgba(16,185,129,.20)" vertical={false} /><XAxis dataKey="date" stroke="#64748b" tickLine={false} /><YAxis stroke="#64748b" tickLine={false} tickFormatter={(v) => `$${v}`} /><Tooltip contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }} formatter={(value) => [formatMoney(value), "Cumulative P&L"]} /><Line type="monotone" dataKey="pnl" stroke="#10b981" strokeWidth={4} dot={{ r: 5, fill: "#6366f1", stroke: "#ffffff", strokeWidth: 2 }} activeDot={{ r: 8, fill: "#b24af2", stroke: "#ffffff", strokeWidth: 3 }} /></LineChart></SafeResponsiveContainer></div>
       </div>
 
       <div className="statistics-chart-panel charts-pro-card rounded-2xl border border-blue-500/20 bg-gradient-to-br from-black via-[#020605] to-[#050b13] p-6">
@@ -14613,7 +14613,7 @@ function StrategyBreakdownDonut({ data, total }) {
   const segments = data.map((item, index) => {
     const percent = (Number(item.value || 0) / safeTotal) * 100;
     const segment = `${percent} ${100 - percent}`;
-    const current = { ...item, percent, offset, color: index % 3 === 0 ? "#94a3b8" : index % 3 === 1 ? "#d946ef" : "#10b981", segment };
+    const current = { ...item, percent, offset, color: index % 3 === 0 ? "#94a3b8" : index % 3 === 1 ? "#b24af2" : "#10b981", segment };
     offset -= percent;
     return current;
   });
@@ -14672,7 +14672,7 @@ function TopPill({ label, value, green, red }) {
 function Section({ title, icon, children }) { return <div className="mt-6 rounded-xl border border-fuchsia-500/45 bg-gradient-to-br from-zinc-950 via-black to-black p-6"><div className="pointer-events-none absolute" /><h3 className="mb-5 flex items-center gap-3 text-lg font-bold text-white"><span className="flex h-9 w-9 items-center justify-center rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300">{icon}</span>{title}</h3>{children}</div>; }
 function Field({ label, children }) { return <label className="block text-sm font-semibold text-white"><span className="mb-2 block">{label}</span>{children}</label>; }
 function inputPurpleClass(extra = "") {
-  return `border-white/15 bg-black text-white outline-none transition-all focus-visible:border-fuchsia-400 focus-visible:ring-2 focus-visible:ring-fuchsia-500/45 focus-visible:ring-offset-0 focus-visible:shadow-[0_0_16px_rgba(217,70,239,0.30)] ${extra}`;
+  return `border-white/15 bg-black text-white outline-none transition-all focus-visible:border-fuchsia-400 focus-visible:ring-2 focus-visible:ring-fuchsia-500/45 focus-visible:ring-offset-0 focus-visible:shadow-[0_0_16px_rgba(178, 74, 242,0.30)] ${extra}`;
 }
 
 function MoneyInput({ value, onChange, placeholder = "0" }) {
@@ -14690,10 +14690,10 @@ function MoneyInput({ value, onChange, placeholder = "0" }) {
 }
 function getSelectOptionStyle(label) {
   const key = String(label || "").toLowerCase();
-  const base = { icon: "", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(217,70,239,0.35)]", normal: "text-zinc-200 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" };
+  const base = { icon: "", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(178, 74, 242,0.35)]", normal: "text-zinc-200 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" };
   const styles = {
-    buy: { icon: "", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(217,70,239,0.35)]", normal: "text-zinc-200 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" },
-    sell: { icon: "", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(217,70,239,0.35)]", normal: "text-zinc-200 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" },
+    buy: { icon: "", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(178, 74, 242,0.35)]", normal: "text-zinc-200 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" },
+    sell: { icon: "", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(178, 74, 242,0.35)]", normal: "text-zinc-200 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" },
     win: { icon: "●", active: "bg-emerald-500 text-black shadow-[0_0_14px_rgba(16,185,129,0.35)]", normal: "text-emerald-300 hover:bg-emerald-500/15 hover:text-emerald-200" },
     loss: { icon: "●", active: "bg-red-500 text-black shadow-[0_0_14px_rgba(239,68,68,0.35)]", normal: "text-red-300 hover:bg-red-500/15 hover:text-red-200" },
     "break even": { icon: "—", active: "bg-amber-500 text-black shadow-[0_0_14px_rgba(245,158,11,0.35)]", normal: "text-amber-300 hover:bg-amber-500/15 hover:text-amber-200" },
@@ -14711,8 +14711,8 @@ function getSelectOptionStyle(label) {
     lunch: { icon: "", active: "session-active-lunch text-amber-100", normal: "session-neon session-neon-lunch" },
     "ny-pm": { icon: "", active: "session-active-nypm text-fuchsia-100", normal: "session-neon session-neon-nypm" },
     "pre-market": { icon: "", active: "session-active-premarket text-cyan-100", normal: "session-neon session-neon-premarket" },
-    "select trading session": { icon: "⌁", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(217,70,239,0.35)]", normal: "text-zinc-400 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" },
-    all: { icon: "✦", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(217,70,239,0.35)]", normal: "text-fuchsia-200 hover:bg-fuchsia-500/15 hover:text-fuchsia-100" },
+    "select trading session": { icon: "⌁", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(178, 74, 242,0.35)]", normal: "text-zinc-400 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" },
+    all: { icon: "✦", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(178, 74, 242,0.35)]", normal: "text-fuchsia-200 hover:bg-fuchsia-500/15 hover:text-fuchsia-100" },
   };
   return styles[key] || base;
 }
@@ -14788,7 +14788,7 @@ function Select({ value, onChange, children }) {
       <button
         type="button"
         onClick={toggleOpen}
-        className="custom-select-trigger flex h-10 w-full items-center justify-between rounded-md border border-white/15 bg-black px-3 text-left text-sm text-white outline-none transition-all hover:border-fuchsia-400 focus:border-fuchsia-400 focus:shadow-[0_0_14px_rgba(217,70,239,0.16)]"
+        className="custom-select-trigger flex h-10 w-full items-center justify-between rounded-md border border-white/15 bg-black px-3 text-left text-sm text-white outline-none transition-all hover:border-fuchsia-400 focus:border-fuchsia-400 focus:shadow-[0_0_14px_rgba(178, 74, 242,0.16)]"
       >
         <span className={`custom-select-selected custom-select-option-${selectedKey} flex items-center gap-2`}>
           <span className="font-black">{selected?.label || "Select"}</span>
@@ -14823,8 +14823,8 @@ function Select({ value, onChange, children }) {
 function StatCard({ title, value, green, gold }) {
   const iconMap = { "Total Trades": "⌁", "Win Rate": "🏆", "Break Even": "—", "Avg P&L": "$", "Avg R:R": "↗", "Total P&L": "$", "TOTAL P&L": "$", "WIN RATE": "🏆", "BREAK EVEN": "—", "TRADES": "⌁", "AVG WIN": "↗", "AVG LOSS": "↘", "PROFIT FACTOR": "✦" };
   const icon = iconMap[title] || "✦";
-  const iconTone = green ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300 shadow-[0_0_14px_rgba(16,185,129,0.18)]" : gold ? "border-amber-500/30 bg-amber-500/10 text-amber-300 shadow-[0_0_14px_rgba(245,158,11,0.18)]" : "border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300 shadow-[0_0_14px_rgba(217,70,239,0.18)]";
-  return <Card className="group relative overflow-hidden border-fuchsia-500/35 bg-gradient-to-br from-zinc-950 via-black to-black text-white shadow-[0_0_22px_rgba(217,70,239,0.12)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-fuchsia-400/80 hover:shadow-2xl hover:shadow-fuchsia-500/25"><div className="absolute right-0 top-0 h-20 w-20 rounded-bl-[2rem] bg-fuchsia-500/10" /><div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent" /><CardContent className="relative z-10 p-5"><div className="flex items-start justify-between gap-3"><div><div className="text-xs font-black uppercase tracking-wider text-zinc-400">{title}</div><div className={`mt-4 text-2xl font-black ${green ? "text-emerald-400" : gold ? "text-amber-400" : "text-white"}`}><AnimatedValue value={value} /></div></div><div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-lg font-black ${iconTone}`}>{icon}</div></div></CardContent></Card>;
+  const iconTone = green ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300 shadow-[0_0_14px_rgba(16,185,129,0.18)]" : gold ? "border-amber-500/30 bg-amber-500/10 text-amber-300 shadow-[0_0_14px_rgba(245,158,11,0.18)]" : "border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300 shadow-[0_0_14px_rgba(178, 74, 242,0.18)]";
+  return <Card className="group relative overflow-hidden border-fuchsia-500/35 bg-gradient-to-br from-zinc-950 via-black to-black text-white shadow-[0_0_22px_rgba(178, 74, 242,0.12)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-fuchsia-400/80 hover:shadow-2xl hover:shadow-fuchsia-500/25"><div className="absolute right-0 top-0 h-20 w-20 rounded-bl-[2rem] bg-fuchsia-500/10" /><div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent" /><CardContent className="relative z-10 p-5"><div className="flex items-start justify-between gap-3"><div><div className="text-xs font-black uppercase tracking-wider text-zinc-400">{title}</div><div className={`mt-4 text-2xl font-black ${green ? "text-emerald-400" : gold ? "text-amber-400" : "text-white"}`}><AnimatedValue value={value} /></div></div><div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-lg font-black ${iconTone}`}>{icon}</div></div></CardContent></Card>;
 }
 
 function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessage, isSupabaseReady, passwordRecoverySession, theme, setTheme }) {
@@ -14929,16 +14929,16 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
 
   return (
     <div className={isLight ? "auth-shell relative min-h-screen overflow-hidden bg-[#f8fafc] text-slate-950" : "auth-shell relative min-h-screen overflow-hidden bg-black text-white"}>
-      <div className={isLight ? "pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(217,70,239,0.13),transparent_28%),radial-gradient(circle_at_88%_76%,rgba(16,185,129,0.12),transparent_30%),linear-gradient(135deg,#f8fafc_0%,#ffffff_48%,#f7efff_100%)]" : "pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(217,70,239,0.18),transparent_34%),radial-gradient(circle_at_84%_80%,rgba(16,185,129,0.10),transparent_28%),linear-gradient(135deg,#000_0%,#060206_45%,#12051b_100%)]"} />
+      <div className={isLight ? "pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(178, 74, 242,0.13),transparent_28%),radial-gradient(circle_at_88%_76%,rgba(16,185,129,0.12),transparent_30%),linear-gradient(135deg,#f8fafc_0%,#ffffff_48%,#f7efff_100%)]" : "pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(178, 74, 242,0.18),transparent_34%),radial-gradient(circle_at_84%_80%,rgba(16,185,129,0.10),transparent_28%),linear-gradient(135deg,#000_0%,#060206_45%,#12051b_100%)]"} />
       <div className="auth-animated-grid pointer-events-none absolute inset-0 opacity-70" />
       <div className={isLight ? "pointer-events-none absolute left-1/2 top-0 h-full w-px bg-gradient-to-b from-transparent via-fuchsia-200 to-transparent" : "pointer-events-none absolute left-1/2 top-0 h-full w-px bg-gradient-to-b from-transparent via-fuchsia-500/15 to-transparent"} />
 
       <div className="relative z-10 flex min-h-screen flex-col lg:grid lg:grid-cols-[520px_1fr]">
         <div className="flex min-h-screen items-center justify-center p-6 lg:p-10">
-          <motion.div initial={{ opacity: 0, y: 16, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} whileHover={{ y: -4 }} transition={{ duration: 0.35 }} className={isLight ? "auth-card-panel w-full max-w-[430px] rounded-[2rem] border border-slate-200 bg-white/90 p-8 text-slate-950 shadow-[0_28px_90px_rgba(15,23,42,0.12),0_0_40px_rgba(217,70,239,0.10)] backdrop-blur-xl" : "auth-card-panel w-full max-w-[480px] rounded-[1.6rem] border border-white/12 bg-[#050507]/92 p-10 shadow-[0_28px_90px_rgba(0,0,0,0.78),0_0_40px_rgba(217,70,239,0.08)] backdrop-blur-xl"}>
+          <motion.div initial={{ opacity: 0, y: 16, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} whileHover={{ y: -4 }} transition={{ duration: 0.35 }} className={isLight ? "auth-card-panel w-full max-w-[430px] rounded-[2rem] border border-slate-200 bg-white/90 p-8 text-slate-950 shadow-[0_28px_90px_rgba(15,23,42,0.12),0_0_40px_rgba(178, 74, 242,0.10)] backdrop-blur-xl" : "auth-card-panel w-full max-w-[480px] rounded-[1.6rem] border border-white/12 bg-[#050507]/92 p-10 shadow-[0_28px_90px_rgba(0,0,0,0.78),0_0_40px_rgba(178, 74, 242,0.08)] backdrop-blur-xl"}>
             <div className={isLight ? "mb-8 flex items-center justify-between" : "mb-10 flex items-center justify-center gap-4"}>
               <button type="button" onClick={() => setAuthPage("landing")} className="auth-brand-button flex items-center gap-3 text-left" aria-label="Go to home page">
-                <BrandBolt className="h-11 w-8 drop-shadow-[0_0_8px_rgba(217,70,239,0.25)]" />
+                <BrandBolt className="h-11 w-8 drop-shadow-[0_0_8px_rgba(178, 74, 242,0.25)]" />
                 <span className="text-2xl font-black tracking-tight">{BRAND_NAME}</span>
               </button>
               <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className={isLight ? "rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-black text-slate-800 shadow-sm hover:border-fuchsia-300" : "absolute right-8 top-8 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-black text-zinc-300 hover:border-fuchsia-500/50 hover:text-white"}>{theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}</button>
@@ -15040,7 +15040,7 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
                 </label>
               )}
 
-              <button type="submit" disabled={!canSubmitAuth} className="auth-submit-button group flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-sm font-black text-white shadow-[0_18px_36px_rgba(217,70,239,0.24)] transition hover:scale-[1.01] hover:shadow-[0_20px_44px_rgba(217,70,239,0.34)] disabled:cursor-not-allowed disabled:opacity-60">
+              <button type="submit" disabled={!canSubmitAuth} className="auth-submit-button group flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-sm font-black text-white shadow-[0_18px_36px_rgba(178, 74, 242,0.24)] transition hover:scale-[1.01] hover:shadow-[0_20px_44px_rgba(178, 74, 242,0.34)] disabled:cursor-not-allowed disabled:opacity-60">
                 <span className="relative z-10">{authLoading ? "Please wait..." : isLogin ? "Sign in" : isRegister ? "Create account" : isUpdatePassword ? "Update password" : "Send reset link"}</span>
                 <span className="relative z-10 transition group-hover:translate-x-1">→</span>
               </button>
@@ -15069,7 +15069,7 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
             <div className="mt-3 text-3xl font-black text-emerald-400">87.3%</div>
             <div className="mt-1 text-xs font-bold text-emerald-300">+12.4% this month</div>
           </div>
-          <div className="auth-float-card auth-float-two absolute right-12 top-28 rounded-2xl border border-fuchsia-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(217,70,239,0.10)] backdrop-blur-xl">
+          <div className="auth-float-card auth-float-two absolute right-12 top-28 rounded-2xl border border-fuchsia-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(178, 74, 242,0.10)] backdrop-blur-xl">
             <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Mistake Detector</div>
             <div className="mt-3 text-xl font-black text-fuchsia-300">Active Coach</div>
             <div className="mt-1 text-xs font-bold text-zinc-400">Find → Understand → Fix</div>
@@ -15162,14 +15162,14 @@ function LegalInfoPage({ page, setAuthPage, theme, setTheme }) {
       <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-5 py-6 sm:px-8">
         <header className="flex items-center justify-between gap-4">
           <button onClick={() => setAuthPage("landing")} className="flex items-center gap-3 text-left">
-            <BrandBolt className="h-10 w-7 drop-shadow-[0_0_8px_rgba(217,70,239,0.25)]" />
+            <BrandBolt className="h-10 w-7 drop-shadow-[0_0_8px_rgba(178, 74, 242,0.25)]" />
             <span className="text-xl font-black">{BRAND_NAME}</span>
           </button>
           <div className="flex items-center gap-3">
             <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className={isLight ? "rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-800 shadow-sm" : "rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-zinc-300"}>
               {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
             </button>
-            <button onClick={() => setAuthPage("login")} className="rounded-xl bg-fuchsia-500 px-4 py-2 text-sm font-black text-white shadow-[0_16px_32px_rgba(217,70,239,0.22)]">Log In</button>
+            <button onClick={() => setAuthPage("login")} className="rounded-xl bg-fuchsia-500 px-4 py-2 text-sm font-black text-white shadow-[0_16px_32px_rgba(178, 74, 242,0.22)]">Log In</button>
           </div>
         </header>
 
@@ -15293,14 +15293,14 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
       <div
         className={
           isLight
-            ? "pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(217,70,239,0.12),transparent_30%),radial-gradient(circle_at_82%_62%,rgba(20,184,166,0.12),transparent_30%),linear-gradient(135deg,#f8fafc_0%,#ffffff_46%,#f7f0ff_100%)]"
+            ? "pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(178, 74, 242,0.12),transparent_30%),radial-gradient(circle_at_82%_62%,rgba(20,184,166,0.12),transparent_30%),linear-gradient(135deg,#f8fafc_0%,#ffffff_46%,#f7f0ff_100%)]"
             : "pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_70%_18%,rgba(126,34,206,0.05),transparent_31%)]"
         }
       />
-      <header className={isLight ? "fixed inset-x-0 top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl" : "fixed inset-x-0 top-0 z-50 border-b border-white/[0.06] bg-black/60 backdrop-blur-2xl shadow-[0_1px_0_rgba(168,85,247,0.12)]"}>
+      <header className={isLight ? "fixed inset-x-0 top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl" : "fixed inset-x-0 top-0 z-50 border-b border-white/[0.06] bg-black/60 backdrop-blur-2xl shadow-[0_1px_0_rgba(178, 74, 242,0.12)]"}>
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-5 lg:px-8">
           <button type="button" onClick={goHome} className="flex items-center gap-3 text-xl font-black">
-            <span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(217,70,239,0.2)]">{BRAND_MARK}</span>
+            <span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(178, 74, 242,0.2)]">{BRAND_MARK}</span>
             <span>{BRAND_NAME}</span>
           </button>
           <nav className={isLight ? "hidden items-center gap-9 text-sm font-black text-slate-500 md:flex" : "hidden items-center gap-9 text-sm font-black text-zinc-400 md:flex"}>
@@ -15322,7 +15322,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
             <button type="button" onClick={() => setAuthPage("login")} className={isLight ? "inline-flex text-sm font-black text-slate-600 transition hover:text-slate-950" : "inline-flex text-sm font-black text-zinc-200 transition hover:text-white"}>
               Log In
             </button>
-            <button type="button" onClick={() => setAuthPage("register")} className="rounded-xl bg-fuchsia-500 px-4 py-2.5 text-sm font-black text-white shadow-[0_18px_42px_rgba(217,70,239,0.28)] transition hover:bg-fuchsia-400">
+            <button type="button" onClick={() => setAuthPage("register")} className="rounded-xl bg-fuchsia-500 px-4 py-2.5 text-sm font-black text-white shadow-[0_18px_42px_rgba(178, 74, 242,0.28)] transition hover:bg-fuchsia-400">
               Try 7 Days Free
             </button>
           </div>
@@ -15396,7 +15396,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
             </div>
 
             <div className={isLight ? "hero-dashboard-card relative overflow-hidden rounded-[2rem] border border-fuchsia-200/70 bg-gradient-to-br from-white via-fuchsia-100/60 to-emerald-100/55 p-8 shadow-[0_34px_100px_rgba(126,34,206,0.16)]" : "hero-dashboard-card glass-card-vivid gradient-border glow-fuchsia relative overflow-hidden rounded-[2rem] p-8"}>
-              <div className={isLight ? "absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(217,70,239,0.12),transparent_30%),radial-gradient(circle_at_88%_20%,rgba(16,185,129,0.12),transparent_32%)]" : "absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(217,70,239,0.24),transparent_28%),radial-gradient(circle_at_88%_20%,rgba(16,185,129,0.18),transparent_32%)]"} />
+              <div className={isLight ? "absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(178, 74, 242,0.12),transparent_30%),radial-gradient(circle_at_88%_20%,rgba(16,185,129,0.12),transparent_32%)]" : "absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(178, 74, 242,0.24),transparent_28%),radial-gradient(circle_at_88%_20%,rgba(16,185,129,0.18),transparent_32%)]"} />
               <div className="relative z-10">
                 <div className="mb-8 flex items-center justify-between">
                   <div className="flex gap-2">
@@ -15552,7 +15552,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
             </div>
 
             <motion.div whileHover={{ scale: 1.025, y: -8 }} transition={{ type: "spring", stiffness: 220, damping: 22 }} className={isLight ? "relative overflow-hidden rounded-[1.6rem] border border-slate-200 bg-white/80 p-5 shadow-[0_28px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl" : "glass-card gradient-border glow-fuchsia relative overflow-hidden rounded-[1.6rem] p-5"}>
-              <div className={isLight ? "absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(217,70,239,0.12),transparent_28%),radial-gradient(circle_at_90%_80%,rgba(16,185,129,0.10),transparent_30%)]" : "absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(217,70,239,0.18),transparent_28%),radial-gradient(circle_at_90%_80%,rgba(16,185,129,0.12),transparent_30%)]"} />
+              <div className={isLight ? "absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(178, 74, 242,0.12),transparent_28%),radial-gradient(circle_at_90%_80%,rgba(16,185,129,0.10),transparent_30%)]" : "absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(178, 74, 242,0.18),transparent_28%),radial-gradient(circle_at_90%_80%,rgba(16,185,129,0.12),transparent_30%)]"} />
               <div className="relative z-10">
                 <div className="mb-5 flex items-center justify-between">
                   <div>
@@ -15695,7 +15695,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
                   Payments are handled by Dodo Payments as Merchant of Record. TryCritique is a journal and analytics tool, not investment advice or trading signals.
                 </p>
 
-                <button type="button" onClick={() => setAuthPage("register")} className="mt-6 flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-sm font-black text-white shadow-[0_18px_36px_rgba(217,70,239,0.24)] transition hover:scale-[1.01]">
+                <button type="button" onClick={() => setAuthPage("register")} className="mt-6 flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-sm font-black text-white shadow-[0_18px_36px_rgba(178, 74, 242,0.24)] transition hover:scale-[1.01]">
                   Start 7-Day Free Trial
                   <ChevronRight size={18} />
                 </button>
@@ -15783,7 +15783,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
         <section className={isLight ? "mx-auto w-full max-w-7xl px-5 py-20 lg:px-8" : "mx-auto w-full max-w-7xl px-5 py-20 lg:px-8"}>
           <div className="section-divider mb-20" />
           <motion.div whileHover={{ scale: 1.01 }} transition={{ type: "spring", stiffness: 200, damping: 25 }} className={isLight ? "relative overflow-hidden rounded-[2rem] border border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 via-white to-purple-50 p-12 text-center shadow-[0_28px_90px_rgba(126,34,206,0.12)]" : "glass-card-vivid gradient-border glow-fuchsia relative overflow-hidden rounded-[2rem] p-12 text-center"}>
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(168,85,247,0.18),transparent_60%)]" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(178, 74, 242,0.18),transparent_60%)]" />
             <div className="relative z-10">
               <div className={isLight ? "eyebrow-badge-light mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-fuchsia-300 bg-fuchsia-50 px-4 py-2 text-xs font-black uppercase tracking-wider text-fuchsia-600" : "eyebrow-badge mx-auto mb-6 inline-flex"}>
                 <Sparkles size={13} /> 7-day free trial — no card required
@@ -15794,7 +15794,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
               <p className={isLight ? "mx-auto mt-5 max-w-xl text-lg font-semibold leading-8 text-slate-600" : "mx-auto mt-5 max-w-xl text-lg font-semibold leading-8 text-zinc-400"}>
                 Join traders who stopped guessing and started improving with data.
               </p>
-              <button type="button" onClick={() => setAuthPage("register")} className={isLight ? "mt-8 inline-flex h-14 items-center gap-3 rounded-xl bg-fuchsia-500 px-10 text-base font-black text-white shadow-[0_18px_42px_rgba(217,70,239,0.28)] transition hover:scale-[1.02] hover:bg-fuchsia-400" : "btn-primary-glow mt-8 inline-flex h-14 items-center gap-3 rounded-xl px-10 text-base font-black text-white"}>
+              <button type="button" onClick={() => setAuthPage("register")} className={isLight ? "mt-8 inline-flex h-14 items-center gap-3 rounded-xl bg-fuchsia-500 px-10 text-base font-black text-white shadow-[0_18px_42px_rgba(178, 74, 242,0.28)] transition hover:scale-[1.02] hover:bg-fuchsia-400" : "btn-primary-glow mt-8 inline-flex h-14 items-center gap-3 rounded-xl px-10 text-base font-black text-white"}>
                 Start 7-Day Free Trial <ChevronRight size={19} />
               </button>
               <p className={isLight ? "mt-3 text-sm font-semibold text-slate-500" : "mt-3 text-sm font-semibold text-zinc-500"}>No credit card required · Cancel anytime</p>
@@ -15806,7 +15806,7 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
           <div className="mx-auto max-w-7xl flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
             <div className="max-w-sm">
               <div className="flex items-center gap-3 mb-3">
-                <BrandBolt className="h-9 w-9 drop-shadow-[0_0_8px_rgba(217,70,239,0.25)]" />
+                <BrandBolt className="h-9 w-9 drop-shadow-[0_0_8px_rgba(178, 74, 242,0.25)]" />
                 <span className={isLight ? "text-lg font-black text-slate-950" : "text-lg font-black text-white"}>{BRAND_NAME}</span>
               </div>
               <p className="leading-6 text-xs">A trading journal and analytics product for self-review. No investment advice, signals, brokerage, or guaranteed returns.</p>
@@ -15946,7 +15946,7 @@ function WatchDemoModal({ onClose, onStart, isLight }) {
 
         <div className="grid lg:grid-cols-[1.18fr_.82fr]">
           <div className={isLight ? "relative min-h-[430px] overflow-hidden bg-gradient-to-br from-slate-50 via-white to-fuchsia-50 p-6" : "relative min-h-[430px] overflow-hidden bg-gradient-to-br from-black via-[#08030d] to-[#03100c] p-6"}>
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(217,70,239,0.16),transparent_28%),radial-gradient(circle_at_82%_78%,rgba(16,185,129,0.14),transparent_28%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(178, 74, 242,0.16),transparent_28%),radial-gradient(circle_at_82%_78%,rgba(16,185,129,0.14),transparent_28%)]" />
             <div className="relative z-10 flex h-full flex-col">
               <div className="flex items-center justify-between">
                 <div className="flex gap-2"><span className="h-3 w-3 rounded-full bg-red-500" /><span className="h-3 w-3 rounded-full bg-amber-400" /><span className="h-3 w-3 rounded-full bg-emerald-400" /></div>
@@ -16009,7 +16009,7 @@ function WatchDemoModal({ onClose, onStart, isLight }) {
             </div>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              <button type="button" onClick={() => { stopVoiceover(); onStart(); }} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-fuchsia-500 px-5 text-sm font-black text-white shadow-[0_18px_36px_rgba(217,70,239,0.24)] transition hover:bg-fuchsia-400">Start Your Journal <ChevronRight size={17} /></button>
+              <button type="button" onClick={() => { stopVoiceover(); onStart(); }} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-fuchsia-500 px-5 text-sm font-black text-white shadow-[0_18px_36px_rgba(178, 74, 242,0.24)] transition hover:bg-fuchsia-400">Start Your Journal <ChevronRight size={17} /></button>
               <button type="button" onClick={() => { stopVoiceover(); onClose(); }} className={isLight ? "inline-flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-black text-slate-700 transition hover:text-slate-950" : "inline-flex h-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 px-5 text-sm font-black text-zinc-300 transition hover:text-white"}>Keep browsing</button>
             </div>
           </div>

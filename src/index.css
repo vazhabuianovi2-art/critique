@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+/* Sydview accent palette: remap the fuchsia ramp to violet-purple (--primary hsl(277 87% 62%) = #b24af2). */
+@theme {
+  --color-fuchsia-50: #f9f1fe;
+  --color-fuchsia-100: #f3e2fd;
+  --color-fuchsia-200: #e7c6fb;
+  --color-fuchsia-300: #d6a0f8;
+  --color-fuchsia-400: #c270f5;
+  --color-fuchsia-500: #b24af2;
+  --color-fuchsia-600: #9e1aef;
+  --color-fuchsia-700: #8a0fd7;
+  --color-fuchsia-800: #720cb0;
+  --color-fuchsia-900: #5f0a94;
+  --color-fuchsia-950: #400764;
+}
+
 * {
   box-sizing: border-box;
 }
