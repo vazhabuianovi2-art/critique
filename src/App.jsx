@@ -2026,14 +2026,17 @@ const THEME_STYLE_CSS = `
   .dashboard-activity-card::before,
   .dashboard-recent-list::before,
   .dashboard-routine-card::before,
-  .journal-hero::before,
-  .journal-search-panel::before,
-  .journal-sort-panel::before {
+  .journal-hero::before {
     content: "";
     position: absolute;
     inset: 0;
     pointer-events: none;
     background: linear-gradient(135deg, rgba(178,74,242,.12), transparent 42%, rgba(16,185,129,.04));
+  }
+
+  .journal-search-panel::before,
+  .journal-sort-panel::before {
+    content: none;
   }
 
   .dashboard-panel > *,
@@ -8454,7 +8457,7 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
   }, [trades, sortBy, sortDirection]);
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-5 pr-14 sm:flex-row sm:items-center sm:justify-between lg:pr-16">
         <div className="flex items-center gap-4">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300"><BookOpen size={20} /></div>
           <div>
