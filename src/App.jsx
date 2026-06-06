@@ -2120,10 +2120,9 @@ const THEME_STYLE_CSS = `
   }
 
   .dashboard-inspiration {
-    backdrop-filter: blur(10px);
-    background: rgba(14,4,22,.78) !important;
-    border-color: rgba(178,74,242,.20) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 12px 32px rgba(178,74,242,.08) !important;
+    background: rgba(0,0,0,0.40) !important;
+    border-color: rgba(255,255,255,0.06) !important;
+    box-shadow: none !important;
   }
 
   .dashboard-dash-card::before {
@@ -8893,28 +8892,32 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
         <TopCrumb page="Dashboard" className="" />
       </div>
 
-      <div className="dashboard-hero rounded-2xl border border-fuchsia-500/35 bg-gradient-to-r from-fuchsia-950/35 via-black to-[#08040d] p-5 shadow-[0_0_38px_rgba(178,74,242,0.12)]">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+      <div className="dashboard-hero rounded-2xl border border-fuchsia-500/20 bg-gradient-to-r from-[#130820] via-[#0d0418] to-[#0a0212] p-6">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <h1 className="text-3xl font-black xl:text-4xl">Welcome back, {getFirstDisplayName(profileName)}! <span className="waving-hand" aria-hidden="true">👋</span></h1>
-            <p className="mt-3 flex items-center gap-2 text-base font-semibold text-zinc-400">▣ {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}</p>
+            <h1 className="text-2xl font-bold xl:text-3xl">Welcome back, {getFirstDisplayName(profileName)}! <span className="waving-hand" aria-hidden="true">👋</span></h1>
+            <p className="mt-2 flex items-center gap-2 text-sm font-medium text-zinc-500">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+            </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Button onClick={onOpenJournal} className="dashboard-primary-btn bg-fuchsia-500 px-5 py-3 font-black text-black shadow-[0_0_24px_rgba(178,74,242,0.28)]">▣ Log Trades</Button>
-            <Button onClick={onStartDay} className="dashboard-start-btn border border-emerald-500/45 bg-black px-5 py-3 font-black text-white hover:bg-emerald-500/15">Start Your Day</Button>
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <Button onClick={onOpenJournal} className="dashboard-primary-btn bg-fuchsia-500 px-4 py-2.5 text-sm font-bold text-black">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8M12 8v8"/></svg>
+              Log Trade
+            </Button>
+            <Button onClick={onStartDay} className="dashboard-start-btn border border-white/20 bg-transparent px-4 py-2.5 text-sm font-bold text-zinc-200 hover:bg-white/5">Start Your Day</Button>
           </div>
         </div>
-        <div className="dashboard-inspiration mt-4 rounded-xl border border-fuchsia-500/20 bg-black/30 p-3 text-center">
-          <div className="text-sm font-black uppercase tracking-widest text-fuchsia-400"><span className="daily-inspiration-star">✬</span> Daily Inspiration <span className="daily-inspiration-star">✬</span></div>
-          <div className="moving-text-wrap mt-2">
+        <div className="dashboard-inspiration mt-5 rounded-xl border border-white/8 bg-black/40 px-5 py-3">
+          <div className="mb-1.5 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest text-fuchsia-400">
+            <Sparkles size={12} /> Daily Inspiration <Sparkles size={12} />
+          </div>
+          <div className="moving-text-wrap">
             <div className="moving-text-track">
               {quotes.map((item, index) => (
                 <div key={index} className="moving-text-slide">
-                  <span className="moving-text-item">
-                    <span className="moving-text-spark">✦</span>
-                    {item}
-                    <span className="moving-text-spark">✦</span>
-                  </span>
+                  <span className="moving-text-item italic text-zinc-300 text-sm">{item}</span>
                 </div>
               ))}
             </div>
