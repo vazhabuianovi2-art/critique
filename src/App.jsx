@@ -5902,7 +5902,14 @@ function createTradeFromForm(form, existingId, account, existingTrade = null) {
     session: form.session,
     result: normalizeTradeResult(form.result) || getResultFromPnl(pnl),
     emotion: form.emotion,
-    risk: Number(form.risk || 0),
+    risk: (() => {
+      const rawRisk = Number(form.risk || 0);
+      if (form.currency === "%" && rawRisk > 0) {
+        const bal = Number(account?.balance || 0);
+        return bal > 0 ? (rawRisk / 100) * bal : rawRisk;
+      }
+      return rawRisk;
+    })(),
     pnl,
     notes: form.notes,
     whatWentWell: form.whatWentWell || "",
@@ -9974,7 +9981,15 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
   const strategyOptions = [...new Set([...DEFAULT_STRATEGIES, ...customStrategies, form.strategy].filter(Boolean).filter((item) => !String(item).startsWith("Select")))];
-  const currencyOptions = ["USD", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF"];
+  const currencyOptions = ["%", "USD", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF"];
+  const accountBalanceNum = Number(accountBalance?.currentBalance || accountBalance?.startingBalance || 0);
+  const isPercentRisk = form.currency === "%";
+  // If % mode: risk entered as % of balance → convert to $
+  const riskInDollars = isPercentRisk
+    ? (Number(form.risk || 0) / 100) * accountBalanceNum
+    : Number(form.risk || 0);
+  const rrRatio = riskInDollars ? (Number(form.pnl || 0) / riskInDollars).toFixed(2) : null;
+  const rrPercent = accountBalanceNum && riskInDollars ? ((Number(form.pnl || 0) / accountBalanceNum) * 100).toFixed(2) : null;
   const activeResult = normalizeTradeResult(form.result) || getResultFromPnl(form.pnl);
   const shownErrors = showErrors ? formErrors : {};
   function handleSaveClick() {
@@ -10063,15 +10078,32 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
             </Field>
             <Field label="Risk">
               <div className="flex gap-2">
-                <div className="flex-1"><MoneyInput value={form.risk} onChange={(e) => updateField("risk", e.target.value)} /></div>
+                <div className="flex-1">
+                  {isPercentRisk ? (
+                    <div className="relative">
+                      <Input value={form.risk} onChange={(e) => updateField("risk", e.target.value)} placeholder="0" className={inputPurpleClass("pr-7")} />
+                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm font-black text-zinc-400">%</span>
+                    </div>
+                  ) : (
+                    <MoneyInput value={form.risk} onChange={(e) => updateField("risk", e.target.value)} />
+                  )}
+                </div>
                 <div className="w-24"><Select value={form.currency} onChange={(e) => updateField("currency", e.target.value)}>{currencyOptions.map((currencyOption) => <option key={currencyOption}>{currencyOption}</option>)}</Select></div>
               </div>
               <FieldError text={shownErrors.risk} />
-              <p className="mt-1.5 text-xs font-semibold text-zinc-500">Risk amount in {form.currency || "USD"}</p>
+              <p className="mt-1.5 text-xs font-semibold text-zinc-500">
+                {isPercentRisk && accountBalanceNum > 0
+                  ? `≈ $${riskInDollars.toLocaleString(undefined, { maximumFractionDigits: 2 })} of $${accountBalanceNum.toLocaleString()}`
+                  : `Risk amount in ${form.currency || "USD"}`}
+              </p>
             </Field>
             <Field label="R:R Ratio">
-              <Input disabled value={rr === "NaN" || rr === "—" ? "—" : `${rr}R`} className="border-white/10 bg-zinc-900" />
-              <p className="mt-1.5 text-xs font-semibold text-zinc-500">Auto-calculated from P&L and Risk</p>
+              <Input disabled value={rrRatio ? `${rrRatio}R` : "—"} className="border-white/10 bg-zinc-900" />
+              <p className="mt-1.5 text-xs font-semibold text-zinc-500">
+                {rrRatio && rrPercent
+                  ? `$${Number(form.pnl || 0).toLocaleString()} P&L · ${rrPercent}% of balance`
+                  : "Auto-calculated from P&L and Risk"}
+              </p>
             </Field>
             <div>
               <DateFilterField label="Trade Date" value={form.date} onChange={(value) => updateField("date", value)} />
