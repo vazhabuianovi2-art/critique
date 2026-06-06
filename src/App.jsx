@@ -8787,7 +8787,7 @@ function DashboardEmptyState({ onAddTrade, onOpenJournal }) {
     { icon: <Target size={20} />, title: "Set Goals", detail: "Define and achieve trading targets" },
   ];
   return (
-    <section className="dashboard-empty mt-8 rounded-3xl border border-dashed border-white/15 bg-gradient-to-br from-[#0b0710] via-black to-[#0a0610] px-6 py-14 sm:px-10 sm:py-16">
+    <section className="dashboard-empty mt-8 rounded-2xl border-2 border-dashed border-white/20 bg-gradient-to-br from-[#0b0710] via-black to-[#0a0610] px-6 py-16 sm:px-10 sm:py-20">
       <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
         <div className="relative mb-8 flex h-32 w-32 items-center justify-center">
           <div className="absolute h-32 w-32 rounded-full bg-fuchsia-500/10 blur-2xl" aria-hidden="true" />
