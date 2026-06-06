@@ -2817,21 +2817,7 @@ const THEME_STYLE_CSS = `
     box-shadow: none !important;
   }
 
-  .trade-context-modern .custom-select-option-win,
-  .trade-context-modern .custom-select-option-a,
-  .trade-context-modern .custom-select-option-yes,
-  .trade-context-modern .custom-select-option-calm,
-  .trade-context-modern .custom-select-option-confident {
-    color: #86efac !important;
-  }
-
-  .trade-context-modern .custom-select-option-loss,
-  .trade-context-modern .custom-select-option-d,
-  .trade-context-modern .custom-select-option-no,
-  .trade-context-modern .custom-select-option-revenge,
-  .trade-context-modern .custom-select-option-fomo {
-    color: #fca5a5 !important;
-  }
+  /* trade-context per-option colors removed */
 
   .light-theme .trade-context-modern,
   .light-theme .trade-context-card {
