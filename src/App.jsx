@@ -8860,7 +8860,7 @@ function DashboardEmptyState({ onAddTrade, onOpenJournal }) {
         <p className="mt-4 max-w-md text-base font-semibold leading-relaxed text-zinc-400">Your trading journey starts here. Log your first trade to see your performance analytics, track your progress, and unlock powerful insights.</p>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Button onClick={onAddTrade} className="bg-fuchsia-500 px-6 py-3 font-black text-white shadow-[0_0_24px_rgba(178,74,242,0.28)]"><Plus size={18} /> Log Your First Trade</Button>
+          <Button onClick={onAddTrade} className="bg-fuchsia-500 px-6 py-3 font-black text-black shadow-[0_0_24px_rgba(178,74,242,0.28)]"><Plus size={18} /> Log Your First Trade</Button>
           <Button onClick={onOpenJournal} className="border border-white/15 bg-black px-6 py-3 font-black text-white hover:bg-white/5">Explore Journal</Button>
         </div>
 

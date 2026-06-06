@@ -2,6 +2,9 @@
 
 /* Sydview accent palette: remap the fuchsia ramp to violet-purple (--primary hsl(277 87% 62%) = #b24af2). */
 @theme {
+  /* Soften pure white so text is less harsh on dark backgrounds */
+  --color-white: #dddde0;
+
   --color-fuchsia-50: #f9f1fe;
   --color-fuchsia-100: #f3e2fd;
   --color-fuchsia-200: #e7c6fb;
