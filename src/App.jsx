@@ -5459,6 +5459,9 @@ const emptyForm = {
   pnl: "590",
   risk: "200",
   date: formatDateKey(new Date()),
+  entryTime: "",
+  exitTime: "",
+  currency: "USD",
   session: "Select trading session",
   strategy: "",
   result: "Win",
@@ -5983,6 +5986,9 @@ function createTradeFromForm(form, existingId, account, existingTrade = null) {
     accountType: account?.type || "Demo Account",
     accountCurrency: account?.currency || "USD",
     date: form.date,
+    entryTime: form.entryTime || "",
+    exitTime: form.exitTime || "",
+    currency: form.currency || account?.currency || "USD",
     pair: String(form.symbol || "").toUpperCase(),
     direction: String(form.direction || "Buy").toUpperCase(),
     quantity: Number(form.quantity || 0),
@@ -6017,6 +6023,9 @@ function formFromTrade(trade) {
     pnl: String(trade.pnl ?? ""),
     risk: String(trade.risk ?? ""),
     date: trade.date || "",
+    entryTime: trade.entryTime || "",
+    exitTime: trade.exitTime || "",
+    currency: trade.currency || trade.accountCurrency || "USD",
     session: trade.session || "",
     strategy: trade.setup || "",
     result: getTradeResult(trade),
@@ -10029,7 +10038,10 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
     }
   });
   const [newStrategyName, setNewStrategyName] = useState("");
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const strategyOptions = [...new Set([...DEFAULT_STRATEGIES, ...customStrategies, form.strategy].filter(Boolean).filter((item) => !String(item).startsWith("Select")))];
+  const currencyOptions = ["USD", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF"];
+  const activeResult = normalizeTradeResult(form.result) || getResultFromPnl(form.pnl);
 
   function updateField(key, value) {
     if (key === "pnl") {
@@ -10108,23 +10120,34 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
               <FieldError text={formErrors.pnl} />
             </Field>
             <Field label="Risk">
-              <MoneyInput value={form.risk} onChange={(e) => updateField("risk", e.target.value)} />
+              <div className="flex gap-2">
+                <div className="flex-1"><MoneyInput value={form.risk} onChange={(e) => updateField("risk", e.target.value)} /></div>
+                <div className="w-24"><Select value={form.currency} onChange={(e) => updateField("currency", e.target.value)}>{currencyOptions.map((currencyOption) => <option key={currencyOption}>{currencyOption}</option>)}</Select></div>
+              </div>
               <FieldError text={formErrors.risk} />
+              <p className="mt-1.5 text-xs font-semibold text-zinc-500">Risk amount in {form.currency || "USD"}</p>
             </Field>
             <Field label="R:R Ratio">
-              <Input disabled value={rr === "NaN" ? "—" : `${rr}R`} className="border-white/10 bg-zinc-900" />
+              <Input disabled value={rr === "NaN" || rr === "—" ? "—" : `${rr}R`} className="border-white/10 bg-zinc-900" />
+              <p className="mt-1.5 text-xs font-semibold text-zinc-500">Auto-calculated from P&L and Risk</p>
             </Field>
             <div>
               <DateFilterField label="Trade Date" value={form.date} onChange={(value) => updateField("date", value)} />
               <FieldError text={formErrors.date} />
             </div>
+            <Field label="Entry Time">
+              <Input value={form.entryTime} onChange={(e) => updateField("entryTime", e.target.value)} placeholder="0930" className={inputPurpleClass()} />
+              <p className="mt-1.5 text-xs font-semibold text-zinc-500">Just type numbers (e.g., 0930 → 09:30)</p>
+            </Field>
+            <Field label="Exit Time">
+              <Input value={form.exitTime} onChange={(e) => updateField("exitTime", e.target.value)} placeholder="1600" className={inputPurpleClass()} />
+              <p className="mt-1.5 text-xs font-semibold text-zinc-500">Just type numbers (e.g., 1600 → 16:00)</p>
+            </Field>
             <Field label="Trading Session">
-              <SegmentedChoice
-                value={form.session}
-                options={TRADING_SESSIONS}
-                onChange={(value) => updateField("session", value)}
-                tone="session"
-              />
+              <Select value={form.session} onChange={(e) => updateField("session", e.target.value)}>
+                <option>Select trading session</option>
+                {TRADING_SESSIONS.map((sessionOption) => <option key={sessionOption}>{sessionOption}</option>)}
+              </Select>
               <FieldError text={formErrors.session} />
             </Field>
           </div>
@@ -10140,67 +10163,67 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
         </Section>
 
         <div className="trade-context-modern mt-6 overflow-visible rounded-[1.6rem] border border-fuchsia-500/30 bg-gradient-to-br from-[#09030d] via-black to-[#050505] p-6 shadow-[0_0_30px_rgba(178,74,242,0.10)]">
-          <div className="mb-6 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-fuchsia-500/35 bg-fuchsia-500/12 text-fuchsia-300 shadow-[0_0_16px_rgba(178,74,242,0.18)]"><Target size={18} /></span>
-              <div>
-                <h3 className="text-xl font-black text-white">Strategy & Trade Context</h3>
-                <p className="mt-1 text-xs font-bold text-zinc-500">Clean selection fields for setup, mindset and execution quality.</p>
-              </div>
-            </div>
-            <span className="hidden rounded-full border border-fuchsia-500/25 bg-fuchsia-500/10 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-fuchsia-300 sm:inline-flex">Context</span>
+          <div className="mb-6 flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-fuchsia-500/35 bg-fuchsia-500/12 text-fuchsia-300 shadow-[0_0_16px_rgba(178,74,242,0.18)]"><Target size={18} /></span>
+            <h3 className="text-xl font-black text-white">Strategy &amp; Trade Context</h3>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="trade-context-card md:col-span-2">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <Field label="Strategy">
-                  <div className="space-y-3">
-                    <StrategyChoice
-                      value={form.strategy}
-                      options={strategyOptions}
-                      customOptions={customStrategies}
-                      onChange={(value) => updateField("strategy", value)}
-                      onDelete={deleteCustomStrategy}
-                    />
-                    <div className="flex gap-2">
-                      <Input value={newStrategyName} onChange={(e) => setNewStrategyName(e.target.value)} placeholder="Add your strategy name" className="trade-context-input border-white/10 bg-black/45 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" />
-                      <button type="button" onClick={addCustomStrategy} className="rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 px-4 text-sm font-black text-fuchsia-200 transition hover:bg-fuchsia-500 hover:text-black">Add</button>
-                    </div>
-                  </div>
-                  <FieldError text={formErrors.strategy} />
-                </Field>
-                <Field label="Account">
-                  <Input value={`${account.name} • ${account.currency} ${Number(accountBalance?.currentBalance ?? account.balance).toLocaleString()} • ${account.type}`} disabled className="trade-context-input border-white/10 bg-black/45 text-zinc-400" />
-                </Field>
+          <div className="space-y-5">
+            <Field label="Strategy">
+              <Select value={form.strategy || ""} onChange={(e) => updateField("strategy", e.target.value)}>
+                <option value="">Select strategy</option>
+                {strategyOptions.map((strategyOption) => <option key={strategyOption}>{strategyOption}</option>)}
+              </Select>
+              <div className="mt-2 flex gap-2">
+                <Input value={newStrategyName} onChange={(e) => setNewStrategyName(e.target.value)} placeholder="Add new strategy name" className={inputPurpleClass()} />
+                <button type="button" onClick={addCustomStrategy} className="shrink-0 rounded-md border border-fuchsia-500/35 bg-fuchsia-500/15 px-4 text-sm font-black text-fuchsia-200 transition hover:bg-fuchsia-500 hover:text-black">Add</button>
               </div>
-            </div>
+              <FieldError text={formErrors.strategy} />
+            </Field>
 
-            <div className="trade-context-card">
-              <Field label="Result">
-                <Select value={normalizeTradeResult(form.result) || getResultFromPnl(form.pnl)} onChange={(e) => updateField("result", e.target.value)}>
-                  {TRADE_RESULT_OPTIONS.map((resultOption) => <option key={resultOption}>{resultOption}</option>)}
-                </Select>
-                <p className="mt-2 text-xs font-semibold text-zinc-500">Auto follows P&L unless you choose Partial.</p>
-              </Field>
-            </div>
+            <Field label="Account">
+              <div className="flex h-10 w-full items-center justify-between rounded-md border border-white/15 bg-black px-3 text-sm text-white">
+                <span className="font-black">{account.name} • {account.currency} {Number(accountBalance?.currentBalance ?? account.balance).toLocaleString()}</span>
+                <ChevronDown size={16} className="text-fuchsia-300" />
+              </div>
+            </Field>
 
-            <div className="trade-context-card">
-              <Field label="Tags"><Input value={syncResultTag(form.tags, form.pnl, form.result)} onChange={(e) => updateField("tags", e.target.value)} placeholder="result:win, NY AM, FVG" className="trade-context-input border-white/10 bg-black/45 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
-            </div>
+            <Field label="Result">
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: "Win", value: "Win", dot: "bg-emerald-400", active: "border-emerald-500/60 bg-emerald-500/15 text-emerald-200", idle: "text-emerald-300" },
+                  { label: "Loss", value: "Loss", dot: "bg-red-400", active: "border-red-500/60 bg-red-500/15 text-red-200", idle: "text-red-300" },
+                  { label: "Breakeven", value: "Break Even", dot: "bg-amber-400", active: "border-amber-500/60 bg-amber-500/15 text-amber-200", idle: "text-amber-300" },
+                  { label: "Partial", value: "Partial", dot: "bg-orange-400", active: "border-orange-500/60 bg-orange-500/15 text-orange-200", idle: "text-orange-300" },
+                ].map((resultOption) => {
+                  const selected = activeResult === resultOption.value;
+                  return (
+                    <button key={resultOption.value} type="button" onClick={() => updateField("result", resultOption.value)} className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-black transition ${selected ? resultOption.active : `border-white/10 bg-black/40 ${resultOption.idle} hover:border-white/25`}`}>
+                      <span className={`h-2.5 w-2.5 rounded-full ${resultOption.dot}`} /> {resultOption.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-xs font-semibold text-zinc-500">Auto follows P&L unless you choose Partial.</p>
+            </Field>
 
-            <div className="trade-context-card"><Field label="Emotions"><MultiChoice value={form.emotion} options={EMOTION_OPTIONS} onChange={(value) => updateField("emotion", value)} tone="emotion" /></Field></div>
-            <div className="trade-context-card"><Field label="Mistakes"><MultiChoice value={form.mistake} options={MISTAKE_OPTIONS} onChange={(value) => updateField("mistake", value)} tone="mistake" allowNone /></Field></div>
-            <div className="trade-context-card"><Field label="Entry Timing"><Select value={form.entryTiming} onChange={(e) => updateField("entryTiming", e.target.value)}><option>Early</option><option>On Time</option><option>Late</option></Select></Field></div>
-            <div className="trade-context-card"><Field label="Confirmation"><Select value={form.confirmation} onChange={(e) => updateField("confirmation", e.target.value)}><option>Yes</option><option>No</option><option>Partial</option></Select></Field></div>
-            <div className="trade-context-card"><Field label="Rules Broken"><MultiChoice value={form.ruleBroken} options={RULE_BROKEN_OPTIONS} onChange={(value) => updateField("ruleBroken", value)} tone="rule" allowNone /></Field></div>
-            <div className="trade-context-card"><Field label="Market Condition"><Select value={form.marketCondition} onChange={(e) => updateField("marketCondition", e.target.value)}><option>Trending</option><option>Ranging</option><option>Choppy</option><option>News</option><option>Low Volume</option></Select></Field></div>
-            <div className="trade-context-card md:col-span-2"><Field label="Setup Quality"><SegmentedChoice value={form.setupQuality} options={SETUP_QUALITY_OPTIONS} onChange={(value) => updateField("setupQuality", value)} tone="quality" /></Field></div>
+            <Field label="Tags">
+              <Input value={syncResultTag(form.tags, form.pnl, form.result)} onChange={(e) => updateField("tags", e.target.value)} placeholder="Add tags (press Enter)" className={inputPurpleClass()} />
+            </Field>
+
+            <Field label="Emotions">
+              <Select value={form.emotion || ""} onChange={(e) => updateField("emotion", e.target.value)}>
+                <option value="">How did you feel?</option>
+                {EMOTION_OPTIONS.map((emotionOption) => <option key={emotionOption[0]} value={emotionOption[0]}>{emotionOption[0]}</option>)}
+              </Select>
+            </Field>
           </div>
         </div>
 
         <Section title={`Screenshots (${screenshots.length}/${MAX_SCREENSHOTS})`} icon={<Camera size={17} />}>
-          <div className="rounded-xl border border-dashed border-white/20 bg-black p-5 text-center">
+          <Input type="file" accept="image/*" multiple disabled={screenshots.length >= MAX_SCREENSHOTS} onChange={(event) => uploadScreenshotsForTrade(event, form, setForm)} className="cursor-pointer border-white/15 bg-black text-white file:mr-4 file:rounded-md file:border-0 file:bg-fuchsia-500 file:px-4 file:py-2 file:text-black" />
+          <p className="mt-2 text-xs font-semibold text-zinc-500">⬆ Upload chart screenshots or paste from clipboard (max {MAX_SCREENSHOTS} images, 5MB each)</p>
+          <div className="mt-4 rounded-xl border border-dashed border-white/20 bg-black p-5 text-center">
             {screenshots.length ? (
               <div className="grid grid-cols-2 gap-2">
                 {screenshots.map((img, index) => (
@@ -10211,25 +10234,41 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
                 ))}
               </div>
             ) : (
-              <div className="py-8 text-zinc-400"><Camera className="mx-auto mb-3" /><div>No screenshot uploaded yet</div><div className="mt-1 text-xs">Upload chart screenshots or paste from clipboard</div></div>
+              <div className="py-8 text-zinc-400"><Camera className="mx-auto mb-3" /><div className="font-bold">No screenshots uploaded yet</div><div className="mt-1 text-xs">Click above to add chart screenshots or press Ctrl+V to paste</div></div>
             )}
-            <Input type="file" accept="image/*" multiple disabled={screenshots.length >= MAX_SCREENSHOTS} onChange={(event) => uploadScreenshotsForTrade(event, form, setForm)} className="mt-4 cursor-pointer border-white/15 bg-black text-white file:mr-4 file:rounded-md file:border-0 file:bg-fuchsia-500 file:px-4 file:py-2 file:text-black" />
           </div>
         </Section>
 
         <Section title="Notes" icon={<BookOpen size={17} />}>
           <Textarea rows={5} value={form.notes} onChange={(e) => updateField("notes", e.target.value)} placeholder="Market conditions, rationale, lessons learned..." className="border-white/15 bg-black focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" />
+          <p className="mt-2 text-xs font-semibold text-zinc-500">Record your thoughts, market analysis, and key learnings from this trade</p>
         </Section>
 
-        <Section title="Trade Review" icon={<ListChecks size={17} />}>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <Field label="What went well?"><Textarea rows={3} value={form.whatWentWell} onChange={(e) => updateField("whatWentWell", e.target.value)} placeholder="Good entry, patience, clean confirmation..." className="border-white/15 bg-black" /></Field>
-            <Field label="What went wrong?"><Textarea rows={3} value={form.whatWentWrong} onChange={(e) => updateField("whatWentWrong", e.target.value)} placeholder="Early entry, moved SL, emotional decision..." className="border-white/15 bg-black" /></Field>
-            <Field label="Rule Followed"><Select value={form.ruleFollowed} onChange={(e) => updateField("ruleFollowed", e.target.value)}><option>Yes</option><option>No</option><option>Partial</option></Select></Field>
-            <Field label="Entry Quality"><Select value={form.entryQuality} onChange={(e) => updateField("entryQuality", e.target.value)}><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></Select></Field>
-            <Field label="Exit Quality"><Select value={form.exitQuality} onChange={(e) => updateField("exitQuality", e.target.value)}><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></Select></Field>
-          </div>
-        </Section>
+        <div className="mt-6">
+          <button type="button" onClick={() => setShowAdvanced((open) => !open)} className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-black/40 px-5 py-4 text-left text-sm font-black text-zinc-200 transition hover:border-fuchsia-500/40 hover:text-fuchsia-200">
+            <span className="flex items-center gap-2"><ListChecks size={16} className="text-fuchsia-300" /> Advanced details (optional)</span>
+            <ChevronDown size={16} className={showAdvanced ? "rotate-180 text-fuchsia-300 transition-transform" : "text-fuchsia-300 transition-transform"} />
+          </button>
+          {showAdvanced && (
+            <div className="mt-4 space-y-6">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <Field label="Mistakes"><MultiChoice value={form.mistake} options={MISTAKE_OPTIONS} onChange={(value) => updateField("mistake", value)} tone="mistake" allowNone /></Field>
+                <Field label="Entry Timing"><Select value={form.entryTiming} onChange={(e) => updateField("entryTiming", e.target.value)}><option>Early</option><option>On Time</option><option>Late</option></Select></Field>
+                <Field label="Confirmation"><Select value={form.confirmation} onChange={(e) => updateField("confirmation", e.target.value)}><option>Yes</option><option>No</option><option>Partial</option></Select></Field>
+                <Field label="Rules Broken"><MultiChoice value={form.ruleBroken} options={RULE_BROKEN_OPTIONS} onChange={(value) => updateField("ruleBroken", value)} tone="rule" allowNone /></Field>
+                <Field label="Market Condition"><Select value={form.marketCondition} onChange={(e) => updateField("marketCondition", e.target.value)}><option>Trending</option><option>Ranging</option><option>Choppy</option><option>News</option><option>Low Volume</option></Select></Field>
+                <div className="md:col-span-2"><Field label="Setup Quality"><SegmentedChoice value={form.setupQuality} options={SETUP_QUALITY_OPTIONS} onChange={(value) => updateField("setupQuality", value)} tone="quality" /></Field></div>
+              </div>
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <Field label="What went well?"><Textarea rows={3} value={form.whatWentWell} onChange={(e) => updateField("whatWentWell", e.target.value)} placeholder="Good entry, patience, clean confirmation..." className="border-white/15 bg-black" /></Field>
+                <Field label="What went wrong?"><Textarea rows={3} value={form.whatWentWrong} onChange={(e) => updateField("whatWentWrong", e.target.value)} placeholder="Early entry, moved SL, emotional decision..." className="border-white/15 bg-black" /></Field>
+                <Field label="Rule Followed"><Select value={form.ruleFollowed} onChange={(e) => updateField("ruleFollowed", e.target.value)}><option>Yes</option><option>No</option><option>Partial</option></Select></Field>
+                <Field label="Entry Quality"><Select value={form.entryQuality} onChange={(e) => updateField("entryQuality", e.target.value)}><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></Select></Field>
+                <Field label="Exit Quality"><Select value={form.exitQuality} onChange={(e) => updateField("exitQuality", e.target.value)}><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></Select></Field>
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
           <Button variant="ghost" onClick={onClose} className="text-white hover:bg-white/10">Cancel</Button>
@@ -14692,8 +14731,8 @@ function getSelectOptionStyle(label) {
   const key = String(label || "").toLowerCase();
   const base = { icon: "", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(178,74,242,0.35)]", normal: "text-zinc-200 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" };
   const styles = {
-    buy: { icon: "", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(178,74,242,0.35)]", normal: "text-zinc-200 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" },
-    sell: { icon: "", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(178,74,242,0.35)]", normal: "text-zinc-200 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" },
+    buy: { icon: "●", active: "bg-emerald-500 text-black shadow-[0_0_14px_rgba(16,185,129,0.35)]", normal: "text-emerald-300 hover:bg-emerald-500/15 hover:text-emerald-200" },
+    sell: { icon: "●", active: "bg-red-500 text-black shadow-[0_0_14px_rgba(239,68,68,0.35)]", normal: "text-red-300 hover:bg-red-500/15 hover:text-red-200" },
     win: { icon: "●", active: "bg-emerald-500 text-black shadow-[0_0_14px_rgba(16,185,129,0.35)]", normal: "text-emerald-300 hover:bg-emerald-500/15 hover:text-emerald-200" },
     loss: { icon: "●", active: "bg-red-500 text-black shadow-[0_0_14px_rgba(239,68,68,0.35)]", normal: "text-red-300 hover:bg-red-500/15 hover:text-red-200" },
     "break even": { icon: "—", active: "bg-amber-500 text-black shadow-[0_0_14px_rgba(245,158,11,0.35)]", normal: "text-amber-300 hover:bg-amber-500/15 hover:text-amber-200" },
