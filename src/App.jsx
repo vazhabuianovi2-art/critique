@@ -2826,7 +2826,6 @@ const THEME_STYLE_CSS = `
     box-shadow: none !important;
   }
 
-  .trade-context-modern .custom-select-option-buy,
   .trade-context-modern .custom-select-option-win,
   .trade-context-modern .custom-select-option-a,
   .trade-context-modern .custom-select-option-yes,
@@ -2835,7 +2834,6 @@ const THEME_STYLE_CSS = `
     color: #86efac !important;
   }
 
-  .trade-context-modern .custom-select-option-sell,
   .trade-context-modern .custom-select-option-loss,
   .trade-context-modern .custom-select-option-d,
   .trade-context-modern .custom-select-option-no,
@@ -5954,9 +5952,7 @@ function getTradeResultClass(result) {
 }
 
 function getTradeDirectionClass(direction) {
-  const side = String(direction || "").toUpperCase();
-  if (side === "SELL") return "border-red-500/55 bg-red-600/75 text-white shadow-[0_0_10px_rgba(239,68,68,0.28)]";
-  return "border-emerald-500/55 bg-emerald-600/75 text-white shadow-[0_0_10px_rgba(16,185,129,0.28)]";
+  return "border-white/20 bg-white/10 text-white";
 }
 
 function createTradeFromForm(form, existingId, account, existingTrade = null) {
@@ -8784,11 +8780,50 @@ function OnboardingChecklist({ trades, account, onOpenJournal, onOpenAccount, on
   );
 }
 
+function DashboardEmptyState({ onAddTrade, onOpenJournal }) {
+  const features = [
+    { icon: <TrendingUp size={20} />, title: "Track Performance", detail: "Monitor your P&L and trading metrics" },
+    { icon: <BarChart3 size={20} />, title: "Analyze Trends", detail: "Visualize your trading patterns" },
+    { icon: <Target size={20} />, title: "Set Goals", detail: "Define and achieve trading targets" },
+  ];
+  return (
+    <section className="dashboard-empty mt-8 rounded-3xl border border-dashed border-white/15 bg-gradient-to-br from-[#0b0710] via-black to-[#0a0610] px-6 py-14 sm:px-10 sm:py-16">
+      <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
+        <div className="relative mb-8 flex h-32 w-32 items-center justify-center">
+          <div className="absolute h-32 w-32 rounded-full bg-fuchsia-500/10 blur-2xl" aria-hidden="true" />
+          <div className="absolute right-1 top-0 flex h-9 w-9 items-center justify-center rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 shadow-[0_0_16px_rgba(16,185,129,0.25)]" aria-hidden="true"><BarChart3 size={16} /></div>
+          <div className="absolute left-1 top-12 flex h-9 w-9 items-center justify-center rounded-full border border-sky-500/40 bg-sky-500/15 text-sky-300 shadow-[0_0_16px_rgba(56,189,248,0.25)]" aria-hidden="true"><Target size={16} /></div>
+          <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-fuchsia-500/35 bg-fuchsia-500/10 text-fuchsia-300 shadow-[0_0_34px_rgba(217,70,239,0.28)]"><TrendingUp size={34} /></div>
+        </div>
+
+        <h2 className="text-3xl font-black text-white sm:text-4xl">Welcome to <span className="bg-gradient-to-r from-fuchsia-300 to-fuchsia-500 bg-clip-text text-transparent">{BRAND_NAME}</span>!</h2>
+        <p className="mt-4 max-w-md text-base font-semibold leading-relaxed text-zinc-400">Your trading journey starts here. Log your first trade to see your performance analytics, track your progress, and unlock powerful insights.</p>
+
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Button onClick={onAddTrade} className="bg-fuchsia-500 px-6 py-3 font-black text-white shadow-[0_0_24px_rgba(217,70,239,0.28)]"><Plus size={18} /> Log Your First Trade</Button>
+          <Button onClick={onOpenJournal} className="border border-white/15 bg-black px-6 py-3 font-black text-white hover:bg-white/5">Explore Journal</Button>
+        </div>
+
+        <div className="mt-12 grid w-full gap-8 sm:grid-cols-3">
+          {features.map((feature) => (
+            <div key={feature.title} className="flex flex-col items-center text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300">{feature.icon}</div>
+              <h3 className="mt-4 text-base font-black text-white">{feature.title}</h3>
+              <p className="mt-1 max-w-[180px] text-sm font-semibold text-zinc-500">{feature.detail}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades, onAdd, onView, onStartDay, routine, selectedCalendarDate, onSelectCalendarDate, onViewAllTrades, onOpenJournal, onOpenMistakeDetector, onOpenAccount, profileName = "User", economicCalendar, onRefreshEconomicCalendar, isLoadingTrades = false }) {
   const [performanceMode, setPerformanceMode] = useState("EquityCurve");
   const quote = quotes[new Date().getDate() % quotes.length];
   const checkedCount = routineItems.filter((item) => routine.checked?.[item.id]).length;
   const routinePercent = Math.round((checkedCount / routineItems.length) * 100);
+  const showEmptyState = !isLoadingTrades && (account?.isPlaceholder || trades.length === 0);
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
@@ -8827,17 +8862,10 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
         </div>
       </div>
 
-      {!isLoadingTrades && (account?.isPlaceholder || trades.length === 0) && (
-        <OnboardingChecklist
-          trades={trades}
-          account={account}
-          onOpenJournal={onOpenJournal}
-          onOpenAccount={onOpenAccount}
-          onViewAllTrades={onViewAllTrades}
-          onOpenMistakeDetector={onOpenMistakeDetector}
-        />
-      )}
-
+      {showEmptyState ? (
+        <DashboardEmptyState onAddTrade={onAdd} onOpenJournal={onOpenJournal} />
+      ) : (
+        <>
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <DashCard title="TOTAL P&L" value={<RotatingPnlValue pnl={stats.totalPnl} balance={accountBalance.startingBalance} />} badge={stats.totalPnl >= 0 ? "↗ Positive P&L" : "↘ Negative P&L"} tone={stats.totalPnl >= 0 ? "emerald" : "amber"} icon="$" isLoading={isLoadingTrades} />
         <DashCard title="WIN RATE" value={`${stats.winRate.toFixed(1)}%`} badge={`↗ ${stats.wins}W / ${stats.losses}L${stats.breakEvens ? ` / ${stats.breakEvens}BE` : ""}`} tone="fuchsia" icon="🏆" isLoading={isLoadingTrades} />
@@ -8928,6 +8956,8 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
       </div>
 
       <TodaysEventsPanel economicCalendar={economicCalendar} onRefresh={onRefreshEconomicCalendar} />
+        </>
+      )}
     </motion.div>
   );
 }
@@ -14628,8 +14658,8 @@ function getSelectOptionStyle(label) {
   const key = String(label || "").toLowerCase();
   const base = { icon: "", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(217,70,239,0.35)]", normal: "text-zinc-200 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" };
   const styles = {
-    buy: { icon: "↗", active: "bg-emerald-500 text-black shadow-[0_0_14px_rgba(16,185,129,0.35)]", normal: "text-emerald-300 hover:bg-emerald-500/15 hover:text-emerald-200" },
-    sell: { icon: "↘", active: "bg-red-500 text-black shadow-[0_0_14px_rgba(239,68,68,0.35)]", normal: "text-red-300 hover:bg-red-500/15 hover:text-red-200" },
+    buy: { icon: "", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(217,70,239,0.35)]", normal: "text-zinc-200 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" },
+    sell: { icon: "", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(217,70,239,0.35)]", normal: "text-zinc-200 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" },
     win: { icon: "●", active: "bg-emerald-500 text-black shadow-[0_0_14px_rgba(16,185,129,0.35)]", normal: "text-emerald-300 hover:bg-emerald-500/15 hover:text-emerald-200" },
     loss: { icon: "●", active: "bg-red-500 text-black shadow-[0_0_14px_rgba(239,68,68,0.35)]", normal: "text-red-300 hover:bg-red-500/15 hover:text-red-200" },
     "break even": { icon: "—", active: "bg-amber-500 text-black shadow-[0_0_14px_rgba(245,158,11,0.35)]", normal: "text-amber-300 hover:bg-amber-500/15 hover:text-amber-200" },
