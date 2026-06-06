@@ -6919,6 +6919,12 @@ export default function TradingJournalDashboard() {
     // sync names into CUSTOM_STRATEGIES_KEY so existing strategy dropdown stays in sync
     const names = next.map((s) => s.name);
     localStorage.setItem(CUSTOM_STRATEGIES_KEY, JSON.stringify(names));
+    // cloud sync (fire-and-forget)
+    if (authUser?.id) {
+      postSupabaseSync("saveStrategies", { strategies: next }).catch((err) =>
+        console.warn("Could not sync strategies to cloud:", err?.message)
+      );
+    }
   }
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isAccountSwitcherOpen, setIsAccountSwitcherOpen] = useState(false);
@@ -7122,6 +7128,13 @@ export default function TradingJournalDashboard() {
             const exists = current.some((item) => String(item.id) === String(normalized.id));
             return exists ? current.map((item) => String(item.id) === String(normalized.id) ? normalized : item) : [normalized, ...current];
           });
+        }
+        // Load strategies from cloud
+        if (result?.strategies && Array.isArray(result.strategies) && result.strategies.length > 0) {
+          setStrategiesObjects(result.strategies);
+          localStorage.setItem(STRATEGIES_OBJ_KEY, JSON.stringify(result.strategies));
+          const names = result.strategies.map((s) => s.name);
+          localStorage.setItem(CUSTOM_STRATEGIES_KEY, JSON.stringify(names));
         }
 
         if (rows.length) {

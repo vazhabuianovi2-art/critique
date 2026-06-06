@@ -70,18 +70,23 @@ export default async function handler(request, response) {
     };
 
     if (action === "loadAll") {
-      // Fetch trades + account in a single round-trip to avoid two cold starts
-      const [tradesRes, accountRes] = await Promise.all([
+      // Fetch trades + profile in a single round-trip to avoid two cold starts
+      const [tradesRes, profileRes] = await Promise.all([
         fetch(`${supabaseUrl}/rest/v1/trades?user_id=eq.${userId}&select=id,created_at,trade_data&order=created_at.desc`, { headers }),
-        fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=account_data&limit=1`, { headers }),
+        fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=account_data,strategies_data&limit=1`, { headers }),
       ]);
-      const [tradesData, accountData] = await Promise.all([
+      const [tradesData, profileData] = await Promise.all([
         tradesRes.json().catch(() => null),
-        accountRes.json().catch(() => null),
+        profileRes.json().catch(() => null),
       ]);
       if (!tradesRes.ok) return json(response, tradesRes.status, { error: tradesData?.message || "Could not load trades." });
-      const accountRow = Array.isArray(accountData) ? accountData[0] : null;
-      return json(response, 200, { ok: true, rows: Array.isArray(tradesData) ? tradesData : [], account: accountRow?.account_data || null });
+      const profileRow = Array.isArray(profileData) ? profileData[0] : null;
+      return json(response, 200, {
+        ok: true,
+        rows: Array.isArray(tradesData) ? tradesData : [],
+        account: profileRow?.account_data || null,
+        strategies: profileRow?.strategies_data || null,
+      });
     }
 
     if (action === "listTrades") {
@@ -154,6 +159,24 @@ export default async function handler(request, response) {
       if (!upstream.ok) return json(response, upstream.status, { error: result?.message || "Could not save account profile." });
       const row = Array.isArray(result) ? result[0] : result;
       return json(response, 200, { account: row?.account_data || account });
+    }
+
+    if (action === "saveStrategies") {
+      const strategies = Array.isArray(body.strategies) ? body.strategies : [];
+      const upstream = await fetch(`${supabaseUrl}/rest/v1/profiles?on_conflict=id&select=id`, {
+        method: "POST",
+        headers: { ...headers, Prefer: "resolution=merge-duplicates,return=representation" },
+        body: JSON.stringify({
+          id: userId,
+          strategies_data: strategies,
+          updated_at: new Date().toISOString(),
+        }),
+      });
+      if (!upstream.ok) {
+        const result = await upstream.json().catch(() => null);
+        return json(response, upstream.status, { error: result?.message || "Could not save strategies." });
+      }
+      return json(response, 200, { ok: true, strategies });
     }
 
     if (action === "replaceTrades") {

@@ -6,12 +6,17 @@ create extension if not exists "pgcrypto";
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   account_data jsonb default null,
+  strategies_data jsonb default null,
   updated_at timestamptz not null default now()
 );
 
 alter table public.profiles
   alter column account_data drop not null,
   alter column account_data drop default;
+
+-- Add strategies_data column if it doesn't exist yet (idempotent migration)
+alter table public.profiles
+  add column if not exists strategies_data jsonb default null;
 
 update public.profiles
   set account_data = null
