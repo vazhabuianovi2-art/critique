@@ -8454,20 +8454,19 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
   }, [trades, sortBy, sortDirection]);
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-      <TopCrumb page="Journal" />
-      <div className="journal-hero flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-6 shadow-[0_18px_45px_rgba(178,74,242,0.10)]">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
-          <div className="journal-hero-icon rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 p-3 text-fuchsia-300"><BookOpen /></div>
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300"><BookOpen size={20} /></div>
           <div>
-            <h1 className="text-3xl font-black">Trading Journal</h1>
-            <p className="text-zinc-500 text-sm mt-0.5">{account?.name || "Account"} • Track and analyze your trades efficiently</p>
+            <h1 className="text-2xl font-bold leading-tight">Trading Journal</h1>
+            <p className="mt-0.5 text-sm text-zinc-500">{account?.name || "Account"} • Track and analyze your trades efficiently</p>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button onClick={onStrategies} variant="outline" className="journal-action-btn border-white/15 bg-black text-zinc-300 hover:text-white"><ListChecks size={16} /> Strategies</Button>
-          <Button onClick={onImport} variant="outline" className="journal-action-btn border-white/15 bg-black text-zinc-300 hover:text-white"><Upload size={16} /> Import</Button>
-          <Button onClick={onExport} variant="outline" className="journal-action-btn border-white/15 bg-black text-zinc-300 hover:text-white"><Download size={16} /> CSV</Button>
-          <Button onClick={onAdd} className="journal-add-btn bg-fuchsia-500 text-black font-bold"><Plus size={16} /> Add Trade</Button>
+          <Button onClick={onStrategies} variant="outline" className="journal-action-btn border-white/15 bg-transparent text-zinc-300 hover:text-white"><ListChecks size={15} /> Strategies</Button>
+          <Button onClick={onImport} variant="outline" className="journal-action-btn border-white/15 bg-transparent text-zinc-300 hover:text-white"><Upload size={15} /> Import</Button>
+          <Button onClick={onExport} variant="outline" className="journal-action-btn border-white/15 bg-transparent text-zinc-300 hover:text-white"><Download size={15} /> CSV</Button>
+          <Button onClick={onAdd} className="journal-add-btn bg-fuchsia-500 font-bold text-black"><Plus size={15} /> Add Trade</Button>
         </div>
       </div>
 
@@ -8506,14 +8505,17 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
         </div>
       ) : (
         <>
-          <div className="journal-search-panel mt-6 rounded-xl border border-white/10 bg-black/30 p-4">
-            <div className="flex flex-col gap-3 lg:flex-row">
-              <div className="relative flex flex-1 items-center gap-3 rounded-xl border border-white/10 bg-black px-4 py-3 text-zinc-400 transition focus-within:border-fuchsia-500/50">
-                <Search size={16} className="shrink-0 text-zinc-500" />
-                <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search trades, symbols, strategies..." className="border-0 bg-transparent text-zinc-200 placeholder:text-zinc-600 focus-visible:ring-0" />
-              </div>
-              <Button onClick={() => setShowFilters(!showFilters)} variant="outline" className={showFilters ? "border-fuchsia-500/50 bg-fuchsia-500/15 font-bold text-fuchsia-300" : "border-white/15 bg-black font-bold text-zinc-300 hover:text-white"}><Filter size={15} /> Filters {activeFilters > 0 && <span className="ml-1 rounded-full bg-fuchsia-500 px-1.5 py-0.5 text-[10px] font-black text-black">{activeFilters}</span>} <ChevronDown size={14} className={showFilters ? "rotate-180 transition-transform" : "transition-transform"} /></Button>
-            </div>
+          <div className="journal-search-panel mt-6 flex items-center gap-0 rounded-xl border border-white/10 bg-[#0c0c0c] px-4">
+            <Search size={16} className="shrink-0 text-zinc-500" />
+            <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search trades, symbols, strategies..." className="flex-1 border-0 bg-transparent py-3 text-zinc-200 placeholder:text-zinc-600 focus-visible:ring-0" />
+            <div className="h-5 w-px bg-white/10 mx-3" />
+            <button onClick={() => setShowFilters(!showFilters)} className={`flex shrink-0 items-center gap-1.5 py-3 text-sm font-semibold transition ${showFilters ? "text-fuchsia-300" : "text-zinc-400 hover:text-zinc-200"}`}>
+              <Filter size={14} /> Filters
+              {activeFilters > 0 && <span className="rounded-full bg-fuchsia-500 px-1.5 py-0.5 text-[10px] font-black text-black">{activeFilters}</span>}
+              <ChevronDown size={13} className={showFilters ? "rotate-180 transition-transform" : "transition-transform"} />
+            </button>
+          </div>
+          <div>
             {showFilters && (
               <div className="mt-4 rounded-xl border border-white/10 bg-black p-5">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
