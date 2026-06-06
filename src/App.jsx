@@ -1609,25 +1609,34 @@ const THEME_STYLE_CSS = `
   }
 
   /* Trade Type: green Buy / red Sell with a colored dot (Sydview style) */
+  .custom-select-option-buy,
+  .custom-select-selected.custom-select-option-buy,
+  .custom-select-option-sell,
+  .custom-select-selected.custom-select-option-sell {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
   .custom-select-option-buy span,
   .custom-select-selected.custom-select-option-buy span,
-  .custom-select-active.custom-select-option-buy span,
-  .light-theme .custom-select-option-buy span { color: #34d399 !important; }
+  .custom-select-active.custom-select-option-buy span { color: #34d399 !important; }
   .custom-select-option-sell span,
   .custom-select-selected.custom-select-option-sell span,
-  .custom-select-active.custom-select-option-sell span,
-  .light-theme .custom-select-option-sell span { color: #f87171 !important; }
+  .custom-select-active.custom-select-option-sell span { color: #f87171 !important; }
   .custom-select-option-buy::before,
   .custom-select-option-sell::before {
     content: "";
-    display: inline-block;
+    display: block;
+    flex-shrink: 0;
     width: 0.55rem;
     height: 0.55rem;
     border-radius: 9999px;
-    flex-shrink: 0;
   }
-  .custom-select-option-buy::before { background: #34d399; box-shadow: 0 0 8px rgba(52,211,153,0.6); }
-  .custom-select-option-sell::before { background: #f87171; box-shadow: 0 0 8px rgba(248,113,113,0.6); }
+  .custom-select-option-buy::before { background: #34d399; box-shadow: 0 0 6px rgba(52,211,153,0.55); }
+  .custom-select-option-sell::before { background: #f87171; box-shadow: 0 0 6px rgba(248,113,113,0.55); }
 
   .custom-select-option:not(.custom-select-active):hover,
   .custom-select-option:not(.custom-select-active):hover span {
@@ -8186,24 +8195,11 @@ Skipped duplicates: ${duplicateCount}
       <button
         type="button"
         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        className="theme-toggle-button fixed right-[4.5rem] top-4 z-[85] flex h-11 w-11 items-center justify-center rounded-2xl border border-fuchsia-500/35 text-fuchsia-200 transition duration-200 hover:bg-fuchsia-500/15 hover:text-white lg:right-[5.75rem] lg:top-6 lg:h-12 lg:w-12"
+        className="theme-toggle-button fixed right-4 top-4 z-[85] flex h-11 w-11 items-center justify-center rounded-2xl border border-fuchsia-500/35 text-fuchsia-200 transition duration-200 hover:bg-fuchsia-500/15 hover:text-white lg:right-6 lg:top-6 lg:h-12 lg:w-12"
         title={theme === "dark" ? "Switch to white mode" : "Switch to dark mode"}
         aria-label={theme === "dark" ? "Switch to white mode" : "Switch to dark mode"}
       >
         {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-      </button>
-      <button
-        type="button"
-        onClick={() => {
-          toggleAppFullscreen().catch((error) => {
-            setDataMessage(error?.message || "Fullscreen is not available in this browser.");
-          });
-        }}
-        className="fullscreen-toggle-button fixed right-4 top-4 z-[85] flex h-11 w-11 items-center justify-center rounded-2xl border border-fuchsia-500/35 text-fuchsia-200 transition duration-200 lg:right-6 lg:top-6 lg:h-12 lg:w-12"
-        title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-        aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-      >
-        {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
       </button>
       <main className="app-main min-h-screen overflow-x-hidden pb-24 p-4 sm:p-6 lg:p-8">
         <div className="w-full max-w-none">
@@ -10115,7 +10111,7 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
   }
 
   return (
-    <div className="trade-modal-shell fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/75 px-3 py-8 backdrop-blur-sm sm:px-6">
+    <div className="trade-modal-shell fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/80 px-3 py-8 backdrop-blur-md sm:px-6">
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -10181,10 +10177,10 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
               <FieldError text={shownErrors.session} />
             </Field>
           </div>
-          {riskWarnings.length > 0 && (
+          {riskWarnings.some((w) => w.tone !== "emerald") && (
             <div className="mt-5 space-y-2">
-              {riskWarnings.map((warning) => (
-                <div key={warning.title} className={warning.tone === "red" ? "rounded-xl border border-red-500/35 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-300" : warning.tone === "amber" ? "rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-sm font-bold text-amber-300" : "rounded-xl border border-emerald-500/35 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-300"}>
+              {riskWarnings.filter((w) => w.tone !== "emerald").map((warning) => (
+                <div key={warning.title} className={warning.tone === "red" ? "rounded-xl border border-red-500/35 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-300" : "rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-sm font-bold text-amber-300"}>
                   <span className="font-black">{warning.title}:</span> {warning.text}
                 </div>
               ))}
@@ -10192,7 +10188,7 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
           )}
         </Section>
 
-        <div className="trade-context-modern mt-6 overflow-visible rounded-[1.6rem] border border-fuchsia-500/30 bg-gradient-to-br from-[#09030d] via-black to-[#050505] p-6 shadow-[0_0_30px_rgba(178,74,242,0.10)]">
+        <div className="trade-context-modern mt-6 overflow-visible rounded-xl border border-white/10 bg-[#0a0a0a] p-6">
           <div className="mb-6 flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-fuchsia-500/35 bg-fuchsia-500/12 text-fuchsia-300 shadow-[0_0_16px_rgba(178,74,242,0.18)]"><Target size={18} /></span>
             <h3 className="text-xl font-black text-white">Strategy &amp; Trade Context</h3>
@@ -14738,7 +14734,7 @@ function SectionTitle({ title, icon, gold }) { return <div className="flex items
 function TopPill({ label, value, green, red }) {
   return <div className={`calendar-top-pill rounded-xl border px-4 py-3 text-sm font-black ${green ? "calendar-top-pill-green border-emerald-500/40 bg-emerald-500/20 text-emerald-300" : red ? "calendar-top-pill-red border-red-500/40 bg-red-500/20 text-red-300" : "calendar-top-pill-neutral border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300"}`}><span className="calendar-top-pill-label mr-2 text-zinc-400">{label}</span>{value}</div>;
 }
-function Section({ title, icon, children }) { return <div className="mt-6 rounded-xl border border-fuchsia-500/45 bg-gradient-to-br from-zinc-950 via-black to-black p-6"><div className="pointer-events-none absolute" /><h3 className="mb-5 flex items-center gap-3 text-lg font-bold text-white"><span className="flex h-9 w-9 items-center justify-center rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300">{icon}</span>{title}</h3>{children}</div>; }
+function Section({ title, icon, children }) { return <div className="mt-6 rounded-xl border border-white/10 bg-[#0a0a0a] p-6"><h3 className="mb-5 flex items-center gap-3 text-lg font-bold text-white"><span className="flex h-9 w-9 items-center justify-center rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300">{icon}</span>{title}</h3>{children}</div>; }
 function Field({ label, children }) { return <label className="block text-sm font-semibold text-white"><span className="mb-2 block">{label}</span>{children}</label>; }
 function inputPurpleClass(extra = "") {
   return `border-white/15 bg-black text-white outline-none transition-all focus-visible:border-fuchsia-400 focus-visible:ring-2 focus-visible:ring-fuchsia-500/45 focus-visible:ring-offset-0 focus-visible:shadow-[0_0_16px_rgba(178,74,242,0.30)] ${extra}`;
