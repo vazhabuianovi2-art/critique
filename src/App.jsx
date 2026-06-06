@@ -71,6 +71,7 @@ const ACTIVE_ACCOUNT_KEY = "critique_video_style_active_account_v1";
 const ROUTINE_KEY = "critique_pre_trade_routine_v1";
 const THEME_KEY = "critique_theme_mode_v1";
 const ACTIVE_PAGE_KEY = "critique_active_page_v1";
+const SIDEBAR_COLLAPSED_KEY = "critique_sidebar_collapsed_v1";
 const RESTORE_CACHE_PREFIX = "critique_last_successful_restore_v1";
 const USER_TRADES_KEY_PREFIX = "critique_user_trades_v2";
 const USER_TRADES_BACKUP_KEY_PREFIX = "critique_user_trades_last_nonempty_v1";
@@ -656,6 +657,22 @@ const THEME_STYLE_CSS = `
       width: calc(100vw - 16rem) !important;
       margin-left: 16rem !important;
     }
+
+    .sidebar-collapsed .sidebar-label { display: none !important; }
+    .sidebar-collapsed aside.app-sidebar {
+      width: 5rem !important;
+      padding-left: 0.6rem !important;
+      padding-right: 0.6rem !important;
+    }
+    .sidebar-collapsed main.app-main {
+      width: calc(100vw - 5rem) !important;
+      margin-left: 5rem !important;
+    }
+    .sidebar-collapsed aside.app-sidebar .sidebar-header { flex-direction: column; gap: 0.6rem; }
+    .sidebar-collapsed aside.app-sidebar .sidebar-account-section { display: none !important; }
+    .sidebar-collapsed aside.app-sidebar .sidebar-nav button { justify-content: center; padding-left: 0; padding-right: 0; }
+    .sidebar-collapsed aside.app-sidebar .account-sidebar-card { justify-content: center; padding-left: 0; padding-right: 0; }
+    .sidebar-collapsed aside.app-sidebar .sidebar-bottom { left: 0.6rem; right: 0.6rem; }
   }
 
   @media (max-width: 1023px) {
@@ -6973,6 +6990,12 @@ export default function TradingJournalDashboard() {
   const [isAccountSwitcherOpen, setIsAccountSwitcherOpen] = useState(false);
   const [accountDeleteTarget, setAccountDeleteTarget] = useState(null);
   const [isSidebarUserMenuOpen, setIsSidebarUserMenuOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    try { return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1"; } catch { return false; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem(SIDEBAR_COLLAPSED_KEY, isSidebarCollapsed ? "1" : "0"); } catch {}
+  }, [isSidebarCollapsed]);
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
   const [isTradeSaving, setIsTradeSaving] = useState(false);
   const tradeSavingRef = useRef(false);
@@ -7987,10 +8010,10 @@ Skipped duplicates: ${duplicateCount}
   // Don't show subscription loading screen — render app directly
 
   return (
-    <div className={theme === "light" ? "light-theme min-h-screen overflow-x-hidden bg-black text-white" : "min-h-screen overflow-x-hidden bg-black text-white"}>
+    <div className={`${theme === "light" ? "light-theme " : ""}${isSidebarCollapsed ? "sidebar-collapsed " : ""}min-h-screen overflow-x-hidden bg-black text-white`}>
       <style>{THEME_STYLE_CSS}</style>
-      <aside className="fixed left-0 top-0 z-[70] hidden h-full w-64 border-r border-white/10 bg-black p-5 lg:block">
-        <div className="flex items-center justify-between">
+      <aside className="app-sidebar fixed left-0 top-0 z-[70] hidden h-full w-64 border-r border-white/10 bg-black p-5 lg:block">
+        <div className="sidebar-header flex items-center justify-between">
           <button
             type="button"
             onClick={() => {
@@ -8000,17 +8023,27 @@ Skipped duplicates: ${duplicateCount}
             className="flex items-center gap-3 rounded-xl text-left text-xl font-black transition hover:text-fuchsia-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/60"
             aria-label="Go to dashboard"
           >
-            <span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(217,70,239,0.2)]">{BRAND_MARK}</span><span className="tracking-tight">{BRAND_NAME}</span>
+            <span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(217,70,239,0.2)]">{BRAND_MARK}</span><span className="sidebar-label tracking-tight">{BRAND_NAME}</span>
           </button>
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 px-3 py-2 text-sm font-black text-fuchsia-300 transition hover:bg-fuchsia-500 hover:text-black"
-            title={theme === "dark" ? "Switch to white mode" : "Switch to dark mode"}
-          >
-            {theme === "dark" ? "☀" : "🌙"}
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="sidebar-label rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 px-3 py-2 text-sm font-black text-fuchsia-300 transition hover:bg-fuchsia-500 hover:text-black"
+              title={theme === "dark" ? "Switch to white mode" : "Switch to dark mode"}
+            >
+              {theme === "dark" ? "☀" : "🌙"}
+            </button>
+            <button
+              onClick={() => { setIsSidebarCollapsed((collapsed) => !collapsed); setIsSidebarUserMenuOpen(false); setIsAccountSwitcherOpen(false); }}
+              className="sidebar-collapse-toggle flex items-center justify-center rounded-xl border border-white/10 bg-white/5 p-2 text-zinc-300 transition hover:border-fuchsia-500/40 hover:bg-white/10 hover:text-fuchsia-200"
+              title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {isSidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+            </button>
+          </div>
         </div>
-        <div className="relative mt-10">
+        <div className="sidebar-account-section relative mt-10">
           <button onClick={() => accounts.length ? setIsAccountSwitcherOpen((open) => !open) : createNewAccount()} className="account-sidebar-card flex w-full items-center justify-between rounded-lg border border-white/10 bg-zinc-950 px-3 py-3 text-left hover:border-fuchsia-500/40">
             <div>
               <div className="text-sm font-bold">{accounts.length ? `🎯 ${account.name}` : "＋ Create account"}</div>
@@ -8064,14 +8097,14 @@ Skipped duplicates: ${duplicateCount}
             </motion.div>
           )}
         </div>
-        <div className="mt-6 space-y-2">
+        <div className="sidebar-nav mt-6 space-y-2">
           {navItems.map(([Icon, label]) => (
-            <button key={label} onClick={() => { setActive(shouldGateForBilling ? "Billing" : label); setTradeViewMode(null); }} className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-[1.035] hover:border hover:border-fuchsia-500/30 hover:shadow-[0_0_22px_rgba(217,70,239,0.18)]" : ""} ${active === label && !tradeViewMode ? "bg-fuchsia-500 text-black font-black" : "text-zinc-300 hover:bg-white/5"}`}>
-              <Icon size={18} /> {label}
+            <button key={label} title={label} onClick={() => { setActive(shouldGateForBilling ? "Billing" : label); setTradeViewMode(null); }} className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-[1.035] hover:border hover:border-fuchsia-500/30 hover:shadow-[0_0_22px_rgba(217,70,239,0.18)]" : ""} ${active === label && !tradeViewMode ? "bg-fuchsia-500 text-black font-black" : "text-zinc-300 hover:bg-white/5"}`}>
+              <Icon size={18} /> <span className="sidebar-label">{label}</span>
             </button>
           ))}
         </div>
-        <div className="absolute bottom-5 left-5 right-5">
+        <div className="sidebar-bottom absolute bottom-5 left-5 right-5">
           {isSidebarUserMenuOpen && (
             <motion.div
               initial={{ opacity: 0, y: 12, scale: 0.96 }}
@@ -8112,19 +8145,20 @@ Skipped duplicates: ${duplicateCount}
           )}
 
           <button
-            onClick={() => setIsSidebarUserMenuOpen((open) => !open)}
+            onClick={() => { if (isSidebarCollapsed) { setIsSidebarCollapsed(false); } else { setIsSidebarUserMenuOpen((open) => !open); } }}
+            title={isSidebarCollapsed ? profileName : undefined}
             className="account-sidebar-card flex w-full items-center justify-between rounded-lg border border-fuchsia-500/20 bg-fuchsia-950/40 p-3 text-left transition hover:border-fuchsia-400/50 hover:bg-fuchsia-950/55"
           >
             <div className="flex min-w-0 items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-fuchsia-500 text-sm font-black text-black">
                 {profilePhoto ? <img src={profilePhoto} alt="Profile" className="h-full w-full object-cover" /> : profileInitial}
               </div>
-              <div className="min-w-0">
+              <div className="sidebar-label min-w-0">
                 <div className="truncate text-sm font-black text-white">{profileName}</div>
                 {(() => { const b = getSubscriptionBadge(billingSubscription); return <div className={`text-xs font-semibold ${b.tone === "emerald" ? "text-emerald-400" : b.tone === "fuchsia" ? "text-fuchsia-400" : "text-zinc-400"}`}>{b.label}{b.detail ? ` · ${b.detail}` : ""}</div>; })()}
               </div>
             </div>
-            <span className={isSidebarUserMenuOpen ? "text-zinc-400 transition rotate-180" : "text-zinc-400 transition"}>⌄</span>
+            <span className={`sidebar-label ${isSidebarUserMenuOpen ? "text-zinc-400 transition rotate-180" : "text-zinc-400 transition"}`}>⌄</span>
           </button>
         </div>
       </aside>
@@ -8358,9 +8392,9 @@ function MobileBottomNav({ active, setActive, onAdd, setTradeViewMode, lockedToB
   );
 }
 
-function TopCrumb({ page }) {
+function TopCrumb({ page, className = "mb-8" }) {
   return (
-    <div className="mb-8 flex items-center gap-3 text-sm font-semibold">
+    <div className={`flex items-center gap-3 text-sm font-semibold ${className}`}>
       <button type="button" onClick={requestDashboardNavigation} className="flex items-center gap-3 rounded-lg transition hover:text-fuchsia-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/60" aria-label="Go to dashboard">
         <span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(217,70,239,0.2)]">{BRAND_MARK}</span>
         <span className="tracking-tight">{BRAND_NAME}</span>
@@ -8829,8 +8863,8 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
       <MobileHeader onAdd={onAdd} />
 
-      <div className="mb-8 flex items-center justify-between gap-4">
-        <TopCrumb page="Dashboard" />
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <TopCrumb page="Dashboard" className="" />
       </div>
 
       <div className="dashboard-hero rounded-2xl border border-fuchsia-500/35 bg-gradient-to-r from-fuchsia-950/35 via-black to-[#08040d] p-5 shadow-[0_0_38px_rgba(168,85,247,0.12)]">
