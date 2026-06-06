@@ -1624,7 +1624,7 @@ const THEME_STYLE_CSS = `
   }
 
   .custom-select-menu {
-    background: #030303 !important;
+    background: #0e0e0e !important;
     scrollbar-width: thin;
     scrollbar-color: rgba(178,74,242,.65) rgba(24,24,27,.95);
   }
@@ -1639,7 +1639,7 @@ const THEME_STYLE_CSS = `
   }
 
   .custom-select-menu::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #b24bf3, #10b981);
+    background: rgba(178,74,242,0.45);
     border-radius: 999px;
   }
 
@@ -1684,13 +1684,14 @@ const THEME_STYLE_CSS = `
   .custom-select-option:not(.custom-select-active):hover,
   .custom-select-option:not(.custom-select-active):hover span {
     color: #ffffff !important;
-    background: linear-gradient(90deg, rgba(178,74,242,.20), rgba(16,185,129,.10)) !important;
+    background: rgba(255,255,255,0.07) !important;
   }
 
   .custom-select-active,
   .custom-select-active span {
-    color: #f4f4f5 !important;
-    background: transparent !important;
+    color: #ffffff !important;
+    background: rgba(178,74,242,0.15) !important;
+    font-weight: 700 !important;
     box-shadow: none !important;
   }
 
