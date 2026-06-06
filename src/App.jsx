@@ -1483,113 +1483,7 @@ const THEME_STYLE_CSS = `
     color: #ffffff !important;
   }
 
-  .custom-select-option-asia,
-  .custom-select-option-asia span,
-  .light-theme .custom-select-option-asia,
-  .light-theme .custom-select-option-asia span {
-    color: #1d4ed8 !important;
-    font-weight: 900 !important;
-  }
-
-  .custom-select-option-london,
-  .custom-select-option-london span,
-  .light-theme .custom-select-option-london,
-  .light-theme .custom-select-option-london span {
-    color: #dc2626 !important;
-    font-weight: 900 !important;
-  }
-
-  .custom-select-option-ny-am,
-  .custom-select-option-ny-am span,
-  .light-theme .custom-select-option-ny-am,
-  .light-theme .custom-select-option-ny-am span {
-    color: #047857 !important;
-    font-weight: 900 !important;
-  }
-
-  .custom-select-option-lunch,
-  .custom-select-option-lunch span,
-  .light-theme .custom-select-option-lunch,
-  .light-theme .custom-select-option-lunch span {
-    color: #b45309 !important;
-    font-weight: 900 !important;
-  }
-
-  .custom-select-option-ny-pm,
-  .custom-select-option-ny-pm span,
-  .light-theme .custom-select-option-ny-pm,
-  .light-theme .custom-select-option-ny-pm span {
-    color: #8a0fd7 !important;
-    font-weight: 900 !important;
-  }
-
-  .custom-select-option-pre-market,
-  .custom-select-option-pre-market span,
-  .light-theme .custom-select-option-pre-market,
-  .light-theme .custom-select-option-pre-market span {
-    color: #0891b2 !important;
-    font-weight: 900 !important;
-  }
-
-  .light-theme .custom-select-option.bg-fuchsia-500,
-  .light-theme .custom-select-option.bg-fuchsia-500 span,
-  .light-theme .custom-select-option.bg-emerald-500,
-  .light-theme .custom-select-option.bg-emerald-500 span,
-  .light-theme .custom-select-option.bg-red-500,
-  .light-theme .custom-select-option.bg-red-500 span,
-  .light-theme .custom-select-option.bg-amber-500,
-  .light-theme .custom-select-option.bg-amber-500 span,
-  .light-theme .custom-select-option.bg-blue-500,
-  .light-theme .custom-select-option.bg-blue-500 span,
-  .light-theme .custom-select-option.bg-cyan-500,
-  .light-theme .custom-select-option.bg-cyan-500 span,
-  .light-theme .custom-select-option.bg-orange-500,
-  .light-theme .custom-select-option.bg-orange-500 span {
-    color: #ffffff !important;
-  }
-
-  .custom-select-option-none,
-  .custom-select-option-early-entry,
-  .custom-select-option-late-entry,
-  .custom-select-option-no-confirmation,
-  .custom-select-option-overtrading,
-  .custom-select-option-emotional-trade,
-  .custom-select-option-bad-risk-management,
-  .custom-select-option-moved-stop-loss {
-    color: #d4d4d8 !important;
-  }
-
-  .custom-select-option-none:hover,
-  .custom-select-option-early-entry:hover,
-  .custom-select-option-late-entry:hover,
-  .custom-select-option-no-confirmation:hover,
-  .custom-select-option-overtrading:hover,
-  .custom-select-option-emotional-trade:hover,
-  .custom-select-option-bad-risk-management:hover,
-  .custom-select-option-moved-stop-loss:hover {
-    background: rgba(178,74,242, 0.10) !important;
-    color: #720cb0 !important;
-  }
-
-  .custom-select-option-asia:hover { background: rgba(29, 78, 216, 0.12) !important; }
-  .custom-select-option-london:hover { background: rgba(220, 38, 38, 0.12) !important; }
-  .custom-select-option-ny-am:hover { background: rgba(4, 120, 87, 0.14) !important; }
-  .custom-select-option-lunch:hover { background: rgba(180, 83, 9, 0.12) !important; }
-  .custom-select-option-ny-pm:hover { background: rgba(138,15,215, 0.14) !important; }
-  .custom-select-option-pre-market:hover { background: rgba(8, 145, 178, 0.12) !important; }
-
-  .custom-select-selected.custom-select-option-asia,
-  .custom-select-selected.custom-select-option-asia span { color: #1d4ed8 !important; }
-  .custom-select-selected.custom-select-option-london,
-  .custom-select-selected.custom-select-option-london span { color: #dc2626 !important; }
-  .custom-select-selected.custom-select-option-ny-am,
-  .custom-select-selected.custom-select-option-ny-am span { color: #047857 !important; }
-  .custom-select-selected.custom-select-option-lunch,
-  .custom-select-selected.custom-select-option-lunch span { color: #b45309 !important; }
-  .custom-select-selected.custom-select-option-ny-pm,
-  .custom-select-selected.custom-select-option-ny-pm span { color: #8a0fd7 !important; }
-  .custom-select-selected.custom-select-option-pre-market,
-  .custom-select-selected.custom-select-option-pre-market span { color: #0891b2 !important; }
+  /* All per-option color overrides removed — plain text for all dropdown options */
 
   .custom-select-active,
   .custom-select-active span {
@@ -3004,61 +2898,7 @@ const THEME_STYLE_CSS = `
     background: #faf5ff !important;
   }
 
-  .session-neon {
-    border: 1px solid transparent !important;
-    background: rgba(0,0,0,.18) !important;
-    letter-spacing: .015em !important;
-    text-shadow: 0 0 10px currentColor !important;
-  }
-
-  .session-neon-asia,
-  .custom-select-selected.custom-select-option-asia,
-  .custom-select-selected.custom-select-option-asia span {
-    color: #60a5fa !important;
-  }
-
-  .session-neon-london,
-  .custom-select-selected.custom-select-option-london,
-  .custom-select-selected.custom-select-option-london span {
-    color: #fb7185 !important;
-  }
-
-  .session-neon-nyam,
-  .custom-select-selected.custom-select-option-ny-am,
-  .custom-select-selected.custom-select-option-ny-am span {
-    color: #34d399 !important;
-  }
-
-  .session-neon-lunch,
-  .custom-select-selected.custom-select-option-lunch,
-  .custom-select-selected.custom-select-option-lunch span {
-    color: #fbbf24 !important;
-  }
-
-  .session-neon-nypm,
-  .custom-select-selected.custom-select-option-ny-pm,
-  .custom-select-selected.custom-select-option-ny-pm span {
-    color: #f472b6 !important;
-  }
-
-  .session-neon-premarket,
-  .custom-select-selected.custom-select-option-pre-market,
-  .custom-select-selected.custom-select-option-pre-market span {
-    color: #22d3ee !important;
-  }
-
-  .session-neon-asia:hover,
-  .session-active-asia { border-color: rgba(96,165,250,.55) !important; background: rgba(37,99,235,.16) !important; box-shadow: inset 0 0 18px rgba(59,130,246,.12), 0 0 16px rgba(59,130,246,.18) !important; }
-  .session-neon-london:hover,
-  .session-active-london { border-color: rgba(251,113,133,.55) !important; background: rgba(239,68,68,.16) !important; box-shadow: inset 0 0 18px rgba(239,68,68,.12), 0 0 16px rgba(239,68,68,.18) !important; }
-  .session-neon-nyam:hover,
-  .session-active-nyam { border-color: rgba(52,211,153,.55) !important; background: rgba(16,185,129,.16) !important; box-shadow: inset 0 0 18px rgba(16,185,129,.12), 0 0 16px rgba(16,185,129,.20) !important; }
-  .session-neon-lunch:hover,
-  .session-active-lunch { border-color: rgba(251,191,36,.55) !important; background: rgba(245,158,11,.16) !important; box-shadow: inset 0 0 18px rgba(245,158,11,.12), 0 0 16px rgba(245,158,11,.18) !important; }
-  .session-neon-nypm:hover,
-  .session-active-nypm { border-color: rgba(244,114,182,.60) !important; background: rgba(178,74,242,.16) !important; box-shadow: inset 0 0 18px rgba(178,74,242,.12), 0 0 16px rgba(178,74,242,.20) !important; }
-  .session-neon-premarket:hover,
-  .session-active-premarket { border-color: rgba(34,211,238,.55) !important; background: rgba(6,182,212,.16) !important; box-shadow: inset 0 0 18px rgba(6,182,212,.12), 0 0 16px rgba(6,182,212,.18) !important; }
+  /* session-neon styles removed — dropdowns use plain text */
 
 
   .pnl-switcher {
@@ -14843,33 +14683,11 @@ function MoneyInput({ value, onChange, placeholder = "0" }) {
     </div>
   );
 }
-function getSelectOptionStyle(label) {
-  const key = String(label || "").toLowerCase();
-  const base = { icon: "", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(178,74,242,0.35)]", normal: "text-zinc-200 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" };
-  const styles = {
-    buy: { icon: "●", active: "bg-emerald-500 text-black shadow-[0_0_14px_rgba(16,185,129,0.35)]", normal: "text-emerald-300 hover:bg-emerald-500/15 hover:text-emerald-200" },
-    sell: { icon: "●", active: "bg-red-500 text-black shadow-[0_0_14px_rgba(239,68,68,0.35)]", normal: "text-red-300 hover:bg-red-500/15 hover:text-red-200" },
-    win: { icon: "●", active: "bg-emerald-500 text-black shadow-[0_0_14px_rgba(16,185,129,0.35)]", normal: "text-emerald-300 hover:bg-emerald-500/15 hover:text-emerald-200" },
-    loss: { icon: "●", active: "bg-red-500 text-black shadow-[0_0_14px_rgba(239,68,68,0.35)]", normal: "text-red-300 hover:bg-red-500/15 hover:text-red-200" },
-    "break even": { icon: "—", active: "bg-amber-500 text-black shadow-[0_0_14px_rgba(245,158,11,0.35)]", normal: "text-amber-300 hover:bg-amber-500/15 hover:text-amber-200" },
-    a: { icon: "A", active: "bg-emerald-500 text-black shadow-[0_0_14px_rgba(16,185,129,0.35)]", normal: "text-emerald-300 hover:bg-emerald-500/15 hover:text-emerald-200" },
-    b: { icon: "B", active: "bg-blue-500 text-black shadow-[0_0_14px_rgba(59,130,246,0.35)]", normal: "text-blue-300 hover:bg-blue-500/15 hover:text-blue-200" },
-    c: { icon: "C", active: "bg-amber-500 text-black shadow-[0_0_14px_rgba(245,158,11,0.35)]", normal: "text-amber-300 hover:bg-amber-500/15 hover:text-amber-200" },
-    d: { icon: "D", active: "bg-red-500 text-black shadow-[0_0_14px_rgba(239,68,68,0.35)]", normal: "text-red-300 hover:bg-red-500/15 hover:text-red-200" },
-    calm: { icon: "◌", active: "bg-cyan-500 text-black shadow-[0_0_14px_rgba(6,182,212,0.35)]", normal: "text-cyan-300 hover:bg-cyan-500/15 hover:text-cyan-200" },
-    confident: { icon: "◆", active: "bg-emerald-500 text-black shadow-[0_0_14px_rgba(16,185,129,0.35)]", normal: "text-emerald-300 hover:bg-emerald-500/15 hover:text-emerald-200" },
-    fearful: { icon: "!", active: "bg-amber-500 text-black shadow-[0_0_14px_rgba(245,158,11,0.35)]", normal: "text-amber-300 hover:bg-amber-500/15 hover:text-amber-200" },
-    greedy: { icon: "$", active: "bg-orange-500 text-black shadow-[0_0_14px_rgba(249,115,22,0.35)]", normal: "text-orange-300 hover:bg-orange-500/15 hover:text-orange-200" },
-    asia: { icon: "", active: "session-active-asia text-blue-100", normal: "session-neon session-neon-asia" },
-    london: { icon: "", active: "session-active-london text-red-100", normal: "session-neon session-neon-london" },
-    "ny-am": { icon: "", active: "session-active-nyam text-emerald-100", normal: "session-neon session-neon-nyam" },
-    lunch: { icon: "", active: "session-active-lunch text-amber-100", normal: "session-neon session-neon-lunch" },
-    "ny-pm": { icon: "", active: "session-active-nypm text-fuchsia-100", normal: "session-neon session-neon-nypm" },
-    "pre-market": { icon: "", active: "session-active-premarket text-cyan-100", normal: "session-neon session-neon-premarket" },
-    "select trading session": { icon: "⌁", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(178,74,242,0.35)]", normal: "text-zinc-400 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" },
-    all: { icon: "✦", active: "bg-fuchsia-500 text-black shadow-[0_0_14px_rgba(178,74,242,0.35)]", normal: "text-fuchsia-200 hover:bg-fuchsia-500/15 hover:text-fuchsia-100" },
-  };
-  return styles[key] || base;
+function getSelectOptionStyle(_label) {
+  // All options use the same plain style — no per-option coloring.
+  // Buy/Sell dots are handled separately via CSS ::before pseudo-elements.
+  const plain = { icon: "", active: "", normal: "text-zinc-300" };
+  return plain;
 }
 
 function flattenSelectChildren(children) {
