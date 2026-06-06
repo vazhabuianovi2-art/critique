@@ -716,8 +716,51 @@ const THEME_STYLE_CSS = `
   .light-theme .bg-zinc-900,
   .light-theme .bg-[#050005],
   .light-theme .bg-[#070707],
-  .light-theme .bg-[#020202] {
+  .light-theme .bg-[#020202],
+  .light-theme .bg-\[\#0d0d0d\],
+  .light-theme .bg-\[\#0c0c0c\],
+  .light-theme .bg-\[\#0a0a0a\],
+  .light-theme .bg-\[\#0a0a12\],
+  .light-theme .bg-\[\#09030d\],
+  .light-theme .bg-\[\#050505\],
+  .light-theme .bg-\[\#050307\],
+  .light-theme .bg-\[\#08070b\] {
     background-color: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  /* Global light-mode border fixes for white/opacity borders */
+  .light-theme [class*="border-white/10"],
+  .light-theme [class*="border-white/15"],
+  .light-theme [class*="border-white/20"] {
+    border-color: rgba(148,163,184,0.30) !important;
+  }
+
+  /* Light-mode overrides for new journal + trade card elements */
+  .light-theme .journal-search-panel,
+  .light-theme .journal-sort-panel {
+    background-color: #ffffff !important;
+    border-color: rgba(148,163,184,0.35) !important;
+    color: #0f172a !important;
+  }
+
+  .light-theme .trade-card,
+  .light-theme .trade-card * {
+    background-color: #ffffff !important;
+    border-color: rgba(148,163,184,0.30) !important;
+    color: #0f172a !important;
+  }
+  .light-theme .trade-card .trade-no-screenshot {
+    background-color: #f8fafc !important;
+  }
+  .light-theme .trade-card .trade-screenshot-area {
+    background-color: #f1f5f9 !important;
+  }
+
+  .light-theme .journal-stats-grid .card,
+  .light-theme .journal-stats-grid [class*="border-white"] {
+    background-color: #ffffff !important;
+    border-color: rgba(148,163,184,0.30) !important;
     color: #0f172a !important;
   }
 
