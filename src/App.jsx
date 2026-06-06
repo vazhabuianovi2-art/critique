@@ -8270,6 +8270,7 @@ Skipped duplicates: ${duplicateCount}
             onBackup={() => exportCritiqueBackup({ trades: activeTrades, account, routine, theme })}
             onRestore={() => backupFileRef.current?.click()}
             onStrategies={openStrategyFilters}
+            account={account}
           />
         ) : active === "Calendar" ? (
           <CalendarPage
@@ -8430,7 +8431,7 @@ function TopCrumb({ page, className = "mb-8" }) {
   );
 }
 
-function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, filters, setFilters, showFilters, setShowFilters, onAdd, onEdit, onView, onRemove, onExport, onImport, onBackup, onRestore, onStrategies }) {
+function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, filters, setFilters, showFilters, setShowFilters, onAdd, onEdit, onView, onRemove, onExport, onImport, onBackup, onRestore, onStrategies, account }) {
   const [sortBy, setSortBy] = useState("Date");
   const [sortDirection, setSortDirection] = useState("desc");
   const [viewMode, setViewMode] = useState("grid");
@@ -8456,89 +8457,126 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
       <TopCrumb page="Journal" />
       <div className="journal-hero flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-6 shadow-[0_18px_45px_rgba(178,74,242,0.10)]">
         <div className="flex items-center gap-4">
-          <div className="journal-hero-icon rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 p-3 text-fuchsia-300 shadow-[0_0_18px_rgba(178,74,242,0.18)]"><BookOpen /></div>
-          <div><h1 className="text-3xl font-black">Trading Journal</h1><p className="text-zinc-400">v • Track and analyze your trades efficiently</p></div>
+          <div className="journal-hero-icon rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 p-3 text-fuchsia-300"><BookOpen /></div>
+          <div>
+            <h1 className="text-3xl font-black">Trading Journal</h1>
+            <p className="text-zinc-500 text-sm mt-0.5">{account?.name || "Account"} • Track and analyze your trades efficiently</p>
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button onClick={onStrategies} variant="outline" className="journal-action-btn border-white/15 bg-black text-white"><ListChecks size={16} /> Strategies</Button>
-          <Button onClick={onImport} variant="outline" className="journal-action-btn border-white/15 bg-black text-white"><Upload size={16} /> CSV Import</Button>
-          <Button onClick={onExport} variant="outline" className="journal-action-btn border-white/15 bg-black text-white"><Download size={16} /> CSV</Button>
-          <Button onClick={onBackup} variant="outline" className="journal-action-btn journal-backup-btn border-emerald-500/35 bg-emerald-500/10 text-emerald-300"><Download size={16} /> Backup</Button>
-          <Button onClick={onRestore} variant="outline" className="journal-action-btn border-amber-500/35 bg-amber-500/10 text-amber-300"><Upload size={16} /> Restore</Button>
-          <Button onClick={onAdd} className="journal-add-btn bg-fuchsia-500 text-white shadow-[0_0_18px_rgba(178,74,242,0.22)]"><Plus size={16} /> Add Trade</Button>
+          <Button onClick={onStrategies} variant="outline" className="journal-action-btn border-white/15 bg-black text-zinc-300 hover:text-white"><ListChecks size={16} /> Strategies</Button>
+          <Button onClick={onImport} variant="outline" className="journal-action-btn border-white/15 bg-black text-zinc-300 hover:text-white"><Upload size={16} /> Import</Button>
+          <Button onClick={onExport} variant="outline" className="journal-action-btn border-white/15 bg-black text-zinc-300 hover:text-white"><Download size={16} /> CSV</Button>
+          <Button onClick={onAdd} className="journal-add-btn bg-fuchsia-500 text-black font-bold"><Plus size={16} /> Add Trade</Button>
         </div>
       </div>
-      <div className="journal-search-panel mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-zinc-950 via-black to-[#100716] p-4 shadow-[0_16px_38px_rgba(178,74,242,0.08)]">
-        <div className="flex flex-col gap-4 lg:flex-row">
-          <div className="group relative flex flex-1 items-center gap-3 overflow-hidden rounded-xl border border-fuchsia-500/35 bg-gradient-to-br from-zinc-950 via-black to-black px-4 py-3 text-zinc-400 shadow-[0_0_22px_rgba(178,74,242,0.12)] transition-all duration-300 hover:border-fuchsia-400/80 hover:shadow-2xl hover:shadow-fuchsia-500/25 focus-within:border-fuchsia-400/90 focus-within:shadow-[0_0_28px_rgba(178,74,242,0.28)]"><div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent" /><div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300 shadow-[0_0_14px_rgba(178,74,242,0.18)]"><Search size={18} /></div><Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search trades, symbols, strategies..." className="relative z-10 border-0 bg-transparent text-white placeholder:text-zinc-500 focus-visible:ring-0" /></div>
-          <Button onClick={() => setShowFilters(!showFilters)} variant="outline" className={showFilters ? "border-fuchsia-500/60 bg-fuchsia-500 text-white font-black shadow-[0_0_18px_rgba(178,74,242,0.28)] hover:bg-fuchsia-400" : "border-fuchsia-500/35 bg-fuchsia-500/15 text-fuchsia-300 font-black hover:border-fuchsia-400/70 hover:bg-fuchsia-500/25 hover:text-white"}><Filter size={16} /> Filters <ChevronDown size={15} className={showFilters ? "rotate-180 transition-transform" : "transition-transform"} /></Button>
-        </div>
-        {showFilters && (
-          <div className="mt-6 rounded-xl border border-fuchsia-500/45 bg-gradient-to-br from-zinc-950 via-black to-black p-5 shadow-[0_0_28px_rgba(178,74,242,0.22)] ring-1 ring-fuchsia-500/15">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <Field label="Result"><Select value={filters.result} onChange={(e) => setFilters({ ...filters, result: e.target.value })}><option>All</option>{TRADE_RESULT_OPTIONS.map((result) => <option key={result}>{result}</option>)}</Select></Field>
-              <Field label="Type"><Select value={filters.direction} onChange={(e) => setFilters({ ...filters, direction: e.target.value })}><option>All</option><option>Buy</option><option>Sell</option></Select></Field>
-              <Field label="Strategy"><Select value={filters.strategy} onChange={(e) => setFilters({ ...filters, strategy: e.target.value })}>{strategies.map((strategy) => <option key={strategy}>{strategy}</option>)}</Select></Field>
-              <Field label="Session"><Select value={filters.session} onChange={(e) => setFilters({ ...filters, session: e.target.value })}>{sessions.map((session) => <option key={session}>{session}</option>)}</Select></Field>
-              <DateFilterField label="From Date" value={filters.dateFrom} onChange={(value) => setFilters({ ...filters, dateFrom: value })} />
-              <DateFilterField label="To Date" value={filters.dateTo} onChange={(value) => setFilters({ ...filters, dateTo: value })} />
-              <Field label="Min P&L ($)"><MoneyInput value={filters.minPnl} onChange={(e) => setFilters({ ...filters, minPnl: e.target.value })} /></Field>
-              <Field label="Max P&L ($)"><MoneyInput value={filters.maxPnl} onChange={(e) => setFilters({ ...filters, maxPnl: e.target.value })} /></Field>
-              <Field label="Tags"><Input value={filters.tag} onChange={(e) => setFilters({ ...filters, tag: e.target.value })} placeholder="Add tag filter" className="border-white/15 bg-black focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
-              <Field label="Emotions"><Select value={filters.emotion} onChange={(e) => setFilters({ ...filters, emotion: e.target.value })}><option>All</option><option>Calm</option><option>Confident</option><option>Fearful</option><option>Greedy</option></Select></Field>
-            </div>
-            <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
-              <Button variant="outline" onClick={resetJournalFilters} className="border-white/15 bg-black text-white">Clear All Filters</Button>
-              <span className="text-xs text-fuchsia-400">{activeFilters} active filters</span>
+
+      {isJournalEmpty ? (
+        <div className="mt-8 rounded-2xl border-2 border-dashed border-white/10 bg-black/20 px-6 py-20 text-center">
+          <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center">
+            <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300">
+              <BookOpen size={32} />
+              <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full border border-fuchsia-500/40 bg-fuchsia-500/20 text-fuchsia-300 text-xs"><Plus size={12} /></span>
             </div>
           </div>
-        )}
-      </div>
-      <div className="journal-stats-grid mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
-        <StatCard title="Total Trades" value={stats.trades} />
-        <StatCard title="Win Rate" value={`${stats.winRate.toFixed(1)}%`} green />
-        <StatCard title="Break Even" value={stats.breakEvens || 0} gold />
-        <StatCard title="Avg P&L" value={formatMoney(stats.avgPnl)} green />
-        <StatCard title="Avg R:R" value={`1:${stats.avgRR.toFixed(1)}`} gold />
-        <StatCard title="Total P&L" value={formatMoney(stats.totalPnl)} green />
-      </div>
-      <div className="journal-sort-panel mt-6 rounded-2xl border border-fuchsia-500/35 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-4 shadow-[0_0_22px_rgba(178,74,242,0.12)]">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 text-sm text-zinc-400">
-            <span>Sort by:</span>
-            <div className="w-36"><Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}><option>Date</option><option>P&L</option><option>Symbol</option><option>Result</option></Select></div>
-            <button onClick={() => setSortDirection(sortDirection === "asc" ? "desc" : "asc")} className="rounded-lg border border-fuchsia-500/35 bg-fuchsia-950/25 px-3 py-2 font-black text-fuchsia-300 shadow-[0_0_14px_rgba(178,74,242,0.12)] transition hover:border-fuchsia-400/80 hover:bg-fuchsia-500 hover:text-black hover:shadow-[0_0_20px_rgba(178,74,242,0.28)]">{sortDirection === "asc" ? "↑" : "↓"}</button>
+          <h2 className="text-2xl font-bold text-zinc-100">Your Trading Journal Awaits</h2>
+          <p className="mx-auto mt-3 max-w-md text-sm font-medium text-zinc-500 leading-relaxed">
+            No trades logged yet. Start building your trading history by recording your first trade. Track entries, exits, strategies, and insights all in one place.
+          </p>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Button onClick={onAdd} className="bg-fuchsia-500 px-6 py-3 font-bold text-black"><Plus size={16} /> Log Your First Trade</Button>
+            <Button onClick={onImport} variant="outline" className="border-white/15 bg-black px-6 py-3 font-bold text-zinc-300 hover:text-white">Import Trades</Button>
           </div>
-          <div className="flex items-center gap-3 text-sm text-zinc-400">
-            <span>View:</span>
-            <button onClick={() => setViewMode("grid")} className={viewMode === "grid" ? "rounded-lg border border-fuchsia-400 bg-fuchsia-500 px-3 py-2 font-black text-black shadow-[0_0_18px_rgba(178,74,242,0.35)]" : "rounded-lg border border-fuchsia-500/35 bg-fuchsia-950/20 px-3 py-2 text-fuchsia-300 transition hover:border-fuchsia-400/80 hover:bg-fuchsia-500/20"}>▦</button>
-            <button onClick={() => setViewMode("list")} className={viewMode === "list" ? "rounded-lg border border-fuchsia-400 bg-fuchsia-500 px-3 py-2 font-black text-black shadow-[0_0_18px_rgba(178,74,242,0.35)]" : "rounded-lg border border-fuchsia-500/35 bg-fuchsia-950/20 px-3 py-2 text-fuchsia-300 transition hover:border-fuchsia-400/80 hover:bg-fuchsia-500/20"}>☷</button>
+          <div className="mt-14 grid grid-cols-2 gap-6 sm:grid-cols-4">
+            {[
+              { icon: <Plus size={18} />, label: "Quick Entry", sub: "Log trades with ease" },
+              { icon: <BookOpen size={18} />, label: "Rich Notes", sub: "Add detailed insights" },
+              { icon: <Search size={18} />, label: "Smart Search", sub: "Find trades instantly" },
+              { icon: <Filter size={18} />, label: "Advanced Filters", sub: "Organize by strategy" },
+            ].map((feature) => (
+              <div key={feature.label} className="flex flex-col items-center gap-3 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/20 bg-fuchsia-500/10 text-fuchsia-300">{feature.icon}</div>
+                <div>
+                  <div className="text-sm font-bold text-zinc-200">{feature.label}</div>
+                  <div className="mt-0.5 text-xs text-zinc-500">{feature.sub}</div>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      </div>
-      {viewMode === "grid" ? (
-        <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {sortedTrades.map((trade) => <TradeCard key={trade.id} trade={trade} onView={() => onView(trade)} onEdit={() => onEdit(trade)} onRemove={() => onRemove(trade.id)} />)}
         </div>
       ) : (
-        <div className="mt-6 space-y-4">
-          {sortedTrades.map((trade) => <TradeListRow key={trade.id} trade={trade} onView={() => onView(trade)} onEdit={() => onEdit(trade)} onRemove={() => onRemove(trade.id)} />)}
-        </div>
-      )}
-      {sortedTrades.length === 0 && (
-        <div className="journal-empty mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-zinc-950 via-black to-[#12081b] p-8 text-center text-zinc-400 sm:p-10">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300">
-            {isJournalEmpty ? <BookOpen size={22} /> : <Search size={22} />}
+        <>
+          <div className="journal-search-panel mt-6 rounded-xl border border-white/10 bg-black/30 p-4">
+            <div className="flex flex-col gap-3 lg:flex-row">
+              <div className="relative flex flex-1 items-center gap-3 rounded-xl border border-white/10 bg-black px-4 py-3 text-zinc-400 transition focus-within:border-fuchsia-500/50">
+                <Search size={16} className="shrink-0 text-zinc-500" />
+                <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search trades, symbols, strategies..." className="border-0 bg-transparent text-zinc-200 placeholder:text-zinc-600 focus-visible:ring-0" />
+              </div>
+              <Button onClick={() => setShowFilters(!showFilters)} variant="outline" className={showFilters ? "border-fuchsia-500/50 bg-fuchsia-500/15 font-bold text-fuchsia-300" : "border-white/15 bg-black font-bold text-zinc-300 hover:text-white"}><Filter size={15} /> Filters {activeFilters > 0 && <span className="ml-1 rounded-full bg-fuchsia-500 px-1.5 py-0.5 text-[10px] font-black text-black">{activeFilters}</span>} <ChevronDown size={14} className={showFilters ? "rotate-180 transition-transform" : "transition-transform"} /></Button>
+            </div>
+            {showFilters && (
+              <div className="mt-4 rounded-xl border border-white/10 bg-black p-5">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  <Field label="Result"><Select value={filters.result} onChange={(e) => setFilters({ ...filters, result: e.target.value })}><option>All</option>{TRADE_RESULT_OPTIONS.map((result) => <option key={result}>{result}</option>)}</Select></Field>
+                  <Field label="Type"><Select value={filters.direction} onChange={(e) => setFilters({ ...filters, direction: e.target.value })}><option>All</option><option>Buy</option><option>Sell</option></Select></Field>
+                  <Field label="Strategy"><Select value={filters.strategy} onChange={(e) => setFilters({ ...filters, strategy: e.target.value })}>{strategies.map((strategy) => <option key={strategy}>{strategy}</option>)}</Select></Field>
+                  <Field label="Session"><Select value={filters.session} onChange={(e) => setFilters({ ...filters, session: e.target.value })}>{sessions.map((session) => <option key={session}>{session}</option>)}</Select></Field>
+                  <DateFilterField label="From Date" value={filters.dateFrom} onChange={(value) => setFilters({ ...filters, dateFrom: value })} />
+                  <DateFilterField label="To Date" value={filters.dateTo} onChange={(value) => setFilters({ ...filters, dateTo: value })} />
+                  <Field label="Min P&L ($)"><MoneyInput value={filters.minPnl} onChange={(e) => setFilters({ ...filters, minPnl: e.target.value })} /></Field>
+                  <Field label="Max P&L ($)"><MoneyInput value={filters.maxPnl} onChange={(e) => setFilters({ ...filters, maxPnl: e.target.value })} /></Field>
+                  <Field label="Tags"><Input value={filters.tag} onChange={(e) => setFilters({ ...filters, tag: e.target.value })} placeholder="Add tag filter" className="border-white/15 bg-black focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
+                  <Field label="Emotions"><Select value={filters.emotion} onChange={(e) => setFilters({ ...filters, emotion: e.target.value })}><option>All</option><option>Calm</option><option>Confident</option><option>Fearful</option><option>Greedy</option></Select></Field>
+                </div>
+                <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
+                  <Button variant="outline" onClick={resetJournalFilters} className="border-white/15 bg-black text-zinc-300">Clear All Filters</Button>
+                  <span className="text-xs text-zinc-500">{activeFilters} active filter{activeFilters !== 1 ? "s" : ""}</span>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="text-xl font-black text-white">{isJournalEmpty ? "Your journal is ready" : "No trades match this view"}</div>
-          <div className="mx-auto mt-2 max-w-xl text-sm font-semibold text-zinc-500">
-            {isJournalEmpty ? "Add your first trade and the dashboard, calendar, statistics, and mistake detector will start learning from it." : "Clear the current search and filters, or add a new trade if this was intentional."}
+          <div className="journal-stats-grid mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+            <StatCard title="Total Trades" value={stats.trades} />
+            <StatCard title="Win Rate" value={`${stats.winRate.toFixed(1)}%`} green />
+            <StatCard title="Break Even" value={stats.breakEvens || 0} gold />
+            <StatCard title="Avg P&L" value={formatMoney(stats.avgPnl)} green />
+            <StatCard title="Avg R:R" value={`1:${stats.avgRR.toFixed(1)}`} gold />
+            <StatCard title="Total P&L" value={formatMoney(stats.totalPnl)} green />
           </div>
-          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-            {!isJournalEmpty && <Button variant="outline" onClick={resetJournalFilters} className="border-white/15 bg-black text-white">Clear Filters</Button>}
-            <Button onClick={onAdd} className="bg-fuchsia-500 font-black text-white shadow-[0_0_18px_rgba(178,74,242,0.22)]"><Plus size={16} /> {isJournalEmpty ? "Add First Trade" : "Add Trade"}</Button>
+          <div className="journal-sort-panel mt-5 rounded-xl border border-white/10 bg-black/30 p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3 text-sm text-zinc-400">
+                <span>Sort by:</span>
+                <div className="w-36"><Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}><option>Date</option><option>P&L</option><option>Symbol</option><option>Result</option></Select></div>
+                <button onClick={() => setSortDirection(sortDirection === "asc" ? "desc" : "asc")} className="rounded-lg border border-white/15 bg-black px-3 py-2 font-black text-zinc-300 transition hover:border-fuchsia-500/50 hover:bg-fuchsia-500 hover:text-black">{sortDirection === "asc" ? "↑" : "↓"}</button>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <button onClick={() => setViewMode("grid")} className={viewMode === "grid" ? "rounded-lg border border-fuchsia-500/50 bg-fuchsia-500 px-3 py-2 font-black text-black" : "rounded-lg border border-white/15 bg-black px-3 py-2 text-zinc-400 hover:text-zinc-200"}>▦</button>
+                <button onClick={() => setViewMode("list")} className={viewMode === "list" ? "rounded-lg border border-fuchsia-500/50 bg-fuchsia-500 px-3 py-2 font-black text-black" : "rounded-lg border border-white/15 bg-black px-3 py-2 text-zinc-400 hover:text-zinc-200"}>☷</button>
+              </div>
+            </div>
           </div>
-        </div>
+          {viewMode === "grid" ? (
+            <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {sortedTrades.map((trade) => <TradeCard key={trade.id} trade={trade} onView={() => onView(trade)} onEdit={() => onEdit(trade)} onRemove={() => onRemove(trade.id)} />)}
+            </div>
+          ) : (
+            <div className="mt-5 space-y-4">
+              {sortedTrades.map((trade) => <TradeListRow key={trade.id} trade={trade} onView={() => onView(trade)} onEdit={() => onEdit(trade)} onRemove={() => onRemove(trade.id)} />)}
+            </div>
+          )}
+          {sortedTrades.length === 0 && (
+            <div className="mt-8 rounded-xl border border-white/10 bg-black/20 p-10 text-center">
+              <Search size={28} className="mx-auto mb-3 text-zinc-600" />
+              <div className="text-lg font-bold text-zinc-300">No trades match this view</div>
+              <p className="mt-1 text-sm text-zinc-500">Clear the current search and filters, or add a new trade.</p>
+              <div className="mt-5 flex justify-center gap-3">
+                <Button variant="outline" onClick={resetJournalFilters} className="border-white/15 bg-black text-zinc-300">Clear Filters</Button>
+                <Button onClick={onAdd} className="bg-fuchsia-500 font-bold text-black"><Plus size={16} /> Add Trade</Button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </motion.div>
   );
