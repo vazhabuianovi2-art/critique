@@ -1000,7 +1000,7 @@ const THEME_STYLE_CSS = `
     box-shadow: 0 0 20px rgba(178, 74, 242,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
   }
   .btn-primary-glow {
-    background: linear-gradient(135deg, #7c3aed, #a855f7, #b24af2);
+    background: linear-gradient(135deg, #7c3aed, #a855f7, #b24bf3);
     box-shadow: 0 4px 24px rgba(178, 74, 242,0.35), 0 0 0 1px rgba(178, 74, 242,0.3);
     transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
   }
@@ -1361,7 +1361,7 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .date-picker-day-selected {
-    background: linear-gradient(135deg, #a855f7, #b24af2) !important;
+    background: linear-gradient(135deg, #a855f7, #b24bf3) !important;
     color: #ffffff !important;
     border-color: rgba(178, 74, 242, 0.70) !important;
     box-shadow: 0 8px 20px rgba(178, 74, 242, 0.24) !important;
@@ -1596,7 +1596,7 @@ const THEME_STYLE_CSS = `
   }
 
   .custom-select-menu::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #b24af2, #10b981);
+    background: linear-gradient(180deg, #b24bf3, #10b981);
     border-radius: 999px;
   }
 
@@ -1710,11 +1710,11 @@ const THEME_STYLE_CSS = `
 
   .light-theme .date-picker-popover .text-fuchsia-300,
   .light-theme .date-picker-popover .text-fuchsia-200 {
-    color: #b24af2 !important;
+    color: #b24bf3 !important;
   }
 
   .light-theme .view-all-button {
-    background: #b24af2 !important;
+    background: #b24bf3 !important;
     color: #ffffff !important;
     border-color: rgba(178, 74, 242, 0.70) !important;
     box-shadow: 0 10px 24px rgba(178, 74, 242, 0.20) !important;
@@ -2299,7 +2299,7 @@ const THEME_STYLE_CSS = `
 
   .light-theme .statistics-tab-active {
     color: #ffffff !important;
-    background: linear-gradient(135deg, #b24af2, #a855f7) !important;
+    background: linear-gradient(135deg, #b24bf3, #a855f7) !important;
     box-shadow: 0 0 22px rgba(178, 74, 242,.22) !important;
   }
 
@@ -2906,7 +2906,7 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .segmented-choice-active {
-    background: linear-gradient(135deg, #b24af2 0%, #a855f7 100%) !important;
+    background: linear-gradient(135deg, #b24bf3 0%, #a855f7 100%) !important;
     border-color: rgba(158, 26, 239,.72) !important;
     color: #ffffff !important;
     box-shadow: 0 10px 26px rgba(178, 74, 242,.22), 0 0 0 3px rgba(178, 74, 242,.10) !important;
@@ -3454,7 +3454,7 @@ const THEME_STYLE_CSS = `
   .light-theme .journal-add-btn,
   .light-theme .dashboard-primary-btn,
   .light-theme button[class*="bg-fuchsia-500"] {
-    background: linear-gradient(135deg, #b24af2, #8b5cf6) !important;
+    background: linear-gradient(135deg, #b24bf3, #8b5cf6) !important;
     color: #ffffff !important;
     border-color: transparent !important;
     box-shadow: 0 14px 30px rgba(178, 74, 242,.24) !important;
@@ -3929,7 +3929,7 @@ const THEME_STYLE_CSS = `
 
   .light-theme .account-switcher-menu .bg-fuchsia-500,
   .light-theme .sidebar-user-menu .bg-fuchsia-500 {
-    background: linear-gradient(135deg, #b24af2, #8b5cf6) !important;
+    background: linear-gradient(135deg, #b24bf3, #8b5cf6) !important;
     color: #ffffff !important;
   }
 
@@ -4218,7 +4218,7 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .account-create-button .account-create-icon {
-    background: linear-gradient(135deg, #b24af2, #a855f7) !important;
+    background: linear-gradient(135deg, #b24bf3, #a855f7) !important;
     color: #ffffff !important;
     box-shadow: 0 10px 24px rgba(178, 74, 242,.22) !important;
   }
@@ -4230,7 +4230,7 @@ const THEME_STYLE_CSS = `
 
   .light-theme .segmented-choice-active,
   .light-theme .segmented-choice-active.font-black {
-    background: linear-gradient(135deg, #b24af2 0%, #a855f7 100%) !important;
+    background: linear-gradient(135deg, #b24bf3 0%, #a855f7 100%) !important;
     border-color: rgba(158, 26, 239,.72) !important;
     color: #ffffff !important;
     box-shadow: 0 10px 26px rgba(178, 74, 242,.22), 0 0 0 3px rgba(178, 74, 242,.10) !important;
@@ -5151,7 +5151,7 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .date-picker-popover .date-picker-day-selected {
-    background: linear-gradient(135deg, #9333ea 0%, #b24af2 100%) !important;
+    background: linear-gradient(135deg, #9333ea 0%, #b24bf3 100%) !important;
     color: #ffffff !important;
     border-color: rgba(147,51,234,.74) !important;
     box-shadow: 0 10px 24px rgba(147,51,234,.24) !important;
@@ -5201,7 +5201,7 @@ const THEME_STYLE_CSS = `
 
     .mobile-nav-fab {
       border: 1px solid rgba(255,255,255,.14) !important;
-      background: linear-gradient(135deg, #d6a0f8, #b24af2 48%, #7c3aed) !important;
+      background: linear-gradient(135deg, #d6a0f8, #b24bf3 48%, #7c3aed) !important;
       box-shadow: 0 16px 34px rgba(178, 74, 242,.34), 0 0 0 6px rgba(0,0,0,.65) !important;
     }
 
@@ -6938,7 +6938,7 @@ if (typeof window !== "undefined" && !window.__CRITIQUE_VIDEO_STYLE_TESTS_RAN__)
 export default function TradingJournalDashboard() {
   useEffect(() => {
     document.title = BRAND_NAME;
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="bg" x1="8" x2="58" y1="6" y2="60" gradientUnits="userSpaceOnUse"><stop stop-color="#050007"/><stop offset="0.58" stop-color="#16051f"/><stop offset="1" stop-color="#04150d"/></linearGradient><linearGradient id="bolt" x1="19" x2="46" y1="8" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="#d6a0f8"/><stop offset="0.42" stop-color="#b24af2"/><stop offset="1" stop-color="#22c55e"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#bg)"/><rect x="6" y="6" width="52" height="52" rx="13" fill="none" stroke="#b24af2" stroke-opacity=".45" stroke-width="2"/><path d="M38 6 14 38h15l-5 20 27-36H34L38 6Z" fill="url(#bolt)"/><path d="M34 14 22 35h10l-3 13 13-22h-9l1-12Z" fill="#050007" fill-opacity=".68"/></svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="bg" x1="8" x2="58" y1="6" y2="60" gradientUnits="userSpaceOnUse"><stop stop-color="#050007"/><stop offset="0.58" stop-color="#16051f"/><stop offset="1" stop-color="#04150d"/></linearGradient><linearGradient id="bolt" x1="19" x2="46" y1="8" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="#d6a0f8"/><stop offset="0.42" stop-color="#b24bf3"/><stop offset="1" stop-color="#22c55e"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#bg)"/><rect x="6" y="6" width="52" height="52" rx="13" fill="none" stroke="#b24bf3" stroke-opacity=".45" stroke-width="2"/><path d="M38 6 14 38h15l-5 20 27-36H34L38 6Z" fill="url(#bolt)"/><path d="M34 14 22 35h10l-3 13 13-22h-9l1-12Z" fill="#050007" fill-opacity=".68"/></svg>`;
     let link = document.querySelector("link[rel~='icon']");
     if (!link) {
       link = document.createElement("link");
@@ -9268,7 +9268,7 @@ function PerformanceOverviewChart({ mode, trades, curve, stats, isLoading = fals
   const headline = isWinRate ? `${stats.winRate.toFixed(1)}%` : isDaily ? formatMoney(latestValue) : formatMoney(stats.totalPnl);
   const subtitle = isWinRate ? "Current cumulative win rate" : isDaily ? "Daily profit / loss by trading day" : "Current cumulative equity curve";
   const accent = isWinRate ? "text-fuchsia-400" : isDaily ? "text-amber-400" : "text-emerald-400";
-  const stroke = isWinRate ? "#b24af2" : isDaily ? "#f59e0b" : "#22c55e";
+  const stroke = isWinRate ? "#b24bf3" : isDaily ? "#f59e0b" : "#22c55e";
   const border = isWinRate ? "border-fuchsia-500/30 bg-fuchsia-950/15" : isDaily ? "border-amber-500/30 bg-amber-950/15" : "border-emerald-500/30 bg-emerald-950/15";
 
   if (isLoading) {
@@ -9323,7 +9323,7 @@ function PerformanceOverviewChart({ mode, trades, curve, stats, isLoading = fals
                 return point.date || "";
               }}
             />
-            <Line type="monotone" dataKey="value" name={mode} stroke={stroke} strokeWidth={4} dot={{ r: 5, fill: stroke, stroke: "#ffffff", strokeWidth: 2 }} activeDot={{ r: 8, fill: "#b24af2", stroke: "#ffffff", strokeWidth: 3 }} />
+            <Line type="monotone" dataKey="value" name={mode} stroke={stroke} strokeWidth={4} dot={{ r: 5, fill: stroke, stroke: "#ffffff", strokeWidth: 2 }} activeDot={{ r: 8, fill: "#b24bf3", stroke: "#ffffff", strokeWidth: 3 }} />
           </LineChart>
         </SafeResponsiveContainer>
       </div>
@@ -14087,7 +14087,7 @@ function StatisticsPerformanceTimeline({ curve, stats }) {
             <XAxis dataKey="date" stroke="#94a3b8" tickLine={false} axisLine={{ stroke: "rgba(178, 74, 242,0.28)" }} />
             <YAxis stroke="#94a3b8" tickLine={false} axisLine={{ stroke: "rgba(178, 74, 242,0.28)" }} tickFormatter={(value) => `$${value}`} />
             <Tooltip contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }} formatter={(value) => [formatMoney(value), "Equity"]} />
-            <Line type="monotone" dataKey="pnl" stroke="#b24af2" strokeWidth={4} dot={{ r: 5, fill: "#22c55e", stroke: "#ffffff", strokeWidth: 2 }} activeDot={{ r: 8, fill: "#b24af2", stroke: "#ffffff", strokeWidth: 3 }} />
+            <Line type="monotone" dataKey="pnl" stroke="#b24bf3" strokeWidth={4} dot={{ r: 5, fill: "#22c55e", stroke: "#ffffff", strokeWidth: 2 }} activeDot={{ r: 8, fill: "#b24bf3", stroke: "#ffffff", strokeWidth: 3 }} />
             <Line type="monotone" dataKey="pnl" stroke="#22c55e" strokeWidth={2} dot={false} opacity={0.45} />
           </LineChart>
         </SafeResponsiveContainer>
@@ -14532,7 +14532,7 @@ function StatisticsRiskView({ stats, trades = [] }) {
                   contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }}
                   formatter={(value, name) => [formatMoney(value), name]}
                 />
-                <Bar dataKey="risk" fill="#b24af2" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="risk" fill="#b24bf3" radius={[8, 8, 0, 0]} />
                 <Bar dataKey="pnl" fill="#22c55e" radius={[8, 8, 0, 0]} />
               </BarChart>
             </SafeResponsiveContainer>
@@ -14568,7 +14568,7 @@ function StatisticsChartsView({ stats, curve, trades = [] }) {
     <section className="mt-10 grid grid-cols-1 gap-8 xl:grid-cols-2">
       <div className="statistics-chart-panel charts-pro-card rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-black via-[#020605] to-[#050b13] p-6">
         <div className="flex items-start justify-between"><SectionTitle title="Performance Timeline" icon={<TrendingUp size={18} />} /><span className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-xs font-black text-emerald-300">Equity</span></div>
-        <div className="mt-5 h-80 rounded-xl border border-white/10 bg-black/25 p-3"><SafeResponsiveContainer><LineChart data={curve} margin={{ top: 18, right: 20, left: 8, bottom: 6 }}><CartesianGrid strokeDasharray="4 6" stroke="rgba(16,185,129,.20)" vertical={false} /><XAxis dataKey="date" stroke="#64748b" tickLine={false} /><YAxis stroke="#64748b" tickLine={false} tickFormatter={(v) => `$${v}`} /><Tooltip contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }} formatter={(value) => [formatMoney(value), "Cumulative P&L"]} /><Line type="monotone" dataKey="pnl" stroke="#10b981" strokeWidth={4} dot={{ r: 5, fill: "#6366f1", stroke: "#ffffff", strokeWidth: 2 }} activeDot={{ r: 8, fill: "#b24af2", stroke: "#ffffff", strokeWidth: 3 }} /></LineChart></SafeResponsiveContainer></div>
+        <div className="mt-5 h-80 rounded-xl border border-white/10 bg-black/25 p-3"><SafeResponsiveContainer><LineChart data={curve} margin={{ top: 18, right: 20, left: 8, bottom: 6 }}><CartesianGrid strokeDasharray="4 6" stroke="rgba(16,185,129,.20)" vertical={false} /><XAxis dataKey="date" stroke="#64748b" tickLine={false} /><YAxis stroke="#64748b" tickLine={false} tickFormatter={(v) => `$${v}`} /><Tooltip contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }} formatter={(value) => [formatMoney(value), "Cumulative P&L"]} /><Line type="monotone" dataKey="pnl" stroke="#10b981" strokeWidth={4} dot={{ r: 5, fill: "#6366f1", stroke: "#ffffff", strokeWidth: 2 }} activeDot={{ r: 8, fill: "#b24bf3", stroke: "#ffffff", strokeWidth: 3 }} /></LineChart></SafeResponsiveContainer></div>
       </div>
 
       <div className="statistics-chart-panel charts-pro-card rounded-2xl border border-blue-500/20 bg-gradient-to-br from-black via-[#020605] to-[#050b13] p-6">
@@ -14613,7 +14613,7 @@ function StrategyBreakdownDonut({ data, total }) {
   const segments = data.map((item, index) => {
     const percent = (Number(item.value || 0) / safeTotal) * 100;
     const segment = `${percent} ${100 - percent}`;
-    const current = { ...item, percent, offset, color: index % 3 === 0 ? "#94a3b8" : index % 3 === 1 ? "#b24af2" : "#10b981", segment };
+    const current = { ...item, percent, offset, color: index % 3 === 0 ? "#94a3b8" : index % 3 === 1 ? "#b24bf3" : "#10b981", segment };
     offset -= percent;
     return current;
   });
