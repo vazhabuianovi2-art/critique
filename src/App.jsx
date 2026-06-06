@@ -8025,23 +8025,14 @@ Skipped duplicates: ${duplicateCount}
           >
             <span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(217,70,239,0.2)]">{BRAND_MARK}</span><span className="sidebar-label tracking-tight">{BRAND_NAME}</span>
           </button>
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="sidebar-label rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 px-3 py-2 text-sm font-black text-fuchsia-300 transition hover:bg-fuchsia-500 hover:text-black"
-              title={theme === "dark" ? "Switch to white mode" : "Switch to dark mode"}
-            >
-              {theme === "dark" ? "☀" : "🌙"}
-            </button>
-            <button
-              onClick={() => { setIsSidebarCollapsed((collapsed) => !collapsed); setIsSidebarUserMenuOpen(false); setIsAccountSwitcherOpen(false); }}
-              className="sidebar-collapse-toggle flex items-center justify-center rounded-xl border border-white/10 bg-white/5 p-2 text-zinc-300 transition hover:border-fuchsia-500/40 hover:bg-white/10 hover:text-fuchsia-200"
-              title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-              aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            >
-              {isSidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-            </button>
-          </div>
+          <button
+            onClick={() => { setIsSidebarCollapsed((collapsed) => !collapsed); setIsSidebarUserMenuOpen(false); setIsAccountSwitcherOpen(false); }}
+            className="sidebar-collapse-toggle flex items-center justify-center rounded-xl border border-white/10 bg-white/5 p-2 text-zinc-300 transition hover:border-fuchsia-500/40 hover:bg-white/10 hover:text-fuchsia-200"
+            title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {isSidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          </button>
         </div>
         <div className="sidebar-account-section relative mt-10">
           <button onClick={() => accounts.length ? setIsAccountSwitcherOpen((open) => !open) : createNewAccount()} className="account-sidebar-card flex w-full items-center justify-between rounded-lg border border-white/10 bg-zinc-950 px-3 py-3 text-left hover:border-fuchsia-500/40">
@@ -8162,6 +8153,15 @@ Skipped duplicates: ${duplicateCount}
           </button>
         </div>
       </aside>
+      <button
+        type="button"
+        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        className="theme-toggle-button fixed right-[4.5rem] top-4 z-[85] flex h-11 w-11 items-center justify-center rounded-2xl border border-fuchsia-500/35 text-fuchsia-200 transition duration-200 hover:bg-fuchsia-500/15 hover:text-white lg:right-[5.75rem] lg:top-6 lg:h-12 lg:w-12"
+        title={theme === "dark" ? "Switch to white mode" : "Switch to dark mode"}
+        aria-label={theme === "dark" ? "Switch to white mode" : "Switch to dark mode"}
+      >
+        {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+      </button>
       <button
         type="button"
         onClick={() => {
