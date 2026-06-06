@@ -1663,6 +1663,9 @@ const THEME_STYLE_CSS = `
     border-color: transparent !important;
     box-shadow: none !important;
   }
+  /* hide checkmark placeholder for buy/sell since they use dot ::before */
+  .custom-select-option-buy .w-4,
+  .custom-select-option-sell .w-4 { display: none !important; }
   .custom-select-option-buy span,
   .custom-select-selected.custom-select-option-buy span,
   .custom-select-active.custom-select-option-buy span { color: #34d399 !important; }
@@ -1690,9 +1693,10 @@ const THEME_STYLE_CSS = `
   .custom-select-active,
   .custom-select-active span {
     color: #ffffff !important;
-    background: rgba(178,74,242,0.15) !important;
+    background: transparent !important;
     font-weight: 700 !important;
     box-shadow: none !important;
+    border-color: transparent !important;
   }
 
   .date-picker-popover {
@@ -14907,11 +14911,18 @@ function Select({ value, onChange, children }) {
     function closeOtherSelects(event) {
       if (event.detail !== selectId.current) setOpen(false);
     }
+    function handleClickOutside(event) {
+      if (selectRef.current && !selectRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
     window.addEventListener("critique-select-open", closeOtherSelects);
     window.addEventListener("critique-dropdown-open", closeOtherSelects);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
       window.removeEventListener("critique-select-open", closeOtherSelects);
       window.removeEventListener("critique-dropdown-open", closeOtherSelects);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -14960,8 +14971,9 @@ function Select({ value, onChange, children }) {
                   event.preventDefault();
                   choose(option);
                 }}
-                className={`custom-select-option custom-select-option-${optionKey} flex min-h-9 w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-black leading-5 outline-none transition-all focus:outline-none focus-visible:outline-none ${active ? "custom-select-active" : style.normal}`}
+                className={`custom-select-option custom-select-option-${optionKey} flex min-h-9 w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm leading-5 outline-none transition-all focus:outline-none focus-visible:outline-none ${active ? "custom-select-active" : style.normal}`}
               >
+                <span className="w-4 shrink-0 text-fuchsia-400 text-xs">{active ? "✓" : ""}</span>
                 <span>{option.label}</span>
               </button>
             );
