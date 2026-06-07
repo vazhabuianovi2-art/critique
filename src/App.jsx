@@ -10474,7 +10474,7 @@ function TradingStrategiesModal({ strategies = [], onSave, onClose }) {
   return (
     <div className="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto bg-black/80 p-4 backdrop-blur-md sm:items-center">
       <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] shadow-2xl">
+        className="w-full max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] shadow-2xl">
         {/* Header */}
         <div className="flex items-start justify-between border-b border-white/8 p-6">
           <div className="flex items-center gap-3">
@@ -10486,7 +10486,7 @@ function TradingStrategiesModal({ strategies = [], onSave, onClose }) {
           </div>
           <button onClick={onClose} className="text-zinc-400 hover:text-white"><X size={20} /></button>
         </div>
-        <div className="flex" style={{ minHeight: "520px" }}>
+        <div className="flex" style={{ minHeight: "660px" }}>
           {/* Left panel */}
           <div className="w-72 shrink-0 border-r border-white/8 p-4">
             <button onClick={startNew} className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-black px-4 py-3 text-sm font-bold text-zinc-200 transition hover:border-fuchsia-500/40 hover:text-fuchsia-200">
@@ -10553,7 +10553,10 @@ function TradingStrategiesModal({ strategies = [], onSave, onClose }) {
                 </div>
                 <div className="flex items-center justify-between border-t border-white/8 pt-5">
                   {selected !== "new" && (
-                    <button type="button" onClick={() => deleteStrategy(selected)} className="text-sm text-red-400 hover:text-red-300">Delete Strategy</button>
+                    <button type="button" onClick={() => deleteStrategy(selected)}
+                      className="flex items-center gap-2 rounded-xl border border-red-500/40 bg-red-500/15 px-4 py-2.5 text-sm font-bold text-red-400 transition hover:bg-red-500 hover:text-white">
+                      <Trash2 size={14} /> Delete Strategy
+                    </button>
                   )}
                   <div className="ml-auto flex gap-3">
                     <button type="button" onClick={() => setSelected(null)} className="rounded-xl border border-white/15 bg-black px-5 py-2.5 text-sm font-bold text-zinc-300 hover:text-white">Cancel</button>
