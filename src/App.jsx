@@ -8453,6 +8453,7 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
   }, [trades, sortBy, sortDirection]);
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+      <TopCrumb page="Journal" />
       <div className="flex flex-col gap-5 pr-14 sm:flex-row sm:items-center sm:justify-between lg:pr-16">
         <div className="flex items-center gap-4">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300"><BookOpen size={20} /></div>
