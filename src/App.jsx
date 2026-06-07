@@ -10212,14 +10212,23 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
             <Field label="Result">
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: "Win", value: "Win", dot: "bg-emerald-400", active: "border-emerald-500/60 bg-emerald-500/15 text-emerald-200", idle: "text-emerald-300" },
-                  { label: "Loss", value: "Loss", dot: "bg-red-400", active: "border-red-500/60 bg-red-500/15 text-red-200", idle: "text-red-300" },
-                  { label: "Breakeven", value: "Break Even", dot: "bg-amber-400", active: "border-amber-500/60 bg-amber-500/15 text-amber-200", idle: "text-amber-300" },
-                  { label: "Partial", value: "Partial", dot: "bg-orange-400", active: "border-orange-500/60 bg-orange-500/15 text-orange-200", idle: "text-orange-300" },
+                  { label: "Win", value: "Win", dot: "bg-emerald-400" },
+                  { label: "Loss", value: "Loss", dot: "bg-red-400" },
+                  { label: "Breakeven", value: "Break Even", dot: "bg-amber-400" },
+                  { label: "Partial", value: "Partial", dot: "bg-orange-400" },
                 ].map((resultOption) => {
                   const selected = activeResult === resultOption.value;
                   return (
-                    <button key={resultOption.value} type="button" onClick={() => updateField("result", resultOption.value)} className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-black transition ${selected ? resultOption.active : `border-white/10 bg-black/40 ${resultOption.idle} hover:border-white/25`}`}>
+                    <button
+                      key={resultOption.value}
+                      type="button"
+                      onClick={() => updateField("result", form.result === resultOption.value ? "" : resultOption.value)}
+                      className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-black transition ${
+                        selected
+                          ? "border-fuchsia-500/60 bg-fuchsia-500/15 text-fuchsia-200 shadow-[0_0_14px_rgba(178,74,242,.15)]"
+                          : "border-white/10 bg-black/40 text-zinc-400 hover:border-white/25 hover:text-zinc-200"
+                      }`}
+                    >
                       <span className={`h-2.5 w-2.5 rounded-full ${resultOption.dot}`} /> {resultOption.label}
                     </button>
                   );
