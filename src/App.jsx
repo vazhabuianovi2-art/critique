@@ -12680,19 +12680,17 @@ function AccessSuspendedOverlay({ subscription, loadingPlan, onStartCheckout, on
         initial={{ opacity: 0, y: 20, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
-        className="relative w-full max-w-xl overflow-y-auto rounded-3xl border border-fuchsia-500/25 bg-[#060410] shadow-[0_40px_120px_rgba(0,0,0,0.95),0_0_80px_rgba(178,74,242,0.12),inset_0_1px_0_rgba(178,74,242,0.1)]"
+        className="relative w-full max-w-xl overflow-y-auto rounded-3xl border border-fuchsia-500/15 bg-[#060410] shadow-[0_40px_100px_rgba(0,0,0,0.92),0_0_40px_rgba(178,74,242,0.05)]"
         style={{ maxHeight: "calc(100vh - 2rem)" }}
       >
         {/* Top accent line */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-400/60 to-transparent" />
-        {/* Inner glow */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-fuchsia-500/6 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/30 to-transparent" />
 
         <div className="px-8 pb-8 pt-8">
           {/* Header */}
           <div className="mb-8 text-center">
             <div className="mb-4 flex justify-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-400 shadow-[0_0_30px_rgba(178,74,242,0.2)]">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-fuchsia-500/20 bg-fuchsia-500/8 text-fuchsia-400">
                 <BrandBolt className="h-9 w-9" />
               </div>
             </div>
@@ -12708,17 +12706,17 @@ function AccessSuspendedOverlay({ subscription, loadingPlan, onStartCheckout, on
                 onClick={() => setSelected(plan.id)}
                 className={`relative flex flex-col items-center rounded-2xl border p-5 text-center transition-all duration-200
                   ${selected === plan.id
-                    ? "border-fuchsia-500/60 bg-gradient-to-b from-fuchsia-500/15 to-fuchsia-500/5 shadow-[0_0_0_1px_rgba(178,74,242,0.25),0_8px_32px_rgba(178,74,242,0.15)]"
-                    : "border-white/8 bg-white/3 hover:border-fuchsia-500/20 hover:bg-white/5"}`}
+                    ? "border-fuchsia-500/40 bg-fuchsia-500/8 shadow-[0_0_0_1px_rgba(178,74,242,0.12)]"
+                    : "border-white/8 bg-white/3 hover:border-white/15 hover:bg-white/5"}`}
               >
                 {plan.featured && (
-                  <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-fuchsia-500 px-3.5 py-1 text-[11px] font-black text-black shadow-[0_0_16px_rgba(178,74,242,0.5)]">⭐ Most Popular</span>
+                  <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-fuchsia-500 px-3.5 py-1 text-[11px] font-black text-black">⭐ Most Popular</span>
                 )}
                 <div className="mb-2 text-[11px] font-black uppercase tracking-widest text-zinc-500">{plan.name}</div>
-                <div className="text-4xl font-black text-fuchsia-400 drop-shadow-[0_0_12px_rgba(178,74,242,0.4)]">{plan.daily}<span className="text-base font-semibold text-zinc-600">/day</span></div>
+                <div className="text-4xl font-black text-fuchsia-400">{plan.daily}<span className="text-base font-semibold text-zinc-600">/day</span></div>
                 <div className="mt-1 text-sm text-zinc-600">{plan.price} {plan.cadence}</div>
                 {plan.badge && <span className="mt-2 rounded-full border border-emerald-500/30 bg-emerald-500/12 px-3 py-0.5 text-[11px] font-black text-emerald-400">{plan.badge}</span>}
-                <div className={`mt-4 h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all ${selected === plan.id ? "border-fuchsia-500 bg-fuchsia-500 shadow-[0_0_10px_rgba(178,74,242,0.5)]" : "border-white/20"}`}>
+                <div className={`mt-4 h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all ${selected === plan.id ? "border-fuchsia-500 bg-fuchsia-500" : "border-white/20"}`}>
                   {selected === plan.id && <div className="h-2 w-2 rounded-full bg-white" />}
                 </div>
               </button>
@@ -12734,7 +12732,7 @@ function AccessSuspendedOverlay({ subscription, loadingPlan, onStartCheckout, on
             <div className="grid grid-cols-1 gap-2.5">
               {features.map((f) => (
                 <div key={f} className="flex items-center gap-2.5 text-sm text-zinc-400">
-                  <CheckCircle size={14} className="shrink-0 text-emerald-500 drop-shadow-[0_0_6px_rgba(52,211,153,0.5)]" />{f}
+                  <CheckCircle size={14} className="shrink-0 text-emerald-600" />{f}
                 </div>
               ))}
             </div>
@@ -12745,7 +12743,7 @@ function AccessSuspendedOverlay({ subscription, loadingPlan, onStartCheckout, on
             type="button"
             onClick={() => onStartCheckout?.(selected)}
             disabled={Boolean(loadingPlan)}
-            className="w-full rounded-2xl bg-fuchsia-500 py-4 text-base font-black text-black shadow-[0_0_40px_rgba(178,74,242,0.45),0_8px_24px_rgba(178,74,242,0.3)] transition hover:bg-fuchsia-400 hover:shadow-[0_0_55px_rgba(178,74,242,0.6),0_8px_32px_rgba(178,74,242,0.4)] disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-2xl bg-fuchsia-600 py-4 text-base font-black text-white shadow-[0_4px_20px_rgba(178,74,242,0.25)] transition hover:bg-fuchsia-500 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loadingPlan ? "Opening checkout..." : isNew ? `Start Free Trial — ${selected === "monthly" ? "$10/month" : "$86/year"}` : `Subscribe — ${selected === "monthly" ? "$10/month" : "$86/year"}`}
           </button>
