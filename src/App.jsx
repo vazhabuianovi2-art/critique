@@ -9605,29 +9605,39 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-      {/* Header bar — Sydview style */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300">
-            <Calendar size={18} />
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => setCalendarMonth(new Date(year, monthIndex - 1, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-black text-zinc-400 transition hover:border-white/25 hover:text-white">
-              <ChevronLeft size={16} />
+      {/* Header banner — Sydview style */}
+      <div className="mb-6 overflow-hidden rounded-2xl border border-fuchsia-500/20 bg-gradient-to-r from-[#1a0a2e] via-[#120820] to-[#0d0514] px-5 py-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          {/* Left: nav + month */}
+          <div className="flex items-center gap-3">
+            <button onClick={() => setCalendarMonth(new Date(year, monthIndex - 1, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-300 transition hover:border-fuchsia-500/40 hover:text-white">
+              <ChevronLeft size={15} />
             </button>
-            <h1 className="min-w-[160px] text-center text-xl font-black text-white">{monthName}</h1>
-            <button onClick={() => setCalendarMonth(new Date(year, monthIndex + 1, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-black text-zinc-400 transition hover:border-white/25 hover:text-white">
-              <ChevronRight size={16} />
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-fuchsia-500/20 text-fuchsia-300">
+                <Calendar size={15} />
+              </div>
+              <h1 className="text-xl font-black tracking-tight text-white">{monthName}</h1>
+            </div>
+            <button onClick={() => setCalendarMonth(new Date(year, monthIndex + 1, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-300 transition hover:border-fuchsia-500/40 hover:text-white">
+              <ChevronRight size={15} />
             </button>
           </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-lg border border-white/10 bg-[#0d0d0d] px-3 py-2 text-xs font-black text-zinc-400">TRADES: <span className="text-white">{monthStats.count}</span></span>
-          <span className={`rounded-lg border px-3 py-2 text-xs font-black ${monthStats.pnl >= 0 ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-red-500/30 bg-red-500/10 text-red-400"}`}>P&L: {formatMoney(monthStats.pnl)}</span>
-          <span className="rounded-lg border border-white/10 bg-[#0d0d0d] px-3 py-2 text-xs font-black text-zinc-400">WIN: <span className="text-white">{monthStats.winRate.toFixed(0)}%</span></span>
-          <button onClick={goToday} className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-[#0d0d0d] px-3 py-2 text-xs font-black text-zinc-300 transition hover:border-fuchsia-500/40 hover:text-fuchsia-200">
-            <Calendar size={12} /> Today
-          </button>
+          {/* Right: stats + today */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-lg border border-white/10 bg-black/40 px-4 py-2 text-xs font-black text-zinc-400">
+              TRADES: <span className="text-white">{monthStats.count}</span>
+            </span>
+            <span className={`rounded-lg border px-4 py-2 text-xs font-black ${monthStats.pnl >= 0 ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-400" : "border-red-500/40 bg-red-500/15 text-red-400"}`}>
+              P&L: {formatMoney(monthStats.pnl)}
+            </span>
+            <span className="rounded-lg border border-white/10 bg-black/40 px-4 py-2 text-xs font-black text-zinc-400">
+              WIN: <span className="text-white">{monthStats.winRate.toFixed(0)}%</span>
+            </span>
+            <button onClick={goToday} className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/40 px-4 py-2 text-xs font-black text-zinc-300 transition hover:border-fuchsia-500/40 hover:text-fuchsia-200">
+              <Calendar size={12} /> Today
+            </button>
+          </div>
         </div>
       </div>
 
