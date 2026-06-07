@@ -12668,62 +12668,73 @@ function AccessSuspendedOverlay({ subscription, loadingPlan, onStartCheckout, on
   ];
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/90 p-4 backdrop-blur-md">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/92 p-4 backdrop-blur-lg">
       {/* Background glows */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-fuchsia-600/8 blur-3xl" />
-        <div className="absolute -right-32 bottom-1/4 h-96 w-96 rounded-full bg-violet-600/6 blur-3xl" />
+        <div className="absolute -left-40 top-1/4 h-[500px] w-[500px] rounded-full bg-fuchsia-600/10 blur-3xl" />
+        <div className="absolute -right-40 bottom-1/4 h-[500px] w-[500px] rounded-full bg-violet-700/8 blur-3xl" />
+        <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-fuchsia-900/15 blur-2xl" />
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 16, scale: 0.96 }}
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        className="relative w-full max-w-lg overflow-y-auto rounded-2xl border border-fuchsia-500/20 bg-[#07050f] shadow-[0_30px_95px_rgba(0,0,0,0.9),0_0_60px_rgba(178,74,242,0.08)]"
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className="relative w-full max-w-xl overflow-y-auto rounded-3xl border border-fuchsia-500/25 bg-[#060410] shadow-[0_40px_120px_rgba(0,0,0,0.95),0_0_80px_rgba(178,74,242,0.12),inset_0_1px_0_rgba(178,74,242,0.1)]"
         style={{ maxHeight: "calc(100vh - 2rem)" }}
       >
         {/* Top accent line */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-400/60 to-transparent" />
+        {/* Inner glow */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-fuchsia-500/6 to-transparent" />
 
-        <div className="px-6 pb-6 pt-7">
+        <div className="px-8 pb-8 pt-8">
           {/* Header */}
-          <div className="mb-6 text-center">
-            <span className="mb-3 inline-block text-fuchsia-400"><BrandBolt className="h-10 w-10" /></span>
-            <h2 className="text-2xl font-black tracking-tight text-white">{isNew ? "Start Your Free Trial" : "Reactivate Pro"}</h2>
-            <p className="mt-1.5 text-sm text-zinc-500">Choose your plan. You won't be charged today.</p>
+          <div className="mb-8 text-center">
+            <div className="mb-4 flex justify-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-400 shadow-[0_0_30px_rgba(178,74,242,0.2)]">
+                <BrandBolt className="h-9 w-9" />
+              </div>
+            </div>
+            <h2 className="text-3xl font-black tracking-tight text-white">{isNew ? "Start Your Free Trial" : "Reactivate Pro"}</h2>
+            <p className="mt-2 text-base text-zinc-500">Choose your plan. You won't be charged today.</p>
           </div>
 
           {/* Plan cards */}
-          <div className="mb-4 grid grid-cols-2 gap-3">
+          <div className="mb-5 grid grid-cols-2 gap-4">
             {plans.map((plan) => (
               <button
                 key={plan.id}
                 onClick={() => setSelected(plan.id)}
-                className={`relative flex flex-col items-center rounded-2xl border p-4 text-center transition-all duration-200
+                className={`relative flex flex-col items-center rounded-2xl border p-5 text-center transition-all duration-200
                   ${selected === plan.id
-                    ? "border-fuchsia-500/60 bg-fuchsia-500/10 shadow-[0_0_0_1px_rgba(178,74,242,0.2),0_0_24px_rgba(178,74,242,0.1)]"
-                    : "border-white/8 bg-white/3 hover:border-white/15"}`}
+                    ? "border-fuchsia-500/60 bg-gradient-to-b from-fuchsia-500/15 to-fuchsia-500/5 shadow-[0_0_0_1px_rgba(178,74,242,0.25),0_8px_32px_rgba(178,74,242,0.15)]"
+                    : "border-white/8 bg-white/3 hover:border-fuchsia-500/20 hover:bg-white/5"}`}
               >
                 {plan.featured && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-fuchsia-500 px-3 py-0.5 text-[10px] font-black text-black">⭐ Most Popular</span>
+                  <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-fuchsia-500 px-3.5 py-1 text-[11px] font-black text-black shadow-[0_0_16px_rgba(178,74,242,0.5)]">⭐ Most Popular</span>
                 )}
-                <div className="mb-1 text-xs font-black uppercase tracking-wider text-zinc-500">{plan.name}</div>
-                <div className="text-3xl font-black text-fuchsia-400">{plan.daily}<span className="text-sm text-zinc-600">/day</span></div>
-                <div className="mt-0.5 text-[11px] text-zinc-600">{plan.price} {plan.cadence}</div>
-                {plan.badge && <span className="mt-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-black text-emerald-400">{plan.badge}</span>}
-                <div className={`mt-3 h-4 w-4 rounded-full border-2 flex items-center justify-center ${selected === plan.id ? "border-fuchsia-500 bg-fuchsia-500" : "border-white/20"}`}>
-                  {selected === plan.id && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
+                <div className="mb-2 text-[11px] font-black uppercase tracking-widest text-zinc-500">{plan.name}</div>
+                <div className="text-4xl font-black text-fuchsia-400 drop-shadow-[0_0_12px_rgba(178,74,242,0.4)]">{plan.daily}<span className="text-base font-semibold text-zinc-600">/day</span></div>
+                <div className="mt-1 text-sm text-zinc-600">{plan.price} {plan.cadence}</div>
+                {plan.badge && <span className="mt-2 rounded-full border border-emerald-500/30 bg-emerald-500/12 px-3 py-0.5 text-[11px] font-black text-emerald-400">{plan.badge}</span>}
+                <div className={`mt-4 h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all ${selected === plan.id ? "border-fuchsia-500 bg-fuchsia-500 shadow-[0_0_10px_rgba(178,74,242,0.5)]" : "border-white/20"}`}>
+                  {selected === plan.id && <div className="h-2 w-2 rounded-full bg-white" />}
                 </div>
               </button>
             ))}
           </div>
 
           {/* Features */}
-          <div className="mb-4 rounded-xl border border-white/6 bg-white/3 p-4">
-            <div className="mb-3 text-xs font-black uppercase tracking-widest text-zinc-500">What's Included</div>
-            <div className="space-y-2">
+          <div className="mb-5 rounded-2xl border border-white/8 bg-white/3 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+            <div className="mb-4 flex items-center gap-2">
+              <ShieldCheck size={14} className="text-fuchsia-400" />
+              <span className="text-xs font-black uppercase tracking-widest text-zinc-400">What's Included</span>
+            </div>
+            <div className="grid grid-cols-1 gap-2.5">
               {features.map((f) => (
-                <div key={f} className="flex items-center gap-2 text-sm text-zinc-400">
-                  <CheckCircle size={13} className="shrink-0 text-emerald-500" />{f}
+                <div key={f} className="flex items-center gap-2.5 text-sm text-zinc-400">
+                  <CheckCircle size={14} className="shrink-0 text-emerald-500 drop-shadow-[0_0_6px_rgba(52,211,153,0.5)]" />{f}
                 </div>
               ))}
             </div>
@@ -12734,12 +12745,12 @@ function AccessSuspendedOverlay({ subscription, loadingPlan, onStartCheckout, on
             type="button"
             onClick={() => onStartCheckout?.(selected)}
             disabled={Boolean(loadingPlan)}
-            className="w-full rounded-xl bg-fuchsia-500 py-3.5 text-sm font-black text-black shadow-[0_0_28px_rgba(178,74,242,0.35)] transition hover:bg-fuchsia-400 hover:shadow-[0_0_40px_rgba(178,74,242,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-2xl bg-fuchsia-500 py-4 text-base font-black text-black shadow-[0_0_40px_rgba(178,74,242,0.45),0_8px_24px_rgba(178,74,242,0.3)] transition hover:bg-fuchsia-400 hover:shadow-[0_0_55px_rgba(178,74,242,0.6),0_8px_32px_rgba(178,74,242,0.4)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loadingPlan ? "Opening checkout..." : isNew ? `Start Free Trial — ${selected === "monthly" ? "$10/month" : "$86/year"}` : `Subscribe — ${selected === "monthly" ? "$10/month" : "$86/year"}`}
           </button>
 
-          <button type="button" onClick={onSignOut} className="mt-3 w-full text-xs font-semibold text-zinc-600 transition hover:text-zinc-400">
+          <button type="button" onClick={onSignOut} className="mt-4 w-full text-sm font-medium text-zinc-700 transition hover:text-zinc-400">
             Sign out
           </button>
         </div>
