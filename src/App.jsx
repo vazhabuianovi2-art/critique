@@ -9587,6 +9587,13 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
     if (!Number.isNaN(nextDate.getTime())) setCalendarMonth(new Date(nextDate.getFullYear(), nextDate.getMonth(), 1));
   }, [selectedDate]);
 
+  useEffect(() => {
+    const today = new Date();
+    if (today.getFullYear() === calendarMonth.getFullYear() && today.getMonth() === calendarMonth.getMonth()) {
+      setSelectedDate(formatDateKey(today));
+    }
+  }, [calendarMonth]);
+
   const year = calendarMonth.getFullYear();
   const monthIndex = calendarMonth.getMonth();
   const cells = getCalendarCells(year, monthIndex);
@@ -9663,7 +9670,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
 
       {/* Calendar grid */}
       <div className="xl:overflow-x-auto">
-        <div className="grid min-w-0 grid-cols-7 gap-1.5 xl:min-w-[900px] xl:grid-cols-[repeat(7,minmax(0,1fr))_150px] xl:gap-2">
+        <div className="grid min-w-0 grid-cols-7 gap-1.5 xl:min-w-[900px] xl:grid-cols-[repeat(7,minmax(0,1fr))_190px] xl:gap-2">
           {/* Day headers */}
           {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN", "WEEK"].map((day) => (
             <div key={day} className={`rounded-xl py-2.5 text-center text-[11px] font-black tracking-widest ${day === "WEEK" ? "hidden xl:block" : ""} ${day === "SAT" || day === "SUN" || day === "WEEK" ? "bg-fuchsia-500/10 text-fuchsia-400" : "bg-white/4 text-zinc-500"}`}>
@@ -9702,6 +9709,9 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                           {cell.day}
                         </span>
                         <div className="flex items-center gap-1">
+                          {isWeekend && cell.isCurrentMonth && (
+                            <span className="hidden xl:inline text-[11px] opacity-40 select-none">🌙</span>
+                          )}
                           {dayEvents.length > 0 && (
                             <span className="flex items-center gap-0.5 text-[9px] font-black text-zinc-500">
                               <ImpactFolderIcon impact={primaryEventImpact} />{dayEvents.length}
