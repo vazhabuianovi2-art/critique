@@ -8972,7 +8972,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
             <div className="moving-text-track">
               {quotes.map((item, index) => (
                 <div key={index} className="moving-text-slide">
-                  <span className="moving-text-item text-sm italic text-zinc-400">{item}</span>
+                  <span className="moving-text-item text-sm text-zinc-600" style={{fontFamily:"'Georgia', serif", fontStyle:"normal", fontWeight:400}}>{item}</span>
                 </div>
               ))}
             </div>
