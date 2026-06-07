@@ -10014,6 +10014,62 @@ function CalendarGuide() {
   );
 }
 
+function MultiSelectDropdown({ value, options = [], onChange, placeholder = "Select..." }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const selected = splitMultiValues(value).filter((v) => v && v !== "None");
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  function toggle(option) {
+    const next = selected.includes(option)
+      ? selected.filter((s) => s !== option)
+      : [...selected, option];
+    onChange(next.length === 0 ? "None" : next.join(", "));
+  }
+
+  const displayText = selected.length === 0 ? placeholder : selected.join(", ");
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between rounded-xl border border-white/15 bg-black px-4 py-2.5 text-left text-sm transition hover:border-white/25 focus:outline-none"
+      >
+        <span className={selected.length === 0 ? "text-zinc-600" : "text-zinc-200 truncate"}>{displayText}</span>
+        <ChevronDown size={15} className={`ml-2 shrink-0 text-zinc-500 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="absolute z-50 mt-1 w-full rounded-xl border border-white/15 bg-[#0d0d0d] py-1 shadow-xl">
+          {options.filter((o) => o !== "None").map((option) => {
+            const checked = selected.includes(option);
+            return (
+              <button
+                key={option}
+                type="button"
+                onClick={() => toggle(option)}
+                className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition hover:bg-white/5"
+              >
+                <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${checked ? "border-fuchsia-500 bg-fuchsia-500" : "border-white/20 bg-transparent"}`}>
+                  {checked && <Check size={10} className="text-black font-black" />}
+                </span>
+                <span className={checked ? "text-zinc-200" : "text-zinc-400"}>{option}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function TagInput({ value, onChange }) {
   const [inputVal, setInputVal] = useState("");
   const tags = normalizeTags({ tags: value }).filter((t) => !String(t).toLowerCase().startsWith("result:"));
@@ -10073,7 +10129,6 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
     }
   });
   const [newStrategyName, setNewStrategyName] = useState("");
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
   // Merge strategiesObjects names + customStrategies (legacy) + form.strategy
   const strategyObjNames = strategiesObjects.map((s) => s.name);
@@ -10297,6 +10352,31 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
                 {EMOTION_OPTIONS.map((emotionOption) => <option key={emotionOption[0]} value={emotionOption[0]}>{emotionOption[0]}</option>)}
               </Select>
             </Field>
+
+            <Field label="Mistakes">
+              <MultiSelectDropdown
+                value={form.mistake}
+                options={MISTAKE_OPTIONS}
+                onChange={(v) => updateField("mistake", v)}
+                placeholder="Select mistakes..."
+              />
+            </Field>
+
+            <Field label="Rules Broken">
+              <MultiSelectDropdown
+                value={form.ruleBroken}
+                options={RULE_BROKEN_OPTIONS}
+                onChange={(v) => updateField("ruleBroken", v)}
+                placeholder="Select rules broken..."
+              />
+            </Field>
+
+            <Field label="Setup Quality">
+              <Select value={form.setupQuality || ""} onChange={(e) => updateField("setupQuality", e.target.value)}>
+                <option value="">Select quality...</option>
+                {SETUP_QUALITY_OPTIONS.map((q) => <option key={q} value={q}>{q}</option>)}
+              </Select>
+            </Field>
           </div>
         </div>
 
@@ -10324,31 +10404,6 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
           <p className="mt-2 text-xs font-semibold text-zinc-500">Record your thoughts, market analysis, and key learnings from this trade</p>
         </Section>
 
-        <div className="mt-6">
-          <button type="button" onClick={() => setShowAdvanced((open) => !open)} className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-black/40 px-5 py-4 text-left text-sm font-black text-zinc-200 transition hover:border-fuchsia-500/40 hover:text-fuchsia-200">
-            <span className="flex items-center gap-2"><ListChecks size={16} className="text-fuchsia-300" /> Advanced details (optional)</span>
-            <ChevronDown size={16} className={showAdvanced ? "rotate-180 text-fuchsia-300 transition-transform" : "text-fuchsia-300 transition-transform"} />
-          </button>
-          {showAdvanced && (
-            <div className="mt-4 space-y-6">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <Field label="Mistakes"><MultiChoice value={form.mistake} options={MISTAKE_OPTIONS} onChange={(value) => updateField("mistake", value)} tone="mistake" allowNone /></Field>
-                <Field label="Entry Timing"><Select value={form.entryTiming} onChange={(e) => updateField("entryTiming", e.target.value)}><option>Early</option><option>On Time</option><option>Late</option></Select></Field>
-                <Field label="Confirmation"><Select value={form.confirmation} onChange={(e) => updateField("confirmation", e.target.value)}><option>Yes</option><option>No</option><option>Partial</option></Select></Field>
-                <Field label="Rules Broken"><MultiChoice value={form.ruleBroken} options={RULE_BROKEN_OPTIONS} onChange={(value) => updateField("ruleBroken", value)} tone="rule" allowNone /></Field>
-                <Field label="Market Condition"><Select value={form.marketCondition} onChange={(e) => updateField("marketCondition", e.target.value)}><option>Trending</option><option>Ranging</option><option>Choppy</option><option>News</option><option>Low Volume</option></Select></Field>
-                <div className="md:col-span-2"><Field label="Setup Quality"><SegmentedChoice value={form.setupQuality} options={SETUP_QUALITY_OPTIONS} onChange={(value) => updateField("setupQuality", value)} tone="quality" /></Field></div>
-              </div>
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                <Field label="What went well?"><Textarea rows={3} value={form.whatWentWell} onChange={(e) => updateField("whatWentWell", e.target.value)} placeholder="Good entry, patience, clean confirmation..." className="border-white/15 bg-black" /></Field>
-                <Field label="What went wrong?"><Textarea rows={3} value={form.whatWentWrong} onChange={(e) => updateField("whatWentWrong", e.target.value)} placeholder="Early entry, moved SL, emotional decision..." className="border-white/15 bg-black" /></Field>
-                <Field label="Rule Followed"><Select value={form.ruleFollowed} onChange={(e) => updateField("ruleFollowed", e.target.value)}><option>Yes</option><option>No</option><option>Partial</option></Select></Field>
-                <Field label="Entry Quality"><Select value={form.entryQuality} onChange={(e) => updateField("entryQuality", e.target.value)}><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></Select></Field>
-                <Field label="Exit Quality"><Select value={form.exitQuality} onChange={(e) => updateField("exitQuality", e.target.value)}><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></Select></Field>
-              </div>
-            </div>
-          )}
-        </div>
 
         <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
           <Button variant="ghost" onClick={onClose} className="text-white hover:bg-white/10">Cancel</Button>
