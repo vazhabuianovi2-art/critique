@@ -8032,6 +8032,22 @@ Skipped duplicates: ${duplicateCount}
     );
   }
 
+  // Show billing gate as standalone page (before main app loads)
+  if (shouldGateForBilling) {
+    return (
+      <div className="min-h-screen overflow-x-hidden bg-black text-white">
+        <style>{THEME_STYLE_CSS}</style>
+        <BillingGatePage
+          authUser={authUser}
+          billingSubscription={billingSubscription}
+          onSignOut={handleSignOut}
+          onSubscriptionChange={setBillingSubscription}
+          onSubscriptionRefresh={() => setBillingRefreshTick((t) => t + 1)}
+        />
+      </div>
+    );
+  }
+
   // Don't show subscription loading screen — render app directly
 
   return (
@@ -12645,6 +12661,136 @@ function getAccessSuspendedCopy(subscription) {
     badge: "Payment required",
     isNewUser: false,
   };
+}
+
+function BillingGatePage({ authUser, billingSubscription, onSignOut, onSubscriptionChange, onSubscriptionRefresh }) {
+  const [loadingPlan, setLoadingPlan] = useState("");
+  const [billingError, setBillingError] = useState("");
+  const [selected, setSelected] = useState("yearly");
+
+  const plans = [
+    { id: "monthly", name: "Monthly", daily: "$0.33", price: "$10", cadence: "billed monthly", badge: null },
+    { id: "yearly", name: "Yearly", daily: "$0.24", price: "$86", cadence: "billed annually", badge: "Save 28%", featured: true },
+  ];
+
+  const features = [
+    "7-day free trial — No charge today",
+    "Unlimited trade logging & journaling",
+    "Advanced analytics & calendar",
+    "Mistake detector & psychology tools",
+    "Screenshot uploads",
+    "CSV import, export & backup",
+    "Up to 20 trading accounts",
+    "Cancel anytime",
+  ];
+
+  async function startCheckout(planId) {
+    setLoadingPlan(planId);
+    setBillingError("");
+    try {
+      const accessToken = await getCurrentAccessToken();
+      const response = await fetch("/api/billing-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: planId, accessToken, email: authUser?.email }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) throw new Error(data.error || "Could not start checkout.");
+      window.location.href = data.url;
+    } catch (error) {
+      setBillingError(error?.message || "Could not open checkout.");
+    } finally {
+      setLoadingPlan("");
+    }
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-[#050308] px-4 py-12">
+      {/* Background glows */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -left-40 top-1/4 h-[500px] w-[500px] rounded-full bg-fuchsia-600/8 blur-3xl" />
+        <div className="absolute -right-40 bottom-1/4 h-[500px] w-[500px] rounded-full bg-violet-700/6 blur-3xl" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-xl">
+        {/* Logo + header */}
+        <div className="mb-8 text-center">
+          <div className="mb-4 flex justify-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-fuchsia-500/20 bg-fuchsia-500/8 text-fuchsia-400">
+              <BrandBolt className="h-9 w-9" />
+            </div>
+          </div>
+          <h1 className="text-3xl font-black tracking-tight text-white">Start Your Free Trial</h1>
+          <p className="mt-2 text-base text-zinc-500">Choose your plan. You won't be charged today.</p>
+        </div>
+
+        {/* Card */}
+        <div className="overflow-hidden rounded-3xl border border-fuchsia-500/15 bg-[#060410] shadow-[0_40px_100px_rgba(0,0,0,0.92)]">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/30 to-transparent" />
+          <div className="px-8 pb-8 pt-8">
+
+            {billingError && (
+              <div className="mb-4 rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-300">{billingError}</div>
+            )}
+
+            {/* Plan cards */}
+            <div className="mb-5 grid grid-cols-2 gap-4">
+              {plans.map((plan) => (
+                <button
+                  key={plan.id}
+                  onClick={() => setSelected(plan.id)}
+                  className={`relative flex flex-col items-center rounded-2xl border p-5 text-center transition-all duration-200
+                    ${selected === plan.id
+                      ? "border-fuchsia-500/40 bg-fuchsia-500/8 shadow-[0_0_0_1px_rgba(178,74,242,0.12)]"
+                      : "border-white/8 bg-white/3 hover:border-white/15 hover:bg-white/5"}`}
+                >
+                  {plan.featured && (
+                    <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-fuchsia-500 px-3.5 py-1 text-[11px] font-black text-black">⭐ Most Popular</span>
+                  )}
+                  <div className="mb-2 text-[11px] font-black uppercase tracking-widest text-zinc-500">{plan.name}</div>
+                  <div className="text-4xl font-black text-fuchsia-400">{plan.daily}<span className="text-base font-semibold text-zinc-600">/day</span></div>
+                  <div className="mt-1 text-sm text-zinc-600">{plan.price} {plan.cadence}</div>
+                  {plan.badge && <span className="mt-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-0.5 text-[11px] font-black text-emerald-500">{plan.badge}</span>}
+                  <div className={`mt-4 h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all ${selected === plan.id ? "border-fuchsia-500 bg-fuchsia-500" : "border-white/20"}`}>
+                    {selected === plan.id && <div className="h-2 w-2 rounded-full bg-white" />}
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Features */}
+            <div className="mb-5 rounded-2xl border border-white/8 bg-white/3 p-5">
+              <div className="mb-4 flex items-center gap-2">
+                <ShieldCheck size={14} className="text-fuchsia-400" />
+                <span className="text-xs font-black uppercase tracking-widest text-zinc-400">What's Included</span>
+              </div>
+              <div className="grid grid-cols-1 gap-2.5">
+                {features.map((f) => (
+                  <div key={f} className="flex items-center gap-2.5 text-sm text-zinc-400">
+                    <CheckCircle size={14} className="shrink-0 text-emerald-600" />{f}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* CTA */}
+            <button
+              type="button"
+              onClick={() => startCheckout(selected)}
+              disabled={Boolean(loadingPlan)}
+              className="w-full rounded-2xl bg-fuchsia-600 py-4 text-base font-black text-white shadow-[0_4px_20px_rgba(178,74,242,0.25)] transition hover:bg-fuchsia-500 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {loadingPlan ? "Opening checkout..." : `Start Free Trial — ${selected === "monthly" ? "$10/month" : "$86/year"}`}
+            </button>
+
+            <button type="button" onClick={onSignOut} className="mt-4 w-full text-sm font-medium text-zinc-700 transition hover:text-zinc-400">
+              Sign out
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function AccessSuspendedOverlay({ subscription, loadingPlan, onStartCheckout, onSignOut }) {
