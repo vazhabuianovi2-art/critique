@@ -8936,36 +8936,43 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
         <TopCrumb page="Dashboard" className="" />
       </div>
 
-      <div className="dashboard-hero relative overflow-hidden rounded-2xl border border-fuchsia-500/20 bg-gradient-to-br from-[#180c2e] via-[#0f0620] to-[#08040f] p-6">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent" />
-        <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-fuchsia-500/5 blur-3xl" />
-        <div className="relative z-10 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+      <div className="dashboard-hero relative overflow-hidden rounded-2xl border border-fuchsia-500/15 bg-[#08050f] p-6 shadow-[0_0_80px_rgba(178,74,242,0.07)]">
+        {/* Background layers */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#130820] via-[#08050f] to-[#050310]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/40 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/10 to-transparent" />
+        <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-fuchsia-600/6 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-10 left-1/3 h-40 w-40 rounded-full bg-violet-600/5 blur-2xl" />
+
+        {/* Content */}
+        <div className="relative z-10 flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <div className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-fuchsia-500/20 bg-fuchsia-500/8 px-2.5 py-1 text-[11px] font-black uppercase tracking-widest text-fuchsia-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400" /> Trading Journal
-            </div>
-            <h1 className="mt-2 text-2xl font-black xl:text-3xl">Welcome back, {getFirstDisplayName(profileName)}! <span className="waving-hand" aria-hidden="true">👋</span></h1>
-            <p className="mt-1.5 flex items-center gap-2 text-sm font-medium text-zinc-500">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <h1 className="text-2xl font-black tracking-tight text-white xl:text-3xl">
+              Welcome back, <span className="bg-gradient-to-r from-fuchsia-300 to-violet-300 bg-clip-text text-transparent">{getFirstDisplayName(profileName)}</span>! <span className="waving-hand" aria-hidden="true">👋</span>
+            </h1>
+            <p className="mt-2 flex items-center gap-2 text-sm font-medium text-zinc-500">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-zinc-600"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
             </p>
           </div>
-          <div className="flex shrink-0 flex-wrap gap-2">
-            <Button onClick={onOpenJournal} className="dashboard-primary-btn bg-fuchsia-500 px-5 py-2.5 text-sm font-bold text-black hover:bg-fuchsia-400">
-              <Plus size={15} /> Log Trade
+          <div className="flex shrink-0 flex-wrap gap-2.5">
+            <Button onClick={onOpenJournal} className="dashboard-primary-btn group relative overflow-hidden rounded-xl bg-fuchsia-500 px-5 py-2.5 text-sm font-bold text-black shadow-[0_0_20px_rgba(178,74,242,0.3)] hover:bg-fuchsia-400 hover:shadow-[0_0_28px_rgba(178,74,242,0.45)]">
+              <BookOpen size={15} /> Log Trade
             </Button>
-            <Button onClick={onStartDay} className="dashboard-start-btn border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-bold text-zinc-200 hover:bg-white/10">Start Your Day</Button>
+            <Button onClick={onStartDay} className="dashboard-start-btn rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-bold text-zinc-300 backdrop-blur hover:border-fuchsia-500/30 hover:bg-fuchsia-500/8 hover:text-white">Start Your Day</Button>
           </div>
         </div>
-        <div className="dashboard-inspiration relative z-10 mt-5 rounded-xl border border-white/8 bg-black/30 px-5 py-3">
-          <div className="mb-1.5 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest text-fuchsia-400">
-            <Sparkles size={12} /> Daily Inspiration <Sparkles size={12} />
+
+        {/* Daily Inspiration */}
+        <div className="dashboard-inspiration relative z-10 mt-5 overflow-hidden rounded-xl border border-white/6 bg-white/3 px-5 py-3 backdrop-blur-sm">
+          <div className="mb-1.5 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-fuchsia-500/70">
+            <Sparkles size={11} /> Daily Inspiration <Sparkles size={11} />
           </div>
           <div className="moving-text-wrap">
             <div className="moving-text-track">
               {quotes.map((item, index) => (
                 <div key={index} className="moving-text-slide">
-                  <span className="moving-text-item italic text-zinc-300 text-sm">{item}</span>
+                  <span className="moving-text-item text-sm italic text-zinc-400">{item}</span>
                 </div>
               ))}
             </div>
