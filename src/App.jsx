@@ -9673,7 +9673,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
         <div className="grid min-w-0 grid-cols-7 gap-1.5 xl:min-w-[900px] xl:grid-cols-[repeat(7,minmax(0,1fr))_190px] xl:gap-2">
           {/* Day headers */}
           {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN", "WEEK"].map((day) => (
-            <div key={day} className={`rounded-xl py-2.5 text-center text-[11px] font-black tracking-widest ${day === "WEEK" ? "hidden xl:block" : ""} ${day === "SAT" || day === "SUN" || day === "WEEK" ? "bg-fuchsia-500/10 text-fuchsia-400" : "bg-white/4 text-zinc-500"}`}>
+            <div key={day} className={`rounded-xl py-2.5 text-center text-[11px] font-black tracking-widest border ${day === "WEEK" ? "hidden xl:block" : ""} ${day === "SAT" || day === "SUN" || day === "WEEK" ? "border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-400" : "border-white/8 bg-white/4 text-zinc-500"}`}>
               {day}
             </div>
           ))}
@@ -9701,7 +9701,9 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                         ${isWeekend ? "bg-fuchsia-500/6" : "bg-[#0d0d0d]"}
                         ${selected
                           ? "border-fuchsia-500/70 shadow-[0_0_0_1px_rgba(178,74,242,0.35)] -translate-y-0.5"
-                          : "border-white/8 hover:border-fuchsia-500/30 hover:bg-fuchsia-500/5 hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(178,74,242,0.12)]"}
+                          : isWeekend
+                            ? "border-fuchsia-500/25 hover:border-fuchsia-500/50 hover:bg-fuchsia-500/10 hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(178,74,242,0.15)]"
+                            : "border-white/10 hover:border-fuchsia-500/30 hover:bg-fuchsia-500/5 hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(178,74,242,0.12)]"}
                       `}
                     >
                       <div className="flex items-start justify-between">
