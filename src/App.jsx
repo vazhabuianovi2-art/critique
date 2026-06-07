@@ -99,9 +99,16 @@ const TRADING_SESSIONS = ["Asia", "London", "NY-AM", "Lunch", "NY-PM", "Pre-Mark
 const LEGACY_DEFAULT_STRATEGIES = ["Liquidity Sweep", "ICT FVG", "Order Block", "Breaker Block", "Silver Bullet"];
 const DEFAULT_STRATEGIES = [];
 const EMOTION_OPTIONS = [
-  ["Calm", "Focus", "◌"],
   ["Confident", "Ready", "✦"],
+  ["Calm", "Focus", "◌"],
+  ["Focused", "Clear", "◎"],
+  ["Excited", "Energy", "↑"],
+  ["Euphoric", "Peak", "★"],
+  ["Anxious", "Tension", "~"],
   ["Fearful", "Careful", "◇"],
+  ["Frustrated", "Block", "✕"],
+  ["Regretful", "Review", "↩"],
+  ["Impulsive", "Rush", "⚡"],
   ["Greedy", "Risk", "$"],
   ["FOMO", "Impulse", "↗"],
   ["Revenge", "Reset", "!"],
@@ -8617,7 +8624,7 @@ function TradeCard({ trade, onView, onEdit, onRemove }) {
         <div className="flex items-start justify-between gap-3"><div><div className="text-xs font-bold uppercase tracking-wider text-zinc-500">{trade.date} • {trade.session || "No session"}</div><div className="mt-2 text-lg font-black text-white">{trade.setup}</div><div className="mt-1 text-xs text-zinc-400">{trade.accountName || "v"} • {trade.accountType || "Account"}</div></div><span className={`text-xs font-bold ${getTradeResultClass(result)}`}>{result}</span></div>
         <div className="mt-4 grid grid-cols-3 gap-3"><MetricBox label="Risk" value={formatMoney(trade.risk)} tone="fuchsia" /><MetricBox label="R:R" value={`${rr.toFixed(2)}R`} tone="fuchsia" /><MetricBox label="Qty" value={trade.quantity} tone="fuchsia" /></div>
         <div className="mt-4 flex flex-wrap gap-2">{tags.length ? tags.map((tag) => <span key={tag} className="trade-tag rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-zinc-400">#{tag}</span>) : <span className="text-xs text-zinc-600">No tags</span>}</div>
-        <div className="mt-5 flex items-center justify-between gap-5 border-t border-white/10 pt-4"><div className="flex min-w-0 flex-wrap items-center gap-2 text-xs"><span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 font-bold text-emerald-200">{trade.emotion || "No emotion"}</span><span className={trade.mistake && trade.mistake !== "None" ? "rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1.5 font-bold text-red-300" : "rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 font-bold text-emerald-300"}>{trade.mistake || "None"}</span></div><div className="ml-auto flex shrink-0 gap-2"><button onClick={onView} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Eye size={16} /></button><button onClick={onEdit} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Edit3 size={16} /></button><button onClick={onRemove} className="rounded-lg border border-red-500/20 bg-red-500/10 p-2 text-red-400 transition hover:border-red-500/60"><Trash2 size={16} /></button></div></div>
+        <div className="mt-5 flex items-center justify-between gap-5 border-t border-white/10 pt-4"><div className="flex min-w-0 flex-wrap items-center gap-2 text-xs"><span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 font-bold text-emerald-200">{trade.emotion || "No emotion"}</span><span className={trade.mistake && trade.mistake !== "None" ? "rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1.5 font-bold text-red-300" : "rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 font-bold text-emerald-300"}>{trade.mistake || "None"}</span></div><div className="ml-auto flex shrink-0 gap-2"><button onClick={onEdit} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Edit3 size={16} /></button><button onClick={onRemove} className="rounded-lg border border-red-500/20 bg-red-500/10 p-2 text-red-400 transition hover:border-red-500/60"><Trash2 size={16} /></button></div></div>
       </div>
     </div>
   );
@@ -8645,7 +8652,6 @@ function TradeListRow({ trade, onView, onEdit, onRemove }) {
           <span>{trade.date}</span>
           <span className={`text-right text-xl font-black sm:min-w-28 ${getPnlToneClass(pnl)}`}>{getPnlArrow(pnl)} {formatMoney(pnl)}</span>
           <div className="flex gap-2">
-            <button onClick={onView} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Eye size={16} /></button>
             <button onClick={onEdit} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Edit3 size={16} /></button>
             <button onClick={onRemove} className="rounded-lg border border-red-500/20 bg-red-500/10 p-2 text-red-400 transition hover:border-red-500/60"><Trash2 size={16} /></button>
           </div>
