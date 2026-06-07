@@ -2147,7 +2147,7 @@ const THEME_STYLE_CSS = `
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,.08), transparent 42%, rgba(178,74,242,.08));
+    background: linear-gradient(135deg, rgba(255,255,255,.035), transparent 46%);
     opacity: 0;
     transition: opacity .25s ease;
     pointer-events: none;
@@ -2993,7 +2993,7 @@ const THEME_STYLE_CSS = `
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
     animation: animatedNumberPop .95s ease both;
-    text-shadow: 0 0 18px rgba(178,74,242,.22), 0 0 28px rgba(255,255,255,.08);
+    text-shadow: 0 2px 18px rgba(0,0,0,.72);
   }
 
   @keyframes animatedNumberPop {
@@ -3010,9 +3010,9 @@ const THEME_STYLE_CSS = `
     border-radius: 1.1rem;
     padding: 0;
     isolation: isolate;
-    background: linear-gradient(135deg, rgba(0,0,0,.56), rgba(88,28,135,.14) 50%, rgba(0,0,0,.54));
-    border: 1px solid rgba(178,74,242,.25);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 0 28px rgba(178,74,242,.10);
+    background: linear-gradient(135deg, rgba(8,8,11,.96), rgba(11,9,15,.94) 50%, rgba(5,8,8,.96));
+    border: 1px solid rgba(255,255,255,.10);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
   }
 
   .moving-text-wrap::before {
@@ -3021,7 +3021,7 @@ const THEME_STYLE_CSS = `
     inset: 0;
     z-index: 1;
     pointer-events: none;
-    background: radial-gradient(circle at 12% 50%, rgba(178,74,242,.18), transparent 28%), radial-gradient(circle at 88% 50%, rgba(34,197,94,.10), transparent 26%);
+    background: radial-gradient(circle at 12% 50%, rgba(178,74,242,.055), transparent 30%), radial-gradient(circle at 88% 50%, rgba(34,197,94,.035), transparent 28%);
   }
 
   .moving-text-wrap::after {
@@ -3032,7 +3032,7 @@ const THEME_STYLE_CSS = `
     top: 0;
     height: 1px;
     z-index: 2;
-    background: linear-gradient(to right, transparent, rgba(178,74,242,.85), transparent);
+    background: linear-gradient(to right, transparent, rgba(255,255,255,.16), transparent);
   }
 
   .moving-text-track {
@@ -3073,7 +3073,7 @@ const THEME_STYLE_CSS = `
     font-style: italic;
     color: #ffffff;
     letter-spacing: .01em;
-    text-shadow: 0 0 16px rgba(178,74,242,.50), 0 0 22px rgba(255,255,255,.10);
+    text-shadow: 0 2px 18px rgba(0,0,0,.82);
   }
 
   .moving-text-spark {
@@ -9008,13 +9008,11 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
         <TopCrumb page="Dashboard" className="" />
       </div>
 
-      <div className="dashboard-hero relative overflow-hidden rounded-2xl border border-fuchsia-500/15 bg-[#08050f] p-6 shadow-[0_0_80px_rgba(178,74,242,0.07)]">
+      <div className="dashboard-hero relative overflow-hidden rounded-2xl border border-white/10 bg-[#050507] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.32)]">
         {/* Background layers */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#130820] via-[#08050f] to-[#050310]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/40 to-transparent" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/10 to-transparent" />
-        <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-fuchsia-600/6 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-10 left-1/3 h-40 w-40 rounded-full bg-violet-600/5 blur-2xl" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#09070d] via-[#050507] to-[#030405]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+        <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-fuchsia-600/[0.025] blur-3xl" />
 
         {/* Content */}
         <div className="relative z-10 flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
@@ -9028,10 +9026,10 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2.5">
-            <Button onClick={onOpenJournal} className="dashboard-primary-btn group relative overflow-hidden rounded-xl bg-fuchsia-500 px-5 py-2.5 text-sm font-bold text-black shadow-[0_0_20px_rgba(178,74,242,0.3)] hover:bg-fuchsia-400 hover:shadow-[0_0_28px_rgba(178,74,242,0.45)]">
+            <Button onClick={onOpenJournal} className="dashboard-primary-btn group relative overflow-hidden rounded-xl border border-fuchsia-500/35 bg-fuchsia-700/75 px-5 py-2.5 text-sm font-bold text-white shadow-[0_12px_28px_rgba(0,0,0,0.32)] hover:border-fuchsia-400/50 hover:bg-fuchsia-600/80 hover:shadow-[0_14px_30px_rgba(0,0,0,0.38)]">
               <BookOpen size={15} /> Log Trade
             </Button>
-            <Button onClick={onStartDay} className="dashboard-start-btn rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-bold text-zinc-300 backdrop-blur hover:border-fuchsia-500/30 hover:bg-fuchsia-500/8 hover:text-white">Start Your Day</Button>
+            <Button onClick={onStartDay} className="dashboard-start-btn rounded-xl border border-white/10 bg-white/[0.035] px-5 py-2.5 text-sm font-bold text-zinc-300 backdrop-blur hover:border-white/20 hover:bg-white/[0.06] hover:text-white">Start Your Day</Button>
           </div>
         </div>
 
@@ -15436,7 +15434,40 @@ function Meta({ label, value, green, gold, danger }) { return <div><div classNam
 function MiniInfo({ label, value, badge, tone }) { const badgeClass = tone === "red" ? "bg-red-600/90 border border-red-500/70 text-white shadow-[0_0_14px_rgba(239,68,68,0.35)]" : tone === "green" ? "bg-emerald-600/90 border border-emerald-500/70 text-white shadow-[0_0_14px_rgba(16,185,129,0.35)]" : "bg-fuchsia-500 text-black"; return <div className="mb-6"><div className="text-sm font-bold text-zinc-300">{label}</div><div className={badge ? `mt-2 w-fit rounded-full px-3 py-1 text-xs font-black ${badgeClass}` : "mt-2 text-sm text-zinc-400"}>{value}</div></div>; }
 function SideBox({ title, children }) { return <div className="rounded-xl border border-white/10 bg-zinc-950 p-6"><h3 className="mb-5 text-lg font-black">{title}</h3>{children}</div>; }
 function DashCard({ title, value, tone, icon, badge, isLoading = false }) {
-  const styles = { emerald: { card: "from-emerald-950/45 via-emerald-950/10 to-black border-emerald-500/45 hover:border-emerald-400/80 hover:shadow-emerald-500/20", icon: "bg-emerald-500/10 text-emerald-400", value: "text-white", line: "text-emerald-400", badge: "bg-emerald-500/20 text-emerald-300", glow: "bg-emerald-500/10" }, fuchsia: { card: "from-fuchsia-950/45 via-fuchsia-950/10 to-black border-fuchsia-500/45 hover:border-fuchsia-400/80 hover:shadow-fuchsia-500/20", icon: "bg-fuchsia-500/10 text-fuchsia-400", value: "text-white", line: "text-violet-400", badge: "bg-emerald-500/20 text-emerald-300", glow: "bg-fuchsia-500/10" }, cyan: { card: "from-cyan-950/45 via-cyan-950/10 to-black border-cyan-500/45 hover:border-cyan-400/80 hover:shadow-cyan-500/20", icon: "bg-cyan-500/10 text-cyan-400", value: "text-white", line: "text-cyan-400", badge: "bg-zinc-700/70 text-zinc-300", glow: "bg-cyan-500/10" }, amber: { card: "from-orange-950/45 via-orange-950/10 to-black border-orange-500/45 hover:border-orange-400/80 hover:shadow-orange-500/20", icon: "bg-amber-500/10 text-amber-400", value: "text-white", line: "text-amber-400", badge: "bg-emerald-500/20 text-emerald-300", glow: "bg-amber-500/10" } };
+  const styles = {
+    emerald: {
+      card: "from-[#07100d] via-[#050807] to-black border-emerald-500/25 hover:border-emerald-400/40",
+      icon: "border border-emerald-500/15 bg-emerald-500/[0.07] text-emerald-400",
+      value: "text-zinc-100",
+      line: "text-emerald-500",
+      badge: "border-emerald-500/25 bg-emerald-500/[0.08] text-emerald-300",
+      glow: "bg-emerald-500/[0.035]",
+    },
+    fuchsia: {
+      card: "from-[#0d0811] via-[#070508] to-black border-fuchsia-500/25 hover:border-fuchsia-400/40",
+      icon: "border border-fuchsia-500/15 bg-fuchsia-500/[0.07] text-fuchsia-400",
+      value: "text-zinc-100",
+      line: "text-violet-500",
+      badge: "border-emerald-500/25 bg-emerald-500/[0.08] text-emerald-300",
+      glow: "bg-fuchsia-500/[0.035]",
+    },
+    cyan: {
+      card: "from-[#061014] via-[#04080a] to-black border-cyan-500/25 hover:border-cyan-400/40",
+      icon: "border border-cyan-500/15 bg-cyan-500/[0.07] text-cyan-400",
+      value: "text-zinc-100",
+      line: "text-cyan-500",
+      badge: "border-white/15 bg-white/[0.05] text-zinc-400",
+      glow: "bg-cyan-500/[0.035]",
+    },
+    amber: {
+      card: "from-[#120c05] via-[#090603] to-black border-amber-500/25 hover:border-amber-400/40",
+      icon: "border border-amber-500/15 bg-amber-500/[0.07] text-amber-400",
+      value: "text-zinc-100",
+      line: "text-amber-500",
+      badge: "border-emerald-500/25 bg-emerald-500/[0.08] text-emerald-300",
+      glow: "bg-amber-500/[0.035]",
+    },
+  };
   const s = styles[tone] || styles.emerald;
   const isCustomValue = React.isValidElement(value);
   if (isLoading) {
@@ -15454,7 +15485,7 @@ function DashCard({ title, value, tone, icon, badge, isLoading = false }) {
       </div>
     );
   }
-  return <button className={`dashboard-dash-card group relative overflow-hidden rounded-xl border bg-gradient-to-br p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:scale-[1.025] hover:shadow-2xl ${s.card}`}><div className={`absolute right-0 top-0 h-24 w-24 rounded-bl-3xl ${s.glow}`} /><div className="relative z-10 flex items-start justify-between"><div><div className="text-xs font-black uppercase tracking-wider text-zinc-400">{title}</div><div className={`mt-4 text-3xl font-black ${s.value}`}>{isCustomValue ? value : <AnimatedValue value={value} />}</div></div><div className={`flex h-10 w-10 items-center justify-center rounded-xl text-lg font-black ${s.icon}`}>{icon}</div></div><div className="relative z-10 mt-3 flex items-end justify-between"><span className={`dashboard-card-badge rounded-md border px-2 py-1 text-xs font-black ${s.badge}`}>{badge}</span><svg width="86" height="34" viewBox="0 0 86 34" fill="none" className={`${s.line} opacity-90 transition-transform duration-300 group-hover:scale-110`}><path d="M2 26 C8 28, 11 12, 17 18 S27 27, 33 16 S45 13, 51 18 S61 8, 68 10 S76 5, 84 2" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" /><path d="M2 31 C11 28, 15 20, 22 22 S32 27, 38 19 S49 15, 55 20 S65 11, 72 13 S78 8, 84 7" stroke="currentColor" strokeWidth="1" opacity="0.35" fill="none" strokeLinecap="round" /></svg></div></button>;
+  return <button className={`dashboard-dash-card group relative overflow-hidden rounded-xl border bg-gradient-to-br p-6 text-left shadow-[0_16px_36px_rgba(0,0,0,0.24)] transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.01] hover:shadow-[0_20px_42px_rgba(0,0,0,0.34)] ${s.card}`}><div className={`absolute right-0 top-0 h-24 w-24 rounded-bl-3xl ${s.glow}`} /><div className="relative z-10 flex items-start justify-between"><div><div className="text-xs font-black uppercase tracking-wider text-zinc-500">{title}</div><div className={`mt-4 text-3xl font-black ${s.value}`}>{isCustomValue ? value : <AnimatedValue value={value} />}</div></div><div className={`flex h-10 w-10 items-center justify-center rounded-xl text-lg font-black ${s.icon}`}>{icon}</div></div><div className="relative z-10 mt-3 flex items-end justify-between"><span className={`dashboard-card-badge rounded-md border px-2 py-1 text-xs font-black ${s.badge}`}>{badge}</span><svg width="86" height="34" viewBox="0 0 86 34" fill="none" className={`${s.line} opacity-65 transition-transform duration-300 group-hover:scale-105 group-hover:opacity-85`}><path d="M2 26 C8 28, 11 12, 17 18 S27 27, 33 16 S45 13, 51 18 S61 8, 68 10 S76 5, 84 2" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" /><path d="M2 31 C11 28, 15 20, 22 22 S32 27, 38 19 S49 15, 55 20 S65 11, 72 13 S78 8, 84 7" stroke="currentColor" strokeWidth="1" opacity="0.35" fill="none" strokeLinecap="round" /></svg></div></button>;
 }
 function Chart({ curve, tall }) { return <div className={tall ? "mt-5 h-96" : "mt-5 h-72"}><SafeResponsiveContainer><LineChart data={curve}><CartesianGrid strokeDasharray="3 3" opacity={0.12} /><XAxis dataKey="date" stroke="#777" /><YAxis stroke="#777" /><Tooltip contentStyle={{ background: "var(--tooltip-bg, #09090b)", border: "1px solid var(--tooltip-border, #333)", borderRadius: 12, color: "var(--tooltip-text, #ffffff)" }} /><Line type="monotone" dataKey="pnl" stroke="#a855f7" strokeWidth={3} dot={{ r: 5 }} /></LineChart></SafeResponsiveContainer></div>; }
 function SectionTitle({ title, icon, gold }) { return <div className="flex items-center gap-3 text-xl font-black"><div className={`rounded-lg p-2 ${gold ? "bg-amber-500/20 text-amber-400" : "bg-fuchsia-500/20 text-fuchsia-400"}`}>{icon}</div>{title}</div>; }
