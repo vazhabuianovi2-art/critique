@@ -8199,6 +8199,17 @@ Skipped duplicates: ${duplicateCount}
       </button>
       <main className="app-main min-h-screen overflow-x-hidden pb-24 p-4 sm:p-6 lg:p-8">
         <div className="w-full max-w-none">
+
+        {/* Breadcrumb */}
+        {!tradeViewMode && (
+          <div className="mb-5 flex items-center gap-2 text-sm">
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-fuchsia-500 text-[11px] font-black text-black">T</div>
+            <span className="font-semibold text-zinc-400">TryCritique</span>
+            <span className="text-zinc-600">/</span>
+            <span className="font-bold text-white">{active === "Mistake Detector" ? "Mistake Detector" : active}</span>
+          </div>
+        )}
+
         {dataMessage && (
           <div className="mb-5 rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-black text-red-300">
             {dataMessage}
