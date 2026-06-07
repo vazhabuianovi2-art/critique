@@ -2063,6 +2063,7 @@ const THEME_STYLE_CSS = `
     overflow: hidden;
     border-color: rgba(255,255,255,.15) !important;
     box-shadow: 0 18px 45px rgba(0,0,0,.28) !important;
+    transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
   }
 
   .dashboard-performance-card:hover,
@@ -2073,16 +2074,25 @@ const THEME_STYLE_CSS = `
 
   .dashboard-recent-card,
   .quick-insights-section,
-  .dashboard-activity-card {
+  .dashboard-activity-card,
+  .dashboard-routine-cta,
+  .dashboard-events-card,
+  .dashboard-empty,
+  .dashboard-mistake-alert {
     border-color: rgba(255,255,255,.15) !important;
     box-shadow: 0 18px 45px rgba(0,0,0,.28) !important;
+    transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
   }
 
   .dashboard-recent-card:hover,
   .quick-insights-section:hover,
-  .dashboard-activity-card:hover {
+  .dashboard-activity-card:hover,
+  .dashboard-routine-cta:hover,
+  .dashboard-events-card:hover,
+  .dashboard-empty:hover,
+  .dashboard-mistake-alert:hover {
     border-color: rgba(255,255,255,.20) !important;
-    box-shadow: 0 18px 45px rgba(0,0,0,.32) !important;
+    box-shadow: 0 22px 52px rgba(0,0,0,.38) !important;
   }
 
   .dashboard-activity-card::before {
@@ -3699,7 +3709,10 @@ const THEME_STYLE_CSS = `
   .light-theme .dashboard-recent-card,
   .light-theme .dashboard-activity-card,
   .light-theme .dashboard-routine-cta,
-  .light-theme .quick-insights-section {
+  .light-theme .quick-insights-section,
+  .light-theme .dashboard-events-card,
+  .light-theme .dashboard-empty,
+  .light-theme .dashboard-mistake-alert {
     background: #ffffff !important;
     border-color: rgba(226,232,240,.96) !important;
     color: #111827 !important;
@@ -8962,27 +8975,27 @@ function DashboardEmptyState({ onAddTrade, onOpenJournal }) {
     { icon: <Target size={20} />, title: "Set Goals", detail: "Define and achieve trading targets" },
   ];
   return (
-    <section className="dashboard-empty mt-8 rounded-2xl border-2 border-dashed border-white/20 bg-gradient-to-br from-[#0b0710] via-black to-[#0a0610] px-6 py-16 sm:px-10 sm:py-20">
+    <section className="dashboard-empty mt-8 rounded-2xl border border-white/15 bg-gradient-to-br from-[#08080b] via-black to-[#050506] px-6 py-16 transition-all duration-300 sm:px-10 sm:py-20">
       <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
         <div className="relative mb-8 flex h-32 w-32 items-center justify-center">
-          <div className="absolute h-32 w-32 rounded-full bg-fuchsia-500/10 blur-2xl" aria-hidden="true" />
-          <div className="absolute right-1 top-0 flex h-9 w-9 items-center justify-center rounded-full border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 shadow-[0_0_16px_rgba(16,185,129,0.25)]" aria-hidden="true"><BarChart3 size={16} /></div>
-          <div className="absolute left-1 top-12 flex h-9 w-9 items-center justify-center rounded-full border border-sky-500/40 bg-sky-500/15 text-sky-300 shadow-[0_0_16px_rgba(56,189,248,0.25)]" aria-hidden="true"><Target size={16} /></div>
-          <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-fuchsia-500/35 bg-fuchsia-500/10 text-fuchsia-300 shadow-[0_0_34px_rgba(178,74,242,0.28)]"><TrendingUp size={34} /></div>
+          <div className="absolute h-32 w-32 rounded-full bg-white/[0.03] blur-2xl" aria-hidden="true" />
+          <div className="absolute right-1 top-0 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/70 text-emerald-400" aria-hidden="true"><BarChart3 size={16} /></div>
+          <div className="absolute left-1 top-12 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/70 text-sky-400" aria-hidden="true"><Target size={16} /></div>
+          <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-white/15 bg-[#0a0a0d] text-fuchsia-300"><TrendingUp size={34} /></div>
         </div>
 
         <h2 className="text-3xl font-black text-white sm:text-4xl">Welcome to <span className="bg-gradient-to-r from-fuchsia-300 to-fuchsia-500 bg-clip-text text-transparent">{BRAND_NAME}</span>!</h2>
         <p className="mt-4 max-w-md text-base font-semibold leading-relaxed text-zinc-400">Your trading journey starts here. Log your first trade to see your performance analytics, track your progress, and unlock powerful insights.</p>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Button onClick={onAddTrade} className="bg-fuchsia-500 px-6 py-3 font-black text-black shadow-[0_0_24px_rgba(178,74,242,0.28)]"><Plus size={18} /> Log Your First Trade</Button>
+          <Button onClick={onAddTrade} className="border border-fuchsia-500/35 bg-fuchsia-950/45 px-6 py-3 font-black text-fuchsia-100 hover:border-fuchsia-400/55 hover:bg-fuchsia-950/65"><Plus size={18} /> Log Your First Trade</Button>
           <Button onClick={onOpenJournal} className="border border-white/15 bg-black px-6 py-3 font-black text-white hover:bg-white/5">Explore Journal</Button>
         </div>
 
         <div className="mt-12 grid w-full gap-8 sm:grid-cols-3">
           {features.map((feature) => (
             <div key={feature.title} className="flex flex-col items-center text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300">{feature.icon}</div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-[#0a0a0d] text-fuchsia-300">{feature.icon}</div>
               <h3 className="mt-4 text-base font-black text-white">{feature.title}</h3>
               <p className="mt-1 max-w-[180px] text-sm font-semibold text-zinc-500">{feature.detail}</p>
             </div>
@@ -9026,7 +9039,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2.5">
-            <Button onClick={onOpenJournal} className="dashboard-primary-btn group relative overflow-hidden rounded-xl border border-fuchsia-500/35 bg-fuchsia-700/75 px-5 py-2.5 text-sm font-bold text-white shadow-[0_12px_28px_rgba(0,0,0,0.32)] hover:border-fuchsia-400/50 hover:bg-fuchsia-600/80 hover:shadow-[0_14px_30px_rgba(0,0,0,0.38)]">
+            <Button onClick={onOpenJournal} className="dashboard-primary-btn group relative overflow-hidden rounded-xl border border-fuchsia-500/30 bg-fuchsia-950/55 px-5 py-2.5 text-sm font-bold text-fuchsia-100 shadow-[0_12px_28px_rgba(0,0,0,0.32)] hover:-translate-y-0.5 hover:border-fuchsia-400/45 hover:bg-fuchsia-950/75 hover:shadow-[0_16px_32px_rgba(0,0,0,0.40)]">
               <BookOpen size={15} /> Log Trade
             </Button>
             <Button onClick={onStartDay} className="dashboard-start-btn rounded-xl border border-white/10 bg-white/[0.035] px-5 py-2.5 text-sm font-bold text-zinc-300 backdrop-blur hover:border-white/20 hover:bg-white/[0.06] hover:text-white">Start Your Day</Button>
@@ -9065,7 +9078,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
         <div className="dashboard-performance-card light-card rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-6">
           <div className="relative z-10 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex items-center gap-4">
-              <div className="dashboard-performance-icon flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-black text-fuchsia-300"><TrendingUp size={22} /></div>
+              <div className="dashboard-performance-icon flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-[#0a0a0d] text-fuchsia-300"><TrendingUp size={22} /></div>
               <div>
                 <h2 className="text-2xl font-black">Performance Overview</h2>
                 <p className="text-sm text-zinc-400">Your cumulative P&L over time</p>
@@ -9077,7 +9090,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
                 ["WinRate", "⌁ WinRate"],
                 ["DailyP&L", "▥ DailyP&L"],
               ].map(([mode, label]) => (
-                <button key={mode} onClick={() => setPerformanceMode(mode)} className={performanceMode === mode ? "rounded-lg bg-fuchsia-500 px-4 py-2 text-sm font-black text-black" : "rounded-lg px-4 py-2 text-sm font-black text-zinc-300 hover:bg-white/5"}>{label}</button>
+                <button key={mode} onClick={() => setPerformanceMode(mode)} className={performanceMode === mode ? "dashboard-performance-tab-active rounded-lg border border-fuchsia-500/30 bg-fuchsia-950/55 px-4 py-2 text-sm font-black text-fuchsia-100" : "dashboard-performance-tab rounded-lg border border-transparent px-4 py-2 text-sm font-black text-zinc-400 hover:border-white/10 hover:bg-white/[0.04] hover:text-white"}>{label}</button>
               ))}
             </div>
           </div>
@@ -9093,26 +9106,26 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
           <div className="dashboard-recent-card light-card relative flex flex-1 flex-col overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-6">
             <div className="relative z-10 mb-5 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="dashboard-recent-icon flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/15 text-fuchsia-300"><TrendingUp size={22} /></div>
+                <div className="dashboard-recent-icon flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-[#0a0a0d] text-fuchsia-300"><TrendingUp size={22} /></div>
                 <div>
                   <h2 className="text-2xl font-black">Recent Trades</h2>
                   <p className="text-sm text-zinc-400">Your latest activity</p>
                 </div>
               </div>
-              <button onClick={onViewAllTrades} className="view-all-button rounded-xl border border-fuchsia-500/35 bg-fuchsia-500 px-4 py-2 text-sm font-black text-white">View All</button>
+              <button onClick={onViewAllTrades} className="view-all-button rounded-xl border border-white/10 bg-[#0a0a0d] px-4 py-2 text-sm font-black text-zinc-200 transition hover:-translate-y-0.5 hover:border-fuchsia-500/35 hover:text-fuchsia-200">View All</button>
             </div>
-            <div className="dashboard-recent-list light-card-soft relative z-10 flex-1 rounded-2xl border border-fuchsia-500/18 bg-black/45 p-4">
+            <div className="dashboard-recent-list light-card-soft relative z-10 flex-1 rounded-2xl border border-white/10 bg-black/45 p-4">
               {recentTrades.map((trade) => {
                 const screenshots = normalizeScreenshots(trade);
                 const pnl = Number(trade.pnl || 0);
                 return (
-                  <button key={trade.id} onClick={() => onView(trade)} className="dashboard-recent-row group flex w-full items-center justify-between gap-2 rounded-xl border border-transparent p-3 text-left transition-all hover:border-fuchsia-500/35 hover:bg-fuchsia-500/8">
+                  <button key={trade.id} onClick={() => onView(trade)} className="dashboard-recent-row group flex w-full items-center justify-between gap-2 rounded-xl border border-transparent p-3 text-left transition-all hover:-translate-y-0.5 hover:border-white/15 hover:bg-white/[0.035]">
                     <div className="flex min-w-0 items-center gap-3">
                       <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-zinc-900">
                         {screenshots.length ? <img src={screenshots[0]} alt="Trade" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-zinc-500"><Camera size={18} /></div>}
                       </div>
                       <div className="min-w-0">
-                        <div className="flex min-w-0 items-center gap-2"><span className="truncate text-lg font-black">{trade.pair}</span><span className="shrink-0 rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 px-2 py-0.5 text-xs font-black text-fuchsia-100">{trade.setup}</span></div>
+                        <div className="flex min-w-0 items-center gap-2"><span className="truncate text-lg font-black">{trade.pair}</span><span className="trade-tag shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-xs font-black text-zinc-300">{trade.setup}</span></div>
                         <div className="mt-0.5 truncate text-sm font-semibold text-zinc-400">{trade.quantity ? `${trade.quantity} lots` : ""}{trade.quantity && trade.date ? " • " : ""}{trade.date}</div>
                       </div>
                     </div>
@@ -9123,7 +9136,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
             </div>
           </div>
 
-          <button onClick={onStartDay} className="dashboard-routine-cta group relative min-h-[220px] w-full overflow-hidden rounded-2xl border border-emerald-500/40 bg-gradient-to-br from-emerald-950/50 via-black to-[#050307] p-6 text-left">
+          <button onClick={onStartDay} className="dashboard-routine-cta group relative min-h-[220px] w-full overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-br from-[#080b0a] via-black to-[#050506] p-6 text-left transition-all duration-300 hover:-translate-y-0.5">
             <div className="relative z-10 flex h-full flex-col justify-between">
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -9131,11 +9144,11 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
                   <div className="mt-4 text-4xl font-black text-white">{checkedCount}/{routineItems.length}</div>
                   <div className="mt-2 text-sm font-bold text-emerald-300">{routinePercent === 100 ? "Ready to Trade" : `${routinePercent}% complete`}</div>
                 </div>
-                <div className="dashboard-routine-icon flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/15 text-2xl text-emerald-300">✅</div>
+                <div className="dashboard-routine-icon flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-[#0a0d0c] text-2xl text-emerald-300">✅</div>
               </div>
               <div className="mt-6">
                 <div className="mb-2 flex justify-between text-[10px] font-black uppercase tracking-wider text-zinc-500"><span>Checklist Progress</span><span>{routinePercent}%</span></div>
-                <div className="h-4 overflow-hidden rounded-full bg-zinc-800"><div className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-emerald-300 to-fuchsia-400" style={{ width: `${routinePercent}%` }} /></div>
+                <div className="h-4 overflow-hidden rounded-full bg-zinc-900"><div className="h-full rounded-full bg-emerald-600/80" style={{ width: `${routinePercent}%` }} /></div>
               </div>
             </div>
           </button>
@@ -9154,7 +9167,7 @@ function DashboardMistakeAlert({ trades, onOpen }) {
   const detector = getMistakeDetectorStats(trades);
   if (!detector.mainIssue) return null;
   return (
-    <button onClick={onOpen} className="mt-8 w-full rounded-2xl border border-red-500/35 bg-gradient-to-r from-red-950/45 via-black to-fuchsia-950/25 p-5 text-left shadow-[0_18px_45px_rgba(239,68,68,0.10)] transition hover:border-red-400/75 hover:shadow-[0_0_28px_rgba(239,68,68,0.18)]">
+    <button onClick={onOpen} className="dashboard-mistake-alert mt-8 w-full rounded-2xl border border-white/15 bg-gradient-to-r from-[#0b0809] via-black to-[#070506] p-5 text-left transition-all duration-300 hover:-translate-y-0.5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="text-xs font-black uppercase tracking-widest text-red-300">Main Mistake Warning</div>
@@ -9211,10 +9224,10 @@ function TodaysEventsPanel({ economicCalendar }) {
   }
 
   return (
-    <section className="mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#100719] via-black to-[#04110d] p-5 shadow-[0_18px_45px_rgba(178,74,242,0.10)]">
+    <section className="dashboard-events-card mt-8 rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050506] p-5 transition-all duration-300">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 text-fuchsia-300"><Calendar size={20} /></div>
+          <div className="dashboard-section-icon flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-[#0a0a0d] text-fuchsia-300"><Calendar size={20} /></div>
           <div>
             <h2 className="text-xl font-black text-white">Today's Events</h2>
             <p className="text-sm font-semibold text-zinc-400">Economic news for {todayKey}</p>
@@ -9244,7 +9257,7 @@ function TodaysEventsPanel({ economicCalendar }) {
             <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Currencies</div>
             <div className="mt-3 flex flex-wrap gap-2">
               {["All", ...currencyOptions].map((currency) => (
-                <button key={currency} onClick={() => toggleCurrencyFilter(currency)} className={currencyFilters.includes(currency) ? "rounded-lg border border-fuchsia-400/60 bg-fuchsia-500/18 px-3 py-2 text-xs font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-xs font-black text-zinc-400 hover:border-fuchsia-500/35 hover:text-fuchsia-200"}>
+                <button key={currency} onClick={() => toggleCurrencyFilter(currency)} className={currencyFilters.includes(currency) ? "rounded-lg border border-fuchsia-500/30 bg-fuchsia-950/45 px-3 py-2 text-xs font-black text-fuchsia-100" : "rounded-lg border border-white/10 bg-black px-3 py-2 text-xs font-black text-zinc-400 transition hover:border-white/20 hover:bg-white/[0.035] hover:text-white"}>
                   {currency}
                 </button>
               ))}
@@ -9267,24 +9280,27 @@ function TodaysEventsPanel({ economicCalendar }) {
 
 function QuickInsights({ insights }) {
   const styles = {
-    emerald: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
-    fuchsia: "border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300",
-    amber: "border-amber-500/30 bg-amber-500/10 text-amber-300",
-    red: "border-red-500/30 bg-red-500/10 text-red-300",
+    emerald: "border-emerald-500/20 bg-emerald-950/15 text-emerald-300",
+    fuchsia: "border-fuchsia-500/20 bg-fuchsia-950/15 text-fuchsia-300",
+    amber: "border-amber-500/20 bg-amber-950/15 text-amber-300",
+    red: "border-red-500/20 bg-red-950/15 text-red-300",
   };
   return (
     <section className="quick-insights-section mt-8 rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-5">
       <div className="mb-4 flex items-center justify-between">
-        <SectionTitle title="Quick Insights" icon={<Target size={18} />} />
-        <span className="rounded-full border border-fuchsia-500/25 bg-fuchsia-500/10 px-3 py-1 text-xs font-black text-fuchsia-300">Auto analysis</span>
+        <div className="flex items-center gap-3 text-xl font-black">
+          <div className="dashboard-section-icon flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-[#0a0a0d] text-fuchsia-300"><Target size={18} /></div>
+          Quick Insights
+        </div>
+        <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs font-black text-zinc-400">Auto analysis</span>
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {insights.map((item) => (
-          <div key={item.title} className={`relative overflow-hidden rounded-2xl border p-4 ${styles[item.tone] || styles.fuchsia}`}>
+          <div key={item.title} className={`quick-insight-card relative overflow-hidden rounded-2xl border p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:shadow-[0_16px_32px_rgba(0,0,0,0.30)] ${styles[item.tone] || styles.fuchsia}`}>
             <div className="absolute right-0 top-0 h-16 w-16 rounded-bl-3xl bg-white/5" />
             <div className="relative z-10 flex items-center justify-between">
               <div className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{item.title}</div>
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-black/25 text-sm font-black">{item.icon}</div>
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-black/50 text-sm font-black">{item.icon}</div>
             </div>
             <div className="relative z-10 mt-4 truncate text-xl font-black text-white">{item.value}</div>
             <div className="relative z-10 mt-1 text-xs font-bold text-zinc-400">{item.detail}</div>
@@ -9313,7 +9329,7 @@ function TradingActivityPanel({ trades, selectedDate, onSelectDate }) {
     <div className="dashboard-activity-card light-card relative flex h-full min-h-0 flex-col overflow-visible rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-5">
       <div className="relative z-10 flex items-start justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/15 text-fuchsia-300">
+          <div className="dashboard-section-icon flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-[#0a0a0d] text-fuchsia-300">
             <Calendar size={22} />
           </div>
           <div>
@@ -9329,10 +9345,10 @@ function TradingActivityPanel({ trades, selectedDate, onSelectDate }) {
         </div>
       </div>
 
-      <div className="relative z-10 mt-4 rounded-2xl border border-fuchsia-500/18 bg-black/40 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <div className="relative z-10 mt-4 rounded-2xl border border-white/10 bg-black/40 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
         <div className="mb-4 grid grid-cols-5 gap-3 text-center text-xs font-black">
           {["MON", "TUE", "WED", "THU", "FRI"].map((day) => (
-            <div key={day} className="rounded-xl border border-fuchsia-500/25 bg-gradient-to-br from-fuchsia-950/45 via-black to-black py-2 text-fuchsia-300 shadow-[0_0_14px_rgba(178,74,242,0.10)]">
+            <div key={day} className="rounded-xl border border-white/10 bg-[#09090b] py-2 text-zinc-400">
               {day}
             </div>
           ))}
@@ -9392,14 +9408,14 @@ function TradingActivityPanel({ trades, selectedDate, onSelectDate }) {
 
 function ActivityStat({ tone, title, value, subtitle, icon }) {
   const styles = {
-    fuchsia: { card: "border-fuchsia-500/45 bg-gradient-to-br from-fuchsia-950/35 via-black to-black text-fuchsia-300", icon: "bg-fuchsia-500/20 text-fuchsia-300", value: "text-fuchsia-300" },
-    emerald: { card: "border-emerald-500/45 bg-gradient-to-br from-emerald-950/35 via-black to-black text-emerald-300", icon: "bg-emerald-500/20 text-emerald-300", value: "text-emerald-300" },
-    red: { card: "border-red-500/45 bg-gradient-to-br from-red-950/35 via-black to-black text-red-300", icon: "bg-red-500/20 text-red-300", value: "text-red-300" },
-    amber: { card: "border-amber-500/45 bg-gradient-to-br from-amber-950/35 via-black to-black text-amber-300", icon: "bg-amber-500/20 text-amber-300", value: "text-amber-300" },
+    fuchsia: { card: "border-fuchsia-500/20 bg-fuchsia-950/10 text-fuchsia-300", icon: "border border-fuchsia-500/15 bg-black/45 text-fuchsia-300", value: "text-fuchsia-300" },
+    emerald: { card: "border-emerald-500/20 bg-emerald-950/10 text-emerald-300", icon: "border border-emerald-500/15 bg-black/45 text-emerald-300", value: "text-emerald-300" },
+    red: { card: "border-red-500/20 bg-red-950/10 text-red-300", icon: "border border-red-500/15 bg-black/45 text-red-300", value: "text-red-300" },
+    amber: { card: "border-amber-500/20 bg-amber-950/10 text-amber-300", icon: "border border-amber-500/15 bg-black/45 text-amber-300", value: "text-amber-300" },
   };
   const s = styles[tone] || styles.fuchsia;
   return (
-    <div className={`activity-stat-${tone} group relative min-h-[118px] overflow-hidden rounded-2xl border p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-fuchsia-400/55 hover:shadow-[0_0_22px_rgba(178,74,242,0.16)] ${s.card}`}>
+    <div className={`activity-stat-${tone} group relative min-h-[118px] overflow-hidden rounded-2xl border p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:shadow-[0_16px_32px_rgba(0,0,0,0.30)] ${s.card}`}>
       <div className="pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full bg-white/5 blur-xl" />
       <div className="relative z-10 flex items-center justify-between gap-2">
         <div className="min-w-0 text-[11px] font-black uppercase tracking-wider text-zinc-400">{title}</div>
@@ -9423,7 +9439,7 @@ function PerformanceOverviewChart({ mode, trades, curve, stats, isLoading = fals
   const subtitle = isWinRate ? "Current cumulative win rate" : isDaily ? "Daily profit / loss by trading day" : "Current cumulative equity curve";
   const accent = isWinRate ? "text-fuchsia-400" : isDaily ? "text-amber-400" : "text-emerald-400";
   const stroke = isWinRate ? "#b24bf3" : isDaily ? "#f59e0b" : "#22c55e";
-  const border = isWinRate ? "border-fuchsia-500/30 bg-fuchsia-950/15" : isDaily ? "border-amber-500/30 bg-amber-950/15" : "border-emerald-500/30 bg-emerald-950/15";
+  const border = isWinRate ? "border-fuchsia-500/18 bg-fuchsia-950/10" : isDaily ? "border-amber-500/18 bg-amber-950/10" : "border-emerald-500/18 bg-emerald-950/10";
 
   if (isLoading) {
     return (
@@ -9528,10 +9544,10 @@ function PerformanceScorePanel({ stats, isLoading = false }) {
 
   return (
     <div className="dashboard-score-card light-card relative overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-6">
-      <div className="pointer-events-none absolute right-0 top-0 h-40 w-40 rounded-bl-[5rem] bg-emerald-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute right-0 top-0 h-40 w-40 rounded-bl-[5rem] bg-white/[0.025] blur-3xl" />
 
       <div className="relative z-10 flex items-start gap-4">
-        <div className="dashboard-section-icon flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/15 text-fuchsia-300 shadow-[0_0_18px_rgba(178,74,242,0.25)]">
+        <div className="dashboard-section-icon flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-[#0a0a0d] text-fuchsia-300">
           <span className="text-2xl font-black">ⓘ</span>
         </div>
         <div>
@@ -9579,7 +9595,7 @@ function PerformanceScorePanel({ stats, isLoading = false }) {
             ))}
 
             <circle cx={center.x} cy={center.y} r="4" fill="rgba(34,197,94,0.45)" />
-            <polygon points={radarPoints} fill="rgba(34,197,94,0.24)" stroke="#22c55e" strokeWidth="3" filter="url(#radarGlow)" />
+            <polygon points={radarPoints} fill="rgba(34,197,94,0.18)" stroke="#22c55e" strokeWidth="3" />
 
             {chartPoints.map((point) => (
               <circle
@@ -9622,13 +9638,13 @@ function PerformanceScorePanel({ stats, isLoading = false }) {
         </div>
       </div>
 
-      <div className="dashboard-score-summary light-card-soft relative z-10 mt-5 rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-950/25 via-black to-fuchsia-950/10 p-5 shadow-[0_0_24px_rgba(16,185,129,0.08)]">
+      <div className="dashboard-score-summary light-card-soft relative z-10 mt-5 rounded-2xl border border-white/10 bg-[#070809] p-5">
         <div className="text-sm font-black uppercase tracking-wider text-zinc-400">Your Performance Score</div>
         <div className="mt-4 flex items-center gap-5">
           <div className="text-6xl font-black leading-none text-emerald-500">{score.toFixed(2)}</div>
           <div className="flex-1">
             <div className="h-5 overflow-hidden rounded-full bg-zinc-800 shadow-inner">
-              <div className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-emerald-400 to-fuchsia-400 shadow-[0_0_18px_rgba(16,185,129,0.30)]" style={{ width: `${score}%` }} />
+              <div className="h-full rounded-full bg-emerald-600/80" style={{ width: `${score}%` }} />
             </div>
             <div className="mt-3 flex justify-between text-xs font-bold text-zinc-400">
               <span>0</span>
