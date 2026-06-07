@@ -16,6 +16,7 @@ import {
   Eye,
   EyeOff,
   Filter,
+  Loader2,
   Lock,
   Mail,
   LayoutDashboard,
@@ -10186,6 +10187,17 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
   function handleSaveClick() {
     if (hasFormErrors) {
       setShowErrors(true);
+      setTimeout(() => {
+        const shell = document.querySelector(".trade-modal-shell");
+        const firstError = document.querySelector(".trade-field-error");
+        if (firstError && shell) {
+          const errorTop = firstError.getBoundingClientRect().top;
+          const shellTop = shell.getBoundingClientRect().top;
+          shell.scrollBy({ top: errorTop - shellTop - 120, behavior: "smooth" });
+          const input = firstError.previousElementSibling || firstError.closest("[data-field]")?.querySelector("input, select, textarea");
+          if (input) input.focus({ preventScroll: true });
+        }
+      }, 50);
       return;
     }
     onSave();
@@ -10877,7 +10889,7 @@ function getTradeFormErrors(form) {
 
 function FieldError({ text }) {
   if (!text) return null;
-  return <div className="mt-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-black text-red-300">⚠ {text}</div>;
+  return <div className="trade-field-error mt-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-black text-red-300">⚠ {text}</div>;
 }
 
 function ImportPreviewModal({ preview, onConfirm, onClose }) {
@@ -13214,7 +13226,7 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
 }
 
 function RefreshCwIcon() {
-  return <span className="text-sm leading-none">↻</span>;
+  return <Loader2 size={16} className="animate-spin" />;
 }
 
 function StatsSectionTitle({ title, icon, className = "" }) {
