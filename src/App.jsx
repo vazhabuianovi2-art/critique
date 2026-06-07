@@ -8200,16 +8200,6 @@ Skipped duplicates: ${duplicateCount}
       <main className="app-main min-h-screen overflow-x-hidden pb-24 p-4 sm:p-6 lg:p-8">
         <div className="w-full max-w-none">
 
-        {/* Breadcrumb */}
-        {!tradeViewMode && (
-          <div className="mb-5 flex items-center gap-2 text-sm">
-            <BrandBolt className="h-5 w-5 text-fuchsia-400" />
-            <span className="font-semibold text-zinc-400">TryCritique</span>
-            <span className="text-zinc-600">/</span>
-            <span className="font-bold text-white">{active}</span>
-          </div>
-        )}
-
         {dataMessage && (
           <div className="mb-5 rounded-2xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-black text-red-300">
             {dataMessage}
@@ -9643,6 +9633,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+      <TopCrumb page="Calendar" />
       {/* Header banner — Sydview style */}
       <div className="mb-6 overflow-hidden rounded-2xl border border-fuchsia-500/20 bg-gradient-to-r from-[#1a0a2e] via-[#120820] to-[#0d0514] px-5 py-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
