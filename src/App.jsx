@@ -9665,8 +9665,8 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
       <div className="xl:overflow-x-auto">
         <div className="grid min-w-0 grid-cols-7 gap-1.5 xl:min-w-[900px] xl:grid-cols-[repeat(7,minmax(0,1fr))_150px] xl:gap-2">
           {/* Day headers */}
-          {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT", "WEEK"].map((day) => (
-            <div key={day} className={`rounded-xl py-2.5 text-center text-[11px] font-black tracking-widest ${day === "WEEK" ? "hidden xl:block" : ""} ${day === "SUN" || day === "SAT" || day === "WEEK" ? "bg-fuchsia-500/10 text-fuchsia-400" : "bg-white/4 text-zinc-500"}`}>
+          {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN", "WEEK"].map((day) => (
+            <div key={day} className={`rounded-xl py-2.5 text-center text-[11px] font-black tracking-widest ${day === "WEEK" ? "hidden xl:block" : ""} ${day === "SAT" || day === "SUN" || day === "WEEK" ? "bg-fuchsia-500/10 text-fuchsia-400" : "bg-white/4 text-zinc-500"}`}>
               {day}
             </div>
           ))}
@@ -9690,11 +9690,11 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                     <button
                       key={cell.key}
                       onClick={() => openDayDetails(cell.key)}
-                      className={`relative flex h-14 flex-col rounded-xl border p-2 text-left transition-all duration-150 xl:h-[110px] xl:p-3
+                      className={`relative flex h-14 flex-col rounded-xl border p-2 text-left transition-all duration-200 xl:h-[110px] xl:p-3
                         ${isWeekend ? "bg-fuchsia-500/6" : "bg-[#0d0d0d]"}
                         ${selected
-                          ? "border-fuchsia-500/70 shadow-[0_0_0_1px_rgba(178,74,242,0.35)]"
-                          : "border-white/8 hover:border-white/18 hover:bg-[#111]"}
+                          ? "border-fuchsia-500/70 shadow-[0_0_0_1px_rgba(178,74,242,0.35)] -translate-y-0.5"
+                          : "border-white/8 hover:border-fuchsia-500/30 hover:bg-fuchsia-500/5 hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(178,74,242,0.12)]"}
                       `}
                     >
                       <div className="flex items-start justify-between">
