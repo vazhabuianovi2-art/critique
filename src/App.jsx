@@ -7530,8 +7530,7 @@ export default function TradingJournalDashboard() {
         if (signUpData?.user && Array.isArray(signUpData.user.identities) && signUpData.user.identities.length === 0) {
           throw new Error("This email is already registered. Please sign in instead.");
         }
-        setAuthMessage("Account created. Check your email inbox and confirm your address before signing in.");
-        setAuthPage("login");
+        setAuthPage("signup-pricing");
         return { ok: true, needsConfirmation: true };
       }
 
@@ -15377,6 +15376,127 @@ function StatCard({ title, value, green, gold }) {
   );
 }
 
+function SignupPricingPage({ setAuthPage }) {
+  const [selected, setSelected] = useState("monthly");
+
+  const plans = [
+    {
+      id: "monthly",
+      name: "Monthly",
+      daily: "$0.33",
+      price: "$10",
+      cadence: "billed monthly",
+      badge: null,
+    },
+    {
+      id: "yearly",
+      name: "Yearly",
+      daily: "$0.24",
+      price: "$86",
+      cadence: "billed annually",
+      badge: "Save 28%",
+      featured: true,
+    },
+  ];
+
+  const features = [
+    "7-day free trial — No charge today",
+    "Unlimited trade logging & journaling",
+    "Advanced analytics & calendar",
+    "Mistake detector & psychology tools",
+    "Screenshot uploads",
+    "CSV import, export & backup",
+    "Up to 20 trading accounts",
+    "Cancel anytime before trial ends",
+  ];
+
+  const activePlan = plans.find((p) => p.id === selected);
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-[#050308] px-4 py-12">
+      {/* Background glow */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-fuchsia-600/8 blur-3xl" />
+        <div className="absolute -right-32 bottom-1/4 h-96 w-96 rounded-full bg-violet-600/6 blur-3xl" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-lg">
+        {/* Logo */}
+        <div className="mb-8 flex flex-col items-center gap-3">
+          <span className="text-fuchsia-400"><BrandBolt className="h-10 w-10" /></span>
+          <h1 className="text-2xl font-black tracking-tight text-white">Start Your Free Trial</h1>
+          <p className="text-center text-sm text-zinc-500">Choose your plan. You won't be charged today.</p>
+        </div>
+
+        {/* Plan cards */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          {plans.map((plan) => (
+            <button
+              key={plan.id}
+              onClick={() => setSelected(plan.id)}
+              className={`relative flex flex-col items-center rounded-2xl border p-5 text-center transition-all duration-200
+                ${selected === plan.id
+                  ? "border-fuchsia-500/60 bg-fuchsia-500/10 shadow-[0_0_0_1px_rgba(178,74,242,0.25),0_0_30px_rgba(178,74,242,0.1)]"
+                  : "border-white/8 bg-white/3 hover:border-white/15"}`}
+            >
+              {plan.featured && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-fuchsia-500 px-3 py-0.5 text-[11px] font-black text-black">⭐ Most Popular</span>
+              )}
+              <div className="text-sm font-black uppercase tracking-wider text-zinc-400 mb-2">{plan.name}</div>
+              <div className="text-4xl font-black text-fuchsia-400">{plan.daily}<span className="text-lg text-zinc-500">/day</span></div>
+              <div className="mt-1 text-xs text-zinc-500">{plan.price} {plan.cadence}</div>
+              {plan.badge && (
+                <span className="mt-2 rounded-full bg-emerald-500/15 border border-emerald-500/25 px-2.5 py-0.5 text-[11px] font-black text-emerald-400">{plan.badge}</span>
+              )}
+              <div className={`mt-4 h-5 w-5 rounded-full border-2 flex items-center justify-center ${selected === plan.id ? "border-fuchsia-500 bg-fuchsia-500" : "border-white/20"}`}>
+                {selected === plan.id && <div className="h-2 w-2 rounded-full bg-white" />}
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {/* What's Included */}
+        <div className="mb-4 rounded-2xl border border-white/8 bg-white/3 p-5">
+          <div className="mb-4 flex items-center gap-2 text-sm font-black text-white">
+            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-fuchsia-500/20 text-fuchsia-400"><CheckCircle size={14} /></span>
+            What's Included
+          </div>
+          <div className="grid grid-cols-1 gap-2.5">
+            {features.map((f) => (
+              <div key={f} className="flex items-center gap-2.5 text-sm text-zinc-300">
+                <span className="shrink-0 text-emerald-400"><CheckCircle size={14} /></span>
+                {f}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <button
+          onClick={() => {
+            setAuthPage("login");
+          }}
+          className="w-full rounded-2xl bg-fuchsia-500 py-4 text-base font-black text-black shadow-[0_0_30px_rgba(178,74,242,0.35)] transition hover:bg-fuchsia-400 hover:shadow-[0_0_40px_rgba(178,74,242,0.5)]"
+        >
+          Start Free Trial — {activePlan?.price}/{selected === "monthly" ? "month" : "year"}
+        </button>
+
+        <p className="mt-4 text-center text-xs text-zinc-600">
+          By continuing, you agree to our{" "}
+          <button onClick={() => setAuthPage("terms")} className="text-zinc-500 underline hover:text-zinc-300">Terms of Service</button>{" "}
+          and{" "}
+          <button onClick={() => setAuthPage("privacy")} className="text-zinc-500 underline hover:text-zinc-300">Privacy Policy</button>.
+        </p>
+
+        <p className="mt-3 text-center text-xs text-zinc-600">
+          Already have an account?{" "}
+          <button onClick={() => setAuthPage("login")} className="font-bold text-fuchsia-400 hover:text-fuchsia-300">Sign in</button>
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessage, isSupabaseReady, passwordRecoverySession, theme, setTheme }) {
   if (authPage === "landing") {
     return <LandingPage setAuthPage={setAuthPage} theme={theme} setTheme={setTheme} />;
@@ -15384,6 +15504,10 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
 
   if (["terms", "privacy", "refund", "contact"].includes(authPage)) {
     return <LegalInfoPage page={authPage} setAuthPage={setAuthPage} theme={theme} setTheme={setTheme} />;
+  }
+
+  if (authPage === "signup-pricing") {
+    return <SignupPricingPage setAuthPage={setAuthPage} />;
   }
 
   const isLogin = authPage === "login";
