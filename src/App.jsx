@@ -7023,7 +7023,7 @@ export default function TradingJournalDashboard() {
   const importFileRef = useRef(null);
   const backupFileRef = useRef(null);
   const accountStorageUserRef = useRef(null);
-  const [filters, setFilters] = useState({ result: "All", direction: "All", strategy: "All", grade: "All", session: "All", dateFrom: "", dateTo: "", minPnl: "", maxPnl: "", emotion: "All", tag: "" });
+  const [filters, setFilters] = useState({ result: "All", direction: "All", strategy: "All", grade: "All", session: "All", dateFrom: "", dateTo: "", minPnl: "", maxPnl: "", emotion: "All", tag: "", mistake: "All", setupQuality: "All", ruleBroken: "All" });
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(() => formatDateKey(new Date()));
   const [theme, setTheme] = useState(() => {
     try {
@@ -7727,7 +7727,10 @@ export default function TradingJournalDashboard() {
         (!filters.minPnl || pnl >= Number(filters.minPnl)) &&
         (!filters.maxPnl || pnl <= Number(filters.maxPnl)) &&
         (filters.emotion === "All" || trade.emotion === filters.emotion) &&
-        (!filters.tag || tags.join(" ").toLowerCase().includes(filters.tag.toLowerCase()))
+        (!filters.tag || tags.join(" ").toLowerCase().includes(filters.tag.toLowerCase())) &&
+        (filters.mistake === "All" || splitMultiValues(trade.mistake).includes(filters.mistake)) &&
+        (filters.setupQuality === "All" || trade.setupQuality === filters.setupQuality) &&
+        (filters.ruleBroken === "All" || splitMultiValues(trade.ruleBroken).includes(filters.ruleBroken))
       );
     });
   }, [activeTrades, searchQuery, filters]);
@@ -8417,7 +8420,7 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
   const isJournalEmpty = allTrades.length === 0;
   const resetJournalFilters = () => {
     setSearchQuery("");
-    setFilters({ result: "All", direction: "All", strategy: "All", session: "All", dateFrom: "", dateTo: "", minPnl: "", maxPnl: "", emotion: "All", tag: "" });
+    setFilters({ result: "All", direction: "All", strategy: "All", session: "All", dateFrom: "", dateTo: "", minPnl: "", maxPnl: "", emotion: "All", tag: "", mistake: "All", setupQuality: "All", ruleBroken: "All" });
   };
   const sortedTrades = useMemo(() => {
     const direction = sortDirection === "asc" ? 1 : -1;
@@ -8504,7 +8507,10 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
                   <Field label="Min P&L ($)"><MoneyInput value={filters.minPnl} onChange={(e) => setFilters({ ...filters, minPnl: e.target.value })} /></Field>
                   <Field label="Max P&L ($)"><MoneyInput value={filters.maxPnl} onChange={(e) => setFilters({ ...filters, maxPnl: e.target.value })} /></Field>
                   <Field label="Tags"><Input value={filters.tag} onChange={(e) => setFilters({ ...filters, tag: e.target.value })} placeholder="Add tag filter" className="border-white/15 bg-black focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" /></Field>
-                  <Field label="Emotions"><Select value={filters.emotion} onChange={(e) => setFilters({ ...filters, emotion: e.target.value })}><option>All</option><option>Calm</option><option>Confident</option><option>Fearful</option><option>Greedy</option></Select></Field>
+                  <Field label="Emotion"><Select value={filters.emotion} onChange={(e) => setFilters({ ...filters, emotion: e.target.value })}><option value="All">All</option>{EMOTION_OPTIONS.map(([name]) => <option key={name} value={name}>{name}</option>)}</Select></Field>
+                  <Field label="Mistake"><Select value={filters.mistake} onChange={(e) => setFilters({ ...filters, mistake: e.target.value })}><option value="All">All</option>{MISTAKE_OPTIONS.filter((m) => m !== "None").map((m) => <option key={m} value={m}>{m}</option>)}</Select></Field>
+                  <Field label="Setup Quality"><Select value={filters.setupQuality} onChange={(e) => setFilters({ ...filters, setupQuality: e.target.value })}><option value="All">All</option>{SETUP_QUALITY_OPTIONS.map((q) => <option key={q} value={q}>{q}</option>)}</Select></Field>
+                  <Field label="Rule Broken"><Select value={filters.ruleBroken} onChange={(e) => setFilters({ ...filters, ruleBroken: e.target.value })}><option value="All">All</option>{RULE_BROKEN_OPTIONS.filter((r) => r !== "None").map((r) => <option key={r} value={r}>{r}</option>)}</Select></Field>
                 </div>
                 <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
                   <Button variant="outline" onClick={resetJournalFilters} className="border-white/15 bg-black text-zinc-300">Clear All Filters</Button>
