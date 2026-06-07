@@ -12710,11 +12710,10 @@ function BillingGatePage({ authUser, billingSubscription, onSignOut, onSubscript
     setLoadingPlan(planId);
     setBillingError("");
     try {
-      const accessToken = await getCurrentAccessToken();
-      const response = await fetch("/api/billing-checkout", {
+      const response = await fetch("/api/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: planId, accessToken, email: authUser?.email }),
+        body: JSON.stringify({ plan: planId, email: authUser?.email, userId: authUser?.id }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.ok) throw new Error(data.error || "Could not start checkout.");
