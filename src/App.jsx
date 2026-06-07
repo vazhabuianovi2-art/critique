@@ -76,6 +76,7 @@ const ACTIVE_PAGE_KEY = "critique_active_page_v1";
 const SIDEBAR_COLLAPSED_KEY = "critique_sidebar_collapsed_v1";
 const STRATEGIES_OBJ_KEY = "critique_strategies_objects_v1";
 const RESTORE_CACHE_PREFIX = "critique_last_successful_restore_v1";
+const BILLING_ACCESS_CACHE_KEY = "critique_billing_access_v1";
 const USER_TRADES_KEY_PREFIX = "critique_user_trades_v2";
 const USER_TRADES_BACKUP_KEY_PREFIX = "critique_user_trades_last_nonempty_v1";
 const DELETED_TRADES_KEY_PREFIX = "critique_deleted_trades_v1";
@@ -7062,9 +7063,10 @@ export default function TradingJournalDashboard() {
   const [passwordRecoverySession, setPasswordRecoverySession] = useState(false);
   const [tradesLoading, setTradesLoading] = useState(false);
   const [hasLoadedRemoteTrades, setHasLoadedRemoteTrades] = useState(false);
+  const cachedBillingAccess = (() => { try { return localStorage.getItem(BILLING_ACCESS_CACHE_KEY) === "true"; } catch { return false; } })();
   const [billingSubscription, setBillingSubscription] = useState(null);
   const [billingLoading, setBillingLoading] = useState(false);
-  const [billingChecked, setBillingChecked] = useState(false);
+  const [billingChecked, setBillingChecked] = useState(cachedBillingAccess);
   const [billingGateMessage, setBillingGateMessage] = useState("");
   const [billingRefreshTick, setBillingRefreshTick] = useState(0);
   const [hasAdminAccess, setHasAdminAccess] = useState(false);
@@ -7127,7 +7129,11 @@ export default function TradingJournalDashboard() {
           subscription = await fetchBillingSubscription(authUser);
         }
 
-        if (!cancelled) setBillingSubscription(subscription);
+        if (!cancelled) {
+          setBillingSubscription(subscription);
+          const hasAccess = isSubscriptionAccessActive(subscription);
+          try { localStorage.setItem(BILLING_ACCESS_CACHE_KEY, hasAccess ? "true" : "false"); } catch {}
+        }
       } catch (error) {
         if (!cancelled) {
           setBillingSubscription(null);
@@ -8032,8 +8038,9 @@ Skipped duplicates: ${duplicateCount}
     );
   }
 
-  // While billing status is being checked, show a minimal loading screen
-  if (!billingChecked || billingLoading) {
+  // While billing check is in progress AND no cached access: show minimal loader
+  // (Users with cached access skip this and go straight to app)
+  if (!billingChecked && !cachedBillingAccess && !canUseAdminTools) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#050308]">
         <div className="flex flex-col items-center gap-4">
