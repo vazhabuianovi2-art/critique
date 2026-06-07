@@ -752,6 +752,45 @@ const THEME_STYLE_CSS = `
     color: #0f172a !important;
   }
 
+  .light-theme .journal-filter-panel {
+    background-color: #f8fafc !important;
+    border-color: rgba(148,163,184,0.35) !important;
+    color: #0f172a !important;
+  }
+  .light-theme .journal-filter-panel label,
+  .light-theme .journal-filter-panel span,
+  .light-theme .journal-filter-panel p {
+    color: #374151 !important;
+  }
+  .light-theme .journal-filter-panel input,
+  .light-theme .journal-filter-panel select,
+  .light-theme .journal-filter-panel [class*="bg-black"] {
+    background-color: #ffffff !important;
+    border-color: rgba(148,163,184,0.40) !important;
+    color: #0f172a !important;
+  }
+  .light-theme .journal-filter-panel input::placeholder {
+    color: #9ca3af !important;
+  }
+  .light-theme .journal-filter-panel button {
+    background-color: #ffffff !important;
+    border-color: rgba(148,163,184,0.40) !important;
+    color: #374151 !important;
+  }
+  .light-theme .journal-filter-panel button:hover {
+    background-color: #f1f5f9 !important;
+  }
+  .light-theme .journal-filter-panel [class*="border-white/10"],
+  .light-theme .journal-filter-panel [class*="border-white/15"] {
+    border-color: rgba(148,163,184,0.35) !important;
+  }
+  .light-theme .journal-filter-panel [class*="text-zinc-"] {
+    color: #374151 !important;
+  }
+  .light-theme .journal-filter-panel [class*="text-fuchsia-"] {
+    color: #8a0fd7 !important;
+  }
+
   .light-theme .trade-card,
   .light-theme .trade-card * {
     background-color: #ffffff !important;
@@ -8453,7 +8492,7 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
           </div>
           <div>
             {showFilters && (
-              <div className="mt-4 rounded-xl border border-white/10 bg-black p-5">
+              <div className="journal-filter-panel mt-4 rounded-xl border border-white/10 bg-black p-5">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                   <Field label="Result"><Select value={filters.result} onChange={(e) => setFilters({ ...filters, result: e.target.value })}><option>All</option>{TRADE_RESULT_OPTIONS.map((result) => <option key={result}>{result}</option>)}</Select></Field>
                   <Field label="Type"><Select value={filters.direction} onChange={(e) => setFilters({ ...filters, direction: e.target.value })}><option>All</option><option>Buy</option><option>Sell</option></Select></Field>
