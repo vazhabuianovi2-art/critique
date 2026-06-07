@@ -8678,7 +8678,7 @@ function DateFilterField({ label, value, onChange }) {
               <button type="button" onClick={() => setViewDate(new Date(year, month + 1, 1))} className="date-picker-nav rounded-lg border border-white/10 bg-zinc-950 p-1.5 text-zinc-300 hover:border-fuchsia-500/50"><ChevronRight size={15} /></button>
             </div>
             <div className="date-picker-weekdays grid grid-cols-7 gap-1 text-center text-[10px] font-black text-zinc-500">
-              {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => <div key={`${day}-${index}`} className="py-1">{day}</div>)}
+              {["M", "T", "W", "T", "F", "S", "S"].map((day, index) => <div key={`${day}-${index}`} className="py-1">{day}</div>)}
             </div>
             <div className="mt-1 grid grid-cols-7 gap-1">
               {cells.map((cell) => (
