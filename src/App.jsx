@@ -9604,64 +9604,46 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="calendar-page-pro relative -m-4 min-h-screen bg-black p-4 sm:-m-6 sm:p-6 lg:-m-8 lg:p-8">
-      <div className="mb-8 flex items-center justify-between gap-4">
-        <TopCrumb page="Calendar" />
-      </div>
-
-      <div className="calendar-hero-pro calendar-neon-panel relative overflow-hidden rounded-2xl border border-fuchsia-500/40 bg-gradient-to-r from-fuchsia-950/35 via-black to-red-950/10 p-7 shadow-[0_0_38px_rgba(178,74,242,0.20)]">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-400/75 to-transparent" />
-        <div className="relative z-10 flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
-          <div>
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-fuchsia-500/25 bg-fuchsia-500/10 px-3 py-1 text-xs font-black uppercase tracking-widest text-fuchsia-300">
-              <span className="h-2 w-2 rounded-full bg-fuchsia-400 shadow-[0_0_12px_rgba(178,74,242,.85)]" /> Calendar Intelligence
-            </div>
-            <div className="flex flex-wrap items-center gap-4">
-              <button onClick={() => setCalendarMonth(new Date(year, monthIndex - 1, 1))} className="calendar-nav-button flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-black text-zinc-300 shadow-[0_0_14px_rgba(178,74,242,0.10)] transition hover:border-fuchsia-400/70 hover:text-fuchsia-200">
-                <ChevronLeft size={20} />
-              </button>
-              <div className="min-w-[240px]">
-                <h1 className="text-3xl font-black tracking-tight text-white xl:text-5xl">{monthName}</h1>
-                <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-zinc-400">Track trading days, weekly performance, best/worst days and selected day details in one clean view.</p>
-              </div>
-              <button onClick={() => setCalendarMonth(new Date(year, monthIndex + 1, 1))} className="calendar-nav-button flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-black text-zinc-300 shadow-[0_0_14px_rgba(178,74,242,0.10)] transition hover:border-fuchsia-400/70 hover:text-fuchsia-200">
-                <ChevronRight size={20} />
-              </button>
-            </div>
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+      {/* Header bar — Sydview style */}
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300">
+            <Calendar size={18} />
           </div>
-
-          <div className="calendar-hero-stats-pro">
-            <TopPill label="TRADES:" value={monthStats.count} />
-            <TopPill label="P&L:" value={formatMoney(monthStats.pnl)} green={monthStats.pnl >= 0} red={monthStats.pnl < 0} />
-            <TopPill label="WIN:" value={`${monthStats.winRate.toFixed(0)}%`} />
-            <button onClick={goToday} className="calendar-top-pill rounded-xl border border-white/15 bg-black px-4 py-3 text-sm font-black text-white shadow-[0_0_16px_rgba(178,74,242,0.10)] transition hover:border-fuchsia-400/60">
-              ▣ Today
+          <div className="flex items-center gap-2">
+            <button onClick={() => setCalendarMonth(new Date(year, monthIndex - 1, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-black text-zinc-400 transition hover:border-white/25 hover:text-white">
+              <ChevronLeft size={16} />
+            </button>
+            <h1 className="min-w-[160px] text-center text-xl font-black text-white">{monthName}</h1>
+            <button onClick={() => setCalendarMonth(new Date(year, monthIndex + 1, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-black text-zinc-400 transition hover:border-white/25 hover:text-white">
+              <ChevronRight size={16} />
             </button>
           </div>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-lg border border-white/10 bg-[#0d0d0d] px-3 py-2 text-xs font-black text-zinc-400">TRADES: <span className="text-white">{monthStats.count}</span></span>
+          <span className={`rounded-lg border px-3 py-2 text-xs font-black ${monthStats.pnl >= 0 ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-red-500/30 bg-red-500/10 text-red-400"}`}>P&L: {formatMoney(monthStats.pnl)}</span>
+          <span className="rounded-lg border border-white/10 bg-[#0d0d0d] px-3 py-2 text-xs font-black text-zinc-400">WIN: <span className="text-white">{monthStats.winRate.toFixed(0)}%</span></span>
+          <button onClick={goToday} className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-[#0d0d0d] px-3 py-2 text-xs font-black text-zinc-300 transition hover:border-fuchsia-500/40 hover:text-fuchsia-200">
+            <Calendar size={12} /> Today
+          </button>
+        </div>
       </div>
 
-      <CalendarMonthSummary
-        monthStats={monthStats}
-        selectedDate={todayKey}
-        selectedDayStats={todayStats}
-        bestMonthDay={bestMonthDay}
-        worstMonthDay={worstMonthDay}
-      />
-
-      <div className="calendar-shell-pro calendar-neon-panel mt-7 rounded-2xl border border-white/10 bg-black p-4 shadow-[0_0_34px_rgba(178,74,242,0.10)] xl:overflow-x-auto xl:p-6">
-        <div className="grid min-w-0 grid-cols-7 gap-1 xl:min-w-[1120px] xl:grid-cols-[repeat(7,minmax(0,1fr))_170px] xl:gap-3">
-          {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN", "WEEK"].map((day) => (
-            <div key={day} className={`calendar-week-header rounded-lg border py-3 text-center text-xs font-black tracking-widest ${day === "WEEK" ? "hidden xl:block" : ""} ${day === "SUN" || day === "SAT" || day === "WEEK" ? "calendar-week-header-special border-fuchsia-500/35 bg-fuchsia-500/12 text-fuchsia-300" : "border-white/10 bg-white/5 text-zinc-400"}`}>
+      {/* Calendar grid */}
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] xl:overflow-x-auto">
+        <div className="grid min-w-0 grid-cols-7 xl:min-w-[900px] xl:grid-cols-[repeat(7,minmax(0,1fr))_150px]">
+          {/* Day headers */}
+          {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT", "WEEK"].map((day) => (
+            <div key={day} className={`border-b py-3 text-center text-xs font-black tracking-widest ${day === "WEEK" ? "hidden xl:block" : ""} ${day === "SUN" || day === "SAT" || day === "WEEK" ? "border-fuchsia-500/20 bg-fuchsia-500/8 text-fuchsia-400" : "border-white/8 bg-white/3 text-zinc-500"}`}>
               {day}
             </div>
           ))}
 
           {weekRows.map((week, weekIndex) => {
-            const weekStats = week.map((cell) => summarizeTrades(grouped[cell.key] || [])).reduce((summary, dayStats) => ({
-              count: summary.count + dayStats.count,
-              pnl: summary.pnl + dayStats.pnl,
-            }), { count: 0, pnl: 0 });
+            const weekStats = week.map((cell) => summarizeTrades(grouped[cell.key] || [])).reduce((s, d) => ({ count: s.count + d.count, pnl: s.pnl + d.pnl }), { count: 0, pnl: 0 });
+            const isLastRow = weekIndex === weekRows.length - 1;
 
             return (
               <React.Fragment key={weekIndex}>
@@ -9673,50 +9655,67 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                   const isWeekend = cell.dayIndex === 0 || cell.dayIndex === 6;
                   const selected = selectedDate === cell.key;
                   const hasTrade = dayTrades.length > 0;
+                  const isToday = cell.key === todayKey;
 
                   return (
-                    <button key={cell.key} onClick={() => openDayDetails(cell.key)} className={`${getCalendarDayVisual(dayStats, isWeekend, selected)} h-14 xl:h-[116px] rounded-xl`}>
-                      <div className="calendar-day-top-row flex items-start justify-between gap-3">
-                        <div className={cell.isCurrentMonth ? "calendar-day-number font-black text-white" : "calendar-day-number-muted font-black text-zinc-500"}>{cell.day}</div>
-                        <div className="flex min-w-0 items-center gap-2">
+                    <button
+                      key={cell.key}
+                      onClick={() => openDayDetails(cell.key)}
+                      className={`relative flex h-14 flex-col gap-1 border-b border-r p-2 text-left transition xl:h-[110px] xl:p-3
+                        ${isLastRow ? "border-b-0" : ""}
+                        ${isWeekend ? "bg-fuchsia-500/4" : "bg-transparent"}
+                        ${selected ? "border-fuchsia-500/60 ring-1 ring-inset ring-fuchsia-500/40" : "border-white/8 hover:bg-white/3"}
+                      `}
+                    >
+                      <div className="flex items-start justify-between">
+                        <span className={`text-xs font-black xl:text-sm ${isToday ? "text-fuchsia-400" : cell.isCurrentMonth ? "text-white" : "text-zinc-600"}`}>
+                          {cell.day}
+                        </span>
+                        <div className="flex items-center gap-1">
                           {dayEvents.length > 0 && (
-                            <div className="calendar-day-event-pill flex items-center gap-1.5 rounded-full border border-white/10 bg-black/75 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-zinc-200 shadow-[0_0_12px_rgba(178,74,242,0.12)]">
-                              <ImpactFolderIcon impact={primaryEventImpact} />
-                              {dayEvents.length}
-                            </div>
+                            <span className="flex items-center gap-0.5 rounded px-1 py-0.5 text-[9px] font-black text-zinc-400">
+                              <ImpactFolderIcon impact={primaryEventImpact} />{dayEvents.length}
+                            </span>
                           )}
-                          {selected && <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-fuchsia-400 shadow-[0_0_14px_rgba(178,74,242,0.95)]" />}
+                          {selected && <span className="h-2 w-2 rounded-full bg-fuchsia-400" />}
                         </div>
                       </div>
 
                       {hasTrade ? (
-                        <div className="calendar-day-result-stack absolute left-3 right-3 z-10 flex flex-col items-end gap-2">
-                          <div className={dayStats.pnl > 0 ? "w-full rounded-md border border-emerald-500/45 bg-emerald-500/18 px-2 py-1 text-center text-sm font-black text-emerald-300" : dayStats.pnl < 0 ? "w-full rounded-md border border-red-500/45 bg-red-500/18 px-2 py-1 text-center text-sm font-black text-red-300" : "w-full rounded-md border border-amber-500/45 bg-amber-500/18 px-2 py-1 text-center text-sm font-black text-amber-300"}>
+                        <div className="hidden xl:flex flex-col gap-1 w-full">
+                          <div className={`w-full rounded px-1.5 py-1 text-center text-xs font-black ${dayStats.pnl > 0 ? "bg-emerald-500/15 text-emerald-400" : dayStats.pnl < 0 ? "bg-red-500/15 text-red-400" : "bg-amber-500/15 text-amber-400"}`}>
                             {formatMoney(dayStats.pnl)}
                           </div>
-                          <div className="calendar-trade-count w-full rounded-md bg-white/10 py-1 text-center text-xs font-black text-zinc-300">
+                          <div className="w-full rounded bg-white/8 py-0.5 text-center text-[11px] font-bold text-zinc-400">
                             {dayStats.count} trade{dayStats.count === 1 ? "" : "s"}
                           </div>
                         </div>
                       ) : (
-                        <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 text-center text-zinc-600">
-                          {isWeekend ? <span className="calendar-weekend-icon text-lg opacity-80">🏖️</span> : <span className="calendar-empty-dash text-2xl">–</span>}
+                        <div className="hidden xl:flex items-center justify-center flex-1 text-zinc-700 text-lg">—</div>
+                      )}
+
+                      {/* Mobile: just show P&L pill */}
+                      {hasTrade && (
+                        <div className={`xl:hidden mt-auto w-full rounded px-1 text-center text-[10px] font-black ${dayStats.pnl > 0 ? "bg-emerald-500/15 text-emerald-400" : dayStats.pnl < 0 ? "bg-red-500/15 text-red-400" : "bg-amber-500/15 text-amber-400"}`}>
+                          {formatMoney(dayStats.pnl)}
                         </div>
+                      )}
+                      {!hasTrade && (
+                        <div className="xl:hidden flex items-center justify-center flex-1 text-zinc-700 text-base">—</div>
                       )}
                     </button>
                   );
                 })}
-                <div className="calendar-week-summary calendar-week-summary-pro hidden xl:block relative h-[116px] overflow-hidden rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/12 p-3 shadow-[0_0_18px_rgba(178,74,242,0.12)]">
-                  <div className="absolute right-0 top-0 h-16 w-16 rounded-bl-2xl bg-fuchsia-500/12" />
+
+                {/* WEEK column */}
+                <div className={`hidden xl:flex flex-col items-center justify-center border-b border-l border-fuchsia-500/15 bg-fuchsia-500/6 p-3 ${isLastRow ? "border-b-0" : ""}`}>
                   {weekStats.count ? (
-                    <div className="relative z-10 flex h-full flex-col items-center justify-center">
-                      <div className={weekStats.pnl >= 0 ? "text-lg font-black text-emerald-400" : "text-lg font-black text-red-400"}>{formatMoney(weekStats.pnl)}</div>
-                      <div className="calendar-trade-count mt-2 rounded-md bg-white/10 px-3 py-1 text-xs font-black text-zinc-300">
-                        {weekStats.count} trade{weekStats.count === 1 ? "" : "s"}
-                      </div>
-                    </div>
+                    <>
+                      <div className={`text-sm font-black ${weekStats.pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>{formatMoney(weekStats.pnl)}</div>
+                      <div className="mt-1.5 rounded bg-white/8 px-2 py-0.5 text-[11px] font-bold text-zinc-400">{weekStats.count} trade{weekStats.count === 1 ? "" : "s"}</div>
+                    </>
                   ) : (
-                    <div className="relative z-10 flex h-full items-center justify-center text-sm font-bold text-zinc-500">No activity</div>
+                    <span className="text-xs font-semibold text-zinc-600">No activity</span>
                   )}
                 </div>
               </React.Fragment>
