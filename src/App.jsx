@@ -8203,10 +8203,10 @@ Skipped duplicates: ${duplicateCount}
         {/* Breadcrumb */}
         {!tradeViewMode && (
           <div className="mb-5 flex items-center gap-2 text-sm">
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-fuchsia-500 text-[11px] font-black text-black">T</div>
+            <BrandBolt className="h-5 w-5 text-fuchsia-400" />
             <span className="font-semibold text-zinc-400">TryCritique</span>
             <span className="text-zinc-600">/</span>
-            <span className="font-bold text-white">{active === "Mistake Detector" ? "Mistake Detector" : active}</span>
+            <span className="font-bold text-white">{active}</span>
           </div>
         )}
 
