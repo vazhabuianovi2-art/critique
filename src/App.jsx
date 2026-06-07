@@ -6427,8 +6427,13 @@ function buildFocusPlan(rootType, issueTitle) {
 
 function exportTradesToCSV(trades) {
   const safeTrades = Array.isArray(trades) ? trades : [];
-  const headers = ["date", "pair", "direction", "quantity", "setup", "session", "result", "emotion", "risk", "pnl", "notes"];
-  const rows = safeTrades.map((trade) => headers.map((key) => `"${String(trade[key] ?? "").replaceAll('"', '""')}"`).join(","));
+  const headers = ["date", "pair", "direction", "quantity", "setup", "session", "result", "emotion", "risk", "pnl", "entryTime", "exitTime", "mistake", "ruleBroken", "setupQuality", "tags", "notes"];
+  const rows = safeTrades.map((trade) =>
+    headers.map((key) => {
+      const val = key === "tags" ? normalizeTags(trade).filter((t) => !String(t).toLowerCase().startsWith("result:")).join("; ") : String(trade[key] ?? "");
+      return `"${val.replaceAll('"', '""')}"`;
+    }).join(",")
+  );
   const csv = [headers.join(","), ...rows].join(String.fromCharCode(10));
   downloadTextFile(csv, "critique-trades.csv", "text/csv;charset=utf-8;");
 }
@@ -6557,6 +6562,10 @@ function parseTradesCSV(text, account, existingTrades = []) {
       pnl,
       notes: row.notes || row.note || "Imported from CSV",
       mistake: row.mistake || "None",
+      ruleBroken: row.rulebroken || row.ruleBroken || "None",
+      setupQuality: row.setupquality || row.setupQuality || "",
+      entryTime: row.entrytime || row.entryTime || "",
+      exitTime: row.exittime || row.exitTime || "",
       screenshots: [],
       tags: normalizeTags({ tags: row.tags || `result:${result.toLowerCase().replaceAll(" ", "-")}` }),
     };
@@ -8247,7 +8256,7 @@ Skipped duplicates: ${duplicateCount}
             onImport={() => importFileRef.current?.click()}
             onBackup={() => exportCritiqueBackup({ trades: activeTrades, account, routine, theme })}
             onRestore={() => backupFileRef.current?.click()}
-            onStrategies={openStrategyFilters}
+            onStrategies={() => setIsStrategiesModalOpen(true)}
             account={account}
           />
         ) : active === "Calendar" ? (
