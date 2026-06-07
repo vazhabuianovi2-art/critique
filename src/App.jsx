@@ -2068,6 +2068,24 @@ const THEME_STYLE_CSS = `
     box-shadow: 0 18px 45px rgba(0,0,0,.32) !important;
   }
 
+  .dashboard-recent-card,
+  .quick-insights-section,
+  .dashboard-activity-card {
+    border-color: rgba(255,255,255,.15) !important;
+    box-shadow: 0 18px 45px rgba(0,0,0,.28) !important;
+  }
+
+  .dashboard-recent-card:hover,
+  .quick-insights-section:hover,
+  .dashboard-activity-card:hover {
+    border-color: rgba(255,255,255,.20) !important;
+    box-shadow: 0 18px 45px rgba(0,0,0,.32) !important;
+  }
+
+  .dashboard-activity-card::before {
+    content: none !important;
+  }
+
   .dashboard-chart-summary {
     box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
   }
@@ -9071,7 +9089,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
 
       <div className="mt-8 grid grid-cols-1 items-stretch gap-6 xl:grid-cols-[2fr_1fr]">
         <div className="flex h-full min-h-0 flex-col gap-6">
-          <div className="dashboard-recent-card light-card relative flex flex-1 flex-col overflow-hidden rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-6 shadow-[0_20px_55px_rgba(178,74,242,0.10)]">
+          <div className="dashboard-recent-card light-card relative flex flex-1 flex-col overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-6">
             <div className="relative z-10 mb-5 flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="dashboard-recent-icon flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/15 text-fuchsia-300"><TrendingUp size={22} /></div>
@@ -9254,7 +9272,7 @@ function QuickInsights({ insights }) {
     red: "border-red-500/30 bg-red-500/10 text-red-300",
   };
   return (
-    <section className="quick-insights-section mt-8 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-5 shadow-[0_18px_45px_rgba(178,74,242,0.10)]">
+    <section className="quick-insights-section mt-8 rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-5">
       <div className="mb-4 flex items-center justify-between">
         <SectionTitle title="Quick Insights" icon={<Target size={18} />} />
         <span className="rounded-full border border-fuchsia-500/25 bg-fuchsia-500/10 px-3 py-1 text-xs font-black text-fuchsia-300">Auto analysis</span>
@@ -9291,7 +9309,7 @@ function TradingActivityPanel({ trades, selectedDate, onSelectDate }) {
   );
 
   return (
-    <div className="dashboard-activity-card light-card relative flex h-full min-h-0 flex-col overflow-visible rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-5 shadow-[0_20px_55px_rgba(178,74,242,0.10)]">
+    <div className="dashboard-activity-card light-card relative flex h-full min-h-0 flex-col overflow-visible rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-5">
       <div className="relative z-10 flex items-start justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/15 text-fuchsia-300">
