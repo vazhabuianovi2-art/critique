@@ -8644,6 +8644,17 @@ function DateFilterField({ label, value, onChange }) {
     return () => window.removeEventListener("critique-dropdown-open", closeOtherDropdowns);
   }, []);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleClickOutside(event) {
+      if (pickerRef.current && !pickerRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
   function toggleDatePicker() {
     setIsOpen((open) => {
       const next = !open;
