@@ -6033,8 +6033,8 @@ function summarizeTrades(trades = []) {
   const losses = safe.filter((trade) => getTradeResult(trade) === "Loss").length;
   const breakEvens = safe.filter((trade) => getTradeResult(trade) === "Break Even").length;
   const partials = safe.filter((trade) => getTradeResult(trade) === "Partial").length;
-  const decisive = wins + losses;
-  return { count: safe.length, pnl, wins, losses, breakEvens, partials, decisive, winRate: decisive ? (wins / decisive) * 100 : 0, breakEvenRate: safe.length ? (breakEvens / safe.length) * 100 : 0, partialRate: safe.length ? (partials / safe.length) * 100 : 0 };
+  const decisive = wins + losses + partials;
+  return { count: safe.length, pnl, wins, losses, breakEvens, partials, decisive, winRate: decisive ? ((wins + partials) / decisive) * 100 : 0, breakEvenRate: safe.length ? (breakEvens / safe.length) * 100 : 0, partialRate: safe.length ? (partials / safe.length) * 100 : 0 };
 }
 
 function groupTradesByDate(trades = []) {
@@ -9024,7 +9024,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
         <>
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <DashCard title="TOTAL P&L" value={<RotatingPnlValue pnl={stats.totalPnl} balance={accountBalance.startingBalance} />} badge={stats.totalPnl >= 0 ? "↗ Positive P&L" : "↘ Negative P&L"} tone={stats.totalPnl >= 0 ? "emerald" : "amber"} icon="$" isLoading={isLoadingTrades} />
-        <DashCard title="WIN RATE" value={`${stats.winRate.toFixed(1)}%`} badge={`↗ ${stats.wins}W / ${stats.losses}L${stats.breakEvens ? ` / ${stats.breakEvens}BE` : ""}`} tone="fuchsia" icon="🏆" isLoading={isLoadingTrades} />
+        <DashCard title="WIN RATE" value={`${stats.winRate.toFixed(1)}%`} badge={`↗ ${stats.wins}W / ${stats.losses}L${stats.breakEvens ? ` / ${stats.breakEvens}BE` : ""}${stats.partials ? ` / ${stats.partials}P` : ""}`} tone="fuchsia" icon="🏆" isLoading={isLoadingTrades} />
         <DashCard title="TOTAL TRADES" value={stats.trades} badge={`▣ ${stats.trades} closed`} tone="cyan" icon="⌁" isLoading={isLoadingTrades} />
         <DashCard title="AVG WIN/LOSS" value={`${formatMoney(stats.avgWin)} / ${formatMoney(stats.avgLoss)}`} badge={stats.avgWinLoss >= 999 ? "↗ Positive R:R" : `${stats.avgWinLoss.toFixed(2)} ratio`} tone="amber" icon="↗" isLoading={isLoadingTrades} />
       </div>
