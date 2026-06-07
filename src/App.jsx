@@ -2058,12 +2058,14 @@ const THEME_STYLE_CSS = `
   .dashboard-score-card {
     position: relative;
     overflow: hidden;
+    border-color: rgba(255,255,255,.15) !important;
+    box-shadow: 0 18px 45px rgba(0,0,0,.28) !important;
   }
 
   .dashboard-performance-card:hover,
   .dashboard-score-card:hover {
-    border-color: rgba(178,74,242,.55) !important;
-    box-shadow: 0 0 34px rgba(178,74,242,.16), 0 20px 55px rgba(16,185,129,.08) !important;
+    border-color: rgba(255,255,255,.20) !important;
+    box-shadow: 0 18px 45px rgba(0,0,0,.32) !important;
   }
 
   .dashboard-chart-summary {
@@ -9041,7 +9043,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-[2fr_1fr]">
-        <div className="dashboard-performance-card light-card rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-6 shadow-[0_20px_55px_rgba(178,74,242,0.10)]">
+        <div className="dashboard-performance-card light-card rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-6">
           <div className="relative z-10 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex items-center gap-4">
               <div className="dashboard-performance-icon flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-black text-fuchsia-300"><TrendingUp size={22} /></div>
@@ -9469,7 +9471,7 @@ function PerformanceScorePanel({ stats, isLoading = false }) {
   const score = Math.min(100, Math.max(0, Number(stats.score || 0)));
   if (isLoading) {
     return (
-      <div className="dashboard-performance-card light-card flex flex-col rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-6 shadow-[0_20px_55px_rgba(178,74,242,0.10)]">
+      <div className="dashboard-performance-card light-card flex flex-col rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="h-12 w-12 animate-pulse rounded-xl bg-white/10" />
           <div><div className="h-5 w-32 animate-pulse rounded-lg bg-white/10" /><div className="mt-2 h-3 w-24 animate-pulse rounded-lg bg-white/10" /></div>
@@ -9506,9 +9508,8 @@ function PerformanceScorePanel({ stats, isLoading = false }) {
   const hovered = hoveredMetric ? chartPoints.find((point) => point.key === hoveredMetric) : null;
 
   return (
-    <div className="dashboard-score-card light-card relative overflow-hidden rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-[#12081b] via-black to-[#050307] p-6 shadow-[0_20px_55px_rgba(16,185,129,0.10)]">
+    <div className="dashboard-score-card light-card relative overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-6">
       <div className="pointer-events-none absolute right-0 top-0 h-40 w-40 rounded-bl-[5rem] bg-emerald-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 left-0 h-36 w-36 rounded-tr-[4rem] bg-fuchsia-500/8 blur-3xl" />
 
       <div className="relative z-10 flex items-start gap-4">
         <div className="dashboard-section-icon flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/15 text-fuchsia-300 shadow-[0_0_18px_rgba(178,74,242,0.25)]">
