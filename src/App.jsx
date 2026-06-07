@@ -9662,18 +9662,17 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
       </div>
 
       {/* Calendar grid */}
-      <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] xl:overflow-x-auto">
-        <div className="grid min-w-0 grid-cols-7 xl:min-w-[900px] xl:grid-cols-[repeat(7,minmax(0,1fr))_150px]">
+      <div className="xl:overflow-x-auto">
+        <div className="grid min-w-0 grid-cols-7 gap-1.5 xl:min-w-[900px] xl:grid-cols-[repeat(7,minmax(0,1fr))_150px] xl:gap-2">
           {/* Day headers */}
           {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT", "WEEK"].map((day) => (
-            <div key={day} className={`border-b py-3 text-center text-xs font-black tracking-widest ${day === "WEEK" ? "hidden xl:block" : ""} ${day === "SUN" || day === "SAT" || day === "WEEK" ? "border-fuchsia-500/20 bg-fuchsia-500/8 text-fuchsia-400" : "border-white/8 bg-white/3 text-zinc-500"}`}>
+            <div key={day} className={`rounded-xl py-2.5 text-center text-[11px] font-black tracking-widest ${day === "WEEK" ? "hidden xl:block" : ""} ${day === "SUN" || day === "SAT" || day === "WEEK" ? "bg-fuchsia-500/10 text-fuchsia-400" : "bg-white/4 text-zinc-500"}`}>
               {day}
             </div>
           ))}
 
           {weekRows.map((week, weekIndex) => {
             const weekStats = week.map((cell) => summarizeTrades(grouped[cell.key] || [])).reduce((s, d) => ({ count: s.count + d.count, pnl: s.pnl + d.pnl }), { count: 0, pnl: 0 });
-            const isLastRow = weekIndex === weekRows.length - 1;
 
             return (
               <React.Fragment key={weekIndex}>
@@ -9691,10 +9690,11 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                     <button
                       key={cell.key}
                       onClick={() => openDayDetails(cell.key)}
-                      className={`relative flex h-14 flex-col gap-1 border-b border-r p-2 text-left transition xl:h-[110px] xl:p-3
-                        ${isLastRow ? "border-b-0" : ""}
-                        ${isWeekend ? "bg-fuchsia-500/4" : "bg-transparent"}
-                        ${selected ? "border-fuchsia-500/60 ring-1 ring-inset ring-fuchsia-500/40" : "border-white/8 hover:bg-white/3"}
+                      className={`relative flex h-14 flex-col rounded-xl border p-2 text-left transition-all duration-150 xl:h-[110px] xl:p-3
+                        ${isWeekend ? "bg-fuchsia-500/6" : "bg-[#0d0d0d]"}
+                        ${selected
+                          ? "border-fuchsia-500/70 shadow-[0_0_0_1px_rgba(178,74,242,0.35)]"
+                          : "border-white/8 hover:border-white/18 hover:bg-[#111]"}
                       `}
                     >
                       <div className="flex items-start justify-between">
@@ -9703,7 +9703,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                         </span>
                         <div className="flex items-center gap-1">
                           {dayEvents.length > 0 && (
-                            <span className="flex items-center gap-0.5 rounded px-1 py-0.5 text-[9px] font-black text-zinc-400">
+                            <span className="flex items-center gap-0.5 text-[9px] font-black text-zinc-500">
                               <ImpactFolderIcon impact={primaryEventImpact} />{dayEvents.length}
                             </span>
                           )}
@@ -9712,11 +9712,11 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                       </div>
 
                       {hasTrade ? (
-                        <div className="hidden xl:flex flex-col gap-1 w-full">
-                          <div className={`w-full rounded px-1.5 py-1 text-center text-xs font-black ${dayStats.pnl > 0 ? "bg-emerald-500/15 text-emerald-400" : dayStats.pnl < 0 ? "bg-red-500/15 text-red-400" : "bg-amber-500/15 text-amber-400"}`}>
+                        <div className="hidden xl:flex flex-col gap-1.5 w-full mt-2">
+                          <div className={`w-full rounded-lg px-1.5 py-1.5 text-center text-xs font-black ${dayStats.pnl > 0 ? "bg-emerald-500/15 text-emerald-400" : dayStats.pnl < 0 ? "bg-red-500/15 text-red-400" : "bg-amber-500/15 text-amber-400"}`}>
                             {formatMoney(dayStats.pnl)}
                           </div>
-                          <div className="w-full rounded bg-white/8 py-0.5 text-center text-[11px] font-bold text-zinc-400">
+                          <div className="w-full rounded-lg bg-white/6 py-1 text-center text-[11px] font-bold text-zinc-500">
                             {dayStats.count} trade{dayStats.count === 1 ? "" : "s"}
                           </div>
                         </div>
@@ -9724,25 +9724,25 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                         <div className="hidden xl:flex items-center justify-center flex-1 text-zinc-700 text-lg">—</div>
                       )}
 
-                      {/* Mobile: just show P&L pill */}
+                      {/* Mobile */}
                       {hasTrade && (
-                        <div className={`xl:hidden mt-auto w-full rounded px-1 text-center text-[10px] font-black ${dayStats.pnl > 0 ? "bg-emerald-500/15 text-emerald-400" : dayStats.pnl < 0 ? "bg-red-500/15 text-red-400" : "bg-amber-500/15 text-amber-400"}`}>
+                        <div className={`xl:hidden mt-auto w-full rounded-md px-1 text-center text-[10px] font-black ${dayStats.pnl > 0 ? "bg-emerald-500/15 text-emerald-400" : dayStats.pnl < 0 ? "bg-red-500/15 text-red-400" : "bg-amber-500/15 text-amber-400"}`}>
                           {formatMoney(dayStats.pnl)}
                         </div>
                       )}
                       {!hasTrade && (
-                        <div className="xl:hidden flex items-center justify-center flex-1 text-zinc-700 text-base">—</div>
+                        <div className="xl:hidden flex items-center justify-center flex-1 text-zinc-700">—</div>
                       )}
                     </button>
                   );
                 })}
 
                 {/* WEEK column */}
-                <div className={`hidden xl:flex flex-col items-center justify-center border-b border-l border-fuchsia-500/15 bg-fuchsia-500/6 p-3 ${isLastRow ? "border-b-0" : ""}`}>
+                <div className="hidden xl:flex h-[110px] flex-col items-center justify-center rounded-xl border border-fuchsia-500/15 bg-fuchsia-500/8 p-3">
                   {weekStats.count ? (
                     <>
                       <div className={`text-sm font-black ${weekStats.pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>{formatMoney(weekStats.pnl)}</div>
-                      <div className="mt-1.5 rounded bg-white/8 px-2 py-0.5 text-[11px] font-bold text-zinc-400">{weekStats.count} trade{weekStats.count === 1 ? "" : "s"}</div>
+                      <div className="mt-1.5 rounded-lg bg-white/8 px-2 py-0.5 text-[11px] font-bold text-zinc-400">{weekStats.count} trade{weekStats.count === 1 ? "" : "s"}</div>
                     </>
                   ) : (
                     <span className="text-xs font-semibold text-zinc-600">No activity</span>
