@@ -8114,11 +8114,21 @@ Skipped duplicates: ${duplicateCount}
           )}
         </div>
         <div className="sidebar-nav mt-6 space-y-2">
-          {navItems.map(([Icon, label]) => (
-            <button key={label} title={label} onClick={() => { setActive(shouldGateForBilling ? "Billing" : label); setTradeViewMode(null); }} className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-[1.035] hover:border hover:border-fuchsia-500/30 hover:shadow-[0_0_22px_rgba(178,74,242,0.18)]" : ""} ${active === label && !tradeViewMode ? "bg-fuchsia-500 text-black font-black" : "text-zinc-300 hover:bg-white/5"}`}>
-              <Icon size={18} /> <span className="sidebar-label">{label}</span>
-            </button>
-          ))}
+          {navItems.map(([Icon, label]) => {
+            const isActive = active === label && !tradeViewMode;
+            return (
+              <button key={label} title={label} onClick={() => { setActive(shouldGateForBilling ? "Billing" : label); setTradeViewMode(null); }}
+                className={`relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200
+                  ${isActive
+                    ? "bg-fuchsia-500/12 text-fuchsia-200 font-bold"
+                    : "text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
+                  }`}>
+                {isActive && <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-fuchsia-500" />}
+                <Icon size={17} className={isActive ? "text-fuchsia-400" : "text-zinc-500"} />
+                <span className="sidebar-label">{label}</span>
+              </button>
+            );
+          })}
         </div>
         <div className="sidebar-bottom absolute bottom-5 left-5 right-5">
           {isSidebarUserMenuOpen && (
@@ -8692,24 +8702,30 @@ function TradeListRow({ trade, onView, onEdit, onRemove }) {
   const rr = getTradeRR(trade);
   const tags = normalizeTags(trade).slice(0, 2);
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-white/10 bg-[#0d0d0d] p-5 transition-all duration-200 hover:border-white/20">
-      <div className="relative z-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-5">
-        <div className="flex min-w-0 items-center gap-3">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-sm font-black text-zinc-300">{trade.pair}</span>
-          <span className={`rounded-full border px-3 py-1 text-xs font-black tracking-wider ${getTradeDirectionClass(trade.direction)}`}>{trade.direction}</span>
-          <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-black text-white">{trade.setup}</span>
-          {tags.map((tag) => <span key={tag} className="hidden rounded-full bg-white/5 px-2 py-1 text-xs text-zinc-400 xl:inline">{tag}</span>)}
-        </div>
-        <div className="flex flex-wrap items-center gap-3 text-sm text-zinc-400 sm:gap-7">
-          <span className="journal-list-metric-chip">Qty {trade.quantity}</span>
-          <span className="journal-list-metric-chip">◎ 1:{Math.abs(rr).toFixed(1)}</span>
-          <span className="text-fuchsia-300">⌖ {trade.session || "—"}</span>
-          <span>{trade.date}</span>
-          <span className={`text-right text-xl font-black sm:min-w-28 ${getPnlToneClass(pnl)}`}>{getPnlArrow(pnl)} {formatMoney(pnl)}</span>
-          <div className="flex gap-2">
-            <button onClick={onEdit} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Edit3 size={16} /></button>
-            <button onClick={onRemove} className="rounded-lg border border-red-500/20 bg-red-500/10 p-2 text-red-400 transition hover:border-red-500/60"><Trash2 size={16} /></button>
+    <div className="group relative flex flex-col gap-3 overflow-hidden rounded-xl border border-white/8 bg-[#0d0d0d] px-5 py-4 transition-all duration-200 hover:border-white/15 hover:bg-[#0f0f0f] sm:flex-row sm:items-center sm:justify-between sm:gap-5">
+      {/* Left - pair + direction + setup */}
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/8 bg-white/4 text-xs font-black text-zinc-200">{trade.pair?.slice(0,3)}</div>
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span className={`rounded-md border px-2 py-0.5 text-[11px] font-black ${getTradeDirectionClass(trade.direction)}`}>{trade.direction}</span>
+            <span className="truncate text-sm font-bold text-zinc-300">{trade.setup || "—"}</span>
           </div>
+          <div className="mt-0.5 flex items-center gap-2 text-xs text-zinc-600">
+            <span>{trade.date}</span>
+            {trade.session && <><span>·</span><span className="text-fuchsia-400/70">{trade.session}</span></>}
+            {tags.map((tag) => <span key={tag} className="hidden xl:inline">· #{tag}</span>)}
+          </div>
+        </div>
+      </div>
+      {/* Right - metrics + P&L + actions */}
+      <div className="flex items-center gap-4 sm:gap-6">
+        <span className="hidden text-xs text-zinc-600 sm:block">Qty <span className="font-bold text-zinc-400">{trade.quantity}</span></span>
+        <span className="hidden text-xs text-zinc-600 lg:block">R:R <span className="font-bold text-zinc-400">1:{Math.abs(rr).toFixed(1)}</span></span>
+        <span className={`min-w-[80px] text-right text-lg font-black sm:min-w-[100px] ${getPnlToneClass(pnl)}`}>{getPnlArrow(pnl)} {formatMoney(pnl)}</span>
+        <div className="flex shrink-0 gap-1.5">
+          <button onClick={onEdit} className="rounded-lg border border-white/8 bg-transparent p-2 text-zinc-500 transition hover:border-fuchsia-500/40 hover:text-fuchsia-300"><Edit3 size={15} /></button>
+          <button onClick={onRemove} className="rounded-lg border border-red-500/15 bg-red-500/8 p-2 text-red-500 transition hover:border-red-500/50 hover:text-red-300"><Trash2 size={15} /></button>
         </div>
       </div>
     </div>
@@ -8718,8 +8734,8 @@ function TradeListRow({ trade, onView, onEdit, onRemove }) {
 
 function MetricBox({ label, value, tone }) {
   return (
-    <div className="journal-metric-box group relative overflow-hidden rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 p-3 shadow-[0_0_14px_rgba(178,74,242,0.10)] transition-all duration-300 hover:-translate-y-0.5 hover:border-fuchsia-400/75 hover:bg-fuchsia-500/15 hover:shadow-[0_0_22px_rgba(178,74,242,0.22)]">
-      <div className="pointer-events-none absolute right-0 top-0 h-10 w-10 rounded-bl-2xl bg-fuchsia-500/10" />
+    <div className="journal-metric-box group relative overflow-hidden rounded-xl border border-white/8 bg-white/3 p-3 transition-all duration-200 hover:border-fuchsia-500/25 hover:bg-fuchsia-500/6">
+      <div className="pointer-events-none absolute right-0 top-0 h-8 w-8 rounded-bl-xl bg-fuchsia-500/5" />
       <div className="relative z-10 text-xs font-black uppercase tracking-wider text-fuchsia-300">{label}</div>
       <div className="relative z-10 mt-1 text-xl font-black text-white">{value}</div>
     </div>
@@ -8918,24 +8934,28 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
         <TopCrumb page="Dashboard" className="" />
       </div>
 
-      <div className="dashboard-hero rounded-2xl border border-fuchsia-500/20 bg-gradient-to-r from-[#130820] via-[#0d0418] to-[#0a0212] p-6">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+      <div className="dashboard-hero relative overflow-hidden rounded-2xl border border-fuchsia-500/20 bg-gradient-to-br from-[#180c2e] via-[#0f0620] to-[#08040f] p-6">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent" />
+        <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-fuchsia-500/5 blur-3xl" />
+        <div className="relative z-10 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <h1 className="text-2xl font-bold xl:text-3xl">Welcome back, {getFirstDisplayName(profileName)}! <span className="waving-hand" aria-hidden="true">👋</span></h1>
-            <p className="mt-2 flex items-center gap-2 text-sm font-medium text-zinc-500">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <div className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-fuchsia-500/20 bg-fuchsia-500/8 px-2.5 py-1 text-[11px] font-black uppercase tracking-widest text-fuchsia-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400" /> Trading Journal
+            </div>
+            <h1 className="mt-2 text-2xl font-black xl:text-3xl">Welcome back, {getFirstDisplayName(profileName)}! <span className="waving-hand" aria-hidden="true">👋</span></h1>
+            <p className="mt-1.5 flex items-center gap-2 text-sm font-medium text-zinc-500">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
-            <Button onClick={onOpenJournal} className="dashboard-primary-btn bg-fuchsia-500 px-4 py-2.5 text-sm font-bold text-black">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8M12 8v8"/></svg>
-              Log Trade
+            <Button onClick={onOpenJournal} className="dashboard-primary-btn bg-fuchsia-500 px-5 py-2.5 text-sm font-bold text-black hover:bg-fuchsia-400">
+              <Plus size={15} /> Log Trade
             </Button>
-            <Button onClick={onStartDay} className="dashboard-start-btn border border-white/20 bg-transparent px-4 py-2.5 text-sm font-bold text-zinc-200 hover:bg-white/5">Start Your Day</Button>
+            <Button onClick={onStartDay} className="dashboard-start-btn border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-bold text-zinc-200 hover:bg-white/10">Start Your Day</Button>
           </div>
         </div>
-        <div className="dashboard-inspiration mt-5 rounded-xl border border-white/8 bg-black/40 px-5 py-3">
+        <div className="dashboard-inspiration relative z-10 mt-5 rounded-xl border border-white/8 bg-black/30 px-5 py-3">
           <div className="mb-1.5 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest text-fuchsia-400">
             <Sparkles size={12} /> Daily Inspiration <Sparkles size={12} />
           </div>
@@ -15180,7 +15200,7 @@ function SectionTitle({ title, icon, gold }) { return <div className="flex items
 function TopPill({ label, value, green, red }) {
   return <div className={`calendar-top-pill rounded-xl border px-4 py-3 text-sm font-black ${green ? "calendar-top-pill-green border-emerald-500/40 bg-emerald-500/20 text-emerald-300" : red ? "calendar-top-pill-red border-red-500/40 bg-red-500/20 text-red-300" : "calendar-top-pill-neutral border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300"}`}><span className="calendar-top-pill-label mr-2 text-zinc-400">{label}</span>{value}</div>;
 }
-function Section({ title, icon, children }) { return <div className="mt-6 rounded-xl border border-white/10 bg-[#0a0a0a] p-6"><h3 className="mb-5 flex items-center gap-3 text-lg font-bold text-white"><span className="flex h-9 w-9 items-center justify-center rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300">{icon}</span>{title}</h3>{children}</div>; }
+function Section({ title, icon, children }) { return <div className="mt-6 overflow-hidden rounded-xl border border-white/8 bg-[#0a0a0a]"><div className="flex items-center gap-3 border-b border-white/8 px-6 py-4"><span className="flex h-8 w-8 items-center justify-center rounded-lg border border-fuchsia-500/20 bg-fuchsia-500/8 text-fuchsia-400">{icon}</span><h3 className="text-sm font-black uppercase tracking-wider text-zinc-300">{title}</h3></div><div className="p-6">{children}</div></div>; }
 function Field({ label, children }) { return <label className="block text-sm font-semibold text-white"><span className="mb-2 block">{label}</span>{children}</label>; }
 function formatTimeInput(raw) {
   // strips non-digits, limits to 4, inserts colon after 2 digits
@@ -15325,10 +15345,14 @@ function Select({ value, onChange, children }) {
   );
 }
 function StatCard({ title, value, green, gold }) {
-  const iconMap = { "Total Trades": "⌁", "Win Rate": "🏆", "Break Even": "—", "Avg P&L": "$", "Avg R:R": "↗", "Total P&L": "$", "TOTAL P&L": "$", "WIN RATE": "🏆", "BREAK EVEN": "—", "TRADES": "⌁", "AVG WIN": "↗", "AVG LOSS": "↘", "PROFIT FACTOR": "✦" };
-  const icon = iconMap[title] || "✦";
-  const iconTone = green ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300" : gold ? "border-amber-500/20 bg-amber-500/10 text-amber-300" : "border-fuchsia-500/20 bg-fuchsia-500/10 text-fuchsia-300";
-  return <Card className="group relative overflow-hidden border-white/10 bg-[#0d0d0d] text-white transition-all duration-200 hover:border-white/20"><CardContent className="relative z-10 p-5"><div className="flex items-start justify-between gap-3"><div><div className="text-xs font-black uppercase tracking-wider text-zinc-500">{title}</div><div className={`mt-4 text-2xl font-black ${green ? "text-emerald-400" : gold ? "text-amber-400" : "text-zinc-100"}`}><AnimatedValue value={value} /></div></div><div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-lg font-black ${iconTone}`}>{icon}</div></div></CardContent></Card>;
+  const valueColor = green ? "text-emerald-400" : gold ? "text-amber-400" : "text-zinc-100";
+  const accentColor = green ? "bg-emerald-500/8 border-b-2 border-emerald-500/30" : gold ? "bg-amber-500/8 border-b-2 border-amber-500/30" : "bg-fuchsia-500/8 border-b-2 border-fuchsia-500/30";
+  return (
+    <div className={`group relative overflow-hidden rounded-xl border border-white/8 bg-[#0d0d0d] p-5 transition-all duration-200 hover:border-white/15 hover:-translate-y-0.5 ${accentColor}`}>
+      <div className="text-[11px] font-black uppercase tracking-widest text-zinc-600">{title}</div>
+      <div className={`mt-3 text-2xl font-black ${valueColor}`}><AnimatedValue value={value} /></div>
+    </div>
+  );
 }
 
 function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessage, isSupabaseReady, passwordRecoverySession, theme, setTheme }) {
