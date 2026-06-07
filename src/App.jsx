@@ -8631,7 +8631,7 @@ function DateFilterField({ label, value, onChange }) {
           <span className={value ? "date-picker-value text-white" : "date-picker-placeholder text-zinc-500"}>{value || "mm/dd/yyyy"}</span>
         </button>
         {isOpen && (
-          <div className="date-picker-popover absolute left-0 top-full z-[80] mt-2 rounded-xl border border-fuchsia-500/40 bg-[#050505] p-3 shadow-[0_18px_55px_rgba(0,0,0,0.95)] ring-1 ring-fuchsia-500/20">
+          <div className="date-picker-popover absolute left-0 top-full z-[999] mt-2 rounded-xl border border-fuchsia-500/40 bg-[#050505] p-3 shadow-[0_18px_55px_rgba(0,0,0,0.95)] ring-1 ring-fuchsia-500/20">
             <div className="mb-3 flex items-center justify-between">
               <button type="button" onClick={() => setViewDate(new Date(year, month - 1, 1))} className="date-picker-nav rounded-lg border border-white/10 bg-zinc-950 p-1.5 text-zinc-300 hover:border-fuchsia-500/50"><ChevronLeft size={15} /></button>
               <div className="date-picker-title text-sm font-black text-white">{monthName}</div>
@@ -15210,7 +15210,7 @@ function SectionTitle({ title, icon, gold }) { return <div className="flex items
 function TopPill({ label, value, green, red }) {
   return <div className={`calendar-top-pill rounded-xl border px-4 py-3 text-sm font-black ${green ? "calendar-top-pill-green border-emerald-500/40 bg-emerald-500/20 text-emerald-300" : red ? "calendar-top-pill-red border-red-500/40 bg-red-500/20 text-red-300" : "calendar-top-pill-neutral border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300"}`}><span className="calendar-top-pill-label mr-2 text-zinc-400">{label}</span>{value}</div>;
 }
-function Section({ title, icon, children }) { return <div className="mt-6 overflow-hidden rounded-xl border border-white/8 bg-[#0a0a0a]"><div className="flex items-center gap-3 border-b border-white/8 px-6 py-4"><span className="flex h-8 w-8 items-center justify-center rounded-lg border border-fuchsia-500/20 bg-fuchsia-500/8 text-fuchsia-400">{icon}</span><h3 className="text-sm font-black uppercase tracking-wider text-zinc-300">{title}</h3></div><div className="p-6">{children}</div></div>; }
+function Section({ title, icon, children }) { return <div className="mt-6 rounded-xl border border-white/8 bg-[#0a0a0a]"><div className="flex items-center gap-3 border-b border-white/8 px-6 py-4 rounded-t-xl"><span className="flex h-8 w-8 items-center justify-center rounded-lg border border-fuchsia-500/20 bg-fuchsia-500/8 text-fuchsia-400">{icon}</span><h3 className="text-sm font-black uppercase tracking-wider text-zinc-300">{title}</h3></div><div className="p-6">{children}</div></div>; }
 function Field({ label, children }) { return <label className="block text-sm font-semibold text-white"><span className="mb-2 block">{label}</span>{children}</label>; }
 function formatTimeInput(raw) {
   // strips non-digits, limits to 4, inserts colon after 2 digits
