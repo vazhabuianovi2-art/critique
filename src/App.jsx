@@ -8032,6 +8032,21 @@ Skipped duplicates: ${duplicateCount}
     );
   }
 
+  // While billing status is being checked, show a minimal loading screen
+  if (!billingChecked || billingLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#050308]">
+        <div className="flex flex-col items-center gap-4">
+          <span className="text-fuchsia-400"><BrandBolt className="h-12 w-12" /></span>
+          <div className="flex items-center gap-2 text-sm font-semibold text-zinc-500">
+            <Loader2 size={15} className="animate-spin text-fuchsia-500" />
+            Checking subscription...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Show billing gate as standalone page (before main app loads)
   if (shouldGateForBilling) {
     return (
