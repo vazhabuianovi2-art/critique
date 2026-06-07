@@ -10008,6 +10008,50 @@ function CalendarGuide() {
   );
 }
 
+function TagInput({ value, onChange }) {
+  const [inputVal, setInputVal] = useState("");
+  const tags = normalizeTags({ tags: value }).filter((t) => !String(t).toLowerCase().startsWith("result:"));
+
+  function addTag(text) {
+    const tag = text.trim().replace(/^#/, "");
+    if (!tag || tags.map((t) => t.toLowerCase()).includes(tag.toLowerCase())) return;
+    onChange([...tags, tag].join(", "));
+    setInputVal("");
+  }
+  function removeTag(tag) {
+    onChange(tags.filter((t) => t !== tag).join(", "));
+  }
+  function handleKeyDown(e) {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addTag(inputVal);
+    } else if (e.key === "Backspace" && !inputVal && tags.length) {
+      removeTag(tags[tags.length - 1]);
+    }
+  }
+
+  return (
+    <div className="flex min-h-[44px] flex-wrap items-center gap-2 rounded-xl border border-white/15 bg-black px-3 py-2 transition focus-within:border-fuchsia-500/60 focus-within:ring-1 focus-within:ring-fuchsia-500/20">
+      {tags.map((tag) => (
+        <span key={tag} className="flex items-center gap-1 rounded-full border border-fuchsia-500/30 bg-fuchsia-500/12 px-2.5 py-1 text-xs font-semibold text-fuchsia-300">
+          #{tag}
+          <button type="button" onClick={() => removeTag(tag)} className="ml-0.5 text-fuchsia-400 hover:text-white transition">
+            <X size={11} />
+          </button>
+        </span>
+      ))}
+      <input
+        value={inputVal}
+        onChange={(e) => setInputVal(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={() => { if (inputVal.trim()) addTag(inputVal); }}
+        placeholder={tags.length === 0 ? "Type a tag and press Enter... (e.g. FVG, Breakout)" : ""}
+        className="min-w-[160px] flex-1 bg-transparent text-sm text-zinc-200 outline-none placeholder:text-zinc-600"
+      />
+    </div>
+  );
+}
+
 function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, onSave, account, accounts = [], trades = [], accountBalance, onSelectAccount, onAddAccount, onOpenStrategies, strategiesObjects = [] }) {
   const rr = Number(form.risk) ? (Number(form.pnl || 0) / Number(form.risk)).toFixed(2) : "—";
   const screenshots = normalizeScreenshots(form);
@@ -10052,16 +10096,16 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
       const previousAutoResult = getResultFromPnl(form.pnl);
       const currentResult = normalizeTradeResult(form.result);
       const nextResult = !currentResult || currentResult === previousAutoResult ? getResultFromPnl(value) : currentResult;
-      setForm({ ...form, pnl: value, result: nextResult, tags: syncResultTag(form.tags, value, nextResult) });
+      setForm({ ...form, pnl: value, result: nextResult });
       return;
     }
     if (key === "result") {
       const nextResult = normalizeTradeResult(value) || getResultFromPnl(form.pnl);
-      setForm({ ...form, result: nextResult, tags: syncResultTag(form.tags, form.pnl, nextResult) });
+      setForm({ ...form, result: nextResult });
       return;
     }
     if (key === "tags") {
-      setForm({ ...form, tags: syncResultTag(value, form.pnl, form.result) });
+      setForm({ ...form, tags: value });
       return;
     }
     setForm({ ...form, [key]: value });
@@ -10238,7 +10282,7 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
             </Field>
 
             <Field label="Tags">
-              <Input value={syncResultTag(form.tags, form.pnl, form.result)} onChange={(e) => updateField("tags", e.target.value)} placeholder="Add tags (press Enter)" className={inputPurpleClass()} />
+              <TagInput value={form.tags} onChange={(v) => updateField("tags", v)} />
             </Field>
 
             <Field label="Emotions">
