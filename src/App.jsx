@@ -1770,50 +1770,53 @@ const THEME_STYLE_CSS = `
   }
 
   .activity-day-empty {
-    background: linear-gradient(135deg, rgba(24,24,27,0.82) 0%, rgba(0,0,0,0.92) 58%, rgba(88,28,135,0.16) 100%) !important;
-    border-color: rgba(178,74,242, 0.18) !important;
+    background: linear-gradient(135deg, rgba(15,15,18,.88) 0%, rgba(2,2,3,.96) 100%) !important;
+    border-color: rgba(255,255,255,.10) !important;
   }
 
   .activity-day-win {
-    background: linear-gradient(135deg, #34d399 0%, #10b981 55%, #047857 100%) !important;
-    border-color: rgba(16, 185, 129, 0.78) !important;
-    box-shadow: 0 0 22px rgba(16,185,129,0.28), inset 0 1px 0 rgba(255,255,255,0.22) !important;
+    background: linear-gradient(135deg, rgba(16,185,129,.18) 0%, rgba(4,55,43,.72) 55%, rgba(1,12,10,.96) 100%) !important;
+    border-color: rgba(16,185,129,.38) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06) !important;
   }
 
   .activity-day-loss {
-    background: linear-gradient(135deg, #fb7185 0%, #ef4444 55%, #b91c1c 100%) !important;
-    border-color: rgba(239, 68, 68, 0.78) !important;
-    box-shadow: 0 0 22px rgba(239,68,68,0.28), inset 0 1px 0 rgba(255,255,255,0.22) !important;
+    background: linear-gradient(135deg, rgba(239,68,68,.18) 0%, rgba(69,10,10,.72) 55%, rgba(15,2,3,.96) 100%) !important;
+    border-color: rgba(239,68,68,.38) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06) !important;
   }
 
   .activity-day-breakeven {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 55%, #d97706 100%) !important;
-    border-color: rgba(245,158,11,0.78) !important;
-    box-shadow: 0 0 22px rgba(245,158,11,0.28), inset 0 1px 0 rgba(255,255,255,0.22) !important;
+    background: linear-gradient(135deg, rgba(245,158,11,.17) 0%, rgba(69,37,4,.72) 55%, rgba(14,8,1,.96) 100%) !important;
+    border-color: rgba(245,158,11,.38) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06) !important;
   }
 
   .activity-day-win:hover {
-    box-shadow: 0 0 30px rgba(16,185,129,0.42), 0 10px 24px rgba(16,185,129,0.20) !important;
+    border-color: rgba(52,211,153,.62) !important;
+    box-shadow: 0 0 16px rgba(16,185,129,.14), inset 0 1px 0 rgba(255,255,255,.08) !important;
   }
 
   .activity-day-breakeven:hover {
-    box-shadow: 0 0 30px rgba(245,158,11,0.42), 0 10px 24px rgba(245,158,11,0.20) !important;
+    border-color: rgba(251,191,36,.62) !important;
+    box-shadow: 0 0 16px rgba(245,158,11,.14), inset 0 1px 0 rgba(255,255,255,.08) !important;
   }
 
   .activity-day-selected.activity-day-breakeven {
-    box-shadow: 0 0 0 2px rgba(178,74,242,.55), 0 0 30px rgba(245,158,11,0.38) !important;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.28), 0 0 16px rgba(245,158,11,.14) !important;
   }
 
   .activity-day-loss:hover {
-    box-shadow: 0 0 30px rgba(239,68,68,0.42), 0 10px 24px rgba(239,68,68,0.20) !important;
+    border-color: rgba(251,113,133,.62) !important;
+    box-shadow: 0 0 16px rgba(239,68,68,.14), inset 0 1px 0 rgba(255,255,255,.08) !important;
   }
 
   .activity-day-selected.activity-day-win {
-    box-shadow: 0 0 0 2px rgba(178,74,242,.55), 0 0 30px rgba(16,185,129,0.38) !important;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.28), 0 0 16px rgba(16,185,129,.14) !important;
   }
 
   .activity-day-selected.activity-day-loss {
-    box-shadow: 0 0 0 2px rgba(178,74,242,.55), 0 0 30px rgba(239,68,68,0.38) !important;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.28), 0 0 16px rgba(239,68,68,.14) !important;
   }
 
   .light-theme .activity-day-empty {
@@ -9343,7 +9346,7 @@ function TradingActivityPanel({ trades, selectedDate, onSelectDate }) {
             const isWin = day.summary.pnl > 0;
             const isBreakEven = day.summary.pnl === 0;
             const dayClass = hasTrade ? (isWin ? "activity-day-win" : isBreakEven ? "activity-day-breakeven" : "activity-day-loss") : "activity-day-empty";
-            const selectedClass = selectedDate === day.key ? "activity-day-selected ring-2 ring-fuchsia-500 ring-offset-2 ring-offset-black" : "";
+            const selectedClass = selectedDate === day.key ? "activity-day-selected ring-1 ring-white/30 ring-offset-2 ring-offset-black" : "";
             const tooltipDate = new Date(`${day.key}T00:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
             return (
@@ -9353,7 +9356,7 @@ function TradingActivityPanel({ trades, selectedDate, onSelectDate }) {
                 onClick={() => onSelectDate?.(day.key)}
                 onMouseEnter={() => setHoveredDay(day)}
                 onMouseLeave={() => setHoveredDay(null)}
-                className={`activity-day-cell group relative h-14 overflow-visible rounded-xl border transition-all duration-300 hover:scale-110 ${dayClass} ${selectedClass} cursor-pointer`}
+                className={`activity-day-cell group relative h-14 overflow-visible rounded-xl border transition-all duration-300 hover:scale-[1.04] ${dayClass} ${selectedClass} cursor-pointer`}
               >
                 {hoveredDay?.key === day.key && (
                   <div className="light-tooltip pointer-events-none absolute bottom-[4.2rem] left-1/2 z-50 w-48 -translate-x-1/2 rounded-xl border border-white/15 bg-[#070707] p-4 text-left shadow-[0_18px_55px_rgba(0,0,0,0.95)] ring-1 ring-fuchsia-500/20">
