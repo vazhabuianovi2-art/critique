@@ -2216,8 +2216,8 @@ const THEME_STYLE_CSS = `
 
   .dashboard-inspiration {
     background: linear-gradient(135deg, rgba(13,7,17,.76) 0%, rgba(17,8,18,.78) 58%, rgba(31,17,12,.76) 100%) !important;
-    border-color: rgba(147,80,91,.22) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.025) !important;
+    border: 0 !important;
+    box-shadow: none !important;
   }
 
   .dashboard-inspiration .moving-text-wrap {
@@ -9127,7 +9127,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
         </div>
 
         {/* Daily Inspiration */}
-        <div className="dashboard-inspiration relative z-10 mt-5 overflow-hidden rounded-xl border border-white/6 bg-white/3 px-5 py-3 backdrop-blur-sm">
+        <div className="dashboard-inspiration relative z-10 mt-5 overflow-hidden rounded-xl bg-white/3 px-5 py-3 backdrop-blur-sm">
           <div className="mb-1.5 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-fuchsia-500/70">
             <Sparkles size={11} /> Daily Inspiration <Sparkles size={11} />
           </div>
