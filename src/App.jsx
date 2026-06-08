@@ -2061,15 +2061,15 @@ const THEME_STYLE_CSS = `
   .dashboard-score-card {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, #070709 0%, #030304 58%, #010102 100%) !important;
-    border-color: rgba(255,255,255,.16) !important;
+    background: linear-gradient(135deg, #0a0a0a 0%, #080808 58%, #060606 100%) !important;
+    border-color: rgba(255,255,255,.12) !important;
     box-shadow: 0 18px 45px rgba(0,0,0,.28) !important;
     transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
   }
 
   .dashboard-performance-card:hover,
   .dashboard-score-card:hover {
-    border-color: rgba(255,255,255,.21) !important;
+    border-color: rgba(255,255,255,.18) !important;
     box-shadow: 0 18px 45px rgba(0,0,0,.32) !important;
   }
 
@@ -9155,7 +9155,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-[2fr_1fr]">
-        <div className="dashboard-performance-card light-card rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-6">
+        <div className="dashboard-performance-card light-card rounded-2xl border border-white/15 bg-[#0a0a0a] p-6">
           <div className="relative z-10 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex items-center gap-4">
               <div className="dashboard-performance-icon flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-[#0a0a0d] text-fuchsia-300"><TrendingUp size={22} /></div>
@@ -9183,7 +9183,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
 
       <div className="mt-8 grid grid-cols-1 items-stretch gap-6 xl:grid-cols-[2fr_1fr]">
         <div className="flex h-full min-h-0 flex-col gap-6">
-          <div className="dashboard-recent-card light-card relative flex flex-1 flex-col overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-6">
+          <div className="dashboard-recent-card light-card relative flex flex-1 flex-col overflow-hidden rounded-2xl border border-white/15 bg-[#0a0a0a] p-6">
             <div className="relative z-10 mb-5 flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="dashboard-recent-icon flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-[#0a0a0d] text-fuchsia-300"><TrendingUp size={22} /></div>
@@ -9366,7 +9366,7 @@ function QuickInsights({ insights }) {
     red: "border-red-500/25 bg-red-950/20 text-red-300",
   };
   return (
-    <section className="quick-insights-section mt-8 rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-5">
+    <section className="quick-insights-section mt-8 rounded-2xl border border-white/15 bg-[#0a0a0a] p-5">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3 text-xl font-black">
           <div className="dashboard-section-icon flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-[#0a0a0d] text-fuchsia-300"><Target size={18} /></div>
@@ -9391,22 +9391,43 @@ function QuickInsights({ insights }) {
   );
 }
 
+function getLastFullWeeks(weeks = 4) {
+  const today = new Date();
+  const day = today.getDay();
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  const currentWeekMonday = new Date(today);
+  currentWeekMonday.setDate(today.getDate() + mondayOffset);
+  const start = new Date(currentWeekMonday);
+  start.setDate(currentWeekMonday.getDate() - (weeks - 1) * 7);
+  const days = [];
+  for (let week = 0; week < weeks; week++) {
+    for (let weekday = 0; weekday < 7; weekday++) {
+      const date = new Date(start);
+      date.setDate(start.getDate() + week * 7 + weekday);
+      const dow = date.getDay(); // 0=Sun,1=Mon...6=Sat — JS getDay
+      days.push({ key: formatDateKey(date), weekday, isWeekend: dow === 0 || dow === 6 });
+    }
+  }
+  return days;
+}
+
 function TradingActivityPanel({ trades, selectedDate, onSelectDate }) {
   const [hoveredDay, setHoveredDay] = useState(null);
   const grouped = groupTradesByDate(trades);
-  const days = getLastTradingDays(20).map((day) => ({ ...day, summary: summarizeTrades(grouped[day.key] || []) }));
+  const days = getLastFullWeeks(4).map((day) => ({ ...day, summary: summarizeTrades(grouped[day.key] || []) }));
   const activityTotals = days.reduce(
     (totals, day) => ({
       trades: totals.trades + Number(day.summary.count || 0),
       wins: totals.wins + Number(day.summary.wins || 0),
       losses: totals.losses + Number(day.summary.losses || 0),
       breakEvens: totals.breakEvens + Number(day.summary.breakEvens || 0),
+      partials: totals.partials + Number(day.summary.partials || 0),
     }),
-    { trades: 0, wins: 0, losses: 0, breakEvens: 0 }
+    { trades: 0, wins: 0, losses: 0, breakEvens: 0, partials: 0 }
   );
 
   return (
-    <div className="dashboard-activity-card light-card relative flex h-full min-h-0 flex-col overflow-visible rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-5">
+    <div className="dashboard-activity-card light-card relative flex h-full min-h-0 flex-col overflow-visible rounded-2xl border border-white/15 bg-[#0a0a0a] p-5">
       <div className="relative z-10 flex items-start justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="dashboard-section-icon flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-[#0a0a0d] text-fuchsia-300">
@@ -9422,24 +9443,25 @@ function TradingActivityPanel({ trades, selectedDate, onSelectDate }) {
           <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500" />Win</span>
           <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-red-500" />Loss</span>
           <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-amber-500" />BE</span>
+          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-fuchsia-500" />P</span>
         </div>
       </div>
 
       <div className="dashboard-activity-grid relative z-10 mt-4 rounded-2xl border border-white/10 bg-black/40 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-        <div className="mb-4 grid grid-cols-5 gap-3 text-center text-xs font-black">
-          {["MON", "TUE", "WED", "THU", "FRI"].map((day) => (
-            <div key={day} className="rounded-xl border border-white/10 bg-[#09090b] py-2 text-zinc-400">
+        <div className="mb-4 grid grid-cols-7 gap-2 text-center text-xs font-black">
+          {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map((day) => (
+            <div key={day} className={`rounded-xl border py-2 ${day === "SAT" || day === "SUN" ? "border-fuchsia-500/25 bg-fuchsia-500/8 text-fuchsia-400" : "border-white/10 bg-[#090909] text-zinc-400"}`}>
               {day}
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-5 gap-3">
+        <div className="grid grid-cols-7 gap-2">
           {days.map((day) => {
             const hasTrade = day.summary.count > 0;
             const isWin = day.summary.pnl > 0;
             const isBreakEven = day.summary.pnl === 0;
-            const dayClass = hasTrade ? (isWin ? "activity-day-win" : isBreakEven ? "activity-day-breakeven" : "activity-day-loss") : "activity-day-empty";
+            const dayClass = hasTrade ? (isWin ? "activity-day-win" : isBreakEven ? "activity-day-breakeven" : "activity-day-loss") : day.isWeekend ? "activity-day-empty opacity-40" : "activity-day-empty";
             const selectedClass = selectedDate === day.key ? "activity-day-selected ring-1 ring-white/30 ring-offset-2 ring-offset-black" : "";
             const tooltipDate = new Date(`${day.key}T00:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
@@ -9477,7 +9499,7 @@ function TradingActivityPanel({ trades, selectedDate, onSelectDate }) {
       <div className="relative z-10 mt-auto border-t border-white/10 pt-5">
         <div className="grid grid-cols-2 gap-3">
           <ActivityStat tone="fuchsia" title="ACTIVE" value={activityTotals.trades} subtitle="trades" icon="●" />
-          <ActivityStat tone="emerald" title="WINS" value={activityTotals.wins} subtitle="profitable trades" icon="↗" />
+          <ActivityStat tone="emerald" title="WINS" value={activityTotals.wins + activityTotals.partials} subtitle="profitable trades" icon="↗" />
           <ActivityStat tone="red" title="LOSSES" value={activityTotals.losses} subtitle="unprofitable trades" icon="↘" />
           <ActivityStat tone="amber" title="BE" value={activityTotals.breakEvens} subtitle="neutral trades" icon="—" />
         </div>
@@ -9586,7 +9608,7 @@ function PerformanceScorePanel({ stats, isLoading = false }) {
   const score = Math.min(100, Math.max(0, Number(stats.score || 0)));
   if (isLoading) {
     return (
-      <div className="dashboard-performance-card light-card flex flex-col rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-6">
+      <div className="dashboard-performance-card light-card flex flex-col rounded-2xl border border-white/15 bg-[#0a0a0a] p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="h-12 w-12 animate-pulse rounded-xl bg-white/10" />
           <div><div className="h-5 w-32 animate-pulse rounded-lg bg-white/10" /><div className="mt-2 h-3 w-24 animate-pulse rounded-lg bg-white/10" /></div>
@@ -9623,7 +9645,7 @@ function PerformanceScorePanel({ stats, isLoading = false }) {
   const hovered = hoveredMetric ? chartPoints.find((point) => point.key === hoveredMetric) : null;
 
   return (
-    <div className="dashboard-score-card light-card relative overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-6">
+    <div className="dashboard-score-card light-card relative overflow-hidden rounded-2xl border border-white/15 bg-[#0a0a0a] p-6">
       <div className="pointer-events-none absolute right-0 top-0 h-40 w-40 rounded-bl-[5rem] bg-white/[0.025] blur-3xl" />
 
       <div className="relative z-10 flex items-start gap-4">
