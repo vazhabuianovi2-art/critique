@@ -10,7 +10,15 @@ async function readBody(req) {
   return raw ? JSON.parse(raw) : {};
 }
 
-const OWNER_ADMIN_EMAILS = ["vazhabuianovi2@gmail.com"];
+// Owner emails: prefer env var, always fall back to hardcoded owner as safety net.
+const OWNER_ADMIN_EMAILS = (process.env.OWNER_ADMIN_EMAILS || "vazhabuianovi2@gmail.com")
+  .split(",")
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
+
+if (!OWNER_ADMIN_EMAILS.includes("vazhabuianovi2@gmail.com")) {
+  OWNER_ADMIN_EMAILS.push("vazhabuianovi2@gmail.com");
+}
 
 function normalizeEmail(email) {
   return String(email || "").trim().toLowerCase();

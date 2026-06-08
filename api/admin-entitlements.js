@@ -10,7 +10,18 @@ async function readBody(req) {
   return raw ? JSON.parse(raw) : {};
 }
 
-const OWNER_ADMIN_EMAILS = ["vazhabuianovi2@gmail.com"];
+// Owner emails: prefer env var, always fall back to hardcoded owner as safety net.
+// To add admins: set OWNER_ADMIN_EMAILS="email1@x.com,email2@x.com" in Vercel env.
+// Additional non-owner admins: set ADMIN_EMAILS="email@x.com" (these can be revoked).
+const OWNER_ADMIN_EMAILS = (process.env.OWNER_ADMIN_EMAILS || "vazhabuianovi2@gmail.com")
+  .split(",")
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
+
+// Ensure the fallback owner is always present even if env var is set but incomplete
+if (!OWNER_ADMIN_EMAILS.includes("vazhabuianovi2@gmail.com")) {
+  OWNER_ADMIN_EMAILS.push("vazhabuianovi2@gmail.com");
+}
 
 function getAdminEmails() {
   const configuredEmails = String(process.env.ADMIN_EMAILS || "")

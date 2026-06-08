@@ -88,7 +88,10 @@ const CUSTOM_STRATEGIES_KEY = "critique_custom_strategies_v1";
 const ECONOMIC_CALENDAR_CACHE_KEY = "critique_economic_calendar_v1";
 const MAX_SCREENSHOTS = 5;
 const BRAND_NAME = "TryCritique";
-const OWNER_ADMIN_EMAILS = ["vazhabuianovi2@gmail.com"];
+const OWNER_ADMIN_EMAILS = (
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_OWNER_ADMIN_EMAILS) ||
+  "vazhabuianovi2@gmail.com"
+).split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
 const TAWK_TO_PROPERTY_ID = "6a1ecbced0b6e01c2e34b60c";
 const TAWK_TO_WIDGET_ID = "1jq44o7ki";
 const BRAND_MARK = <BrandBolt className="h-8 w-8" />;
@@ -7318,8 +7321,32 @@ export default function TradingJournalDashboard() {
 
         // Update account if server returned one
         if (profileAccount) {
+          // --- Preferences: Supabase → localStorage sync / one-time migration ---
+          let accountWithPrefs = profileAccount;
+          if (profileAccount.preferences && typeof profileAccount.preferences === "object") {
+            // Account already has preferences — sync to localStorage cache so readTradingPreferences() stays current
+            try { localStorage.setItem(TRADING_PREFERENCES_KEY, JSON.stringify(profileAccount.preferences)); } catch {}
+          } else {
+            // No preferences in account yet — attempt one-time migration from localStorage
+            try {
+              const localRaw = localStorage.getItem(TRADING_PREFERENCES_KEY);
+              const localPrefs = localRaw ? JSON.parse(localRaw) : null;
+              if (localPrefs && typeof localPrefs === "object" && (localPrefs.defaultRisk || localPrefs.defaultSession || localPrefs.timezone)) {
+                const migratedPrefs = {
+                  timezone: localPrefs.timezone || "Asia/Tbilisi",
+                  defaultSession: localPrefs.defaultSession || "",
+                  defaultRisk: localPrefs.defaultRisk || "",
+                };
+                accountWithPrefs = { ...profileAccount, preferences: migratedPrefs };
+                // Save migrated preferences to Supabase silently (non-blocking)
+                saveAccountToSupabase(authUser?.id, accountWithPrefs).catch(() => {});
+              }
+            } catch {}
+          }
+          // -----------------------------------------------------------------------
+
           setAccounts((current) => {
-            const normalized = { ...defaultAccount, ...profileAccount, id: profileAccount.id || activeAccountId || defaultAccount.id, balance: Number(profileAccount.balance || defaultAccount.balance) };
+            const normalized = { ...defaultAccount, ...accountWithPrefs, id: accountWithPrefs.id || activeAccountId || defaultAccount.id, balance: Number(accountWithPrefs.balance || defaultAccount.balance) };
             const exists = current.some((item) => String(item.id) === String(normalized.id));
             return exists ? current.map((item) => String(item.id) === String(normalized.id) ? normalized : item) : [normalized, ...current];
           });
@@ -8453,6 +8480,11 @@ Skipped duplicates: ${duplicateCount}
             onSignOut={handleSignOut}
             profilePhoto={profilePhoto}
             setProfilePhoto={setProfilePhoto}
+            onSavePreferences={async (prefs) => {
+              // Merge preferences into the current account and persist to Supabase
+              const updatedAccount = { ...account, preferences: prefs };
+              await handleSaveAccountSettings(updatedAccount);
+            }}
             onProfileNameChange={(name, nextUser) => {
               if (nextUser) {
                 setAuthUser(nextUser);
@@ -11428,7 +11460,7 @@ function SettingsPasswordInput({ visible, onToggle, className = "", ...props }) 
   );
 }
 
-function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, isSupabaseReady, onOpenAccount, onBackup, onRestore, onSignOut, profilePhoto, setProfilePhoto, onProfileNameChange }) {
+function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, isSupabaseReady, onOpenAccount, onBackup, onRestore, onSignOut, profilePhoto, setProfilePhoto, onProfileNameChange, onSavePreferences }) {
   const profileName = getUserDisplayName(authUser, account?.isPlaceholder ? "User" : account?.name || "User");
   const profileInitials = profileName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join("") || "U";
   const currentBalance = Number(accountBalance?.currentBalance || account?.balance || 0);
@@ -11442,9 +11474,15 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
   const [passwordMessage, setPasswordMessage] = useState("");
   const [passwordStatus, setPasswordStatus] = useState("");
   const [visiblePasswords, setVisiblePasswords] = useState({ current: false, new: false, confirm: false });
-  const [preferences, setPreferences] = useState(readTradingPreferences);
+  const [preferences, setPreferences] = useState(() => {
+    // Prefer account.preferences (Supabase SoT) over localStorage fallback
+    const fromAccount = account?.preferences && typeof account.preferences === "object" ? account.preferences : null;
+    const fromStorage = readTradingPreferences();
+    return fromAccount ? { ...fromStorage, ...fromAccount } : fromStorage;
+  });
   const timezoneOptions = useMemo(() => getTimezoneOptions(), []);
-  useEffect(() => { localStorage.setItem(TRADING_PREFERENCES_KEY, JSON.stringify(preferences)); }, [preferences]);
+  // Keep localStorage cache in sync (read-only cache — Supabase is source of truth)
+  useEffect(() => { try { localStorage.setItem(TRADING_PREFERENCES_KEY, JSON.stringify(preferences)); } catch {} }, [preferences]);
   useEffect(() => { setFullName(profileName); }, [profileName]);
 
   async function uploadProfilePhoto(event) {
@@ -11597,7 +11635,12 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
       defaultRisk: String(risk),
     };
     setPreferences(next);
-    localStorage.setItem(TRADING_PREFERENCES_KEY, JSON.stringify(next));
+    // localStorage = cache only; Supabase is source of truth
+    try { localStorage.setItem(TRADING_PREFERENCES_KEY, JSON.stringify(next)); } catch {}
+    // Persist to Supabase via account object
+    if (onSavePreferences) {
+      onSavePreferences(next).catch(() => {});
+    }
     setMessage("Trading preferences saved.");
   }
 
