@@ -2089,7 +2089,8 @@ const THEME_STYLE_CSS = `
   .dashboard-recent-card,
   .quick-insights-section,
   .dashboard-activity-card,
-  .dashboard-events-card {
+  .dashboard-events-card,
+  .dashboard-routine-cta {
     background: linear-gradient(135deg, #070709 0%, #030304 58%, #010102 100%) !important;
     border-color: rgba(255,255,255,.16) !important;
   }
