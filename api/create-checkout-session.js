@@ -27,6 +27,27 @@ async function readBody(req) {
   return raw ? JSON.parse(raw) : {};
 }
 
+// Verify the Supabase access token and return the authenticated user.
+// Returns null if the token is missing, expired, or invalid.
+async function verifyAccessToken(accessToken) {
+  const supabaseUrl = String(process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "").replace(/\/+$/, "");
+  const anonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !anonKey || !accessToken) return null;
+
+  try {
+    const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: {
+        apikey: anonKey,
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    if (!userResponse.ok) return null;
+    return await userResponse.json();
+  } catch {
+    return null;
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -38,6 +59,21 @@ export default async function handler(req, res) {
     if (!apiKey) throw new Error("Dodo Payments API key is not configured");
 
     const body = await readBody(req);
+
+    // --- Auth check: require a valid Supabase session ---
+    const accessToken = typeof body.accessToken === "string" ? body.accessToken.trim() : "";
+    if (!accessToken) {
+      return res.status(401).json({ ok: false, error: "Authentication required." });
+    }
+    const user = await verifyAccessToken(accessToken);
+    if (!user?.id) {
+      return res.status(401).json({ ok: false, error: "Invalid or expired session. Please sign in again." });
+    }
+    // Use verified identity — do not trust client-supplied email/userId
+    const verifiedEmail = user.email || body.email || "";
+    const verifiedUserId = user.id;
+    // ---------------------------------------------------
+
     const plan = body.plan === "yearly" ? "yearly" : "monthly";
     const productId = getProductId(plan);
     if (!productId) throw new Error(`${plan === "yearly" ? "Yearly" : "Monthly"} Dodo product is not configured`);
@@ -53,14 +89,14 @@ export default async function handler(req, res) {
         product_cart: [{ product_id: productId, quantity: 1 }],
         subscription_data: { trial_period_days: 7 },
         customer: {
-          email: body.email || undefined,
-          name: body.name || body.email || "TryCritique customer",
+          email: verifiedEmail || undefined,
+          name: verifiedEmail || "TryCritique customer",
         },
         metadata: {
           source: "trycritique",
           plan,
-          user_id: body.userId || "",
-          email: body.email || "",
+          user_id: verifiedUserId,
+          email: verifiedEmail,
         },
         return_url: `${siteUrl}/dashboard?billing=success`,
         cancel_url: `${siteUrl}/dashboard?billing=cancelled`,

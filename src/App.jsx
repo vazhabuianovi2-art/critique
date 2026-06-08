@@ -5533,19 +5533,19 @@ function readTradingPreferences() {
     return {
       timezone: normalizeTimezoneValue(saved.timezone || "Asia/Tbilisi"),
       defaultSession: TRADING_SESSIONS.includes(saved.defaultSession) ? saved.defaultSession : "",
-      defaultRisk: Number.isFinite(savedRisk) && savedRisk >= 0 ? String(savedRisk) : "200",
+      defaultRisk: Number.isFinite(savedRisk) && savedRisk > 0 ? String(savedRisk) : "",
     };
   } catch {
-    return { timezone: "Asia/Tbilisi", defaultSession: "", defaultRisk: "200" };
+    return { timezone: "Asia/Tbilisi", defaultSession: "", defaultRisk: "" };
   }
 }
 
 const emptyForm = {
   symbol: "",
   direction: "Buy",
-  quantity: "2",
-  pnl: "590",
-  risk: "200",
+  quantity: "",
+  pnl: "",
+  risk: "",
   date: formatDateKey(new Date()),
   entryTime: "",
   exitTime: "",
@@ -12561,8 +12561,10 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
     setBillingStatus("");
     setLoadingPlan(plan);
     try {
+      const accessToken = await getCurrentAccessToken();
       const data = await postBilling("/api/create-checkout-session", {
         plan,
+        accessToken,
         email: authUser?.email,
         userId: authUser?.id,
       });
@@ -12859,10 +12861,11 @@ function BillingGatePage({ authUser, billingSubscription, onSignOut, onSubscript
     setLoadingPlan(planId);
     setBillingError("");
     try {
+      const accessToken = await getCurrentAccessToken();
       const response = await fetch("/api/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: planId, email: authUser?.email, userId: authUser?.id }),
+        body: JSON.stringify({ plan: planId, accessToken, email: authUser?.email, userId: authUser?.id }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.ok) throw new Error(data.error || "Could not start checkout.");

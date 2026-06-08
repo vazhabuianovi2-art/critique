@@ -49,12 +49,42 @@ function publicSubscription(subscription) {
   };
 }
 
+// Simple in-process rate limiter (best-effort — not cross-instance).
+// Proper production rate limiting requires Vercel KV or Upstash Redis.
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX_CALLS = 20;        // max 20 calls per IP per minute
+
+function isRateLimited(ip) {
+  if (!ip) return false;
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
+    rateLimitMap.set(ip, { windowStart: now, count: 1 });
+    return false;
+  }
+  entry.count += 1;
+  if (entry.count > RATE_LIMIT_MAX_CALLS) return true;
+  return false;
+}
+
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
 
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return json(res, 405, { ok: false, error: "Method not allowed" });
+  }
+
+  // Best-effort IP rate limiting
+  const clientIp =
+    (req.headers["x-forwarded-for"] || "").split(",")[0].trim() ||
+    req.headers["x-real-ip"] ||
+    req.socket?.remoteAddress ||
+    "";
+
+  if (isRateLimited(clientIp)) {
+    return json(res, 429, { ok: false, error: "Too many requests. Please try again shortly." });
   }
 
   try {
@@ -64,19 +94,24 @@ export default async function handler(req, res) {
     if (!supabaseUrl || !anonKey || !serviceRoleKey) throw new Error("Billing status is not configured.");
 
     const body = await readBody(req);
-    const accessToken = typeof body.accessToken === "string" ? body.accessToken : "";
-    const requestedEmail = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+    const accessToken = typeof body.accessToken === "string" ? body.accessToken.trim() : "";
 
-    const user = accessToken ? await getUserFromToken(supabaseUrl, anonKey, accessToken) : null;
-    const email = String(user?.email || requestedEmail || "").trim().toLowerCase();
-    if (!user?.id && !email) return json(res, 401, { ok: false, error: "Login session is missing." });
+    // Require a valid access token — reject anonymous / email-only requests
+    if (!accessToken) {
+      return json(res, 401, { ok: false, error: "Authentication required." });
+    }
+
+    const user = await getUserFromToken(supabaseUrl, anonKey, accessToken);
+    if (!user?.id) {
+      return json(res, 401, { ok: false, error: "Invalid or expired session. Please sign in again." });
+    }
+
+    const email = String(user.email || "").trim().toLowerCase();
 
     const adminGrant = email
       ? await fetchLatestSubscription(supabaseUrl, serviceRoleKey, `provider=eq.admin&email=eq.${encodeURIComponent(email)}`)
       : null;
-    const byUser = user?.id
-      ? await fetchLatestSubscription(supabaseUrl, serviceRoleKey, `user_id=eq.${encodeURIComponent(user.id)}`)
-      : null;
+    const byUser = await fetchLatestSubscription(supabaseUrl, serviceRoleKey, `user_id=eq.${encodeURIComponent(user.id)}`);
     const subscription = adminGrant || byUser || (email
       ? await fetchLatestSubscription(supabaseUrl, serviceRoleKey, `email=eq.${encodeURIComponent(email)}`)
       : null);
