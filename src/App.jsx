@@ -2061,8 +2061,8 @@ const THEME_STYLE_CSS = `
   .dashboard-score-card {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, #0d0d12 0%, #09090c 58%, #07080a 100%) !important;
-    border-color: rgba(255,255,255,.18) !important;
+    background: linear-gradient(135deg, #16161d 0%, #101116 58%, #0c0d11 100%) !important;
+    border-color: rgba(255,255,255,.22) !important;
     box-shadow: 0 18px 45px rgba(0,0,0,.28) !important;
     transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
   }
@@ -2080,8 +2080,8 @@ const THEME_STYLE_CSS = `
   .dashboard-events-card,
   .dashboard-empty,
   .dashboard-mistake-alert {
-    background: linear-gradient(135deg, #0d0d12 0%, #09090c 58%, #07080a 100%) !important;
-    border-color: rgba(255,255,255,.18) !important;
+    background: linear-gradient(135deg, #16161d 0%, #101116 58%, #0c0d11 100%) !important;
+    border-color: rgba(255,255,255,.22) !important;
     box-shadow: 0 18px 45px rgba(0,0,0,.28) !important;
     transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
   }
@@ -2102,15 +2102,15 @@ const THEME_STYLE_CSS = `
   }
 
   .dashboard-chart-summary {
-    background-color: rgba(18,18,24,.72) !important;
+    background-color: rgba(27,27,35,.86) !important;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
   }
 
   .dashboard-chart-area,
   .dashboard-radar-card,
   .dashboard-score-summary {
-    background-color: rgba(14,14,18,.88) !important;
-    border-color: rgba(255,255,255,.14) !important;
+    background-color: rgba(21,21,27,.96) !important;
+    border-color: rgba(255,255,255,.18) !important;
     backdrop-filter: blur(10px);
   }
 
@@ -2118,13 +2118,21 @@ const THEME_STYLE_CSS = `
   .dashboard-recent-icon,
   .dashboard-section-icon,
   .dashboard-routine-icon {
-    background: #121217 !important;
-    border-color: rgba(255,255,255,.16) !important;
+    background: #1a1a21 !important;
+    border-color: rgba(255,255,255,.20) !important;
   }
 
   .dashboard-recent-list {
-    background: rgba(13,13,17,.88) !important;
-    border-color: rgba(255,255,255,.14) !important;
+    background: rgba(20,20,26,.94) !important;
+    border-color: rgba(255,255,255,.18) !important;
+  }
+
+  .dashboard-dash-card {
+    filter: brightness(1.16);
+  }
+
+  .dashboard-dash-card:hover {
+    filter: brightness(1.24);
   }
 
   .dashboard-performance-tab,
@@ -3791,6 +3799,7 @@ const THEME_STYLE_CSS = `
     background: #ffffff !important;
     border-color: rgba(226,232,240,.96) !important;
     box-shadow: 0 14px 32px rgba(15,23,42,.06) !important;
+    filter: none !important;
   }
 
   .light-theme .dashboard-dash-card .rounded-full,
@@ -15470,36 +15479,36 @@ function SideBox({ title, children }) { return <div className="rounded-xl border
 function DashCard({ title, value, tone, icon, badge, isLoading = false }) {
   const styles = {
     emerald: {
-      card: "from-[#07100d] via-[#050807] to-black border-emerald-500/25 hover:border-emerald-400/40",
-      icon: "border border-emerald-500/15 bg-emerald-500/[0.07] text-emerald-400",
+      card: "from-[#10271f] via-[#0a1713] to-[#070b09] border-emerald-500/35 hover:border-emerald-400/50",
+      icon: "border border-emerald-500/25 bg-emerald-500/[0.12] text-emerald-300",
       value: "text-zinc-100",
       line: "text-emerald-500",
       badge: "border-emerald-500/25 bg-emerald-500/[0.08] text-emerald-300",
-      glow: "bg-emerald-500/[0.035]",
+      glow: "bg-emerald-500/[0.07]",
     },
     fuchsia: {
-      card: "from-[#0d0811] via-[#070508] to-black border-fuchsia-500/25 hover:border-fuchsia-400/40",
-      icon: "border border-fuchsia-500/15 bg-fuchsia-500/[0.07] text-fuchsia-400",
+      card: "from-[#281430] via-[#170c1c] to-[#0b080d] border-fuchsia-500/35 hover:border-fuchsia-400/50",
+      icon: "border border-fuchsia-500/25 bg-fuchsia-500/[0.12] text-fuchsia-300",
       value: "text-zinc-100",
       line: "text-violet-500",
       badge: "border-emerald-500/25 bg-emerald-500/[0.08] text-emerald-300",
-      glow: "bg-fuchsia-500/[0.035]",
+      glow: "bg-fuchsia-500/[0.07]",
     },
     cyan: {
-      card: "from-[#061014] via-[#04080a] to-black border-cyan-500/25 hover:border-cyan-400/40",
-      icon: "border border-cyan-500/15 bg-cyan-500/[0.07] text-cyan-400",
+      card: "from-[#0d2932] via-[#09191f] to-[#060b0e] border-cyan-500/35 hover:border-cyan-400/50",
+      icon: "border border-cyan-500/25 bg-cyan-500/[0.12] text-cyan-300",
       value: "text-zinc-100",
       line: "text-cyan-500",
       badge: "border-white/15 bg-white/[0.05] text-zinc-400",
-      glow: "bg-cyan-500/[0.035]",
+      glow: "bg-cyan-500/[0.07]",
     },
     amber: {
-      card: "from-[#120c05] via-[#090603] to-black border-amber-500/25 hover:border-amber-400/40",
-      icon: "border border-amber-500/15 bg-amber-500/[0.07] text-amber-400",
+      card: "from-[#30200b] via-[#1b1207] to-[#0e0a05] border-amber-500/35 hover:border-amber-400/50",
+      icon: "border border-amber-500/25 bg-amber-500/[0.12] text-amber-300",
       value: "text-zinc-100",
       line: "text-amber-500",
       badge: "border-emerald-500/25 bg-emerald-500/[0.08] text-emerald-300",
-      glow: "bg-amber-500/[0.035]",
+      glow: "bg-amber-500/[0.07]",
     },
   };
   const s = styles[tone] || styles.emerald;
