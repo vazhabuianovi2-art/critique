@@ -2061,15 +2061,15 @@ const THEME_STYLE_CSS = `
   .dashboard-score-card {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, #16161d 0%, #101116 58%, #0c0d11 100%) !important;
-    border-color: rgba(255,255,255,.22) !important;
+    background: linear-gradient(135deg, #070709 0%, #030304 58%, #010102 100%) !important;
+    border-color: rgba(255,255,255,.16) !important;
     box-shadow: 0 18px 45px rgba(0,0,0,.28) !important;
     transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
   }
 
   .dashboard-performance-card:hover,
   .dashboard-score-card:hover {
-    border-color: rgba(255,255,255,.24) !important;
+    border-color: rgba(255,255,255,.21) !important;
     box-shadow: 0 18px 45px rgba(0,0,0,.32) !important;
   }
 
@@ -2102,15 +2102,15 @@ const THEME_STYLE_CSS = `
   }
 
   .dashboard-chart-summary {
-    background-color: rgba(27,27,35,.86) !important;
+    background-color: #08090b !important;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
   }
 
   .dashboard-chart-area,
   .dashboard-radar-card,
   .dashboard-score-summary {
-    background-color: rgba(21,21,27,.96) !important;
-    border-color: rgba(255,255,255,.18) !important;
+    background-color: #070709 !important;
+    border-color: rgba(255,255,255,.15) !important;
     backdrop-filter: blur(10px);
   }
 
