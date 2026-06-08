@@ -2095,6 +2095,17 @@ const THEME_STYLE_CSS = `
     border-color: rgba(255,255,255,.16) !important;
   }
 
+  .dashboard-empty {
+    background: #000000 !important;
+    border-color: rgba(255,255,255,.10) !important;
+    box-shadow: none !important;
+  }
+
+  .dashboard-empty:hover {
+    border-color: rgba(255,255,255,.16) !important;
+    box-shadow: none !important;
+  }
+
   .dashboard-recent-card:hover,
   .quick-insights-section:hover,
   .dashboard-activity-card:hover,
@@ -9023,7 +9034,7 @@ function DashboardEmptyState({ onAddTrade, onOpenJournal }) {
     { icon: <Target size={20} />, title: "Set Goals", detail: "Define and achieve trading targets" },
   ];
   return (
-    <section className="dashboard-empty mt-8 rounded-2xl border border-white/15 bg-gradient-to-br from-[#08080b] via-black to-[#050506] px-6 py-16 transition-all duration-300 sm:px-10 sm:py-20">
+    <section className="dashboard-empty mt-8 rounded-2xl border-2 border-dashed border-white/10 bg-black px-6 py-16 transition-all duration-300 sm:px-10 sm:py-20">
       <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
         <div className="relative mb-8 flex h-32 w-32 items-center justify-center">
           <div className="absolute h-32 w-32 rounded-full bg-white/[0.03] blur-2xl" aria-hidden="true" />
