@@ -2076,14 +2076,22 @@ const THEME_STYLE_CSS = `
   .dashboard-recent-card,
   .quick-insights-section,
   .dashboard-activity-card,
-  .dashboard-routine-cta,
   .dashboard-events-card,
+  .dashboard-routine-cta,
   .dashboard-empty,
   .dashboard-mistake-alert {
     background: linear-gradient(135deg, #16161d 0%, #101116 58%, #0c0d11 100%) !important;
     border-color: rgba(255,255,255,.22) !important;
     box-shadow: 0 18px 45px rgba(0,0,0,.28) !important;
     transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
+  }
+
+  .dashboard-recent-card,
+  .quick-insights-section,
+  .dashboard-activity-card,
+  .dashboard-events-card {
+    background: linear-gradient(135deg, #070709 0%, #030304 58%, #010102 100%) !important;
+    border-color: rgba(255,255,255,.16) !important;
   }
 
   .dashboard-recent-card:hover,
@@ -2118,13 +2126,19 @@ const THEME_STYLE_CSS = `
   .dashboard-recent-icon,
   .dashboard-section-icon,
   .dashboard-routine-icon {
-    background: #1a1a21 !important;
-    border-color: rgba(255,255,255,.20) !important;
+    background: #09090b !important;
+    border-color: rgba(255,255,255,.16) !important;
   }
 
   .dashboard-recent-list {
-    background: rgba(20,20,26,.94) !important;
-    border-color: rgba(255,255,255,.18) !important;
+    background: #050506 !important;
+    border-color: rgba(255,255,255,.14) !important;
+  }
+
+  .dashboard-events-filters,
+  .dashboard-activity-grid {
+    background: #050506 !important;
+    border-color: rgba(255,255,255,.14) !important;
   }
 
   .dashboard-dash-card {
@@ -3822,6 +3836,12 @@ const THEME_STYLE_CSS = `
     background: #f8fafc !important;
     border-color: rgba(226,232,240,.96) !important;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.8) !important;
+  }
+
+  .light-theme .dashboard-events-filters,
+  .light-theme .dashboard-activity-grid {
+    background: #f8fafc !important;
+    border-color: rgba(226,232,240,.96) !important;
   }
 
   .light-theme button.dashboard-recent-row.dashboard-recent-row {
@@ -9261,7 +9281,7 @@ function TodaysEventsPanel({ economicCalendar }) {
           </div>
         </div>
       </div>
-      <div className="mt-5 rounded-xl border border-white/10 bg-black/35 p-4">
+      <div className="dashboard-events-filters mt-5 rounded-xl border border-white/10 bg-black/35 p-4">
         <div className="grid gap-4 lg:grid-cols-[1fr_2fr]">
           <div>
             <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Expected impact</div>
@@ -9372,7 +9392,7 @@ function TradingActivityPanel({ trades, selectedDate, onSelectDate }) {
         </div>
       </div>
 
-      <div className="relative z-10 mt-4 rounded-2xl border border-white/10 bg-black/40 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <div className="dashboard-activity-grid relative z-10 mt-4 rounded-2xl border border-white/10 bg-black/40 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
         <div className="mb-4 grid grid-cols-5 gap-3 text-center text-xs font-black">
           {["MON", "TUE", "WED", "THU", "FRI"].map((day) => (
             <div key={day} className="rounded-xl border border-white/10 bg-[#09090b] py-2 text-zinc-400">
