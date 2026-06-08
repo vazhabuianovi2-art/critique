@@ -2061,14 +2061,15 @@ const THEME_STYLE_CSS = `
   .dashboard-score-card {
     position: relative;
     overflow: hidden;
-    border-color: rgba(255,255,255,.15) !important;
+    background: linear-gradient(135deg, #0d0d12 0%, #09090c 58%, #07080a 100%) !important;
+    border-color: rgba(255,255,255,.18) !important;
     box-shadow: 0 18px 45px rgba(0,0,0,.28) !important;
     transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
   }
 
   .dashboard-performance-card:hover,
   .dashboard-score-card:hover {
-    border-color: rgba(255,255,255,.20) !important;
+    border-color: rgba(255,255,255,.24) !important;
     box-shadow: 0 18px 45px rgba(0,0,0,.32) !important;
   }
 
@@ -2079,7 +2080,8 @@ const THEME_STYLE_CSS = `
   .dashboard-events-card,
   .dashboard-empty,
   .dashboard-mistake-alert {
-    border-color: rgba(255,255,255,.15) !important;
+    background: linear-gradient(135deg, #0d0d12 0%, #09090c 58%, #07080a 100%) !important;
+    border-color: rgba(255,255,255,.18) !important;
     box-shadow: 0 18px 45px rgba(0,0,0,.28) !important;
     transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
   }
@@ -2091,7 +2093,7 @@ const THEME_STYLE_CSS = `
   .dashboard-events-card:hover,
   .dashboard-empty:hover,
   .dashboard-mistake-alert:hover {
-    border-color: rgba(255,255,255,.20) !important;
+    border-color: rgba(255,255,255,.24) !important;
     box-shadow: 0 22px 52px rgba(0,0,0,.38) !important;
   }
 
@@ -2100,13 +2102,29 @@ const THEME_STYLE_CSS = `
   }
 
   .dashboard-chart-summary {
+    background-color: rgba(18,18,24,.72) !important;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
   }
 
   .dashboard-chart-area,
   .dashboard-radar-card,
   .dashboard-score-summary {
+    background-color: rgba(14,14,18,.88) !important;
+    border-color: rgba(255,255,255,.14) !important;
     backdrop-filter: blur(10px);
+  }
+
+  .dashboard-performance-icon,
+  .dashboard-recent-icon,
+  .dashboard-section-icon,
+  .dashboard-routine-icon {
+    background: #121217 !important;
+    border-color: rgba(255,255,255,.16) !important;
+  }
+
+  .dashboard-recent-list {
+    background: rgba(13,13,17,.88) !important;
+    border-color: rgba(255,255,255,.14) !important;
   }
 
   .dashboard-performance-tab,
@@ -9021,9 +9039,9 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
         <TopCrumb page="Dashboard" className="" />
       </div>
 
-      <div className="dashboard-hero relative overflow-hidden rounded-2xl border border-white/10 bg-[#050507] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.32)]">
+      <div className="dashboard-hero relative overflow-hidden rounded-2xl border border-white/15 bg-[#09090d] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.32)]">
         {/* Background layers */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#09070d] via-[#050507] to-[#030405]" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#100d15] via-[#0a0a0e] to-[#07090a]" />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
         <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-fuchsia-600/[0.025] blur-3xl" />
 
@@ -9280,10 +9298,10 @@ function TodaysEventsPanel({ economicCalendar }) {
 
 function QuickInsights({ insights }) {
   const styles = {
-    emerald: "border-emerald-500/20 bg-emerald-950/15 text-emerald-300",
-    fuchsia: "border-fuchsia-500/20 bg-fuchsia-950/15 text-fuchsia-300",
-    amber: "border-amber-500/20 bg-amber-950/15 text-amber-300",
-    red: "border-red-500/20 bg-red-950/15 text-red-300",
+    emerald: "border-emerald-500/25 bg-emerald-950/20 text-emerald-300",
+    fuchsia: "border-fuchsia-500/25 bg-fuchsia-950/20 text-fuchsia-300",
+    amber: "border-amber-500/25 bg-amber-950/20 text-amber-300",
+    red: "border-red-500/25 bg-red-950/20 text-red-300",
   };
   return (
     <section className="quick-insights-section mt-8 rounded-2xl border border-white/15 bg-gradient-to-br from-[#08070b] via-black to-[#050307] p-5">
@@ -9408,10 +9426,10 @@ function TradingActivityPanel({ trades, selectedDate, onSelectDate }) {
 
 function ActivityStat({ tone, title, value, subtitle, icon }) {
   const styles = {
-    fuchsia: { card: "border-fuchsia-500/20 bg-fuchsia-950/10 text-fuchsia-300", icon: "border border-fuchsia-500/15 bg-black/45 text-fuchsia-300", value: "text-fuchsia-300" },
-    emerald: { card: "border-emerald-500/20 bg-emerald-950/10 text-emerald-300", icon: "border border-emerald-500/15 bg-black/45 text-emerald-300", value: "text-emerald-300" },
-    red: { card: "border-red-500/20 bg-red-950/10 text-red-300", icon: "border border-red-500/15 bg-black/45 text-red-300", value: "text-red-300" },
-    amber: { card: "border-amber-500/20 bg-amber-950/10 text-amber-300", icon: "border border-amber-500/15 bg-black/45 text-amber-300", value: "text-amber-300" },
+    fuchsia: { card: "border-fuchsia-500/25 bg-fuchsia-950/15 text-fuchsia-300", icon: "border border-fuchsia-500/20 bg-black/35 text-fuchsia-300", value: "text-fuchsia-300" },
+    emerald: { card: "border-emerald-500/25 bg-emerald-950/15 text-emerald-300", icon: "border border-emerald-500/20 bg-black/35 text-emerald-300", value: "text-emerald-300" },
+    red: { card: "border-red-500/25 bg-red-950/15 text-red-300", icon: "border border-red-500/20 bg-black/35 text-red-300", value: "text-red-300" },
+    amber: { card: "border-amber-500/25 bg-amber-950/15 text-amber-300", icon: "border border-amber-500/20 bg-black/35 text-amber-300", value: "text-amber-300" },
   };
   const s = styles[tone] || styles.fuchsia;
   return (
