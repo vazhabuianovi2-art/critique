@@ -2199,9 +2199,30 @@ const THEME_STYLE_CSS = `
     transform: translateY(-1px) scale(1.02);
   }
 
+  .dashboard-hero {
+    border: 1px solid transparent !important;
+    background:
+      linear-gradient(135deg, #14071d 0%, #16081e 48%, #180d17 76%, #21130d 100%) padding-box,
+      linear-gradient(135deg, rgba(178,74,242,.58) 0%, rgba(122,42,170,.48) 58%, rgba(132,76,36,.62) 100%) border-box !important;
+    box-shadow: 0 18px 48px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.035) !important;
+  }
+
+  .dashboard-hero-bg {
+    background:
+      radial-gradient(circle at 10% 0%, rgba(178,74,242,.09), transparent 34%),
+      radial-gradient(circle at 100% 100%, rgba(123,69,31,.20), transparent 42%),
+      linear-gradient(135deg, rgba(18,6,27,.98) 0%, rgba(20,7,27,.98) 52%, rgba(26,13,20,.98) 78%, rgba(31,18,12,.98) 100%) !important;
+  }
+
   .dashboard-inspiration {
-    background: rgba(0,0,0,0.40) !important;
-    border-color: rgba(255,255,255,0.06) !important;
+    background: linear-gradient(135deg, rgba(13,7,17,.76) 0%, rgba(17,8,18,.78) 58%, rgba(31,17,12,.76) 100%) !important;
+    border-color: rgba(147,80,91,.22) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.025) !important;
+  }
+
+  .dashboard-inspiration .moving-text-wrap {
+    background: transparent !important;
+    border-color: transparent !important;
     box-shadow: none !important;
   }
 
@@ -9082,7 +9103,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
 
       <div className="dashboard-hero relative overflow-hidden rounded-2xl border border-white/15 bg-[#09090d] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.32)]">
         {/* Background layers */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#100d15] via-[#0a0a0e] to-[#07090a]" />
+        <div className="dashboard-hero-bg pointer-events-none absolute inset-0" />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
         <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-fuchsia-600/[0.025] blur-3xl" />
 
