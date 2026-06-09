@@ -8566,7 +8566,7 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
           </div>
           <h2 className="text-2xl font-bold text-zinc-100">Your Trading Journal Awaits</h2>
           <p className="mx-auto mt-3 max-w-md text-sm font-medium text-zinc-500 leading-relaxed">
-            No trades logged yet. Start building your trading history by recording your first trade. Track entries, exits, strategies, and insights all in one place.
+            No trades logged yet. Add your first trade to start finding patterns.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Button onClick={onAdd} className="bg-fuchsia-500 px-6 py-3 font-bold text-black"><Plus size={16} /> Log Your First Trade</Button>
@@ -8659,8 +8659,8 @@ function JournalPage({ trades, allTrades, stats, searchQuery, setSearchQuery, fi
           {sortedTrades.length === 0 && (
             <div className="mt-8 rounded-xl border border-white/10 bg-black/20 p-10 text-center">
               <Search size={28} className="mx-auto mb-3 text-zinc-600" />
-              <div className="text-lg font-bold text-zinc-300">No trades match this view</div>
-              <p className="mt-1 text-sm text-zinc-500">Clear the current search and filters, or add a new trade.</p>
+              <div className="text-lg font-bold text-zinc-300">No trades match these filters.</div>
+              <p className="mt-1 text-sm text-zinc-500">Clear the current filters or search to see all your trades.</p>
               <div className="mt-5 flex justify-center gap-3">
                 <Button variant="outline" onClick={resetJournalFilters} className="border-white/15 bg-black text-zinc-300">Clear Filters</Button>
                 <Button onClick={onAdd} className="bg-fuchsia-500 font-bold text-black"><Plus size={16} /> Add Trade</Button>
@@ -8772,23 +8772,155 @@ function DateFilterField({ label, value, onChange }) {
 function TradeCard({ trade, onView, onEdit, onRemove }) {
   const screenshots = normalizeScreenshots(trade);
   const pnl = Number(trade.pnl || 0);
-  const isWin = pnl > 0;
-  const isBreakEven = pnl === 0;
   const result = getTradeResult(trade);
   const rr = getTradeRR(trade);
-  const tags = normalizeTags(trade).slice(0, 3);
+  const resultTone = getResultTone(result);
+
+  // Review completeness — purely display, derived from existing fields only
+  const hasMistake = trade.mistake && trade.mistake !== "None" && !String(trade.mistake).startsWith("Select");
+  const hasRuleBroken = trade.ruleBroken && trade.ruleBroken !== "None" && !String(trade.ruleBroken).startsWith("Select");
+  const hasEmotion = trade.emotion && !String(trade.emotion).startsWith("Select");
+  const reviewFilled = [
+    screenshots.length > 0,
+    String(trade.notes || "").trim().length > 0,
+    hasEmotion,
+    hasMistake,
+    hasRuleBroken,
+    Boolean(trade.setupQuality),
+    Number(trade.entryQuality || 0) > 0,
+    Number(trade.exitQuality || 0) > 0,
+  ].filter(Boolean).length;
+  const reviewTotal = 8;
+  const reviewPct = Math.round((reviewFilled / reviewTotal) * 100);
+  const reviewLabel = reviewPct >= 75 ? "Complete" : reviewPct >= 50 ? "Partial" : "Incomplete";
+  const reviewColor = reviewPct >= 75 ? "bg-emerald-500" : reviewPct >= 50 ? "bg-amber-500" : "bg-zinc-700";
+  const reviewTextColor = reviewPct >= 75 ? "text-emerald-400" : reviewPct >= 50 ? "text-amber-400" : "text-zinc-600";
+
+  // Result badge colors
+  const resultBadgeCls =
+    resultTone === "emerald" ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-300" :
+    resultTone === "red"     ? "border-red-500/40 bg-red-500/15 text-red-300" :
+    resultTone === "fuchsia" ? "border-fuchsia-500/40 bg-fuchsia-500/15 text-fuchsia-300" :
+                               "border-amber-500/40 bg-amber-500/15 text-amber-300";
+
+  // Setup quality badge colors
+  const setupQualityCls =
+    ["A+", "A"].includes(trade.setupQuality) ? "border-emerald-500/30 bg-emerald-500/[0.08] text-emerald-300" :
+    trade.setupQuality === "B"               ? "border-fuchsia-500/30 bg-fuchsia-500/[0.08] text-fuchsia-300" :
+                                               "border-amber-500/30 bg-amber-500/[0.08] text-amber-300";
+
   return (
     <div className="trade-card group relative overflow-hidden rounded-2xl border border-white/10 bg-[#0d0d0d] transition-all duration-200 hover:border-white/20">
-      <button onClick={onView} className="trade-screenshot-area relative block h-48 w-full overflow-hidden bg-zinc-900 text-left">
-        {screenshots.length ? <><img src={screenshots[0]} alt="Trade screenshot" className="trade-screenshot-image h-full w-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:opacity-95" /><div className="trade-screenshot-overlay absolute inset-0 bg-gradient-to-t from-black via-black/15 to-transparent" /></> : <div className="trade-no-screenshot flex h-full flex-col items-center justify-center bg-[#0a0a0a] text-zinc-500"><div className="trade-no-screenshot-icon flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-zinc-400"><Camera size={24} /></div><span className="trade-no-screenshot-text mt-3 text-xs font-bold text-zinc-500">No Screenshot</span><span className="mt-1 text-[11px] font-semibold text-zinc-600">Edit trade → upload image</span></div>}
-        <div className="absolute left-4 top-4 flex gap-2"><span className="rounded-full border border-fuchsia-500/30 bg-black/70 px-3 py-1 text-xs font-black text-fuchsia-300 backdrop-blur">{trade.pair}</span><span className={`rounded-full border px-3 py-1 text-xs font-black tracking-wider backdrop-blur ${getTradeDirectionClass(trade.direction)}`}>{trade.direction}</span></div>
-        <div className={`absolute bottom-4 right-4 rounded-xl border px-4 py-2 text-lg font-black backdrop-blur ${getPnlPillClass(pnl)}`}>{getPnlArrow(pnl)} {formatMoney(pnl)}</div>
+
+      {/* ── Screenshot area ─────────────────────────── */}
+      <button onClick={onView} className="trade-screenshot-area relative block h-44 w-full overflow-hidden bg-zinc-900 text-left">
+        {screenshots.length ? (
+          <>
+            <img src={screenshots[0]} alt="Trade screenshot" className="trade-screenshot-image h-full w-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:opacity-95" />
+            <div className="trade-screenshot-overlay absolute inset-0 bg-gradient-to-t from-black via-black/15 to-transparent" />
+          </>
+        ) : (
+          <div className="trade-no-screenshot flex h-full flex-col items-center justify-center bg-[#0a0a0a]">
+            <div className="trade-no-screenshot-icon flex h-12 w-12 items-center justify-center rounded-xl border border-white/8 bg-white/3 text-zinc-600">
+              <Camera size={20} />
+            </div>
+            <span className="trade-no-screenshot-text mt-2 text-xs font-bold text-zinc-600">No screenshot</span>
+            <span className="mt-0.5 text-[11px] font-semibold text-zinc-700">Edit trade to add one</span>
+          </div>
+        )}
+
+        {/* Pair + direction */}
+        <div className="absolute left-3 top-3 flex gap-1.5">
+          <span className="rounded-full border border-fuchsia-500/30 bg-black/75 px-2.5 py-1 text-xs font-black text-fuchsia-300 backdrop-blur">{trade.pair}</span>
+          <span className={`rounded-full border px-2.5 py-1 text-xs font-black backdrop-blur ${getTradeDirectionClass(trade.direction)}`}>{trade.direction}</span>
+        </div>
+
+        {/* Result badge */}
+        <div className={`absolute right-3 top-3 rounded-full border px-2.5 py-1 text-[11px] font-black backdrop-blur ${resultBadgeCls}`}>{result}</div>
+
+        {/* P&L */}
+        <div className={`absolute bottom-3 right-3 rounded-lg border px-3 py-1.5 text-base font-black backdrop-blur ${getPnlPillClass(pnl)}`}>{getPnlArrow(pnl)} {formatMoney(pnl)}</div>
+
+        {/* Screenshot count badge */}
+        {screenshots.length > 1 && (
+          <div className="absolute bottom-3 left-3 flex items-center gap-1 rounded-full border border-white/20 bg-black/65 px-2 py-1 text-[11px] font-black text-zinc-300 backdrop-blur">
+            <Camera size={10} /> {screenshots.length}
+          </div>
+        )}
       </button>
+
+      {/* ── Card body ────────────────────────────────── */}
       <div className="relative z-10 p-5">
-        <div className="flex items-start justify-between gap-3"><div><div className="text-xs font-bold uppercase tracking-wider text-zinc-500">{trade.date} • {trade.session || "No session"}</div><div className="mt-2 text-lg font-black text-white">{trade.setup}</div><div className="mt-1 text-xs text-zinc-400">{trade.accountName || "v"} • {trade.accountType || "Account"}</div></div><span className={`text-xs font-bold ${getTradeResultClass(result)}`}>{result}</span></div>
-        <div className="mt-4 grid grid-cols-3 gap-3"><MetricBox label="Risk" value={formatMoney(trade.risk)} tone="fuchsia" /><MetricBox label="R:R" value={`${rr.toFixed(2)}R`} tone="fuchsia" /><MetricBox label="Qty" value={trade.quantity} tone="fuchsia" /></div>
-        <div className="mt-4 flex flex-wrap gap-2">{tags.length ? tags.map((tag) => <span key={tag} className="trade-tag rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-zinc-400">#{tag}</span>) : <span className="text-xs text-zinc-600">No tags</span>}</div>
-        <div className="mt-5 flex items-center justify-between gap-5 border-t border-white/10 pt-4"><div className="flex min-w-0 flex-wrap items-center gap-2 text-xs"><span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 font-bold text-emerald-200">{trade.emotion || "No emotion"}</span><span className={trade.mistake && trade.mistake !== "None" ? "rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1.5 font-bold text-red-300" : "rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 font-bold text-emerald-300"}>{trade.mistake || "None"}</span></div><div className="ml-auto flex shrink-0 gap-2"><button onClick={onEdit} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Edit3 size={16} /></button><button onClick={onRemove} className="rounded-lg border border-red-500/20 bg-red-500/10 p-2 text-red-400 transition hover:border-red-500/60"><Trash2 size={16} /></button></div></div>
+
+        {/* Strategy + date + setup quality */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="truncate text-base font-black text-white">{trade.setup || "No strategy"}</div>
+            <div className="mt-0.5 text-xs font-semibold text-zinc-500">
+              {trade.date}{trade.session ? ` · ${trade.session}` : ""}
+            </div>
+          </div>
+          {trade.setupQuality && (
+            <span className={`shrink-0 rounded-md border px-2 py-0.5 text-xs font-black ${setupQualityCls}`}>
+              {trade.setupQuality}
+            </span>
+          )}
+        </div>
+
+        {/* Metrics */}
+        <div className="mt-4 grid grid-cols-3 gap-2.5">
+          <MetricBox label="Risk" value={trade.risk ? formatMoney(trade.risk) : "—"} tone="fuchsia" />
+          <MetricBox label="R:R" value={trade.risk ? `${rr.toFixed(2)}R` : "—"} tone="fuchsia" />
+          <MetricBox label="Qty" value={trade.quantity || "—"} tone="fuchsia" />
+        </div>
+
+        {/* Entry / Exit quality */}
+        {(Number(trade.entryQuality || 0) > 0 || Number(trade.exitQuality || 0) > 0) && (
+          <div className="mt-2.5 flex flex-wrap gap-2">
+            {Number(trade.entryQuality || 0) > 0 && (
+              <div className="flex items-center gap-1.5 rounded-lg border border-white/8 bg-black/25 px-3 py-1.5 text-xs">
+                <span className="font-black text-zinc-600">Entry</span>
+                <span className="font-black text-white">{trade.entryQuality}/5</span>
+              </div>
+            )}
+            {Number(trade.exitQuality || 0) > 0 && (
+              <div className="flex items-center gap-1.5 rounded-lg border border-white/8 bg-black/25 px-3 py-1.5 text-xs">
+                <span className="font-black text-zinc-600">Exit</span>
+                <span className="font-black text-white">{trade.exitQuality}/5</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Behavior: emotion + mistake + rule broken */}
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {hasEmotion ? (
+            <span className="rounded-full border border-emerald-500/20 bg-emerald-500/[0.07] px-2.5 py-1 text-xs font-semibold text-emerald-300">{trade.emotion}</span>
+          ) : null}
+          {hasMistake ? (
+            <span className="rounded-full border border-red-500/25 bg-red-500/[0.07] px-2.5 py-1 text-xs font-semibold text-red-300">{trade.mistake}</span>
+          ) : null}
+          {hasRuleBroken ? (
+            <span className="rounded-full border border-amber-500/25 bg-amber-500/[0.07] px-2.5 py-1 text-xs font-semibold text-amber-300">Rule: {trade.ruleBroken}</span>
+          ) : null}
+          {!hasEmotion && !hasMistake && !hasRuleBroken && (
+            <span className="text-xs font-semibold text-zinc-700">Not tagged</span>
+          )}
+        </div>
+
+        {/* Footer: review completeness + actions */}
+        <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/8 pt-4">
+          <div className="flex items-center gap-2">
+            <div className="h-1.5 w-14 overflow-hidden rounded-full bg-white/8">
+              <div className={`h-full rounded-full transition-all duration-500 ${reviewColor}`} style={{ width: `${reviewPct}%` }} />
+            </div>
+            <span className={`text-[11px] font-black ${reviewTextColor}`}>{reviewLabel}</span>
+          </div>
+          <div className="flex shrink-0 gap-1.5">
+            <button onClick={onEdit} className="rounded-lg border border-white/10 bg-black p-2 text-zinc-400 transition hover:border-fuchsia-500/50 hover:text-fuchsia-300"><Edit3 size={15} /></button>
+            <button onClick={onRemove} className="rounded-lg border border-red-500/20 bg-red-500/10 p-2 text-red-400 transition hover:border-red-500/60"><Trash2 size={15} /></button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -8796,35 +8928,54 @@ function TradeCard({ trade, onView, onEdit, onRemove }) {
 
 function TradeListRow({ trade, onView, onEdit, onRemove }) {
   const pnl = Number(trade.pnl || 0);
-  const isWin = pnl > 0;
-  const isBreakEven = pnl === 0;
   const rr = getTradeRR(trade);
-  const tags = normalizeTags(trade).slice(0, 2);
+  const result = getTradeResult(trade);
+  const resultTone = getResultTone(result);
+  const hasMistake = trade.mistake && trade.mistake !== "None" && !String(trade.mistake).startsWith("Select");
+  const hasEmotion = trade.emotion && !String(trade.emotion).startsWith("Select");
+
+  const resultDotCls =
+    resultTone === "emerald" ? "bg-emerald-400" :
+    resultTone === "red"     ? "bg-red-400" :
+    resultTone === "fuchsia" ? "bg-fuchsia-400" :
+                               "bg-amber-400";
+
   return (
     <div className="group relative flex flex-col gap-3 overflow-hidden rounded-xl border border-white/8 bg-[#0d0d0d] px-5 py-4 transition-all duration-200 hover:border-white/15 hover:bg-[#0f0f0f] sm:flex-row sm:items-center sm:justify-between sm:gap-5">
-      {/* Left - pair + direction + setup */}
+
+      {/* Left — pair + result dot + strategy + meta */}
       <div className="flex min-w-0 items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/8 bg-white/4 text-xs font-black text-zinc-200">{trade.pair?.slice(0,3)}</div>
+        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/8 bg-white/[0.03] text-xs font-black text-zinc-300">
+          {trade.pair?.slice(0, 3)}
+          <span className={`absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full border-2 border-[#0d0d0d] ${resultDotCls}`} />
+        </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className={`rounded-md border px-2 py-0.5 text-[11px] font-black ${getTradeDirectionClass(trade.direction)}`}>{trade.direction}</span>
-            <span className="truncate text-sm font-bold text-zinc-300">{trade.setup || "—"}</span>
+            <span className="truncate text-sm font-black text-white">{trade.setup || "No strategy"}</span>
+            {trade.setupQuality && (
+              <span className={`hidden rounded-md border px-1.5 py-0.5 text-[11px] font-black xl:inline ${["A+", "A"].includes(trade.setupQuality) ? "border-emerald-500/30 text-emerald-400" : "border-amber-500/30 text-amber-400"}`}>
+                {trade.setupQuality}
+              </span>
+            )}
           </div>
-          <div className="mt-0.5 flex items-center gap-2 text-xs text-zinc-600">
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-zinc-600">
             <span>{trade.date}</span>
             {trade.session && <><span>·</span><span className="text-fuchsia-400/70">{trade.session}</span></>}
-            {tags.map((tag) => <span key={tag} className="hidden xl:inline">· #{tag}</span>)}
+            {hasEmotion && <><span>·</span><span className="hidden text-zinc-500 sm:inline">{trade.emotion}</span></>}
+            {hasMistake && <><span>·</span><span className="hidden text-red-400/70 lg:inline">{trade.mistake}</span></>}
           </div>
         </div>
       </div>
-      {/* Right - metrics + P&L + actions */}
-      <div className="flex items-center gap-4 sm:gap-6">
-        <span className="hidden text-xs text-zinc-600 sm:block">Qty <span className="font-bold text-zinc-400">{trade.quantity}</span></span>
-        <span className="hidden text-xs text-zinc-600 lg:block">R:R <span className="font-bold text-zinc-400">1:{Math.abs(rr).toFixed(1)}</span></span>
-        <span className={`min-w-[80px] text-right text-lg font-black sm:min-w-[100px] ${getPnlToneClass(pnl)}`}>{getPnlArrow(pnl)} {formatMoney(pnl)}</span>
+
+      {/* Right — metrics + P&L + actions */}
+      <div className="flex items-center gap-4 sm:gap-5">
+        <span className="hidden text-xs text-zinc-600 sm:block">Qty <span className="font-bold text-zinc-400">{trade.quantity || "—"}</span></span>
+        <span className="hidden text-xs text-zinc-600 lg:block">R:R <span className="font-bold text-zinc-400">{trade.risk ? `${rr.toFixed(1)}R` : "—"}</span></span>
+        <span className={`min-w-[90px] text-right text-base font-black sm:min-w-[105px] ${getPnlToneClass(pnl)}`}>{getPnlArrow(pnl)} {formatMoney(pnl)}</span>
         <div className="flex shrink-0 gap-1.5">
           <button onClick={onEdit} className="rounded-lg border border-white/8 bg-transparent p-2 text-zinc-500 transition hover:border-fuchsia-500/40 hover:text-fuchsia-300"><Edit3 size={15} /></button>
-          <button onClick={onRemove} className="rounded-lg border border-red-500/15 bg-red-500/8 p-2 text-red-500 transition hover:border-red-500/50 hover:text-red-300"><Trash2 size={15} /></button>
+          <button onClick={onRemove} className="rounded-lg border border-red-500/15 bg-red-500/[0.08] p-2 text-red-500 transition hover:border-red-500/50 hover:text-red-300"><Trash2 size={15} /></button>
         </div>
       </div>
     </div>
