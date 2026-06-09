@@ -10,7 +10,7 @@ const FEATURES = [
     iconDark: "border-fuchsia-500/30 bg-fuchsia-500/12 text-fuchsia-300",
     iconLight: "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-600",
     cardDark: "glass-card rounded-[1.35rem] p-6",
-    cardLight: "rounded-[1.35rem] border border-fuchsia-100 bg-white/85 p-6 shadow-sm",
+    cardLight: "rounded-[1.35rem] border border-fuchsia-200/70 bg-gradient-to-br from-white to-fuchsia-50/50 p-6 shadow-[0_3px_16px_rgba(192,38,211,0.08)]",
   },
   {
     icon: AlertTriangle,
@@ -19,7 +19,7 @@ const FEATURES = [
     iconDark: "border-red-500/30 bg-red-500/12 text-red-300",
     iconLight: "border-red-200 bg-red-50 text-red-500",
     cardDark: "glass-card rounded-[1.35rem] p-6 border-red-500/20",
-    cardLight: "rounded-[1.35rem] border border-red-100 bg-white/85 p-6 shadow-sm",
+    cardLight: "rounded-[1.35rem] border border-red-200/70 bg-gradient-to-br from-white to-red-50/50 p-6 shadow-[0_3px_16px_rgba(239,68,68,0.07)]",
   },
   {
     icon: BarChart3,
@@ -28,7 +28,7 @@ const FEATURES = [
     iconDark: "border-emerald-500/30 bg-emerald-500/12 text-emerald-300",
     iconLight: "border-emerald-200 bg-emerald-50 text-emerald-600",
     cardDark: "glass-card rounded-[1.35rem] p-6",
-    cardLight: "rounded-[1.35rem] border border-emerald-100 bg-white/85 p-6 shadow-sm",
+    cardLight: "rounded-[1.35rem] border border-emerald-200/70 bg-gradient-to-br from-white to-emerald-50/50 p-6 shadow-[0_3px_16px_rgba(5,150,105,0.07)]",
   },
   {
     icon: Newspaper,
@@ -37,7 +37,7 @@ const FEATURES = [
     iconDark: "border-amber-500/30 bg-amber-500/12 text-amber-300",
     iconLight: "border-amber-200 bg-amber-50 text-amber-600",
     cardDark: "glass-card rounded-[1.35rem] p-6",
-    cardLight: "rounded-[1.35rem] border border-amber-100 bg-white/85 p-6 shadow-sm",
+    cardLight: "rounded-[1.35rem] border border-amber-200/70 bg-gradient-to-br from-white to-amber-50/50 p-6 shadow-[0_3px_16px_rgba(245,158,11,0.07)]",
   },
   {
     icon: Shield,
@@ -46,7 +46,7 @@ const FEATURES = [
     iconDark: "border-cyan-500/30 bg-cyan-500/12 text-cyan-300",
     iconLight: "border-cyan-200 bg-cyan-50 text-cyan-600",
     cardDark: "glass-card rounded-[1.35rem] p-6",
-    cardLight: "rounded-[1.35rem] border border-cyan-100 bg-white/85 p-6 shadow-sm",
+    cardLight: "rounded-[1.35rem] border border-cyan-200/70 bg-gradient-to-br from-white to-cyan-50/50 p-6 shadow-[0_3px_16px_rgba(6,182,212,0.07)]",
   },
   {
     icon: CalendarDays,
@@ -55,7 +55,7 @@ const FEATURES = [
     iconDark: "border-purple-500/30 bg-purple-500/12 text-purple-300",
     iconLight: "border-purple-200 bg-purple-50 text-purple-600",
     cardDark: "glass-card rounded-[1.35rem] p-6",
-    cardLight: "rounded-[1.35rem] border border-purple-100 bg-white/85 p-6 shadow-sm",
+    cardLight: "rounded-[1.35rem] border border-purple-200/70 bg-gradient-to-br from-white to-purple-50/50 p-6 shadow-[0_3px_16px_rgba(109,40,217,0.07)]",
   },
 ];
 
@@ -64,7 +64,7 @@ export function LandingFeatures({ isLight }) {
     <section id="features" className="mx-auto w-full max-w-7xl scroll-mt-16 px-5 py-24 lg:px-8">
 
       {/* Problem panel */}
-      <div className={isLight ? "mb-16 overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white/82 p-8 shadow-sm" : "mb-16 glass-card overflow-hidden rounded-[1.35rem] p-8"}>
+      <div className={isLight ? "mb-16 overflow-hidden rounded-[1.35rem] border border-red-200/70 bg-gradient-to-br from-white via-red-50/30 to-rose-50/20 p-8 shadow-[0_4px_24px_rgba(239,68,68,0.08)]" : "mb-16 glass-card overflow-hidden rounded-[1.35rem] p-8"}>
         <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
           <div>
             <div className={isLight ? "text-sm font-black uppercase tracking-[0.22em] text-red-500" : "mb-3 text-sm font-black uppercase tracking-[0.22em] text-red-400"}>
@@ -87,7 +87,7 @@ export function LandingFeatures({ isLight }) {
               ["Oversized risk", "after drawdown"],
               ["News-day overtrading", "no edge in volatility"],
             ].map(([mistake, context]) => (
-              <div key={mistake} className={isLight ? "rounded-2xl border border-red-100 bg-red-50/70 p-4" : "rounded-2xl border border-red-500/20 bg-red-500/8 p-4"}>
+              <div key={mistake} className={isLight ? "rounded-2xl border border-red-200/80 bg-gradient-to-br from-red-50 to-rose-50/60 p-4 shadow-[0_2px_8px_rgba(239,68,68,0.07)]" : "rounded-2xl border border-red-500/20 bg-red-500/8 p-4"}>
                 <div className="text-sm font-black text-red-400">{mistake}</div>
                 <div className={isLight ? "mt-1 text-xs font-semibold text-slate-500" : "mt-1 text-xs font-semibold text-zinc-500"}>{context}</div>
               </div>

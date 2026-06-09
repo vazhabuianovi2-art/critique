@@ -66,7 +66,7 @@ export function LandingHero({ isLight, setAuthPage, onWatchDemo }) {
           <div className="text-xl font-black text-red-400">− $2,360</div>
         </div>
 
-        <div className={isLight ? "overflow-hidden rounded-[1.6rem] border border-fuchsia-200/80 bg-white/92 p-6 shadow-[0_34px_100px_rgba(126,34,206,0.14)]" : "glass-card-vivid gradient-border glow-fuchsia overflow-hidden rounded-[1.6rem] p-6"}>
+        <div className={isLight ? "overflow-hidden rounded-[1.6rem] border border-violet-300/60 bg-gradient-to-br from-white via-violet-50/40 to-fuchsia-50/30 p-6 shadow-[0_34px_100px_rgba(126,34,206,0.18),0_4px_20px_rgba(109,40,217,0.10)]" : "glass-card-vivid gradient-border glow-fuchsia overflow-hidden rounded-[1.6rem] p-6"}>
           <div className="mb-5 flex items-center justify-between">
             <div className={isLight ? "text-sm font-black text-slate-950" : "text-sm font-black text-white"}>Mistake Report · This Week</div>
             <span className="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-black text-red-400">4 patterns found</span>
@@ -84,8 +84,8 @@ export function LandingHero({ isLight, setAuthPage, onWatchDemo }) {
                 className={
                   isLight
                     ? color === "red"
-                      ? "rounded-2xl border border-red-200 bg-red-50/80 p-4"
-                      : "rounded-2xl border border-amber-200 bg-amber-50/80 p-4"
+                      ? "rounded-2xl border border-red-300/70 bg-gradient-to-br from-red-50 to-rose-50/60 p-4 shadow-[0_2px_10px_rgba(239,68,68,0.08)]"
+                      : "rounded-2xl border border-amber-300/60 bg-gradient-to-br from-amber-50 to-yellow-50/60 p-4 shadow-[0_2px_10px_rgba(245,158,11,0.08)]"
                     : color === "red"
                       ? "rounded-2xl border border-red-500/25 bg-red-500/8 p-4"
                       : "rounded-2xl border border-amber-500/25 bg-amber-500/8 p-4"
@@ -96,9 +96,9 @@ export function LandingHero({ isLight, setAuthPage, onWatchDemo }) {
                   <div className={color === "red" ? "shrink-0 text-sm font-black text-red-400" : "shrink-0 text-sm font-black text-amber-400"}>{cost}</div>
                 </div>
                 <div className="mt-2 flex items-center gap-3">
-                  <div className={isLight ? "h-2 flex-1 rounded-full bg-slate-200" : "h-2 flex-1 rounded-full bg-white/10"}>
+                  <div className={isLight ? color === "red" ? "h-2 flex-1 rounded-full bg-red-100" : "h-2 flex-1 rounded-full bg-amber-100" : "h-2 flex-1 rounded-full bg-white/10"}>
                     <div
-                      className={color === "red" ? "h-full rounded-full bg-red-400" : "h-full rounded-full bg-amber-400"}
+                      className={color === "red" ? "h-full rounded-full bg-gradient-to-r from-red-500 to-rose-400" : "h-full rounded-full bg-gradient-to-r from-amber-500 to-yellow-400"}
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -108,7 +108,7 @@ export function LandingHero({ isLight, setAuthPage, onWatchDemo }) {
             ))}
           </div>
 
-          <div className={isLight ? "mt-5 rounded-2xl border border-fuchsia-200 bg-fuchsia-50 p-4" : "mt-5 rounded-2xl border border-fuchsia-500/25 bg-fuchsia-500/8 p-4"}>
+          <div className={isLight ? "mt-5 rounded-2xl border border-violet-300/60 bg-gradient-to-br from-violet-50 to-fuchsia-50/60 p-4 shadow-[0_2px_10px_rgba(109,40,217,0.08)]" : "mt-5 rounded-2xl border border-fuchsia-500/25 bg-fuchsia-500/8 p-4"}>
             <div className="text-xs font-black uppercase tracking-wider text-fuchsia-400">This week&apos;s focus</div>
             <p className={isLight ? "mt-2 text-sm font-black text-slate-950" : "mt-2 text-sm font-black text-white"}>
               Stop entering trades in the first 15 minutes after a major news event.
