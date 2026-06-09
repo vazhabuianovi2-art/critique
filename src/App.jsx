@@ -4033,10 +4033,10 @@ const THEME_STYLE_CSS = `
   .stat-tile-purple:hover { border-color: rgba(178,74,242,0.55); }
 
   /* ── Stat tile cards – light mode ─────────────────────────────── */
-  .light-theme .stat-tile-green  { background: linear-gradient(145deg,#f0fdf9 0%,#ffffff 60%) !important; border-color: rgba(5,150,105,.22) !important; border-left: 3px solid rgba(5,150,105,.55) !important; box-shadow: 0 2px 14px rgba(5,150,105,.08) !important; }
-  .light-theme .stat-tile-red    { background: linear-gradient(145deg,#fff5f5 0%,#ffffff 60%) !important; border-color: rgba(220,38,38,.18) !important; border-left: 3px solid rgba(220,38,38,.50) !important; box-shadow: 0 2px 14px rgba(220,38,38,.07) !important; }
-  .light-theme .stat-tile-amber  { background: linear-gradient(145deg,#fffbf0 0%,#ffffff 60%) !important; border-color: rgba(217,119,6,.18) !important; border-left: 3px solid rgba(217,119,6,.50) !important; box-shadow: 0 2px 14px rgba(217,119,6,.07) !important; }
-  .light-theme .stat-tile-purple { background: linear-gradient(145deg,#f8f5ff 0%,#ffffff 60%) !important; border-color: rgba(109,40,217,.18) !important; border-left: 3px solid rgba(109,40,217,.45) !important; box-shadow: 0 2px 14px rgba(109,40,217,.07) !important; }
+  .light-theme .stat-tile-green  { background: linear-gradient(145deg,#d1fae5 0%,#ecfdf5 100%) !important; border-color: rgba(5,150,105,.30) !important; border-left: 3px solid rgba(5,150,105,.65) !important; box-shadow: 0 3px 16px rgba(5,150,105,.12) !important; }
+  .light-theme .stat-tile-red    { background: linear-gradient(145deg,#fee2e2 0%,#fff1f2 100%) !important; border-color: rgba(220,38,38,.28) !important; border-left: 3px solid rgba(220,38,38,.60) !important; box-shadow: 0 3px 16px rgba(220,38,38,.10) !important; }
+  .light-theme .stat-tile-amber  { background: linear-gradient(145deg,#fde68a 0%,#fefce8 100%) !important; border-color: rgba(217,119,6,.28) !important; border-left: 3px solid rgba(217,119,6,.60) !important; box-shadow: 0 3px 16px rgba(217,119,6,.10) !important; }
+  .light-theme .stat-tile-purple { background: linear-gradient(145deg,#ede9fe 0%,#f5f3ff 100%) !important; border-color: rgba(109,40,217,.25) !important; border-left: 3px solid rgba(109,40,217,.55) !important; box-shadow: 0 3px 16px rgba(109,40,217,.10) !important; }
   /* hide dark glow in light mode */
   .light-theme .stat-tile-green .stat-tile-glow,
   .light-theme .stat-tile-red .stat-tile-glow,
