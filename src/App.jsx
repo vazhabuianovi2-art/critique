@@ -17296,58 +17296,49 @@ function LegalInfoPage({ page, setAuthPage, theme, setTheme }) {
 
 const DEMO_SCENES = [
   {
-    eyebrow: "Trade Journal",
-    title: "Log every trade in seconds",
-    body: "Capture symbol, session, strategy, risk, P&L, screenshots, emotion, and execution quality in one clean workflow.",
-    voiceover: "TryCritique gives traders a calm, simple workspace to record every trade clearly, without messy spreadsheets or scattered notes.",
-    stat: "+$780",
-    accent: "emerald",
-    bullets: ["Fast trade entry", "Screenshots & tags", "Risk and R:R tracking"],
+    eyebrow: "Mistake Detector",
+    title: "See exactly what's costing you money",
+    body: "Most traders lose the same $500–$2,000 every week on the same 2–3 habits. TryCritique shows you which ones — ranked by total cost.",
+    voiceover: "The Mistake Detector groups every tagged error by type, shows how often it happens, and ranks them by total cost. You pick one to fix — not all of them at once.",
+    stat: "−$2,360",
+    accent: "amber",
+    bullets: ["FOMO entries · cost: −$840", "Revenge trades · cost: −$540", "One fix per week — no overwhelm"],
   },
   {
-    eyebrow: "Economic Calendar",
-    title: "News context without leaving your workspace",
-    body: "High-impact news and daily market context live inside the product, so traders do not need to jump between different websites before reviewing a setup.",
-    voiceover: "The economic calendar is built into the same workspace, so you can review market news without opening extra tabs before or after a trade.",
-    stat: "News",
-    accent: "cyan",
-    bullets: ["Calendar in one place", "News-day performance", "Less tab switching"],
-  },
-  {
-    eyebrow: "Calendar Review",
-    title: "See your trading month clearly",
-    body: "Winning days, losing days, break-even days, and news events become obvious instead of buried in notes.",
-    voiceover: "The calendar gives you a clean view of your month, showing winning days, losing days, break-even days, and weekly totals at a glance.",
-    stat: "May",
-    accent: "fuchsia",
-    bullets: ["Daily P&L", "Weekly totals", "News-day context"],
-  },
-  {
-    eyebrow: "Advanced Analytics",
-    title: "Find your real edge",
-    body: "Analyze setups, sessions, currencies, entry quality, emotions, mistake patterns, and performance trends.",
-    voiceover: "Instead of guessing, you can see which setups, sessions, emotions, and habits are actually helping your performance improve.",
+    eyebrow: "Win Rate & Analytics",
+    title: "Know which setups actually work",
+    body: "Stop guessing. See your real win rate per session, per strategy, and per currency — so you only take trades where you have a proven edge.",
+    voiceover: "Instead of guessing which setups work, you can see your exact win rate and average R:R per session, strategy, and market condition.",
     stat: "78%",
     accent: "emerald",
-    bullets: ["Best setups", "Weak sessions", "Performance timeline"],
+    bullets: ["Win rate by session & setup", "Avg R:R per strategy", "Cut weak setups instantly"],
   },
   {
-    eyebrow: "Mistake Detector",
-    title: "Stop repeating costly habits",
-    body: "TryCritique turns your review into a feedback loop so you know exactly what to fix before the next trading day.",
-    voiceover: "The mistake detector helps you notice repeated behavior leaks, choose one clear fix, and come back to the next session with more discipline.",
-    stat: "Fix",
-    accent: "amber",
-    bullets: ["Behavior patterns", "Loss triggers", "Actionable review"],
-  },
-  {
-    eyebrow: "Affordable Pro",
-    title: "Built to be useful, not overpriced",
-    body: "For a low monthly subscription, traders get journal, calendar, analytics, review tools, and workflow structure in one product.",
-    voiceover: "Because TryCritique is affordable, it can become part of your daily routine: one focused workspace for journaling, calendar context, analytics, and review.",
-    stat: "$10",
+    eyebrow: "Trade Journal",
+    title: "Log in 60 seconds, review in minutes",
+    body: "Capture symbol, direction, session, risk, P&L, screenshots, emotion, and execution quality — then replay any trade with one click.",
+    voiceover: "TryCritique gives traders a calm, structured workspace to log every trade with screenshots, tags, and notes — without spreadsheets.",
+    stat: "+$780",
     accent: "fuchsia",
-    bullets: ["Low monthly price", "One workspace", "Built for daily review"],
+    bullets: ["Screenshot & tag every trade", "Risk and R:R tracking", "Searchable trade history"],
+  },
+  {
+    eyebrow: "Calendar View",
+    title: "Spot losing patterns at a glance",
+    body: "See every trading day color-coded by P&L. Losing Mondays? Bad London session weeks? The calendar makes it impossible to ignore.",
+    voiceover: "The calendar shows winning days, losing days, break-even days, and news events in one visual — so patterns that were hidden become obvious.",
+    stat: "May",
+    accent: "cyan",
+    bullets: ["Daily P&L heatmap", "Weekly & monthly totals", "News-day context built in"],
+  },
+  {
+    eyebrow: "Try it free",
+    title: "7 days free. No credit card.",
+    body: "Start your free trial today. Most traders find their biggest leak in the first week — and fix it in the second.",
+    voiceover: "TryCritique is affordable and built for daily use. Journal, review, analytics, and calendar — one focused workspace that pays for itself.",
+    stat: "Free",
+    accent: "fuchsia",
+    bullets: ["Full access for 7 days", "Cancel anytime — no lock-in", "Most traders find their leak in week 1"],
   },
 ];
 
@@ -17474,89 +17465,141 @@ function WatchDemoModal({ onClose, onStart, isLight }) {
     };
   }, []);
 
+  const accentBar   = { emerald: "from-emerald-500 to-teal-400",   fuchsia: "from-fuchsia-500 to-violet-500", cyan: "from-cyan-500 to-blue-400",   amber: "from-amber-500 to-orange-400" }[scene.accent] || "from-fuchsia-500 to-violet-500";
+  const accentGlow  = { emerald: "rgba(16,185,129,0.22)",          fuchsia: "rgba(139,92,246,0.22)",          cyan: "rgba(6,182,212,0.22)",         amber: "rgba(245,158,11,0.22)"  }[scene.accent] || "rgba(139,92,246,0.22)";
+  const accentText  = { emerald: "text-emerald-400",               fuchsia: "text-fuchsia-400",               cyan: "text-cyan-400",                amber: "text-amber-400"         }[scene.accent] || "text-fuchsia-400";
+  const accentBorder= { emerald: "border-emerald-500/30",          fuchsia: "border-fuchsia-500/30",          cyan: "border-cyan-500/30",           amber: "border-amber-500/30"    }[scene.accent] || "border-fuchsia-500/30";
+  const accentBg    = { emerald: "bg-emerald-500/10",              fuchsia: "bg-fuchsia-500/10",              cyan: "bg-cyan-500/10",               amber: "bg-amber-500/10"        }[scene.accent] || "bg-fuchsia-500/10";
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/82 px-4 py-6 backdrop-blur-xl">
-      <motion.div initial={{ opacity: 0, y: 18, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} className={isLight ? "w-full max-w-6xl overflow-hidden rounded-[1.6rem] border border-slate-200 bg-white text-slate-950 shadow-[0_32px_110px_rgba(15,23,42,0.28)]" : "w-full max-w-6xl overflow-hidden rounded-[1.6rem] border border-white/12 bg-[#050507] text-white shadow-[0_32px_110px_rgba(0,0,0,0.72)]"}>
-        <div className={isLight ? "flex items-center justify-between border-b border-slate-200 px-5 py-4" : "flex items-center justify-between border-b border-white/10 px-5 py-4"}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 px-4 py-6 backdrop-blur-xl">
+      <motion.div initial={{ opacity: 0, y: 20, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 260, damping: 26 }}
+        className="w-full max-w-5xl overflow-hidden rounded-[1.75rem] border border-violet-500/25 bg-gradient-to-b from-[#0c0814] to-[#07050f] text-white shadow-[0_40px_130px_rgba(109,40,217,0.35),0_0_0_1px_rgba(139,92,246,0.12)]">
+
+        {/* Ambient glows */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[1.75rem]">
+          <div className="absolute -top-20 left-1/4 h-64 w-64 rounded-full blur-3xl" style={{background:`radial-gradient(circle,${accentGlow},transparent 70%)`}} />
+          <div className="absolute bottom-0 right-1/4 h-48 w-48 rounded-full bg-violet-600/10 blur-3xl" />
+        </div>
+
+        {/* Header bar */}
+        <div className="relative flex items-center justify-between border-b border-white/8 px-6 py-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/12 text-fuchsia-300"><PlayCircle size={19} /></span>
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 shadow-[0_4px_12px_rgba(139,92,246,0.4)]">
+              <PlayCircle size={17} className="text-white" />
+            </span>
             <div>
-              <div className="text-sm font-black">TryCritique Demo</div>
-              <div className={isLight ? "text-xs font-bold text-slate-500" : "text-xs font-bold text-zinc-500"}>{voiceStatus}</div>
+              <div className="text-sm font-black text-white">TryCritique — Product Demo</div>
+              <div className="text-[11px] font-semibold text-violet-400">{voiceStatus}</div>
             </div>
           </div>
-          <button type="button" onClick={onClose} className={isLight ? "rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-600 transition hover:text-slate-950" : "rounded-xl border border-white/10 bg-white/5 p-3 text-zinc-400 transition hover:text-white"} aria-label="Close demo">
-            <X size={18} />
+          <button type="button" onClick={onClose} className="rounded-xl border border-white/10 bg-white/5 p-2.5 text-zinc-400 transition hover:bg-white/10 hover:text-white" aria-label="Close demo">
+            <X size={17} />
           </button>
         </div>
 
-        <div className="grid lg:grid-cols-[1.18fr_.82fr]">
-          <div className={isLight ? "relative min-h-[430px] overflow-hidden bg-gradient-to-br from-slate-50 via-white to-fuchsia-50 p-6" : "relative min-h-[430px] overflow-hidden bg-gradient-to-br from-black via-[#08030d] to-[#03100c] p-6"}>
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(178,74,242,0.16),transparent_28%),radial-gradient(circle_at_82%_78%,rgba(16,185,129,0.14),transparent_28%)]" />
-            <div className="relative z-10 flex h-full flex-col">
-              <div className="flex items-center justify-between">
-                <div className="flex gap-2"><span className="h-3 w-3 rounded-full bg-red-500" /><span className="h-3 w-3 rounded-full bg-amber-400" /><span className="h-3 w-3 rounded-full bg-emerald-400" /></div>
-                <span className={isLight ? "rounded-full bg-white px-3 py-1 text-xs font-black text-slate-500 shadow-sm" : "rounded-full bg-white/8 px-3 py-1 text-xs font-black text-zinc-400"}>Live product preview</span>
+        {/* Body */}
+        <div className="relative grid lg:grid-cols-[1.1fr_0.9fr]">
+
+          {/* LEFT — mock product UI */}
+          <div className="relative min-h-[420px] overflow-hidden border-r border-white/8 p-6">
+            {/* Scene dots */}
+            <div className="mb-5 flex items-center gap-2">
+              {DEMO_SCENES.map((item, index) => (
+                <button key={item.eyebrow} type="button" onClick={() => { stopVoiceover(); setActiveScene(index); }}
+                  className={`transition-all duration-300 rounded-full ${index === activeScene ? `h-2 w-8 bg-gradient-to-r ${accentBar}` : "h-2 w-2 bg-white/15 hover:bg-white/30"}`}
+                  aria-label={`Show ${item.eyebrow}`} />
+              ))}
+              <span className="ml-auto rounded-full border border-white/12 bg-white/6 px-3 py-1 text-[10px] font-black text-zinc-400">Live preview</span>
+            </div>
+
+            {/* Stat card */}
+            <motion.div key={scene.eyebrow + "-stat"} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}
+              className={`rounded-2xl border ${accentBorder} ${accentBg} p-5`}>
+              <div className={`text-[10px] font-black uppercase tracking-[0.22em] ${accentText}`}>{scene.eyebrow}</div>
+              <div className="mt-3 text-5xl font-black text-white">{scene.stat}</div>
+              <div className="mt-2 text-sm font-semibold text-zinc-400">Real data. Real patterns. Real improvement.</div>
+              {/* accent bar */}
+              <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-white/8">
+                <motion.div initial={{ width: 0 }} animate={{ width: "72%" }} transition={{ duration: 0.9, delay: 0.2 }}
+                  className={`h-full rounded-full bg-gradient-to-r ${accentBar}`} />
               </div>
+            </motion.div>
 
-              <div className="mt-7 grid flex-1 gap-5 md:grid-cols-[.9fr_1.1fr]">
-                <div className={`rounded-2xl border p-5 ${accentClass}`}>
-                  <div className="text-xs font-black uppercase tracking-[0.2em] opacity-80">{scene.eyebrow}</div>
-                  <div className="mt-8 text-5xl font-black">{scene.stat}</div>
-                  <div className={isLight ? "mt-4 text-sm font-bold text-slate-500" : "mt-4 text-sm font-bold text-zinc-400"}>Turns raw trade data into decisions you can actually use.</div>
-                </div>
-
-                <div className={isLight ? "rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm" : "rounded-2xl border border-white/10 bg-black/45 p-5"}>
-                  <div className="mb-5 flex items-center justify-between">
-                    <span className="text-sm font-black">{BRAND_NAME} Pro</span>
-                    <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-black text-emerald-300">Review mode</span>
-                  </div>
-                  <div className="space-y-3">
-                    {scene.bullets.map((bullet, index) => (
-                      <motion.div key={bullet} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.08 }} className={isLight ? "flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3" : "flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3"}>
-                        <span className="font-black">{bullet}</span>
-                        <Check size={17} className="text-emerald-300" />
-                      </motion.div>
-                    ))}
-                  </div>
-                  <div className="mt-5 h-24 overflow-hidden rounded-xl border border-fuchsia-500/20 bg-fuchsia-500/10 p-3">
-                    <div className="flex h-full items-end gap-2">
-                      {[34, 58, 42, 76, 64, 88, 72, 96].map((height, index) => (
-                        <span key={index} className="flex-1 rounded-t-md bg-gradient-to-t from-fuchsia-600 to-emerald-300" style={{ height: `${height}%` }} />
-                      ))}
-                    </div>
-                  </div>
-                </div>
+            {/* Bullets card */}
+            <motion.div key={scene.eyebrow + "-bullets"} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.1 }}
+              className="mt-4 rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-sm font-black text-white">{BRAND_NAME} Pro</span>
+                <span className={`rounded-full border ${accentBorder} ${accentBg} px-2.5 py-0.5 text-[10px] font-black ${accentText}`}>Active</span>
               </div>
-
-              <div className="mt-5 flex gap-2">
-                {DEMO_SCENES.map((item, index) => (
-                  <button key={item.eyebrow} type="button" onClick={() => { stopVoiceover(); setActiveScene(index); }} className={index === activeScene ? "h-2 flex-1 rounded-full bg-fuchsia-400" : "h-2 flex-1 rounded-full bg-white/15"} aria-label={`Show ${item.eyebrow}`} />
+              <div className="space-y-2.5">
+                {scene.bullets.map((bullet, index) => (
+                  <motion.div key={bullet} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + index * 0.08 }}
+                    className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-4 py-2.5">
+                    <Check size={14} className={accentText} />
+                    <span className="text-sm font-semibold text-white/90">{bullet}</span>
+                  </motion.div>
                 ))}
               </div>
-            </div>
+
+              {/* Mini chart */}
+              <div className="mt-4 h-14 overflow-hidden rounded-xl border border-white/8 bg-black/30 px-3 py-2">
+                <div className="flex h-full items-end gap-1.5">
+                  {[28, 45, 38, 62, 55, 78, 65, 90, 72, 88].map((h, i) => (
+                    <span key={i} className={`flex-1 rounded-t-sm bg-gradient-to-t ${accentBar} opacity-80`} style={{ height: `${h}%` }} />
+                  ))}
+                </div>
+              </div>
+            </motion.div>
           </div>
 
-          <div className={isLight ? "flex flex-col justify-between bg-white p-7" : "flex flex-col justify-between bg-black p-7"}>
+          {/* RIGHT — sales copy */}
+          <div className="flex flex-col justify-between p-7">
             <div>
-              <div className="text-xs font-black uppercase tracking-[0.22em] text-fuchsia-400">Why traders buy it</div>
-              <h3 className="mt-4 text-4xl font-black leading-tight">{scene.title}</h3>
-              <p className={isLight ? "mt-5 text-base font-semibold leading-7 text-slate-600" : "mt-5 text-base font-semibold leading-7 text-zinc-400"}>{scene.body}</p>
-              <div className={isLight ? "mt-7 rounded-2xl border border-slate-200 bg-slate-50 p-5" : "mt-7 rounded-2xl border border-white/10 bg-white/[0.04] p-5"}>
-                <div className="flex items-center justify-between gap-3">
-                  <div className="text-sm font-black">Demo voiceover</div>
-                  <button type="button" onClick={isVoicePlaying ? stopVoiceover : startVoiceover} className={isVoicePlaying ? "inline-flex items-center gap-2 rounded-full border border-amber-400/35 bg-amber-500/10 px-3 py-1.5 text-xs font-black text-amber-300 transition hover:bg-amber-500/18" : "inline-flex items-center gap-2 rounded-full border border-fuchsia-400/35 bg-fuchsia-500/10 px-3 py-1.5 text-xs font-black text-fuchsia-300 transition hover:bg-fuchsia-500/18"}>
-                    {isVoicePlaying ? <PauseCircle size={14} /> : <Volume2 size={14} />}
-                    {isVoicePlaying ? "Stop" : "Play voice"}
-                  </button>
+              <div className={`text-[10px] font-black uppercase tracking-[0.22em] ${accentText}`}>Why traders buy it</div>
+              <motion.h3 key={scene.title} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}
+                className="mt-3 text-3xl font-black leading-tight text-white">{scene.title}</motion.h3>
+              <motion.p key={scene.body} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}
+                className="mt-4 text-sm font-semibold leading-7 text-zinc-400">{scene.body}</motion.p>
+
+              {/* Social proof */}
+              <div className="mt-6 flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.04] px-4 py-3">
+                <div className="flex -space-x-2">
+                  {["#7c3aed","#0ea5e9","#10b981","#f59e0b"].map((c,i) => (
+                    <span key={i} className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#0c0814] text-[10px] font-black text-white" style={{background:c}}>{["J","M","S","R"][i]}</span>
+                  ))}
                 </div>
-                <p className={isLight ? "mt-3 text-sm font-semibold leading-6 text-slate-600" : "mt-3 text-sm font-semibold leading-6 text-zinc-400"}>{scene.voiceover}</p>
+                <div>
+                  <div className="text-xs font-black text-white">2,000+ traders use TryCritique</div>
+                  <div className="text-[10px] font-semibold text-zinc-500">Futures · Forex · Crypto · Stocks</div>
+                </div>
+              </div>
+
+              {/* Voice */}
+              <div className="mt-4 flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3">
+                <div className="text-xs font-semibold text-zinc-400">{scene.voiceover.slice(0, 72)}…</div>
+                <button type="button" onClick={isVoicePlaying ? stopVoiceover : startVoiceover}
+                  className={`ml-3 shrink-0 inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[11px] font-black transition ${isVoicePlaying ? "border-amber-500/35 bg-amber-500/12 text-amber-300 hover:bg-amber-500/20" : "border-violet-500/35 bg-violet-500/12 text-violet-300 hover:bg-violet-500/20"}`}>
+                  {isVoicePlaying ? <PauseCircle size={13} /> : <Volume2 size={13} />}
+                  {isVoicePlaying ? "Stop" : "Play"}
+                </button>
               </div>
             </div>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              <button type="button" onClick={() => { stopVoiceover(); onStart(); }} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-fuchsia-500 px-5 text-sm font-black text-white shadow-[0_18px_36px_rgba(178,74,242,0.24)] transition hover:bg-fuchsia-400">Start Your Journal <ChevronRight size={17} /></button>
-              <button type="button" onClick={() => { stopVoiceover(); onClose(); }} className={isLight ? "inline-flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-black text-slate-700 transition hover:text-slate-950" : "inline-flex h-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 px-5 text-sm font-black text-zinc-300 transition hover:text-white"}>Keep browsing</button>
+            {/* CTAs */}
+            <div className="mt-7 space-y-3">
+              <button type="button" onClick={() => { stopVoiceover(); onStart(); }}
+                className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 py-3.5 text-sm font-black text-white shadow-[0_8px_28px_rgba(139,92,246,0.35)] transition-all hover:shadow-[0_12px_36px_rgba(139,92,246,0.50)] hover:scale-[1.02]">
+                <span className="relative flex items-center justify-center gap-2">
+                  Start 7-Day Free Trial <ChevronRight size={16} />
+                </span>
+              </button>
+              <button type="button" onClick={() => { stopVoiceover(); onClose(); }}
+                className="w-full rounded-xl border border-white/10 bg-white/4 py-3 text-sm font-semibold text-zinc-400 transition hover:bg-white/8 hover:text-white">
+                Keep browsing
+              </button>
+              <div className="text-center text-[11px] font-semibold text-zinc-600">No credit card · Cancel anytime</div>
             </div>
           </div>
         </div>
