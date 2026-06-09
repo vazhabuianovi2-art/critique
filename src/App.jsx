@@ -9951,9 +9951,11 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
       <TopCrumb page="Calendar" />
-      {/* Header banner — Sydview style */}
-      <div className="mb-6 overflow-hidden rounded-2xl border border-fuchsia-500/20 bg-gradient-to-r from-[#1a0a2e] via-[#120820] to-[#0d0514] px-5 py-4">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* Header banner */}
+      <div className="dashboard-hero mb-6 relative overflow-hidden rounded-2xl border border-white/15 px-5 py-4">
+        <div className="dashboard-hero-bg pointer-events-none absolute inset-0" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+        <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Left: nav + month + subtitle */}
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-3">
