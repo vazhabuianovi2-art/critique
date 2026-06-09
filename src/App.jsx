@@ -10168,16 +10168,15 @@ function CalendarDayDetailsModal({ dateKey, trades = [], events = [], onClose, o
             </div>
           </div>
 
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <div className="mb-4 flex flex-wrap items-center gap-2">
             <span className="rounded-xl border border-fuchsia-500/45 bg-black px-4 py-2 text-sm font-black text-white">All Trades</span>
-            <button onClick={onAdd} className="flex items-center gap-2 rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 px-4 py-2 text-sm font-black text-fuchsia-300 transition hover:border-fuchsia-400/70 hover:bg-fuchsia-500/25 hover:text-white"><Plus size={14} /> Add Trade</button>
           </div>
 
           <div className="max-h-[340px] space-y-3 overflow-y-auto pr-1">
             {sortedTrades.length ? sortedTrades.map((trade) => <CalendarModalTradeRow key={trade.id} trade={trade} />) : (
               <div className="rounded-2xl border border-dashed border-white/10 bg-black/35 p-8 text-center">
                 <div className="text-lg font-black text-white">No trades on this day</div>
-                <div className="mt-2 text-sm font-semibold text-zinc-500">Click Add Trade to log a win, loss, or break-even trade for this date.</div>
+                <div className="mt-2 text-sm font-semibold text-zinc-500">No trades logged for this date.</div>
               </div>
             )}
           </div>
