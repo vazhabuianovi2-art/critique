@@ -3507,19 +3507,68 @@ const THEME_STYLE_CSS = `
     color: #475569 !important;
   }
   .light-theme .sidebar-nav-item:hover {
-    background: rgba(178,74,242,.07) !important;
-    color: #6d28d9 !important;
+    background: rgba(124,58,237,.08) !important;
+    color: #5b21b6 !important;
   }
   .light-theme .sidebar-nav-item-active {
-    background: rgba(178,74,242,.10) !important;
-    color: #7c3aed !important;
+    background: linear-gradient(135deg, rgba(124,58,237,.13) 0%, rgba(139,92,246,.08) 100%) !important;
+    color: #6d28d9 !important;
     font-weight: 700 !important;
+    border-left: 3px solid #7c3aed !important;
+    box-shadow: 0 2px 10px rgba(124,58,237,.12) !important;
   }
   .light-theme .sidebar-nav-item-active svg,
-  .light-theme .sidebar-nav-item-active .text-fuchsia-400 { color: #7c3aed !important; }
+  .light-theme .sidebar-nav-item-active .text-fuchsia-400 { color: #6d28d9 !important; }
   .light-theme .sidebar-nav-item svg { color: #94a3b8 !important; }
-  .light-theme .sidebar-nav-item:hover svg { color: #6d28d9 !important; }
+  .light-theme .sidebar-nav-item:hover svg { color: #5b21b6 !important; }
   .light-theme .sidebar-nav-item-active .bg-fuchsia-500 { background: #7c3aed !important; }
+
+  /* ── Add Trade Modal (light mode) ── */
+  .light-theme .trade-modal-panel {
+    background: #ffffff !important;
+    border-color: rgba(226,232,240,.9) !important;
+    box-shadow: 0 28px 80px rgba(15,23,42,.16) !important;
+    color: #0f172a !important;
+  }
+  .light-theme .trade-modal-panel .text-white,
+  .light-theme .trade-modal-panel .text-zinc-100,
+  .light-theme .trade-modal-panel .text-zinc-200,
+  .light-theme .trade-modal-panel .text-zinc-300 { color: #0f172a !important; }
+  .light-theme .trade-modal-panel .text-zinc-400,
+  .light-theme .trade-modal-panel .text-zinc-500 { color: #64748b !important; }
+  .light-theme .trade-modal-panel .text-fuchsia-400,
+  .light-theme .trade-modal-panel .text-fuchsia-300 { color: #7c3aed !important; }
+  .light-theme .trade-form-section {
+    background: #f8fafc !important;
+    border-color: rgba(226,232,240,.85) !important;
+  }
+  .light-theme .trade-form-section-header {
+    background: #f1f5f9 !important;
+    border-color: rgba(226,232,240,.85) !important;
+  }
+  .light-theme .trade-form-section-title { color: #334155 !important; }
+  .light-theme .trade-form-section .border-fuchsia-500\/20 { border-color: rgba(124,58,237,.25) !important; }
+  .light-theme .trade-form-section .bg-fuchsia-500\/8 { background: rgba(124,58,237,.1) !important; }
+  .light-theme .trade-modal-panel label,
+  .light-theme .trade-modal-panel .block.text-sm { color: #1e293b !important; }
+  .light-theme .trade-modal-panel input,
+  .light-theme .trade-modal-panel select,
+  .light-theme .trade-modal-panel textarea {
+    background: #ffffff !important;
+    border-color: rgba(148,163,184,.45) !important;
+    color: #0f172a !important;
+  }
+  .light-theme .trade-modal-panel input:disabled { background: #f1f5f9 !important; color: #64748b !important; }
+  .light-theme .trade-modal-panel input::placeholder,
+  .light-theme .trade-modal-panel textarea::placeholder { color: #94a3b8 !important; }
+  .light-theme .trade-modal-panel .bg-black,
+  .light-theme .trade-modal-panel .bg-zinc-900,
+  .light-theme .trade-modal-panel .bg-zinc-950,
+  .light-theme .trade-modal-panel .bg-\[#0a0a0a\] { background: #ffffff !important; }
+  .light-theme .trade-modal-panel .border-white\/10,
+  .light-theme .trade-modal-panel .border-white\/8,
+  .light-theme .trade-modal-panel .border-white\/15 { border-color: rgba(226,232,240,.8) !important; }
+  .light-theme .trade-modal-shell { background: rgba(15,23,42,.45) !important; }
 
   /* ── Account Modal – dark mode base ── */
   .account-modal-panel {
@@ -10990,7 +11039,7 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
           )}
         </Section>
 
-        <div className="trade-context-modern mt-6 overflow-visible rounded-xl border border-white/10 bg-[#0a0a0a] p-6">
+        <div className="trade-context-modern trade-form-section mt-6 overflow-visible rounded-xl border border-white/10 bg-[#0a0a0a] p-6">
           <div className="mb-6 flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-fuchsia-500/35 bg-fuchsia-500/12 text-fuchsia-300 shadow-[0_0_16px_rgba(178,74,242,0.18)]"><Target size={18} /></span>
             <h3 className="text-xl font-black text-white">Strategy &amp; Trade Context</h3>
@@ -16295,7 +16344,7 @@ function SectionTitle({ title, icon, gold }) { return <div className="flex items
 function TopPill({ label, value, green, red }) {
   return <div className={`calendar-top-pill rounded-xl border px-4 py-3 text-sm font-black ${green ? "calendar-top-pill-green border-emerald-500/40 bg-emerald-500/20 text-emerald-300" : red ? "calendar-top-pill-red border-red-500/40 bg-red-500/20 text-red-300" : "calendar-top-pill-neutral border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300"}`}><span className="calendar-top-pill-label mr-2 text-zinc-400">{label}</span>{value}</div>;
 }
-function Section({ title, icon, children }) { return <div className="mt-6 rounded-xl border border-white/8 bg-[#0a0a0a]"><div className="flex items-center gap-3 border-b border-white/8 px-6 py-4 rounded-t-xl"><span className="flex h-8 w-8 items-center justify-center rounded-lg border border-fuchsia-500/20 bg-fuchsia-500/8 text-fuchsia-400">{icon}</span><h3 className="text-sm font-black uppercase tracking-wider text-zinc-300">{title}</h3></div><div className="p-6">{children}</div></div>; }
+function Section({ title, icon, children }) { return <div className="trade-form-section mt-6 rounded-xl border border-white/8 bg-[#0a0a0a]"><div className="trade-form-section-header flex items-center gap-3 border-b border-white/8 px-6 py-4 rounded-t-xl"><span className="flex h-8 w-8 items-center justify-center rounded-lg border border-fuchsia-500/20 bg-fuchsia-500/8 text-fuchsia-400">{icon}</span><h3 className="trade-form-section-title text-sm font-black uppercase tracking-wider text-zinc-300">{title}</h3></div><div className="p-6">{children}</div></div>; }
 function Field({ label, children }) { return <label className="block text-sm font-semibold text-white"><span className="mb-2 block">{label}</span>{children}</label>; }
 function inputPurpleClass(extra = "") {
   return `border-white/15 bg-black text-white outline-none transition-all focus-visible:border-fuchsia-400 focus-visible:ring-2 focus-visible:ring-fuchsia-500/45 focus-visible:ring-offset-0 focus-visible:shadow-[0_0_16px_rgba(178,74,242,0.30)] ${extra}`;
