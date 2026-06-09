@@ -8926,19 +8926,19 @@ function TradeCard({ trade, onView, onEdit, onRemove }) {
           <MetricBox label="Qty" value={trade.quantity || "—"} tone="fuchsia" />
         </div>
 
-        {/* Entry / Exit quality */}
-        {(Number(trade.entryQuality || 0) > 0 || Number(trade.exitQuality || 0) > 0) && (
+        {/* Entry / Exit time */}
+        {(trade.entryTime || trade.exitTime) && (
           <div className="mt-2.5 flex flex-wrap gap-2">
-            {Number(trade.entryQuality || 0) > 0 && (
+            {trade.entryTime && (
               <div className="flex items-center gap-1.5 rounded-lg border border-white/8 bg-black/25 px-3 py-1.5 text-xs">
                 <span className="font-black text-zinc-600">Entry</span>
-                <span className="font-black text-white">{trade.entryQuality}/5</span>
+                <span className="font-black text-white">{trade.entryTime}</span>
               </div>
             )}
-            {Number(trade.exitQuality || 0) > 0 && (
+            {trade.exitTime && (
               <div className="flex items-center gap-1.5 rounded-lg border border-white/8 bg-black/25 px-3 py-1.5 text-xs">
                 <span className="font-black text-zinc-600">Exit</span>
-                <span className="font-black text-white">{trade.exitQuality}/5</span>
+                <span className="font-black text-white">{trade.exitTime}</span>
               </div>
             )}
           </div>
