@@ -2842,7 +2842,7 @@ const THEME_STYLE_CSS = `
 
   /* ── Calendar Grid Cells – dark mode base ── */
   .cal-grid-cell { background: #0d0d0d; }
-  .cal-grid-cell-empty { border-color: rgba(178,74,242,.30) !important; background: radial-gradient(circle at top right, rgba(178,74,242,.11), #060606 52%) !important; }
+  .cal-grid-cell-empty { border-color: rgba(255,255,255,.06) !important; background: #070707 !important; }
   .cal-grid-cell-win { border-color: rgba(16,185,129,.45) !important; background: rgba(6,78,59,.22) !important; }
   .cal-grid-cell-loss { border-color: rgba(239,68,68,.45) !important; background: rgba(127,29,29,.22) !important; }
   .cal-grid-cell-breakeven { border-color: rgba(245,158,11,.45) !important; background: rgba(120,53,15,.22) !important; }
