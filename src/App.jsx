@@ -15834,8 +15834,8 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
     if (result && !result.ok) setError(result.error?.message || "Authentication failed. Try again.");
   }
 
-  const title = isLogin ? "Welcome back" : isRegister ? "Create your account" : isUpdatePassword ? "Create new password" : "Reset password";
-  const subtitle = isLogin ? "Sign in to continue your trading journey" : isRegister ? "Start tracking your trades with clarity" : isUpdatePassword ? "Choose a new secure password for your account" : "Enter your email and we will send a reset link";
+  const title = isLogin ? "Welcome back" : isRegister ? "Start reviewing your trades like a coach is watching." : isUpdatePassword ? "Create new password" : "Reset password";
+  const subtitle = isLogin ? "Continue reviewing your trades, tracking your patterns, and improving your consistency." : isRegister ? "Create your TryCritique account and start your 7-day free trial. No card required." : isUpdatePassword ? "Choose a new secure password for your account" : "Enter your email and we will send a reset link";
   const isLight = theme === "light";
   const authInputClass = isLight ? "border-slate-200 bg-slate-50 pl-11 text-slate-950 placeholder:text-slate-400 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" : "border-white/10 bg-black/45 pl-11 text-white placeholder:text-zinc-500 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20";
   const authPasswordInputClass = isLight ? "border-slate-200 bg-slate-50 pl-11 pr-11 text-slate-950 placeholder:text-slate-400 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" : "border-white/10 bg-black/45 pl-11 pr-11 text-white placeholder:text-zinc-500 focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20";
@@ -15983,6 +15983,11 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
                 <span className="relative z-10">{authLoading ? "Please wait..." : isLogin ? "Sign in" : isRegister ? "Create account" : isUpdatePassword ? "Update password" : "Send reset link"}</span>
                 <span className="relative z-10 transition group-hover:translate-x-1">→</span>
               </button>
+              {isRegister && !form.agreedToTerms && !authLoading && (
+                <p className={isLight ? "text-center text-xs font-semibold text-slate-400" : "text-center text-xs font-semibold text-zinc-500"}>
+                  Agree to the Terms and Privacy Policy above to create your account.
+                </p>
+              )}
             </form>
 
             <div className="mt-7 text-center text-sm font-semibold text-zinc-500">
@@ -16003,30 +16008,55 @@ function AuthPage({ authPage, setAuthPage, onSubmitAuth, authLoading, authMessag
         </div>
 
         <div className="relative hidden min-h-screen items-center justify-center overflow-hidden p-10 lg:flex">
-          <div className="auth-float-card auth-float-one absolute left-16 bottom-[30%] rounded-2xl border border-emerald-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(16,185,129,0.10)] backdrop-blur-xl">
-            <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Win Rate</div>
-            <div className="mt-3 text-3xl font-black text-emerald-400">87.3%</div>
-            <div className="mt-1 text-xs font-bold text-emerald-300">+12.4% this month</div>
+          {/* Floating accent cards */}
+          <div className="auth-float-card auth-float-one absolute left-16 bottom-[30%] rounded-2xl border border-red-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(239,68,68,0.10)] backdrop-blur-xl">
+            <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Top Mistake This Week</div>
+            <div className="mt-3 text-xl font-black text-red-300">FOMO entries</div>
+            <div className="mt-1 text-xs font-bold text-red-400">Cost: − $840</div>
           </div>
           <div className="auth-float-card auth-float-two absolute right-12 top-28 rounded-2xl border border-fuchsia-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(178,74,242,0.10)] backdrop-blur-xl">
             <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Mistake Detector</div>
-            <div className="mt-3 text-xl font-black text-fuchsia-300">Active Coach</div>
-            <div className="mt-1 text-xs font-bold text-zinc-400">Find → Understand → Fix</div>
+            <div className="mt-3 text-xl font-black text-fuchsia-300">This week&apos;s fix</div>
+            <div className="mt-1 text-xs font-bold text-zinc-400">Skip first 15 min post-news</div>
           </div>
           <div className="auth-float-card auth-float-three absolute right-[6%] top-[30%] rounded-2xl border border-emerald-500/20 bg-black/40 p-5 opacity-80 shadow-[0_0_35px_rgba(16,185,129,0.10)] backdrop-blur-xl">
-            <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Total P&L</div>
-            <div className="mt-3 text-3xl font-black text-emerald-400">+$2,450</div>
+            <div className="text-xs font-black uppercase tracking-widest text-zinc-500">This Week P&amp;L</div>
+            <div className="mt-3 text-3xl font-black text-emerald-400">+$1,840</div>
             <div className="mt-1 text-xs font-bold text-zinc-400">Tracked from journal</div>
           </div>
 
-          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="auth-hero-panel relative z-10 max-w-2xl text-center">
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="auth-hero-panel relative z-10 max-w-xl text-center">
             <div className="auth-hero-mark mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-[1.5rem] border border-fuchsia-500/30 bg-fuchsia-500/10 text-5xl text-fuchsia-300">{BRAND_MARK}</div>
-            <h2 className="text-6xl font-black leading-[0.95] tracking-tight text-white">Transform Your<br />Trading Journey</h2>
-            <p className="mx-auto mt-8 max-w-xl text-xl font-semibold leading-8 text-zinc-400">Turn every trade into clear feedback, discipline, and measurable growth. Build consistency with data-driven insights and better psychology.</p>
-            <div className="mt-10 grid grid-cols-3 gap-4">
-              <AuthHeroMetric value="1" label="journal" />
-              <AuthHeroMetric value="5" label="analytics pages" />
-              <AuthHeroMetric value="24/7" label="trade review" />
+            <h2 className="text-5xl font-black leading-[0.97] tracking-tight text-white">
+              {isLogin
+                ? <><span className="text-white">Find the leak.</span><br /><span className="text-gradient-primary">Fix the next trade.</span></>
+                : <><span className="text-white">Turn every trade</span><br /><span className="text-gradient-primary">into a lesson.</span></>}
+            </h2>
+            <p className="mx-auto mt-6 max-w-sm text-lg font-semibold leading-8 text-zinc-400">
+              {isLogin
+                ? "Review your latest patterns, check your most costly mistake, and go into today's session with a clear focus."
+                : "Log your trades, find what's costing you money, and build a consistent review habit — one session at a time."}
+            </p>
+            <div className="mt-10 grid gap-3 text-left">
+              {(isLogin
+                ? [
+                    "Review your latest trades",
+                    "See your most costly mistake",
+                    "Track session and strategy performance",
+                    "Stay focused before the next session",
+                  ]
+                : [
+                    "Log trades with screenshots, strategy, emotion, and mistakes",
+                    "Detect repeated patterns that cost you money",
+                    "Review sessions, strategies, and news-day performance",
+                    "Build a cleaner routine before your next trade",
+                  ]
+              ).map((bullet) => (
+                <div key={bullet} className="flex items-start gap-3 rounded-xl border border-white/8 bg-white/[0.04] px-4 py-3">
+                  <CheckCircle size={15} className="mt-0.5 shrink-0 text-emerald-400" />
+                  <span className="text-sm font-semibold text-zinc-300">{bullet}</span>
+                </div>
+              ))}
             </div>
           </motion.div>
         </div>
