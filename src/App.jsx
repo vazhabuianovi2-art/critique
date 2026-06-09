@@ -14762,16 +14762,6 @@ function StrategyStatsCard({ name, item, winRate, avgRR, pnl, onDelete }) {
           <span className={pnl >= 0 ? "rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-black text-emerald-300" : "rounded-full border border-red-500/25 bg-red-500/10 px-3 py-1 text-xs font-black text-red-300"}>
             {pnl >= 0 ? "Profit" : "Loss"}
           </span>
-          {onDelete && (
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); if (window.confirm(`Delete strategy "${name}"?`)) onDelete(); }}
-              className="flex h-7 w-7 items-center justify-center rounded-lg border border-red-500/25 bg-red-500/10 text-red-400 opacity-0 transition hover:bg-red-500/25 group-hover:opacity-100"
-              title="Delete strategy"
-            >
-              <Trash2 size={13} />
-            </button>
-          )}
         </div>
       </div>
       <div className={pnl >= 0 ? "relative z-10 mt-5 text-3xl font-black text-emerald-400" : "relative z-10 mt-5 text-3xl font-black text-red-400"}>{formatMoney(pnl)}</div>
