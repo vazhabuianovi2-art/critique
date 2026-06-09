@@ -10888,7 +10888,7 @@ function CalendarDayDetailsModal({ dateKey, trades = [], events = [], onClose, o
 
         <div className={resultTone === "win" ? "calendar-day-modal-summary calendar-day-modal-summary-win" : resultTone === "loss" ? "calendar-day-modal-summary calendar-day-modal-summary-loss" : resultTone === "be" ? "calendar-day-modal-summary calendar-day-modal-summary-be" : "calendar-day-modal-summary calendar-day-modal-summary-empty"}>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <CalendarModalMetric value={stats.wins} label="Wins" tone="win" />
+            <CalendarModalMetric value={stats.wins + (stats.partials || 0)} label="Wins" tone="win" />
             <CalendarModalMetric value={stats.breakEvens || 0} label="Break Even" tone="be" />
             <CalendarModalMetric value={stats.losses} label="Losses" tone="loss" />
             <CalendarModalMetric value={`${getPnlArrow(stats.pnl)} ${formatMoney(stats.pnl)}`} label="Total P&L" tone={resultTone} />
