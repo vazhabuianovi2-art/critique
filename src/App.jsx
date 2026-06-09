@@ -3600,6 +3600,27 @@ const THEME_STYLE_CSS = `
     box-shadow: 0 16px 34px rgba(239,68,68,.10) !important;
   }
 
+  /* ── What Pro Includes feature items (light mode) ── */
+  .light-theme .pro-feature-item {
+    background: #f1f5f9 !important;
+    border-color: rgba(148,163,184,.45) !important;
+    color: #1e293b !important;
+    font-weight: 700 !important;
+  }
+  .light-theme .pro-feature-item:hover {
+    background: #e9f0ff !important;
+    border-color: rgba(109,40,217,.30) !important;
+  }
+
+  /* ── Fix step cards more visible in light mode ── */
+  .light-theme .fix-step-card {
+    background: linear-gradient(135deg, #f0fdf4, #f8fafc) !important;
+    border-color: rgba(5,150,105,.28) !important;
+    box-shadow: 0 3px 12px rgba(5,150,105,.08) !important;
+  }
+  .light-theme .fix-step-card .text-zinc-300,
+  .light-theme .fix-step-card .text-zinc-400 { color: #1e293b !important; }
+
   /* Premium white mode inspired by clean SaaS dashboard styling */
   .light-theme,
   .light-theme main.app-main,
@@ -3990,10 +4011,10 @@ const THEME_STYLE_CSS = `
   .stat-tile-purple:hover { border-color: rgba(178,74,242,0.55); }
 
   /* ── Stat tile cards – light mode ─────────────────────────────── */
-  .light-theme .stat-tile-green  { background: linear-gradient(145deg,#bbf7d0,#d1fae5,#f0fdf4) !important; border-color: rgba(16,185,129,.42) !important; box-shadow: 0 6px 22px rgba(16,185,129,.16) !important; }
-  .light-theme .stat-tile-red    { background: linear-gradient(145deg,#fecaca,#fee2e2,#fef2f2) !important; border-color: rgba(239,68,68,.40) !important; box-shadow: 0 6px 22px rgba(239,68,68,.14) !important; }
-  .light-theme .stat-tile-amber  { background: linear-gradient(145deg,#fde68a,#fef3c7,#fffbeb) !important; border-color: rgba(245,158,11,.40) !important; box-shadow: 0 6px 22px rgba(245,158,11,.14) !important; }
-  .light-theme .stat-tile-purple { background: linear-gradient(145deg,#ddd6fe,#ede9fe,#faf5ff) !important; border-color: rgba(124,58,237,.38) !important; box-shadow: 0 6px 22px rgba(124,58,237,.14) !important; }
+  .light-theme .stat-tile-green  { background: linear-gradient(145deg,#6ee7b7,#a7f3d0,#d1fae5) !important; border-color: rgba(5,150,105,.55) !important; box-shadow: 0 6px 22px rgba(5,150,105,.20) !important; }
+  .light-theme .stat-tile-red    { background: linear-gradient(145deg,#fca5a5,#fecaca,#fee2e2) !important; border-color: rgba(220,38,38,.52) !important; box-shadow: 0 6px 22px rgba(220,38,38,.18) !important; }
+  .light-theme .stat-tile-amber  { background: linear-gradient(145deg,#fcd34d,#fde68a,#fef3c7) !important; border-color: rgba(217,119,6,.52) !important; box-shadow: 0 6px 22px rgba(217,119,6,.18) !important; }
+  .light-theme .stat-tile-purple { background: linear-gradient(145deg,#c4b5fd,#ddd6fe,#ede9fe) !important; border-color: rgba(109,40,217,.50) !important; box-shadow: 0 6px 22px rgba(109,40,217,.18) !important; }
   /* hide dark glow in light mode */
   .light-theme .stat-tile-green .stat-tile-glow,
   .light-theme .stat-tile-red .stat-tile-glow,
@@ -13513,7 +13534,7 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
             </div>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               {features.map((feature) => (
-                <div key={feature} className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-bold text-zinc-100">
+                <div key={feature} className="pro-feature-item rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-bold text-zinc-100">
                   {feature}
                 </div>
               ))}
