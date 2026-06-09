@@ -9952,8 +9952,8 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
       <TopCrumb page="Calendar" />
       {/* Header banner */}
-      <div className="dashboard-hero mb-6 relative overflow-hidden rounded-2xl border border-white/15 px-5 py-4">
-        <div className="dashboard-hero-bg pointer-events-none absolute inset-0" />
+      <div className="mb-6 relative overflow-hidden rounded-2xl px-5 py-4" style={{ border: "1px solid transparent", background: "linear-gradient(135deg, #14071d 0%, #16081e 48%, #180d17 76%, #21130d 100%) padding-box, linear-gradient(135deg, rgba(178,74,242,.58) 0%, rgba(122,42,170,.48) 58%, rgba(132,76,36,.62) 100%) border-box", boxShadow: "0 18px 48px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.035)" }}>
+        <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(circle at 10% 0%, rgba(178,74,242,.09), transparent 34%), radial-gradient(circle at 100% 100%, rgba(123,69,31,.20), transparent 42%), linear-gradient(135deg, rgba(18,6,27,.98) 0%, rgba(20,7,27,.98) 52%, rgba(26,13,20,.98) 78%, rgba(31,18,12,.98) 100%)" }} />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
         <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Left: nav + month + subtitle */}
