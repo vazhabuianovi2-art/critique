@@ -32,10 +32,19 @@ export function LandingHero({ isLight, setAuthPage, onWatchDemo }) {
           <button
             type="button"
             onClick={onWatchDemo}
-            className={isLight ? "inline-flex h-14 items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-8 text-base font-black text-slate-950 transition hover:border-fuchsia-300 hover:bg-fuchsia-50" : "btn-ghost-glow inline-flex h-14 items-center justify-center gap-3 rounded-xl px-8 text-base font-black text-white"}
+            className={isLight
+              ? "group relative inline-flex h-14 items-center justify-center gap-3 overflow-hidden rounded-xl border border-violet-300/60 bg-white px-8 text-base font-black text-slate-900 shadow-[0_4px_18px_rgba(109,40,217,0.12)] transition-all duration-300 hover:border-violet-400 hover:shadow-[0_6px_24px_rgba(109,40,217,0.22)] hover:scale-[1.02]"
+              : "group relative inline-flex h-14 items-center justify-center gap-3 overflow-hidden rounded-xl border border-violet-500/30 bg-white/5 px-8 text-base font-black text-white shadow-[0_4px_18px_rgba(109,40,217,0.15)] backdrop-blur-sm transition-all duration-300 hover:border-violet-400/60 hover:bg-white/10 hover:shadow-[0_6px_24px_rgba(109,40,217,0.28)] hover:scale-[1.02]"}
           >
-            <PlayCircle size={20} />
-            See Example Mistake Report
+            <span className={isLight
+              ? "flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 shadow-[0_2px_8px_rgba(109,40,217,0.35)]"
+              : "flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/80 to-fuchsia-500/80"}>
+              <PlayCircle size={15} className="text-white" />
+            </span>
+            <span>
+              <span className="block text-[13px] leading-tight">See Example</span>
+              <span className={isLight ? "block text-[11px] font-semibold leading-tight text-violet-500" : "block text-[11px] font-semibold leading-tight text-violet-400"}>Mistake Report →</span>
+            </span>
           </button>
         </div>
 
