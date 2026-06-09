@@ -3990,40 +3990,45 @@ const THEME_STYLE_CSS = `
   .stat-tile-purple:hover { border-color: rgba(178,74,242,0.55); }
 
   /* ── Stat tile cards – light mode ─────────────────────────────── */
-  .light-theme .stat-tile-green  { background: linear-gradient(145deg,#f0fdf4,#ecfdf5,#ffffff) !important; border-color: rgba(16,185,129,.28) !important; box-shadow: 0 4px 18px rgba(16,185,129,.10) !important; }
-  .light-theme .stat-tile-red    { background: linear-gradient(145deg,#fef2f2,#fff5f5,#ffffff) !important; border-color: rgba(239,68,68,.28) !important; box-shadow: 0 4px 18px rgba(239,68,68,.10) !important; }
-  .light-theme .stat-tile-amber  { background: linear-gradient(145deg,#fffbeb,#fff7ed,#ffffff) !important; border-color: rgba(245,158,11,.28) !important; box-shadow: 0 4px 18px rgba(245,158,11,.10) !important; }
-  .light-theme .stat-tile-purple { background: linear-gradient(145deg,#faf5ff,#f9f1fe,#ffffff) !important; border-color: rgba(178,74,242,.28) !important; box-shadow: 0 4px 18px rgba(178,74,242,.10) !important; }
+  .light-theme .stat-tile-green  { background: linear-gradient(145deg,#bbf7d0,#d1fae5,#f0fdf4) !important; border-color: rgba(16,185,129,.42) !important; box-shadow: 0 6px 22px rgba(16,185,129,.16) !important; }
+  .light-theme .stat-tile-red    { background: linear-gradient(145deg,#fecaca,#fee2e2,#fef2f2) !important; border-color: rgba(239,68,68,.40) !important; box-shadow: 0 6px 22px rgba(239,68,68,.14) !important; }
+  .light-theme .stat-tile-amber  { background: linear-gradient(145deg,#fde68a,#fef3c7,#fffbeb) !important; border-color: rgba(245,158,11,.40) !important; box-shadow: 0 6px 22px rgba(245,158,11,.14) !important; }
+  .light-theme .stat-tile-purple { background: linear-gradient(145deg,#ddd6fe,#ede9fe,#faf5ff) !important; border-color: rgba(124,58,237,.38) !important; box-shadow: 0 6px 22px rgba(124,58,237,.14) !important; }
   /* hide dark glow in light mode */
   .light-theme .stat-tile-green .stat-tile-glow,
   .light-theme .stat-tile-red .stat-tile-glow,
   .light-theme .stat-tile-amber .stat-tile-glow,
   .light-theme .stat-tile-purple .stat-tile-glow { opacity: 0 !important; }
   /* value text colors in light mode */
-  .light-theme .stat-tile-green  .stat-tile-value { color: #059669 !important; }
-  .light-theme .stat-tile-red    .stat-tile-value { color: #dc2626 !important; }
-  .light-theme .stat-tile-amber  .stat-tile-value { color: #d97706 !important; }
-  .light-theme .stat-tile-purple .stat-tile-value { color: #1e1b4b !important; }
+  .light-theme .stat-tile-green  .stat-tile-value { color: #065f46 !important; }
+  .light-theme .stat-tile-red    .stat-tile-value { color: #991b1b !important; }
+  .light-theme .stat-tile-amber  .stat-tile-value { color: #92400e !important; }
+  .light-theme .stat-tile-purple .stat-tile-value { color: #4c1d95 !important; }
+  /* all text inside stat tile – dark in light mode */
+  .light-theme .stat-tile-green  * { color: #065f46 !important; }
+  .light-theme .stat-tile-red    * { color: #991b1b !important; }
+  .light-theme .stat-tile-amber  * { color: #78350f !important; }
+  .light-theme .stat-tile-purple * { color: #4c1d95 !important; }
+  /* label: slightly muted */
+  .light-theme .stat-tile-green  .stat-tile-label { color: #047857 !important; opacity: 0.75; }
+  .light-theme .stat-tile-red    .stat-tile-label { color: #b91c1c !important; opacity: 0.75; }
+  .light-theme .stat-tile-amber  .stat-tile-label { color: #b45309 !important; opacity: 0.75; }
+  .light-theme .stat-tile-purple .stat-tile-label { color: #6d28d9 !important; opacity: 0.75; }
   /* badge in light mode */
-  .light-theme .stat-tile-green  .stat-tile-badge { background: rgba(16,185,129,.12) !important; border-color: rgba(16,185,129,.30) !important; color: #065f46 !important; }
-  .light-theme .stat-tile-red    .stat-tile-badge { background: rgba(239,68,68,.10) !important; border-color: rgba(239,68,68,.30) !important; color: #991b1b !important; }
-  .light-theme .stat-tile-amber  .stat-tile-badge { background: rgba(245,158,11,.12) !important; border-color: rgba(245,158,11,.30) !important; color: #92400e !important; }
-  .light-theme .stat-tile-purple .stat-tile-badge { background: rgba(178,74,242,.10) !important; border-color: rgba(178,74,242,.30) !important; color: #6b21a8 !important; }
+  .light-theme .stat-tile-green  .stat-tile-badge { background: rgba(5,150,105,.18) !important; border-color: rgba(5,150,105,.40) !important; color: #065f46 !important; }
+  .light-theme .stat-tile-red    .stat-tile-badge { background: rgba(220,38,38,.14) !important; border-color: rgba(220,38,38,.38) !important; color: #991b1b !important; }
+  .light-theme .stat-tile-amber  .stat-tile-badge { background: rgba(217,119,6,.16) !important; border-color: rgba(217,119,6,.38) !important; color: #78350f !important; }
+  .light-theme .stat-tile-purple .stat-tile-badge { background: rgba(109,40,217,.14) !important; border-color: rgba(109,40,217,.36) !important; color: #4c1d95 !important; }
   /* icon box in light mode */
-  .light-theme .stat-tile-green  .stat-tile-icon { background: rgba(16,185,129,.12) !important; border-color: rgba(16,185,129,.30) !important; color: #059669 !important; }
-  .light-theme .stat-tile-red    .stat-tile-icon { background: rgba(239,68,68,.10) !important; border-color: rgba(239,68,68,.30) !important; color: #dc2626 !important; }
-  .light-theme .stat-tile-amber  .stat-tile-icon { background: rgba(245,158,11,.12) !important; border-color: rgba(245,158,11,.30) !important; color: #d97706 !important; }
-  .light-theme .stat-tile-purple .stat-tile-icon { background: rgba(178,74,242,.10) !important; border-color: rgba(178,74,242,.30) !important; color: #7c3aed !important; }
+  .light-theme .stat-tile-green  .stat-tile-icon { background: rgba(5,150,105,.18) !important; border-color: rgba(5,150,105,.40) !important; color: #065f46 !important; }
+  .light-theme .stat-tile-red    .stat-tile-icon { background: rgba(220,38,38,.14) !important; border-color: rgba(220,38,38,.38) !important; color: #991b1b !important; }
+  .light-theme .stat-tile-amber  .stat-tile-icon { background: rgba(217,119,6,.16) !important; border-color: rgba(217,119,6,.38) !important; color: #78350f !important; }
+  .light-theme .stat-tile-purple .stat-tile-icon { background: rgba(109,40,217,.14) !important; border-color: rgba(109,40,217,.36) !important; color: #4c1d95 !important; }
   /* sparkline in light mode */
-  .light-theme .stat-tile-green  .stat-tile-line { color: #059669 !important; opacity: 0.4 !important; }
-  .light-theme .stat-tile-red    .stat-tile-line { color: #dc2626 !important; opacity: 0.4 !important; }
-  .light-theme .stat-tile-amber  .stat-tile-line { color: #d97706 !important; opacity: 0.4 !important; }
-  .light-theme .stat-tile-purple .stat-tile-line { color: #7c3aed !important; opacity: 0.4 !important; }
-  /* label text in light mode */
-  .light-theme .stat-tile-green .stat-tile-label,
-  .light-theme .stat-tile-red .stat-tile-label,
-  .light-theme .stat-tile-amber .stat-tile-label,
-  .light-theme .stat-tile-purple .stat-tile-label { color: #94a3b8 !important; }
+  .light-theme .stat-tile-green  .stat-tile-line { color: #059669 !important; opacity: 0.55 !important; }
+  .light-theme .stat-tile-red    .stat-tile-line { color: #dc2626 !important; opacity: 0.55 !important; }
+  .light-theme .stat-tile-amber  .stat-tile-line { color: #d97706 !important; opacity: 0.55 !important; }
+  .light-theme .stat-tile-purple .stat-tile-line { color: #7c3aed !important; opacity: 0.55 !important; }
 
   .light-theme .dashboard-dash-card,
   .light-theme .group.relative.overflow-hidden.rounded-xl.border.bg-gradient-to-br,
@@ -4158,20 +4163,22 @@ const THEME_STYLE_CSS = `
     border-color: rgba(226,232,240,.85) !important;
     box-shadow: 0 2px 10px rgba(15,23,42,.06) !important;
   }
+  .light-theme .currency-impact-item .text-white { color: #0f172a !important; }
+  .light-theme .currency-impact-item .text-zinc-500 { color: #64748b !important; }
   .light-theme .currency-pill-win {
-    background: rgba(5,150,105,.12) !important;
-    border-color: rgba(5,150,105,.35) !important;
-    color: #047857 !important;
+    background: rgba(5,150,105,.18) !important;
+    border-color: rgba(5,150,105,.42) !important;
+    color: #065f46 !important;
   }
   .light-theme .currency-pill-loss {
-    background: rgba(220,38,38,.10) !important;
-    border-color: rgba(220,38,38,.30) !important;
-    color: #b91c1c !important;
+    background: rgba(220,38,38,.14) !important;
+    border-color: rgba(220,38,38,.38) !important;
+    color: #991b1b !important;
   }
   .light-theme .currency-pill-neutral {
-    background: #f1f5f9 !important;
-    border-color: rgba(148,163,184,.45) !important;
-    color: #334155 !important;
+    background: #e2e8f0 !important;
+    border-color: rgba(100,116,139,.35) !important;
+    color: #1e293b !important;
   }
 
   /* ── Activity stat cards (light mode) ── */
