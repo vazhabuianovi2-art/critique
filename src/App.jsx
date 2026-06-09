@@ -4036,17 +4036,26 @@ const THEME_STYLE_CSS = `
   .light-theme .stat-tile-green,
   .light-theme .stat-tile-red,
   .light-theme .stat-tile-amber,
-  .light-theme .stat-tile-purple { background: linear-gradient(145deg,#ede9fe 0%,#f5f3ff 100%) !important; border-color: rgba(109,40,217,.22) !important; border-left: 3px solid rgba(109,40,217,.55) !important; box-shadow: 0 3px 16px rgba(109,40,217,.10) !important; }
+  .light-theme .stat-tile-purple {
+    background: #ffffff !important;
+    border-color: rgba(226,232,240,.9) !important;
+    border-left: none !important;
+    border-top: 3px solid transparent !important;
+    box-shadow: 0 1px 6px rgba(15,23,42,.05), 0 6px 24px rgba(15,23,42,.06) !important;
+  }
+  .light-theme .stat-tile-green  { border-top-color: #10b981 !important; }
+  .light-theme .stat-tile-red    { border-top-color: #ef4444 !important; }
+  .light-theme .stat-tile-amber  { border-top-color: #f59e0b !important; }
+  .light-theme .stat-tile-purple { border-top-color: #8b5cf6 !important; }
+  .light-theme .stat-tile-green:hover  { box-shadow: 0 4px 12px rgba(15,23,42,.06), 0 12px 36px rgba(16,185,129,.12) !important; border-color: rgba(16,185,129,.30) !important; }
+  .light-theme .stat-tile-red:hover    { box-shadow: 0 4px 12px rgba(15,23,42,.06), 0 12px 36px rgba(239,68,68,.12) !important; border-color: rgba(239,68,68,.28) !important; }
+  .light-theme .stat-tile-amber:hover  { box-shadow: 0 4px 12px rgba(15,23,42,.06), 0 12px 36px rgba(245,158,11,.12) !important; border-color: rgba(245,158,11,.28) !important; }
+  .light-theme .stat-tile-purple:hover { box-shadow: 0 4px 12px rgba(15,23,42,.06), 0 12px 36px rgba(139,92,246,.12) !important; border-color: rgba(139,92,246,.28) !important; }
   /* hide dark glow in light mode */
   .light-theme .stat-tile-green .stat-tile-glow,
   .light-theme .stat-tile-red .stat-tile-glow,
   .light-theme .stat-tile-amber .stat-tile-glow,
   .light-theme .stat-tile-purple .stat-tile-glow { opacity: 0 !important; }
-  /* value text — plain dark in light mode */
-  .light-theme .stat-tile-green  .stat-tile-value,
-  .light-theme .stat-tile-red    .stat-tile-value,
-  .light-theme .stat-tile-amber  .stat-tile-value,
-  .light-theme .stat-tile-purple .stat-tile-value { color: #0f172a !important; }
   /* all text inside stat tile – plain dark */
   .light-theme .stat-tile-green  *,
   .light-theme .stat-tile-red    *,
@@ -4057,21 +4066,21 @@ const THEME_STYLE_CSS = `
   .light-theme .stat-tile-red    .stat-tile-label,
   .light-theme .stat-tile-amber  .stat-tile-label,
   .light-theme .stat-tile-purple .stat-tile-label { color: #64748b !important; opacity: 1; }
-  /* badge in light mode */
-  .light-theme .stat-tile-green  .stat-tile-badge { background: rgba(5,150,105,.10) !important; border-color: rgba(5,150,105,.28) !important; color: #065f46 !important; }
-  .light-theme .stat-tile-red    .stat-tile-badge { background: rgba(220,38,38,.08) !important; border-color: rgba(220,38,38,.26) !important; color: #991b1b !important; }
-  .light-theme .stat-tile-amber  .stat-tile-badge { background: rgba(217,119,6,.10) !important; border-color: rgba(217,119,6,.28) !important; color: #78350f !important; }
-  .light-theme .stat-tile-purple .stat-tile-badge { background: rgba(109,40,217,.08) !important; border-color: rgba(109,40,217,.26) !important; color: #4c1d95 !important; }
-  /* icon box in light mode */
-  .light-theme .stat-tile-green  .stat-tile-icon { background: rgba(5,150,105,.10) !important; border-color: rgba(5,150,105,.28) !important; color: #059669 !important; }
-  .light-theme .stat-tile-red    .stat-tile-icon { background: rgba(220,38,38,.08) !important; border-color: rgba(220,38,38,.26) !important; color: #dc2626 !important; }
-  .light-theme .stat-tile-amber  .stat-tile-icon { background: rgba(217,119,6,.10) !important; border-color: rgba(217,119,6,.28) !important; color: #d97706 !important; }
-  .light-theme .stat-tile-purple .stat-tile-icon { background: rgba(109,40,217,.08) !important; border-color: rgba(109,40,217,.26) !important; color: #7c3aed !important; }
-  /* sparkline in light mode */
-  .light-theme .stat-tile-green  .stat-tile-line { color: #059669 !important; opacity: 0.45 !important; }
-  .light-theme .stat-tile-red    .stat-tile-line { color: #dc2626 !important; opacity: 0.45 !important; }
-  .light-theme .stat-tile-amber  .stat-tile-line { color: #d97706 !important; opacity: 0.45 !important; }
-  .light-theme .stat-tile-purple .stat-tile-line { color: #7c3aed !important; opacity: 0.45 !important; }
+  /* badge */
+  .light-theme .stat-tile-green  .stat-tile-badge { background: #f0fdf4 !important; border-color: rgba(16,185,129,.30) !important; color: #065f46 !important; }
+  .light-theme .stat-tile-red    .stat-tile-badge { background: #fef2f2 !important; border-color: rgba(239,68,68,.28) !important; color: #991b1b !important; }
+  .light-theme .stat-tile-amber  .stat-tile-badge { background: #fffbeb !important; border-color: rgba(245,158,11,.28) !important; color: #78350f !important; }
+  .light-theme .stat-tile-purple .stat-tile-badge { background: #f5f3ff !important; border-color: rgba(139,92,246,.26) !important; color: #4c1d95 !important; }
+  /* icon box */
+  .light-theme .stat-tile-green  .stat-tile-icon { background: #f0fdf4 !important; border-color: rgba(16,185,129,.30) !important; color: #059669 !important; }
+  .light-theme .stat-tile-red    .stat-tile-icon { background: #fef2f2 !important; border-color: rgba(239,68,68,.28) !important; color: #dc2626 !important; }
+  .light-theme .stat-tile-amber  .stat-tile-icon { background: #fffbeb !important; border-color: rgba(245,158,11,.28) !important; color: #d97706 !important; }
+  .light-theme .stat-tile-purple .stat-tile-icon { background: #f5f3ff !important; border-color: rgba(139,92,246,.26) !important; color: #7c3aed !important; }
+  /* sparkline */
+  .light-theme .stat-tile-green  .stat-tile-line { color: #10b981 !important; opacity: 0.5 !important; }
+  .light-theme .stat-tile-red    .stat-tile-line { color: #ef4444 !important; opacity: 0.5 !important; }
+  .light-theme .stat-tile-amber  .stat-tile-line { color: #f59e0b !important; opacity: 0.5 !important; }
+  .light-theme .stat-tile-purple .stat-tile-line { color: #8b5cf6 !important; opacity: 0.5 !important; }
 
   .light-theme .dashboard-dash-card,
   .light-theme .group.relative.overflow-hidden.rounded-xl.border.bg-gradient-to-br,
