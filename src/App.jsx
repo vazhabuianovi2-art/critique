@@ -12986,6 +12986,8 @@ function BillingGatePage({ authUser, billingSubscription, onSignOut, onSubscript
   const [loadingPlan, setLoadingPlan] = useState("");
   const [billingError, setBillingError] = useState("");
   const [selected, setSelected] = useState("yearly");
+  // Returning user = had a subscription before (cancelled or expired). No second trial.
+  const isReturningUser = Boolean(billingSubscription);
 
   const plans = [
     { id: "monthly", name: "Monthly", daily: "$0.33", price: "$10", cadence: "billed monthly", badge: null },
@@ -12993,7 +12995,7 @@ function BillingGatePage({ authUser, billingSubscription, onSignOut, onSubscript
   ];
 
   const features = [
-    "7-day free trial — No charge today",
+    ...(isReturningUser ? [] : ["7-day free trial — No charge today"]),
     "Unlimited trade logging & journaling",
     "Advanced analytics & calendar",
     "Mistake detector & psychology tools",
@@ -13039,8 +13041,8 @@ function BillingGatePage({ authUser, billingSubscription, onSignOut, onSubscript
               <BrandBolt className="h-9 w-9" />
             </div>
           </div>
-          <h1 className="text-3xl font-black tracking-tight text-white">Start Your Free Trial</h1>
-          <p className="mt-2 text-base text-zinc-500">Choose your plan. You won't be charged today.</p>
+          <h1 className="text-3xl font-black tracking-tight text-white">{isReturningUser ? "Reactivate Pro" : "Start Your Free Trial"}</h1>
+          <p className="mt-2 text-base text-zinc-500">{isReturningUser ? "Reactivate your subscription to continue." : "Choose your plan. You won't be charged today."}</p>
         </div>
 
         {/* Card */}
@@ -13099,7 +13101,7 @@ function BillingGatePage({ authUser, billingSubscription, onSignOut, onSubscript
               disabled={Boolean(loadingPlan)}
               className="w-full rounded-2xl bg-fuchsia-600 py-4 text-base font-black text-white shadow-[0_4px_20px_rgba(178,74,242,0.25)] transition hover:bg-fuchsia-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loadingPlan ? "Opening checkout..." : `Start Free Trial — ${selected === "monthly" ? "$10/month" : "$86/year"}`}
+              {loadingPlan ? "Opening checkout..." : isReturningUser ? `Subscribe — ${selected === "monthly" ? "$10/month" : "$86/year"}` : `Start Free Trial — ${selected === "monthly" ? "$10/month" : "$86/year"}`}
             </button>
 
             <button type="button" onClick={onSignOut} className="mt-4 w-full text-sm font-medium text-zinc-700 transition hover:text-zinc-400">

@@ -6,6 +6,26 @@ function stripBom(s) {
   return String(s || "").replace(/﻿/g, "").trim();
 }
 
+// Returns true if the user has any prior subscription row in billing_subscriptions.
+// Used to skip the free trial on reactivation — only the first checkout gets a trial.
+async function checkHasPriorSubscription(supabaseUrl, serviceRoleKey, userId, email) {
+  try {
+    const orParts = [];
+    if (userId) orParts.push(`user_id.eq.${userId}`);
+    if (email) orParts.push(`email.eq.${encodeURIComponent(email)}`);
+    if (!orParts.length) return false;
+    const response = await fetch(
+      `${supabaseUrl}/rest/v1/billing_subscriptions?or=(${orParts.join(",")})&select=id&limit=1`,
+      { headers: { apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}` } }
+    );
+    const data = await response.json().catch(() => null);
+    return Array.isArray(data) && data.length > 0;
+  } catch {
+    // On error default to no trial (conservative — prevents accidental double trial)
+    return true;
+  }
+}
+
 function getDodoApiBase() {
   const environment = String(process.env.DODO_PAYMENTS_ENVIRONMENT || "").toLowerCase();
   return environment === "test_mode" || environment === "test" ? DODO_TEST_API_BASE : DODO_LIVE_API_BASE;
@@ -83,6 +103,13 @@ export default async function handler(req, res) {
     const productId = getProductId(plan);
     if (!productId) throw new Error(`${plan === "yearly" ? "Yearly" : "Monthly"} Dodo product is not configured`);
 
+    // Check prior subscription — returning users do not get a second free trial
+    const supabaseUrl = stripBom(process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL).replace(/\/+$/, "");
+    const serviceRoleKey = stripBom(process.env.SUPABASE_SERVICE_ROLE_KEY);
+    const hasPriorSubscription = supabaseUrl && serviceRoleKey
+      ? await checkHasPriorSubscription(supabaseUrl, serviceRoleKey, verifiedUserId, verifiedEmail)
+      : false;
+
     const siteUrl = getSiteUrl(req);
     const checkoutResponse = await fetch(`${getDodoApiBase()}/checkouts`, {
       method: "POST",
@@ -92,7 +119,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         product_cart: [{ product_id: productId, quantity: 1 }],
-        subscription_data: { trial_period_days: 7 },
+        ...(hasPriorSubscription ? {} : { subscription_data: { trial_period_days: 7 } }),
         customer: {
           email: verifiedEmail || undefined,
           name: verifiedEmail || "TryCritique customer",
