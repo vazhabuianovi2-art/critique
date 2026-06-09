@@ -177,6 +177,8 @@ export default async function handler(req, res) {
       const text = String(body.text || "").trim();
       if (!id) return json(res, 400, { ok: false, error: "Report id is required." });
       if (text.length < 1) return json(res, 400, { ok: false, error: "Message is required." });
+      // Require a verified JWT — email-only access is not accepted
+      if (!isAdmin && !user?.id) return json(res, 401, { ok: false, error: "Please sign in to reply." });
 
       const lookupResponse = await fetch(`${supabaseUrl}/rest/v1/support_reports?id=eq.${encodeURIComponent(id)}&select=*&limit=1`, { headers });
       const rows = await supabaseJson(lookupResponse, "Could not load support report.");
@@ -184,7 +186,7 @@ export default async function handler(req, res) {
       if (!report) return json(res, 404, { ok: false, error: "Support report not found." });
 
       const reportEmail = normalizeEmail(report.email);
-      const senderEmail = requesterEmail || normalizeEmail(body.email);
+      const senderEmail = requesterEmail;
       const canUserReply = Boolean(user?.id && report.user_id === user.id) || Boolean(senderEmail && reportEmail && senderEmail === reportEmail);
       if (!isAdmin && !canUserReply) return json(res, 403, { ok: false, error: "You cannot reply to this report." });
 
