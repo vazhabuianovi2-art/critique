@@ -12627,6 +12627,10 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
 
   useEffect(() => {
     if (!authUser?.id && !authUser?.email) return undefined;
+    // Admin users: skip the internal re-check — their subscription comes from the main
+    // app billing check (which has the owner-email fallback). Running a second check only
+    // risks overwriting the correct Admin Pro state with a network error.
+    if (String(initialSubscription?.provider || "").toLowerCase() === "admin") return undefined;
     let cancelled = false;
 
     async function loadBillingStatus() {
@@ -12787,14 +12791,14 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
               <div className="mt-6 flex flex-wrap gap-3">
                 <button
                   onClick={() => startCheckout("monthly")}
-                  disabled={Boolean(loadingPlan)}
+                  disabled={Boolean(loadingPlan) || isAdminGrantedPlan}
                   className="rounded-lg bg-fuchsia-500 px-5 py-3 text-sm font-black text-black shadow-[0_16px_36px_rgba(178,74,242,0.28)] transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {loadingPlan === "monthly" ? "Opening..." : "Start Monthly"}
                 </button>
                 <button
                   onClick={() => startCheckout("yearly")}
-                  disabled={Boolean(loadingPlan)}
+                  disabled={Boolean(loadingPlan) || isAdminGrantedPlan}
                   className="rounded-lg border border-fuchsia-500/35 bg-fuchsia-500/10 px-5 py-3 text-sm font-black text-fuchsia-100 transition hover:border-fuchsia-300 hover:bg-fuchsia-500/20 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {loadingPlan === "yearly" ? "Opening..." : "Start Yearly"}
@@ -12826,7 +12830,7 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
                   <div className="mt-2 text-sm font-bold text-emerald-300">{plan.daily}</div>
                   <button
                     onClick={() => startCheckout(plan.id)}
-                    disabled={Boolean(loadingPlan)}
+                    disabled={Boolean(loadingPlan) || isAdminGrantedPlan}
                     className={`mt-6 w-full rounded-lg px-4 py-3 text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-60 ${
                       plan.featured ? "bg-fuchsia-500 text-black hover:scale-[1.01]" : "border border-white/12 bg-black text-white hover:border-fuchsia-400/50"
                     }`}
