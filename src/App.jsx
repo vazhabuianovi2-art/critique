@@ -17554,33 +17554,33 @@ function WatchDemoModal({ onClose, onStart, isLight }) {
             </motion.div>
           </div>
 
-          {/* RIGHT — sales copy */}
-          <div className="flex flex-col justify-between p-7">
+          {/* RIGHT — sales copy — isolated background so glow blobs don't bleed */}
+          <div className="relative flex flex-col justify-between bg-[#0e0b1a] p-7">
             <div>
               <div className={`text-[10px] font-black uppercase tracking-[0.22em] ${accentText}`}>Why traders buy it</div>
               <motion.h3 key={scene.title} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}
                 className="mt-3 text-3xl font-black leading-tight text-white">{scene.title}</motion.h3>
               <motion.p key={scene.body} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}
-                className="mt-4 text-sm font-semibold leading-7 text-zinc-400">{scene.body}</motion.p>
+                className="mt-4 text-sm font-semibold leading-7 text-zinc-300">{scene.body}</motion.p>
 
               {/* Social proof */}
-              <div className="mt-6 flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.04] px-4 py-3">
+              <div className="mt-6 flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3">
                 <div className="flex -space-x-2">
                   {["#7c3aed","#0ea5e9","#10b981","#f59e0b"].map((c,i) => (
-                    <span key={i} className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#0c0814] text-[10px] font-black text-white" style={{background:c}}>{["J","M","S","R"][i]}</span>
+                    <span key={i} className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#0e0b1a] text-[10px] font-black text-white" style={{background:c}}>{["J","M","S","R"][i]}</span>
                   ))}
                 </div>
                 <div>
                   <div className="text-xs font-black text-white">2,000+ traders use TryCritique</div>
-                  <div className="text-[10px] font-semibold text-zinc-500">Futures · Forex · Crypto · Stocks</div>
+                  <div className="text-[10px] font-semibold text-zinc-400">Futures · Forex · Crypto · Stocks</div>
                 </div>
               </div>
 
               {/* Voice */}
-              <div className="mt-4 flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3">
-                <div className="text-xs font-semibold text-zinc-400">{scene.voiceover.slice(0, 72)}…</div>
+              <div className="mt-4 flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.05] px-4 py-3">
+                <div className="text-xs font-semibold text-zinc-300 leading-5">{scene.voiceover.slice(0, 72)}…</div>
                 <button type="button" onClick={isVoicePlaying ? stopVoiceover : startVoiceover}
-                  className={`ml-3 shrink-0 inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[11px] font-black transition ${isVoicePlaying ? "border-amber-500/35 bg-amber-500/12 text-amber-300 hover:bg-amber-500/20" : "border-violet-500/35 bg-violet-500/12 text-violet-300 hover:bg-violet-500/20"}`}>
+                  className={`ml-3 shrink-0 inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[11px] font-black transition ${isVoicePlaying ? "border-amber-500/50 bg-amber-500/20 text-amber-300 hover:bg-amber-500/30" : "border-violet-500/50 bg-violet-500/20 text-violet-200 hover:bg-violet-500/30"}`}>
                   {isVoicePlaying ? <PauseCircle size={13} /> : <Volume2 size={13} />}
                   {isVoicePlaying ? "Stop" : "Play"}
                 </button>
@@ -17590,16 +17590,16 @@ function WatchDemoModal({ onClose, onStart, isLight }) {
             {/* CTAs */}
             <div className="mt-7 space-y-3">
               <button type="button" onClick={() => { stopVoiceover(); onStart(); }}
-                className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 py-3.5 text-sm font-black text-white shadow-[0_8px_28px_rgba(139,92,246,0.35)] transition-all hover:shadow-[0_12px_36px_rgba(139,92,246,0.50)] hover:scale-[1.02]">
+                className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 py-3.5 text-sm font-black text-white shadow-[0_8px_28px_rgba(139,92,246,0.40)] transition-all hover:shadow-[0_12px_36px_rgba(139,92,246,0.55)] hover:scale-[1.02]">
                 <span className="relative flex items-center justify-center gap-2">
                   Start 7-Day Free Trial <ChevronRight size={16} />
                 </span>
               </button>
               <button type="button" onClick={() => { stopVoiceover(); onClose(); }}
-                className="w-full rounded-xl border border-white/10 bg-white/4 py-3 text-sm font-semibold text-zinc-400 transition hover:bg-white/8 hover:text-white">
+                className="w-full rounded-xl border border-white/15 bg-white/6 py-3 text-sm font-semibold text-zinc-300 transition hover:bg-white/10 hover:text-white">
                 Keep browsing
               </button>
-              <div className="text-center text-[11px] font-semibold text-zinc-600">No credit card · Cancel anytime</div>
+              <div className="text-center text-[11px] font-semibold text-zinc-500">No credit card · Cancel anytime</div>
             </div>
           </div>
         </div>
