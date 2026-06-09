@@ -9059,14 +9059,80 @@ function TradeDetailsPage({ trade, account, onBack, onEdit, onDelete, onExport }
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mx-auto max-w-5xl">
       <TopCrumb page="Journal" />
       <div className="mb-8 flex items-center justify-between"><button onClick={onBack} className="text-sm font-bold text-zinc-300 hover:text-white">← Back</button><div className="flex gap-3"><Button onClick={onExport} variant="outline" className="border-white/15 bg-black text-white"><Download size={16} /> Export</Button><Button onClick={onEdit} variant="outline" className="border-white/15 bg-black text-white"><Edit3 size={16} /> Edit</Button><Button onClick={onDelete} className="bg-red-600 text-white"><Trash2 size={16} /> Delete</Button></div></div>
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
-        <div className="flex h-full flex-col gap-6">
-          <div className="flex items-center gap-4"><div className="rounded-xl bg-fuchsia-500/20 p-4 text-fuchsia-300">{trade.pair}</div><div><h1 className="text-3xl font-black">{trade.pair} Trade Details</h1><p className="text-zinc-400">{trade.direction} • {trade.quantity} shares • {trade.date}</p></div></div>
-          <div className={`rounded-xl border p-6 ${Number(trade.pnl) > 0 ? "border-emerald-500/30 bg-emerald-950/30" : Number(trade.pnl) < 0 ? "border-red-500/30 bg-red-950/30" : "border-amber-500/30 bg-amber-950/30"}`}><div className="text-sm text-zinc-400">Total P&L</div><div className={`mt-2 text-4xl font-black ${getPnlToneClass(trade.pnl)}`}>{getPnlArrow(trade.pnl)} {formatMoney(trade.pnl)}</div></div>
-          <div className="rounded-xl border border-white/10 bg-zinc-950 p-6"><SectionTitle title="Trade Metadata" icon={<BarChart3 size={18} />} /><div className="mt-8 grid grid-cols-2 gap-8 border-b border-white/10 pb-6"><Meta label="Quantity" value={trade.quantity} /><Meta label="Session" value={trade.session || "—"} /></div><div className="grid grid-cols-2 gap-8 border-b border-white/10 py-6"><Meta label="Entry Date" value={trade.date} /><Meta label="Exit Date" value={trade.date} /></div>{(trade.entryTime || trade.exitTime) && <div className="grid grid-cols-2 gap-8 border-b border-white/10 py-6"><Meta label="Entry Time" value={trade.entryTime || "—"} /><Meta label="Exit Time" value={trade.exitTime || "—"} /></div>}<div className={`grid gap-8 pt-6 ${trade.setupQuality ? "grid-cols-4" : "grid-cols-3"}`}><Meta label="Risk" value={formatMoney(trade.risk)} danger /><Meta label="Risk/Reward Ratio" value={`${getTradeRR(trade).toFixed(2)}:1`} gold /><Meta label="Realized P&L" value={formatMoney(trade.pnl)} green={Number(trade.pnl) > 0} gold={Number(trade.pnl) === 0} danger={Number(trade.pnl) < 0} />{trade.setupQuality && <Meta label="Setup Quality" value={trade.setupQuality} gold />}</div></div>
-          <div className="rounded-xl border border-white/10 bg-zinc-950 p-6"><SectionTitle title={`Trade Screenshots (${screenshots.length})`} icon={<Camera size={18} />} /><div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">{screenshots.length ? screenshots.map((img, index) => <button key={index} onClick={() => setActiveIndex(index)}><img src={img} alt="Trade screenshot" className="h-56 w-full rounded-lg object-cover hover:opacity-80" /></button>) : <div className="col-span-2 rounded-xl border border-dashed border-white/10 bg-black p-10 text-center text-zinc-500">No screenshots uploaded</div>}</div></div>
+      {/* Header row */}
+      <div className="flex items-center gap-4 mb-2">
+        <div className="rounded-xl bg-fuchsia-500/20 p-4 text-fuchsia-300 text-lg font-black">{trade.pair}</div>
+        <div>
+          <h1 className="text-3xl font-black">{trade.pair} Trade Details</h1>
+          <p className="text-zinc-400">{trade.direction} • {trade.quantity} {trade.quantity === 1 ? "share" : "shares"} • {trade.date}</p>
         </div>
-        <div className="space-y-5"><SideBox title="Trade Info"><MiniInfo label="Strategy" value={trade.setup} /><MiniInfo label="Account" value={trade.accountName || account?.name || "—"} /><MiniInfo label="Account Type" value={trade.accountType || account?.type || "—"} /><MiniInfo label="Trade Type" value={trade.direction} badge tone={trade.direction === "SELL" ? "red" : "green"} /></SideBox><SideBox title="Tags"><div className="flex flex-wrap gap-2">{normalizeTags(trade).length ? normalizeTags(trade).map((tag) => <span key={tag} className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">{tag}</span>) : <span className="text-zinc-500">No tags</span>}</div></SideBox><SideBox title="Emotions"><span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">{trade.emotion || "—"}</span></SideBox><SideBox title="Result"><div className={`text-sm font-bold ${getTradeResultClass(getTradeResult(trade))}`}>{getTradeResult(trade)}</div><div className="mt-3 text-sm text-zinc-400">Mistake: <span className="font-semibold text-zinc-300">{trade.mistake || "None"}</span></div>{trade.ruleBroken && trade.ruleBroken !== "None" && <div className="mt-2 text-sm text-zinc-400">Rules Broken: <span className="font-semibold text-red-400">{trade.ruleBroken}</span></div>}</SideBox>{trade.notes && <SideBox title="Notes"><p className="text-sm leading-6 text-zinc-300">{trade.notes}</p></SideBox>}</div>
+      </div>
+
+      {/* P&L banner */}
+      <div className={`rounded-xl border p-5 mb-2 flex items-center justify-between ${Number(trade.pnl) > 0 ? "border-emerald-500/30 bg-emerald-950/30" : Number(trade.pnl) < 0 ? "border-red-500/30 bg-red-950/30" : "border-amber-500/30 bg-amber-950/30"}`}>
+        <div>
+          <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Total P&L</div>
+          <div className={`mt-1 text-4xl font-black ${getPnlToneClass(trade.pnl)}`}>{getPnlArrow(trade.pnl)} {formatMoney(trade.pnl)}</div>
+        </div>
+        <div className="text-right">
+          <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Result</div>
+          <div className={`mt-1 text-xl font-black ${getTradeResultClass(getTradeResult(trade))}`}>{getTradeResult(trade)}</div>
+        </div>
+      </div>
+
+      {/* Main info grid */}
+      <div className="rounded-xl border border-white/10 bg-zinc-950 p-6 mb-2">
+        <SectionTitle title="Trade Info" icon={<BarChart3 size={18} />} />
+        <div className="mt-6 grid grid-cols-2 gap-x-10 gap-y-6 sm:grid-cols-3 xl:grid-cols-4">
+          <Meta label="Direction" value={trade.direction} />
+          <Meta label="Quantity" value={trade.quantity} />
+          <Meta label="Session" value={trade.session || "—"} />
+          <Meta label="Strategy" value={trade.setup || "—"} />
+          <Meta label="Date" value={trade.date} />
+          <Meta label="Entry Time" value={trade.entryTime || "—"} />
+          <Meta label="Exit Time" value={trade.exitTime || "—"} />
+          <Meta label="Emotion" value={trade.emotion || "—"} />
+          <Meta label="Risk" value={formatMoney(trade.risk)} danger />
+          <Meta label="Risk/Reward" value={`${getTradeRR(trade).toFixed(2)}:1`} gold />
+          <Meta label="Realized P&L" value={formatMoney(trade.pnl)} green={Number(trade.pnl) > 0} gold={Number(trade.pnl) === 0} danger={Number(trade.pnl) < 0} />
+          {trade.setupQuality && <Meta label="Setup Quality" value={trade.setupQuality} gold />}
+          <Meta label="Mistake" value={trade.mistake || "None"} />
+          {trade.ruleBroken && trade.ruleBroken !== "None" && <Meta label="Rules Broken" value={trade.ruleBroken} danger />}
+        </div>
+
+        {/* Tags row */}
+        {normalizeTags(trade).filter(t => !String(t).toLowerCase().startsWith("result:")).length > 0 && (
+          <div className="mt-6 border-t border-white/8 pt-5">
+            <div className="text-xs font-black uppercase tracking-widest text-zinc-500 mb-3">Tags</div>
+            <div className="flex flex-wrap gap-2">
+              {normalizeTags(trade).filter(t => !String(t).toLowerCase().startsWith("result:")).map((tag) => (
+                <span key={tag} className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">{tag}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Notes row */}
+        {trade.notes && (
+          <div className="mt-5 border-t border-white/8 pt-5">
+            <div className="text-xs font-black uppercase tracking-widest text-zinc-500 mb-2">Notes</div>
+            <p className="text-sm leading-6 text-zinc-300">{trade.notes}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Screenshots */}
+      <div className="rounded-xl border border-white/10 bg-zinc-950 p-6">
+        <SectionTitle title={`Trade Screenshots (${screenshots.length})`} icon={<Camera size={18} />} />
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          {screenshots.length ? screenshots.map((img, index) => (
+            <button key={index} onClick={() => setActiveIndex(index)}>
+              <img src={img} alt="Trade screenshot" className="h-56 w-full rounded-lg object-cover hover:opacity-80" />
+            </button>
+          )) : (
+            <div className="col-span-2 rounded-xl border border-dashed border-white/10 bg-black p-10 text-center text-zinc-500">No screenshots uploaded</div>
+          )}
+        </div>
       </div>
       {activeIndex !== null && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/95 p-4">
