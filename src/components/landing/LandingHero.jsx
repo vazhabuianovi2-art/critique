@@ -122,7 +122,7 @@ export function LandingHero({ isLight, setAuthPage, onWatchDemo }) {
                 <p className="mt-2 text-sm font-black text-white">
                   Stop entering trades in the first 15 minutes after a major news event.
                 </p>
-                <p className="mt-1 text-xs font-semibold text-violet-300/80">
+                <p className="mt-1 text-xs font-semibold text-white/70">
                   Fixing this alone recovers an estimated $840 per week.
                 </p>
               </div>
