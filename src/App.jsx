@@ -11720,7 +11720,7 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
       <div className="mb-7">
         <div>
           <h1 className="text-4xl font-black tracking-tight text-white">Settings</h1>
-          <p className="mt-2 text-base font-semibold text-zinc-400">Manage your account preferences and application settings</p>
+          <p className="mt-2 text-base font-semibold text-zinc-400">Personalize your profile, configure trading defaults, and manage your data.</p>
         </div>
       </div>
       {message && <div className="mb-5 rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 px-4 py-3 text-sm font-bold text-fuchsia-200">{message}</div>}
@@ -11763,20 +11763,25 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
         </SettingsPanel>
 
         <div className="space-y-6">
-          <SettingsPanel icon={<Sparkles size={25} />} title="Appearance" subtitle="Customize how Critique looks">
+          <SettingsPanel icon={<Sparkles size={25} />} title="Appearance" subtitle="Customize how TryCritique looks.">
             <div className="mt-8 flex items-center justify-between"><div className="font-black text-white">Dark Mode</div><SettingsToggle checked={theme === "dark"} onClick={() => setTheme(theme === "dark" ? "light" : "dark")} /></div>
           </SettingsPanel>
-          <SettingsPanel icon={<Target size={25} />} title="Trading Preferences" subtitle="Default settings for trading">
+          <SettingsPanel icon={<Target size={25} />} title="Trading Preferences" subtitle="These defaults pre-fill when you add a new trade. You can override them per trade at any time.">
             <div className="mt-7 space-y-5">
-              <Field label="Timezone"><Select value={normalizeTimezoneValue(preferences.timezone)} onChange={(event) => setPreferences((current) => ({ ...current, timezone: event.target.value }))}>{timezoneOptions.map((zone) => <option key={zone.value} value={zone.value}>{zone.label}</option>)}</Select></Field>
+              <Field label="Timezone">
+                <Select value={normalizeTimezoneValue(preferences.timezone)} onChange={(event) => setPreferences((current) => ({ ...current, timezone: event.target.value }))}>{timezoneOptions.map((zone) => <option key={zone.value} value={zone.value}>{zone.label}</option>)}</Select>
+                <p className="mt-1.5 text-xs font-semibold text-zinc-500">Used to display trade times and calendar sessions in your local time.</p>
+              </Field>
               <Field label="Default Trading Session">
                 <Select value={preferences.defaultSession} onChange={(event) => setPreferences((current) => ({ ...current, defaultSession: event.target.value }))}>
                   <option value="">Choose per trade</option>
                   {TRADING_SESSIONS.map((session) => <option key={session} value={session}>{session}</option>)}
                 </Select>
+                <p className="mt-1.5 text-xs font-semibold text-zinc-500">Pre-selects the session when you log a new trade. Helps with session-based analysis.</p>
               </Field>
               <Field label={`Default Risk (${account?.currency || "USD"})`}>
                 <Input type="number" min="0" step="1" inputMode="decimal" value={preferences.defaultRisk} onChange={(event) => setPreferences((current) => ({ ...current, defaultRisk: event.target.value }))} className="border-white/15 bg-black text-white focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" />
+                <p className="mt-1.5 text-xs font-semibold text-zinc-500">Your standard risk amount per trade. Used to calculate R:R ratios and risk stats.</p>
               </Field>
             </div>
             <div className="mt-5 flex justify-end"><Button onClick={savePreferences} className="bg-fuchsia-500 text-black"><Save size={16} /> Save Preferences</Button></div>
@@ -11792,11 +11797,17 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
         <div className="mt-5 rounded-lg bg-white/[0.05] p-4"><div className="font-black text-white">Account Tips</div><div className="mt-3 space-y-2 text-sm font-semibold text-zinc-400"><div>- New accounts are created from the account menu.</div><div>- Click an account to make it active and filter your trades.</div><div>- Your default account is used for new trades unless you change it.</div></div></div>
       </SettingsPanel>
 
-      <SettingsPanel icon={<ShieldCheck size={25} />} title="Data & Privacy" className="mt-6 max-w-xl">
+      <SettingsPanel icon={<ShieldCheck size={25} />} title="Data & Privacy" subtitle="Your data belongs to you. Export or restore at any time." className="mt-6 max-w-xl">
         <Button onClick={onBackup} variant="outline" className="mt-6 w-full border-white/15 bg-black text-white"><Download size={16} /> Export My Data</Button>
-        <Button onClick={onRestore} variant="outline" className="mt-3 w-full border-amber-500/35 bg-amber-500/10 text-amber-300"><Upload size={16} /> Restore Backup</Button>
-        <Button onClick={onSignOut} className="mt-4 w-full bg-red-800 text-white hover:bg-red-700"><LogOut size={16} /> Delete Account</Button>
+        <p className="mt-1.5 text-xs font-semibold text-zinc-500">Downloads a CSV of all your trades for use in spreadsheets or external tools.</p>
+        <Button onClick={onRestore} variant="outline" className="mt-4 w-full border-amber-500/35 bg-amber-500/10 text-amber-300"><Upload size={16} /> Restore Backup</Button>
+        <p className="mt-1.5 text-xs font-semibold text-zinc-500">Restores your journal from a previously exported JSON backup file.</p>
+        <Button onClick={onSignOut} className="mt-5 w-full bg-red-800 text-white hover:bg-red-700"><LogOut size={16} /> Delete Account</Button>
       </SettingsPanel>
+
+      <div className="mt-8 rounded-xl border border-white/8 bg-black/20 px-5 py-4 text-xs font-semibold leading-5 text-zinc-600">
+        TryCritique is a trading journal and self-review tool. It does not provide trading signals, investment advice, brokerage services, or guaranteed returns.
+      </div>
     </motion.div>
   );
 }
@@ -12715,7 +12726,7 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
         <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h1 className="text-4xl font-black tracking-tight text-white">Billing & Subscription</h1>
-            <p className="mt-2 text-lg font-semibold text-zinc-400">Start, manage, or update your TryCritique Pro plan.</p>
+            <p className="mt-2 text-lg font-semibold text-zinc-400">One plan. Everything included. Cancel anytime.</p>
           </div>
           <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-black/70 px-4 py-2 text-sm font-black text-white">
             <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
@@ -12748,7 +12759,7 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
                 </span>
                 <div>
                   <div className="text-lg font-black text-white">Admin Pro Active</div>
-                  <div className="text-sm font-semibold text-emerald-100/80">Free access granted by TryCritique admin. Dodo payment is not required for this account.</div>
+                  <div className="text-sm font-semibold text-emerald-100/80">Free access granted by TryCritique. No payment required for this account.</div>
                 </div>
               </div>
               <span className="rounded-full border border-emerald-400/35 bg-emerald-400/10 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-200">
@@ -12771,7 +12782,7 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
               </div>
               <h2 className="mt-5 text-4xl font-black leading-tight text-white">Simple billing for serious trading review.</h2>
               <p className="mt-4 max-w-xl text-base font-semibold leading-7 text-zinc-400">
-                A 7-day free trial, then clear monthly or yearly pricing. Payments, taxes, and subscription changes are handled by Dodo Payments.
+                A 7-day free trial, then $10/month or $86/year. Cancel anytime. No hidden fees. Your data stays exportable.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <button
@@ -12828,6 +12839,20 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
           </div>
         </section>
 
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-6 rounded-xl border border-white/8 bg-black/30 px-5 py-4">
+          {[
+            { icon: <ShieldCheck size={15} />, text: "Cancel anytime" },
+            { icon: <CreditCard size={15} />, text: "No hidden fees" },
+            { icon: <Download size={15} />, text: "Data stays exportable" },
+            { icon: <Sparkles size={15} />, text: "7-day free trial" },
+          ].map(({ icon, text }) => (
+            <div key={text} className="flex items-center gap-2 text-sm font-bold text-zinc-400">
+              <span className="text-emerald-400">{icon}</span>
+              {text}
+            </div>
+          ))}
+        </div>
+
         <div className="mt-8 grid gap-8 xl:grid-cols-[1.05fr_0.95fr]">
           <section className="rounded-lg border border-white/10 bg-[#070707] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.22)]">
             <div className="flex items-center gap-3">
@@ -12851,7 +12876,7 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
               <Settings className="text-fuchsia-300" size={26} />
               <div>
                 <h2 className="text-2xl font-black text-white">Manage Billing</h2>
-                <p className="mt-1 text-sm font-semibold text-zinc-400">Open Dodo Customer Portal after a subscription is created.</p>
+                <p className="mt-1 text-sm font-semibold text-zinc-400">Manage your subscription, update payment details, or cancel anytime.</p>
               </div>
             </div>
 
@@ -12901,6 +12926,10 @@ function BillingPageDodo({ account, authUser, initialSubscription = null, gateMe
             </div>
 
           </section>
+        </div>
+
+        <div className="mt-8 rounded-xl border border-white/8 bg-black/20 px-5 py-4 text-xs font-semibold leading-5 text-zinc-600">
+          TryCritique is a trading journal and self-review tool. It does not provide trading signals, investment advice, brokerage services, or guaranteed returns. Subscription billing is processed securely. You may cancel at any time from your billing portal.
         </div>
       </div>
     </motion.div>
