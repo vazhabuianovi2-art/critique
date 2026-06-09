@@ -8382,7 +8382,7 @@ Skipped duplicates: ${duplicateCount}
             onRefreshEconomicCalendar={() => setEconomicCalendarRefresh((tick) => tick + 1)}
           />
         ) : active === "Statistics" ? (
-          <SimpleStatisticsPage stats={stats} curve={curve} trades={activeTrades} onExport={() => exportTradesToCSV(activeTrades)} economicCalendar={economicCalendar} onRefreshEconomicCalendar={() => setEconomicCalendarRefresh((tick) => tick + 1)} />
+          <SimpleStatisticsPage stats={stats} curve={curve} trades={activeTrades} onExport={() => exportTradesToCSV(activeTrades)} economicCalendar={economicCalendar} onRefreshEconomicCalendar={() => setEconomicCalendarRefresh((tick) => tick + 1)} onDeleteStrategy={(name) => { const next = strategiesObjects.filter((s) => s.name !== name); saveStrategiesObjects(next); }} />
         ) : active === "Mistake Detector" ? (
           <SimpleMistakeDetectorPage trades={activeTrades} />
         ) : active === "Support" ? (
@@ -13639,8 +13639,13 @@ function SimplePanel({ title, subtitle, children, icon }) {
   );
 }
 
-function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefreshEconomicCalendar }) {
+function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefreshEconomicCalendar, onDeleteStrategy }) {
   const [activeTab, setActiveTab] = useState("Overview");
+  const [deletedStrategyNames, setDeletedStrategyNames] = useState(() => new Set());
+  function handleDeleteStrategy(name) {
+    setDeletedStrategyNames((prev) => new Set([...prev, name]));
+    onDeleteStrategy?.(name);
+  }
   const allTrades = Array.isArray(trades) ? trades : [];
   const visibleTrades = allTrades;
 
@@ -13753,13 +13758,13 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
           <p className="mb-6 text-sm font-semibold text-zinc-500">See which setups deserve more size — and which ones need review.</p>
           <StatsSectionTitle title="Strategy Performance" icon={<Sparkles size={20} />} />
           <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {strategyRows.length ? strategyRows.map(([name, item]) => {
+            {strategyRows.filter(([name]) => !deletedStrategyNames.has(name)).length ? strategyRows.filter(([name]) => !deletedStrategyNames.has(name)).map(([name, item]) => {
               const decisive = Number(item.wins || 0) + Number(item.losses || 0);
               const winRate = decisive ? (Number(item.wins || 0) / decisive) * 100 : 0;
               const avgRR = item.riskTrades ? Number(item.rrSum || 0) / item.riskTrades : 0;
               const pnl = Number(item.pnl || 0);
               return (
-                <StrategyStatsCard key={name} name={name} item={item} winRate={winRate} avgRR={avgRR} pnl={pnl} />
+                <StrategyStatsCard key={name} name={name} item={item} winRate={winRate} avgRR={avgRR} pnl={pnl} onDelete={() => handleDeleteStrategy(name)} />
               );
             }) : (
               <div className="col-span-full rounded-xl border border-dashed border-white/10 bg-black/20 px-5 py-8 text-center">
@@ -13773,14 +13778,9 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
 
       {activeTab === "News" && (
         <div className="mt-10">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <StatsSectionTitle title="News-Day Performance" icon={<BookOpen size={20} />} />
-              <p className="mt-2 text-sm font-semibold text-zinc-500">Review how economic events affect your trading results.</p>
-            </div>
-            <button onClick={onRefreshEconomicCalendar} className="w-fit rounded-xl border border-white/10 bg-black px-3 py-2 text-sm font-black text-zinc-300 hover:border-fuchsia-500/45">
-              <RefreshCwIcon /> Refresh News
-            </button>
+          <div>
+            <StatsSectionTitle title="News-Day Performance" icon={<BookOpen size={20} />} />
+            <p className="mt-2 text-sm font-semibold text-zinc-500">Review how economic events affect your trading results.</p>
           </div>
           <div className="mt-5 grid min-w-0 gap-5 md:grid-cols-2 xl:grid-cols-4">
             <SimpleStatCard label="Best News Day" value={newsStats.best ? formatMoney(newsStats.best.pnl) : "—"} detail={newsStats.best ? `${newsStats.best.event.country} · ${newsStats.best.event.title}` : "Log trades on economic event days to see news impact."} tone="green" />
@@ -13944,21 +13944,33 @@ function WeekdayTile({ day }) {
   );
 }
 
-function StrategyStatsCard({ name, item, winRate, avgRR, pnl }) {
+function StrategyStatsCard({ name, item, winRate, avgRR, pnl, onDelete }) {
   const wins = Number(item.wins || 0);
   const losses = Number(item.losses || 0);
   const breakEvens = Number(item.breakEvens || 0);
   return (
-    <button type="button" className={`group relative min-h-[220px] overflow-hidden rounded-xl border bg-gradient-to-br p-5 text-left shadow-[0_16px_45px_rgba(0,0,0,0.20)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-fuchsia-400/70 hover:shadow-[0_0_28px_rgba(178,74,242,0.18)] ${pnl >= 0 ? "border-emerald-500/25 from-emerald-950/25 via-black to-fuchsia-950/10" : "border-red-500/25 from-red-950/25 via-black to-fuchsia-950/10"}`}>
+    <div className={`group relative min-h-[220px] overflow-hidden rounded-xl border bg-gradient-to-br p-5 shadow-[0_16px_45px_rgba(0,0,0,0.20)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-fuchsia-400/70 hover:shadow-[0_0_28px_rgba(178,74,242,0.18)] ${pnl >= 0 ? "border-emerald-500/25 from-emerald-950/25 via-black to-fuchsia-950/10" : "border-red-500/25 from-red-950/25 via-black to-fuchsia-950/10"}`}>
       <div className="pointer-events-none absolute right-0 top-0 h-20 w-20 rounded-bl-3xl bg-fuchsia-500/10 transition group-hover:bg-fuchsia-500/16" />
       <div className="relative z-10 flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="truncate text-xl font-black text-white">{name}</div>
           <div className="mt-1 text-xs font-bold text-zinc-500">{item.count || 0} trades</div>
         </div>
-        <span className={pnl >= 0 ? "rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-black text-emerald-300" : "rounded-full border border-red-500/25 bg-red-500/10 px-3 py-1 text-xs font-black text-red-300"}>
-          {pnl >= 0 ? "Profit" : "Loss"}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className={pnl >= 0 ? "rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-black text-emerald-300" : "rounded-full border border-red-500/25 bg-red-500/10 px-3 py-1 text-xs font-black text-red-300"}>
+            {pnl >= 0 ? "Profit" : "Loss"}
+          </span>
+          {onDelete && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); if (window.confirm(`Delete strategy "${name}"?`)) onDelete(); }}
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-red-500/25 bg-red-500/10 text-red-400 opacity-0 transition hover:bg-red-500/25 group-hover:opacity-100"
+              title="Delete strategy"
+            >
+              <Trash2 size={13} />
+            </button>
+          )}
+        </div>
       </div>
       <div className={pnl >= 0 ? "relative z-10 mt-5 text-3xl font-black text-emerald-400" : "relative z-10 mt-5 text-3xl font-black text-red-400"}>{formatMoney(pnl)}</div>
       <div className="relative z-10 mt-5 grid grid-cols-3 gap-2 text-center">
@@ -13966,7 +13978,7 @@ function StrategyStatsCard({ name, item, winRate, avgRR, pnl }) {
         <div className="rounded-lg border border-white/10 bg-black/25 p-2"><div className="text-[10px] font-black uppercase text-zinc-500">Avg RR</div><div className="font-black text-amber-300">{avgRR.toFixed(2)}</div></div>
         <div className="rounded-lg border border-white/10 bg-black/25 p-2"><div className="text-[10px] font-black uppercase text-zinc-500">W/L/BE</div><div className="font-black text-zinc-200">{wins}/{losses}/{breakEvens}</div></div>
       </div>
-    </button>
+    </div>
   );
 }
 
