@@ -5465,12 +5465,12 @@ const starterTrades = [
 ];
 
 const defaultAccount = {
-  id: "acc-demo-v",
-  name: "v",
+  id: "acc-default",
+  name: "My Account",
   type: "Demo Account",
   currency: "USD",
-  balance: 50000,
-  description: "Practice trading with virtual money",
+  balance: 10000,
+  description: "My trading account",
 };
 
 const ACCOUNT_TYPE_OPTIONS = [
@@ -7237,11 +7237,6 @@ export default function TradingJournalDashboard() {
             const exists = current.some((item) => String(item.id) === String(normalized.id));
             return exists ? current.map((item) => String(item.id) === String(normalized.id) ? normalized : item) : [normalized, ...current];
           });
-        } else if (mounted && authUser?.id) {
-          // No profile row exists in Supabase yet (new user or profile was cleared).
-          // Silently create an initial profile row with default values so future saves
-          // (trades, preferences, account settings) have a valid parent row.
-          saveAccountToSupabase(authUser.id, defaultAccount).catch(() => {});
         }
         // Load strategies from cloud
         if (result?.strategies && Array.isArray(result.strategies) && result.strategies.length > 0) {
