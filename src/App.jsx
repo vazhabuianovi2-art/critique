@@ -9020,21 +9020,8 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
           </div>
         </div>
 
-        {/* Daily Inspiration */}
-        <div className="dashboard-inspiration relative z-10 mt-5 overflow-hidden rounded-xl bg-white/3 px-5 py-3 backdrop-blur-sm">
-          <div className="mb-1.5 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-fuchsia-500/70">
-            <Sparkles size={11} /> Daily Inspiration <Sparkles size={11} />
-          </div>
-          <div className="moving-text-wrap">
-            <div className="moving-text-track">
-              {quotes.map((item, index) => (
-                <div key={index} className="moving-text-slide">
-                  <span className="moving-text-item text-sm text-zinc-600" style={{fontFamily:"'Georgia', serif", fontStyle:"normal", fontWeight:400}}>{item}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        {/* Coach Alert */}
+        <DashboardCoachAlert trades={trades} onOpen={onOpenMistakeDetector} />
       </div>
 
       {showEmptyState ? (
@@ -9149,6 +9136,76 @@ function DashboardMistakeAlert({ trades, onOpen }) {
           <div className="mt-1 text-sm font-bold text-zinc-400">{translateDetectorText(detector.mainRoot?.title || detector.mainIssue.type)} · {detector.confidence}% confidence · {formatMoney(detector.affectedPnl)} lost P&L</div>
         </div>
         <span className="rounded-xl border border-red-500/35 bg-red-500/15 px-4 py-3 text-sm font-black text-red-300">Open Mistake Analysis →</span>
+      </div>
+    </button>
+  );
+}
+
+function DashboardCoachAlert({ trades, onOpen }) {
+  const safe = Array.isArray(trades) ? trades : [];
+  const detector = getMistakeDetectorStats(safe);
+
+  // No trades at all
+  if (safe.length === 0) {
+    return (
+      <div className="relative z-10 mt-5 overflow-hidden rounded-xl border border-white/8 bg-white/[0.02] px-5 py-4 backdrop-blur-sm">
+        <div className="mb-1.5 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-600">
+          <Target size={11} className="shrink-0" /> Coach Alert
+        </div>
+        <p className="text-sm font-semibold text-zinc-500">Log your first trades to generate a coach alert.</p>
+      </div>
+    );
+  }
+
+  // Trades exist but no losses
+  if (detector.losses.length === 0) {
+    return (
+      <div className="relative z-10 mt-5 overflow-hidden rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04] px-5 py-4 backdrop-blur-sm">
+        <div className="mb-1.5 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-600">
+          <Target size={11} className="shrink-0" /> Coach Alert
+        </div>
+        <p className="text-sm font-black text-emerald-300">No losing trade patterns detected yet.</p>
+        <p className="mt-1 text-xs font-semibold text-zinc-500">Keep logging and reviewing trades to track patterns over time.</p>
+      </div>
+    );
+  }
+
+  const { mainIssue, losses, lossProfile, focusPlan } = detector;
+  if (!mainIssue) return null;
+
+  const issueTitle = translateDetectorText(mainIssue.title);
+  const isSingleLoss = losses.length === 1;
+  const isEarlyData = losses.length < 4 || mainIssue.count < 2;
+
+  const headlinePrefix = isSingleLoss
+    ? "Early signal — latest losing trade points to"
+    : isEarlyData
+      ? "Possible pattern"
+      : "Your #1 mistake";
+
+  const sessionCtx = lossProfile?.session && lossProfile.session !== "No session" ? lossProfile.session : null;
+  const fixText = Array.isArray(focusPlan) && focusPlan.length ? focusPlan[0] : null;
+
+  return (
+    <button type="button" onClick={onOpen} className="relative z-10 mt-5 w-full overflow-hidden rounded-xl border border-red-500/20 bg-red-500/[0.04] px-5 py-4 text-left backdrop-blur-sm transition-all duration-200 hover:border-red-500/35 hover:bg-red-500/[0.07]">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <div className="mb-1.5 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-red-500/80">
+            <Target size={11} className="shrink-0" /> Coach Alert
+          </div>
+          <div className="text-sm font-black text-white">
+            {headlinePrefix}: <span className="text-red-300">{issueTitle}</span>
+          </div>
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-zinc-500">
+            <span>{mainIssue.count} losing trade{mainIssue.count === 1 ? "" : "s"}</span>
+            {mainIssue.pnl ? <><span>·</span><span className="text-red-400">{formatMoney(mainIssue.pnl)}</span></> : null}
+            {sessionCtx ? <><span>·</span><span>Mostly in {sessionCtx}</span></> : null}
+          </div>
+          {fixText && <p className="mt-2 text-xs font-semibold leading-5 text-zinc-400">{fixText}</p>}
+        </div>
+        <span className="shrink-0 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-black text-red-300 transition hover:bg-red-500/15">
+          View Fix Plan →
+        </span>
       </div>
     </button>
   );
