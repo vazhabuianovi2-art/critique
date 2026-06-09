@@ -10019,13 +10019,10 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                     <button
                       key={cell.key}
                       onClick={() => openDayDetails(cell.key)}
-                      className={`relative flex h-14 flex-col rounded-xl border p-2 text-left transition-all duration-200 xl:h-[110px] xl:p-3
-                        ${isWeekend ? "bg-fuchsia-500/6" : "bg-[#0d0d0d]"}
+                      className={`relative flex h-14 flex-col rounded-xl border p-2 text-left transition-all duration-200 xl:h-[110px] xl:p-3 bg-[#0d0d0d]
                         ${selected
                           ? "border-fuchsia-500/70 shadow-[0_0_0_1px_rgba(178,74,242,0.35)] -translate-y-0.5"
-                          : isWeekend
-                            ? "border-fuchsia-500/25 hover:border-fuchsia-500/50 hover:bg-fuchsia-500/10 hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(178,74,242,0.15)]"
-                            : "border-white/10 hover:border-fuchsia-500/30 hover:bg-fuchsia-500/5 hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(178,74,242,0.12)]"}
+                          : "border-white/10 hover:border-fuchsia-500/30 hover:bg-fuchsia-500/5 hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(178,74,242,0.12)]"}
                       `}
                     >
                       <div className="flex items-start justify-between">
@@ -10033,9 +10030,6 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                           {cell.day}
                         </span>
                         <div className="flex items-center gap-1">
-                          {isWeekend && cell.isCurrentMonth && (
-                            <span className="hidden xl:inline text-[11px] opacity-40 select-none">🌙</span>
-                          )}
                           {dayEvents.length > 0 && (
                             <span className="flex items-center gap-0.5 text-[9px] font-black text-zinc-500">
                               <ImpactFolderIcon impact={primaryEventImpact} />{dayEvents.length}
