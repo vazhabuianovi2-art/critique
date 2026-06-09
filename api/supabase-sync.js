@@ -55,7 +55,13 @@ export default async function handler(request, response) {
       return authExpired(response, "Login session is missing.");
     }
 
-    const user = await getUserFromToken(supabaseUrl, anonKey, accessToken);
+    let user = await getUserFromToken(supabaseUrl, anonKey, accessToken);
+    if (!user?.id) {
+      // Fallback: try the service role key in case the anon key has env var issues.
+      // Both keys authenticate the same Supabase project; service role key bypasses
+      // any anon-key BOM/config problems without relaxing security.
+      user = await getUserFromToken(supabaseUrl, serviceRoleKey, accessToken);
+    }
     const userId = user?.id;
     console.log("[sync] action=", action, "userId=", userId ? userId.slice(0,8)+"..." : "NULL");
     if (!userId) {
