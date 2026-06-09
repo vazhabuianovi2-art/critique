@@ -2763,6 +2763,80 @@ const THEME_STYLE_CSS = `
     color: #7e22ce !important;
   }
 
+  /* ── Calendar Grid Cells – dark mode base ── */
+  .cal-grid-cell { background: #0d0d0d; }
+  .cal-grid-cell-empty { border-color: rgba(178,74,242,.30) !important; background: radial-gradient(circle at top right, rgba(178,74,242,.11), #060606 52%) !important; }
+  .cal-grid-cell-win { border-color: rgba(16,185,129,.45) !important; background: rgba(6,78,59,.22) !important; }
+  .cal-grid-cell-loss { border-color: rgba(239,68,68,.45) !important; background: rgba(127,29,29,.22) !important; }
+  .cal-grid-cell-breakeven { border-color: rgba(245,158,11,.45) !important; background: rgba(120,53,15,.22) !important; }
+  .cal-grid-cell-weekend { border-color: rgba(255,255,255,.06) !important; background: #070707 !important; }
+  .cal-grid-cell:not(.cal-grid-cell-selected):hover { border-color: rgba(178,74,242,.35) !important; background-color: rgba(178,74,242,.06) !important; }
+  .cal-grid-cell-selected { border-color: rgba(178,74,242,.80) !important; box-shadow: 0 0 0 1px rgba(178,74,242,.35), 0 0 22px rgba(178,74,242,.22) !important; }
+
+  /* ── Calendar Grid Cells – light mode ── */
+  .light-theme .cal-grid-cell { background: #ffffff !important; }
+  .light-theme .cal-grid-cell-empty {
+    background: linear-gradient(145deg, #faf5ff 0%, #ffffff 60%) !important;
+    border-color: rgba(124,58,237,.22) !important;
+    box-shadow: 0 2px 10px rgba(124,58,237,.06) !important;
+  }
+  .light-theme .cal-grid-cell-win {
+    background: linear-gradient(145deg, #f0fdf4 0%, #ffffff 55%, #dcfce7 100%) !important;
+    border-color: rgba(16,185,129,.50) !important;
+    box-shadow: 0 4px 14px rgba(16,185,129,.11) !important;
+  }
+  .light-theme .cal-grid-cell-loss {
+    background: linear-gradient(145deg, #fef2f2 0%, #ffffff 55%, #fee2e2 100%) !important;
+    border-color: rgba(239,68,68,.50) !important;
+    box-shadow: 0 4px 14px rgba(239,68,68,.11) !important;
+  }
+  .light-theme .cal-grid-cell-breakeven {
+    background: linear-gradient(145deg, #fffbeb 0%, #ffffff 55%, #fef3c7 100%) !important;
+    border-color: rgba(245,158,11,.50) !important;
+    box-shadow: 0 4px 14px rgba(245,158,11,.11) !important;
+  }
+  .light-theme .cal-grid-cell-weekend {
+    background: #f8fafc !important;
+    border-color: rgba(0,0,0,.07) !important;
+    box-shadow: none !important;
+  }
+  .light-theme .cal-grid-cell:not(.cal-grid-cell-selected):hover {
+    border-color: rgba(124,58,237,.40) !important;
+    background: rgba(124,58,237,.05) !important;
+    box-shadow: 0 6px 18px rgba(124,58,237,.10) !important;
+  }
+  .light-theme .cal-grid-cell-selected {
+    border-color: rgba(124,58,237,.75) !important;
+    box-shadow: 0 0 0 2px rgba(124,58,237,.28), 0 6px 20px rgba(124,58,237,.15) !important;
+  }
+  /* Day numbers & text inside cells */
+  .light-theme .cal-grid-cell .text-white { color: #1e293b !important; }
+  .light-theme .cal-grid-cell .text-zinc-600 { color: #94a3b8 !important; }
+  .light-theme .cal-grid-cell .text-zinc-700 { color: #cbd5e1 !important; }
+  .light-theme .cal-grid-cell .text-fuchsia-400 { color: #6d28d9 !important; }
+  .light-theme .cal-grid-cell .text-zinc-500 { color: #94a3b8 !important; }
+  .light-theme .cal-trade-count { background: rgba(15,23,42,.07) !important; color: #475569 !important; }
+  /* Week column */
+  .light-theme .cal-grid-week-col {
+    background: rgba(124,58,237,.07) !important;
+    border-color: rgba(124,58,237,.22) !important;
+  }
+  .light-theme .cal-grid-week-col .text-emerald-400 { color: #059669 !important; }
+  .light-theme .cal-grid-week-col .text-red-400 { color: #dc2626 !important; }
+  .light-theme .cal-grid-week-col .text-zinc-400 { color: #64748b !important; }
+  .light-theme .cal-grid-week-col .bg-white\/8 { background: rgba(15,23,42,.07) !important; }
+  /* Day column headers (MON/TUE..) */
+  .light-theme .calendar-col-header {
+    background: #f1f5f9 !important;
+    border-color: rgba(226,232,240,.85) !important;
+    color: #64748b !important;
+  }
+  .light-theme .calendar-col-header-week {
+    background: rgba(124,58,237,.10) !important;
+    border-color: rgba(124,58,237,.28) !important;
+    color: #6d28d9 !important;
+  }
+
   .light-theme .calendar-trade-count {
     background: rgba(15, 23, 42, 0.08) !important;
     color: #334155 !important;
@@ -10302,7 +10376,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
         <div className="grid min-w-0 grid-cols-7 gap-1.5 xl:min-w-[900px] xl:grid-cols-[repeat(7,minmax(0,1fr))_190px] xl:gap-2">
           {/* Day headers */}
           {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN", "WEEK"].map((day) => (
-            <div key={day} className={`rounded-xl py-2.5 text-center text-[11px] font-black tracking-widest border ${day === "WEEK" ? "hidden xl:block" : ""} ${day === "WEEK" ? "border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-400" : "border-white/8 bg-white/4 text-zinc-500"}`}>
+            <div key={day} className={`rounded-xl py-2.5 text-center text-[11px] font-black tracking-widest border ${day === "WEEK" ? "hidden xl:block calendar-col-header-week" : "calendar-col-header"} ${day === "WEEK" ? "border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-400" : "border-white/8 bg-white/4 text-zinc-500"}`}>
               {day}
             </div>
           ))}
@@ -10326,10 +10400,9 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                     <button
                       key={cell.key}
                       onClick={() => openDayDetails(cell.key)}
-                      className={`relative flex h-14 flex-col rounded-xl border p-2 text-left transition-all duration-200 xl:h-[110px] xl:p-3 bg-[#0d0d0d]
-                        ${selected
-                          ? "border-fuchsia-500/70 shadow-[0_0_0_1px_rgba(178,74,242,0.35)] -translate-y-0.5"
-                          : "border-white/10 hover:border-fuchsia-500/30 hover:bg-fuchsia-500/5 hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(178,74,242,0.12)]"}
+                      className={`cal-grid-cell relative flex h-14 flex-col rounded-xl border p-2 text-left transition-all duration-200 xl:h-[110px] xl:p-3
+                        ${hasTrade && dayStats.pnl > 0 ? "cal-grid-cell-win" : hasTrade && dayStats.pnl < 0 ? "cal-grid-cell-loss" : hasTrade ? "cal-grid-cell-breakeven" : isWeekend ? "cal-grid-cell-weekend" : "cal-grid-cell-empty"}
+                        ${selected ? "cal-grid-cell-selected border-fuchsia-500/70 shadow-[0_0_0_1px_rgba(178,74,242,0.35)] -translate-y-0.5" : "hover:-translate-y-0.5"}
                       `}
                     >
                       <div className="flex items-start justify-between">
@@ -10351,7 +10424,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                           <div className={`w-full rounded-lg px-1.5 py-1.5 text-center text-xs font-black ${dayStats.pnl > 0 ? "bg-emerald-500/15 text-emerald-400" : dayStats.pnl < 0 ? "bg-red-500/15 text-red-400" : "bg-amber-500/15 text-amber-400"}`}>
                             {formatMoney(dayStats.pnl)}
                           </div>
-                          <div className="w-full rounded-lg bg-white/6 py-1 text-center text-[11px] font-bold text-zinc-500">
+                          <div className="cal-trade-count w-full rounded-lg bg-white/6 py-1 text-center text-[11px] font-bold text-zinc-500">
                             {dayStats.count} trade{dayStats.count === 1 ? "" : "s"}
                           </div>
                         </div>
@@ -10373,7 +10446,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
                 })}
 
                 {/* WEEK column */}
-                <div className="hidden xl:flex h-[110px] flex-col items-center justify-center rounded-xl border border-fuchsia-500/15 bg-fuchsia-500/8 p-3">
+                <div className="cal-grid-week-col hidden xl:flex h-[110px] flex-col items-center justify-center rounded-xl border border-fuchsia-500/15 bg-fuchsia-500/8 p-3">
                   {weekStats.count ? (
                     <>
                       <div className={`text-sm font-black ${weekStats.pnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>{formatMoney(weekStats.pnl)}</div>
