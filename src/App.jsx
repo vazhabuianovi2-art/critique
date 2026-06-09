@@ -7696,6 +7696,9 @@ export default function TradingJournalDashboard() {
   const [billingChecked, setBillingChecked] = useState(false);
   const [billingGateMessage, setBillingGateMessage] = useState("");
   const [billingRefreshTick, setBillingRefreshTick] = useState(0);
+  const [trialNudgeDismissed, setTrialNudgeDismissed] = useState(() => {
+    try { return localStorage.getItem("critique_nudge_dismissed_v1") === new Date().toDateString(); } catch { return false; }
+  });
   const [hasAdminAccess, setHasAdminAccess] = useState(false);
   const [dataMessage, setDataMessage] = useState("");
   const [economicCalendar, setEconomicCalendar] = useState(() => {
@@ -8911,6 +8914,24 @@ Skipped duplicates: ${duplicateCount}
             {dataMessage}
           </div>
         )}
+        {(() => {
+          if (trialNudgeDismissed || !billingSubscription?.trial_end) return null;
+          const msLeft = new Date(billingSubscription.trial_end).getTime() - Date.now();
+          const daysLeft = Math.ceil(msLeft / 86400000);
+          if (daysLeft <= 0 || daysLeft > 3) return null;
+          const patternCount = getMistakeDetectorStats(activeTrades)?.issues ? Object.keys(getMistakeDetectorStats(activeTrades).issues).length : 0;
+          return (
+            <TrialNudgeBanner
+              daysLeft={daysLeft}
+              patternCount={patternCount}
+              onUpgrade={() => setActive("Billing")}
+              onDismiss={() => {
+                setTrialNudgeDismissed(true);
+                try { localStorage.setItem("critique_nudge_dismissed_v1", new Date().toDateString()); } catch {}
+              }}
+            />
+          );
+        })()}
         {shouldGateForBilling && active !== "Support" && active !== "Admin" ? (
           <BillingPageDodo
             account={account}
@@ -9750,6 +9771,51 @@ function ReviewBox({ title, value, tone }) {
   return <div className={`rounded-xl border p-4 ${cls}`}><div className="text-xs font-black uppercase tracking-widest text-zinc-400">{title}</div><div className="mt-2 text-sm font-semibold text-zinc-300">{value}</div></div>;
 }
 
+function TrialNudgeBanner({ daysLeft, patternCount, onUpgrade, onDismiss }) {
+  const urgent = daysLeft <= 1;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      className={`mb-5 flex flex-col gap-3 overflow-hidden rounded-2xl border px-5 py-4 sm:flex-row sm:items-center sm:justify-between ${
+        urgent
+          ? "border-red-500/35 bg-gradient-to-r from-red-950/60 via-black to-black"
+          : "border-amber-500/30 bg-gradient-to-r from-amber-950/50 via-black to-black"
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <span className="text-2xl">{urgent ? "⏰" : "🎯"}</span>
+        <div>
+          <div className={`text-sm font-black ${urgent ? "text-red-300" : "text-amber-300"}`}>
+            {urgent ? "Trial ends today!" : `Trial ends in ${daysLeft} day${daysLeft === 1 ? "" : "s"}`}
+          </div>
+          <div className="mt-0.5 text-xs font-semibold text-zinc-400">
+            {patternCount > 0
+              ? `You've found ${patternCount} mistake pattern${patternCount === 1 ? "" : "s"} — keep the analysis going.`
+              : "Log a few trades to activate your Mistake Detector analysis."}
+          </div>
+        </div>
+      </div>
+      <div className="flex shrink-0 items-center gap-3">
+        <button
+          onClick={onUpgrade}
+          className={`inline-flex h-9 items-center gap-2 rounded-xl px-5 text-sm font-black text-white transition hover:scale-[1.03] ${
+            urgent
+              ? "bg-red-500 shadow-[0_4px_18px_rgba(239,68,68,0.40)]"
+              : "bg-gradient-to-r from-amber-500 to-orange-500 shadow-[0_4px_18px_rgba(245,158,11,0.35)]"
+          }`}
+        >
+          Upgrade Now →
+        </button>
+        <button onClick={onDismiss} className="text-xs font-semibold text-zinc-600 hover:text-zinc-400 transition">
+          Remind later
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
 function OnboardingChecklist({ trades, account, onOpenJournal, onOpenAccount, onViewAllTrades, onOpenMistakeDetector }) {
   const tradeCount = trades.length;
   const steps = [
@@ -9869,6 +9935,16 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
         <DashboardEmptyState onAddTrade={onAdd} onOpenJournal={onOpenJournal} />
       ) : (
         <>
+      {trades.length > 0 && trades.length < 5 && (
+        <OnboardingChecklist
+          trades={trades}
+          account={account}
+          onOpenJournal={onOpenJournal}
+          onOpenAccount={onOpenAccount}
+          onViewAllTrades={onOpenJournal}
+          onOpenMistakeDetector={onOpenMistakeDetector}
+        />
+      )}
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <DashCard title="TOTAL P&L" value={<RotatingPnlValue pnl={stats.totalPnl} balance={accountBalance.startingBalance} />} badge={stats.totalPnl >= 0 ? "↗ Positive P&L" : "↘ Negative P&L"} tone={stats.totalPnl >= 0 ? "emerald" : "amber"} icon="$" isLoading={isLoadingTrades} />
         <DashCard title="WIN RATE" value={`${stats.winRate.toFixed(1)}%`} badge={`↗ ${stats.wins}W / ${stats.losses}L${stats.breakEvens ? ` / ${stats.breakEvens}BE` : ""}${stats.partials ? ` / ${stats.partials}P` : ""}`} tone="fuchsia" icon="🏆" isLoading={isLoadingTrades} />
