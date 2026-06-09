@@ -9935,7 +9935,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
         <DashboardEmptyState onAddTrade={onAdd} onOpenJournal={onOpenJournal} />
       ) : (
         <>
-      {trades.length > 0 && trades.length < 5 && (
+      {trades.length > 0 && (account?.isPlaceholder || trades.length < 3) && (
         <OnboardingChecklist
           trades={trades}
           account={account}
