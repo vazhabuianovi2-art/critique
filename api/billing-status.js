@@ -2,6 +2,12 @@ function json(res, status, body) {
   res.status(status).json(body);
 }
 
+// Strip UTF-8 BOM (﻿) that may be present when env vars are copy-pasted from .env files.
+// A BOM-prefixed anon key or URL causes Supabase to reject all token verifications.
+function stripBom(s) {
+  return String(s || "").replace(/﻿/g, "").trim();
+}
+
 // Owner emails always have admin-level billing access (synthetic fallback when no DB row exists).
 const OWNER_ADMIN_EMAILS = (process.env.OWNER_ADMIN_EMAILS || "vazhabuianovi2@gmail.com")
   .split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
@@ -95,9 +101,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const supabaseUrl = String(process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "").replace(/\/+$/, "");
-    const anonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseUrl = stripBom(process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL).replace(/\/+$/, "");
+    const anonKey = stripBom(process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY);
+    const serviceRoleKey = stripBom(process.env.SUPABASE_SERVICE_ROLE_KEY);
     if (!supabaseUrl || !anonKey || !serviceRoleKey) throw new Error("Billing status is not configured.");
 
     const body = await readBody(req);

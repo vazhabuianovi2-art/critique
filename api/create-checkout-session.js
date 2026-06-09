@@ -1,6 +1,11 @@
 const DODO_TEST_API_BASE = "https://test.dodopayments.com";
 const DODO_LIVE_API_BASE = "https://live.dodopayments.com";
 
+// Strip UTF-8 BOM (﻿) that may be present when env vars are copy-pasted from .env files.
+function stripBom(s) {
+  return String(s || "").replace(/﻿/g, "").trim();
+}
+
 function getDodoApiBase() {
   const environment = String(process.env.DODO_PAYMENTS_ENVIRONMENT || "").toLowerCase();
   return environment === "test_mode" || environment === "test" ? DODO_TEST_API_BASE : DODO_LIVE_API_BASE;
@@ -30,8 +35,8 @@ async function readBody(req) {
 // Verify the Supabase access token and return the authenticated user.
 // Returns null if the token is missing, expired, or invalid.
 async function verifyAccessToken(accessToken) {
-  const supabaseUrl = String(process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "").replace(/\/+$/, "");
-  const anonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+  const supabaseUrl = stripBom(process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL).replace(/\/+$/, "");
+  const anonKey = stripBom(process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY);
   if (!supabaseUrl || !anonKey || !accessToken) return null;
 
   try {
