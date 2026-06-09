@@ -3209,10 +3209,12 @@ const THEME_STYLE_CSS = `
     position: relative;
     overflow: hidden;
     border-radius: 2rem;
-    border: 1px solid rgba(178,74,242,.26);
-    background: linear-gradient(135deg, rgba(10,3,16,.98), rgba(0,0,0,.96) 52%, rgba(20,8,28,.98));
+    border: 1px solid transparent;
+    background:
+      linear-gradient(135deg, #14071d 0%, #16081e 48%, #180d17 76%, #21130d 100%) padding-box,
+      linear-gradient(135deg, rgba(178,74,242,.58) 0%, rgba(122,42,170,.48) 58%, rgba(132,76,36,.62) 100%) border-box;
     padding: 1.4rem;
-    box-shadow: 0 24px 70px rgba(178,74,242,.13), inset 0 1px 0 rgba(255,255,255,.05);
+    box-shadow: 0 18px 48px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.035);
   }
 
   .mistake-coach-hero::before {
@@ -3220,7 +3222,10 @@ const THEME_STYLE_CSS = `
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: radial-gradient(circle at top left, rgba(178,74,242,.18), transparent 32%), radial-gradient(circle at bottom right, rgba(16,185,129,.10), transparent 34%);
+    background:
+      radial-gradient(circle at 10% 0%, rgba(178,74,242,.09), transparent 34%),
+      radial-gradient(circle at 100% 100%, rgba(123,69,31,.20), transparent 42%),
+      linear-gradient(135deg, rgba(18,6,27,.98) 0%, rgba(20,7,27,.98) 52%, rgba(26,13,20,.98) 78%, rgba(31,18,12,.98) 100%);
   }
 
   .coach-flow-step,
@@ -4532,10 +4537,12 @@ const THEME_STYLE_CSS = `
     position: relative;
     overflow: hidden;
     border-radius: 2rem;
-    border: 1px solid rgba(178,74,242,.18);
-    background: linear-gradient(135deg, rgba(13,13,16,.96), rgba(7,7,9,.98) 52%, rgba(18,12,24,.94));
+    border: 1px solid transparent;
+    background:
+      linear-gradient(135deg, #14071d 0%, #16081e 48%, #180d17 76%, #21130d 100%) padding-box,
+      linear-gradient(135deg, rgba(178,74,242,.58) 0%, rgba(122,42,170,.48) 58%, rgba(132,76,36,.62) 100%) border-box;
     padding: 1.45rem;
-    box-shadow: 0 22px 60px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05);
+    box-shadow: 0 18px 48px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.035);
   }
 
   .statistics-hero-pro::before {
@@ -4543,7 +4550,10 @@ const THEME_STYLE_CSS = `
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: radial-gradient(circle at top left, rgba(178,74,242,.12), transparent 33%), radial-gradient(circle at bottom right, rgba(16,185,129,.08), transparent 34%);
+    background:
+      radial-gradient(circle at 10% 0%, rgba(178,74,242,.09), transparent 34%),
+      radial-gradient(circle at 100% 100%, rgba(123,69,31,.20), transparent 42%),
+      linear-gradient(135deg, rgba(18,6,27,.98) 0%, rgba(20,7,27,.98) 52%, rgba(26,13,20,.98) 78%, rgba(31,18,12,.98) 100%);
   }
 
   .stats-flow-step-pro,
@@ -4692,10 +4702,26 @@ const THEME_STYLE_CSS = `
     padding: 1rem;
   }
 
-  .stats-hero-good { border-color: rgba(16,185,129,.24); background: rgba(16,185,129,.075); }
-  .stats-hero-bad { border-color: rgba(239,68,68,.24); background: rgba(239,68,68,.075); }
-  .stats-hero-warn { border-color: rgba(245,158,11,.24); background: rgba(245,158,11,.075); }
-  .stats-hero-main { border-color: rgba(178,74,242,.24); background: rgba(178,74,242,.075); }
+  .stats-hero-good {
+    border-color: rgba(16,185,129,.35);
+    background: linear-gradient(135deg, rgba(6,46,30,.92) 0%, rgba(4,26,18,.96) 52%, rgba(8,42,28,.92) 100%);
+    box-shadow: 0 8px 32px rgba(16,185,129,.10), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  .stats-hero-bad {
+    border-color: rgba(239,68,68,.35);
+    background: linear-gradient(135deg, rgba(46,8,8,.92) 0%, rgba(26,4,4,.96) 52%, rgba(42,8,8,.92) 100%);
+    box-shadow: 0 8px 32px rgba(239,68,68,.10), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  .stats-hero-warn {
+    border-color: rgba(245,158,11,.35);
+    background: linear-gradient(135deg, rgba(46,30,4,.92) 0%, rgba(30,18,2,.96) 52%, rgba(46,28,2,.92) 100%);
+    box-shadow: 0 8px 32px rgba(245,158,11,.10), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  .stats-hero-main {
+    border-color: rgba(178,74,242,.35);
+    background: linear-gradient(135deg, rgba(30,8,46,.92) 0%, rgba(18,4,30,.96) 52%, rgba(28,6,44,.92) 100%);
+    box-shadow: 0 8px 32px rgba(178,74,242,.10), inset 0 1px 0 rgba(255,255,255,.04);
+  }
 
   .stats-insight-card {
     border-radius: 1.15rem;
@@ -5026,13 +5052,18 @@ const THEME_STYLE_CSS = `
   }
 
   .mistake-coach-hero {
-    border-color: rgba(178,74,242,.18) !important;
-    background: linear-gradient(135deg, rgba(13,13,16,.96), rgba(7,7,9,.98) 52%, rgba(18,12,24,.94)) !important;
-    box-shadow: 0 22px 60px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05) !important;
+    border: 1px solid transparent !important;
+    background:
+      linear-gradient(135deg, #14071d 0%, #16081e 48%, #180d17 76%, #21130d 100%) padding-box,
+      linear-gradient(135deg, rgba(178,74,242,.58) 0%, rgba(122,42,170,.48) 58%, rgba(132,76,36,.62) 100%) border-box !important;
+    box-shadow: 0 18px 48px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.035) !important;
   }
 
   .mistake-coach-hero::before {
-    background: radial-gradient(circle at top left, rgba(178,74,242,.105), transparent 33%), radial-gradient(circle at bottom right, rgba(16,185,129,.075), transparent 34%) !important;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(178,74,242,.09), transparent 34%),
+      radial-gradient(circle at 100% 100%, rgba(123,69,31,.20), transparent 42%),
+      linear-gradient(135deg, rgba(18,6,27,.98) 0%, rgba(20,7,27,.98) 52%, rgba(26,13,20,.98) 78%, rgba(31,18,12,.98) 100%) !important;
   }
 
   .mistake-panel-clean,
