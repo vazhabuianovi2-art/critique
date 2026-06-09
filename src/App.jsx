@@ -13606,8 +13606,8 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
   return (
     <SimplePageShell
       crumb="Statistics"
-      title="Statistics"
-      subtitle="Comprehensive trading performance analytics"
+      title="Performance Review"
+      subtitle="See what is working, what is costing money, and where your edge is strongest."
     >
       <div className="mt-2 h-px bg-white/10" />
       <div className="statistics-tabs mt-6 inline-flex max-w-full flex-wrap gap-2 rounded-xl border border-white/10 bg-[#111113] p-2 shadow-[0_18px_45px_rgba(0,0,0,0.22)]">
@@ -13626,6 +13626,12 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
 
       {activeTab === "Overview" && (
         <>
+          {stats.trades === 0 && (
+            <div className="mt-8 rounded-xl border border-dashed border-white/10 bg-black/20 px-5 py-8 text-center">
+              <BarChart3 size={24} className="mx-auto mb-3 text-zinc-600" />
+              <p className="text-sm font-semibold text-zinc-500">Log trades to unlock performance analytics.</p>
+            </div>
+          )}
           <StatsSectionTitle title="Performance Overview" icon={<BarChart3 size={20} />} className="mt-10" />
           <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             <DashboardStatTile label="Total P&L" value={formatMoney(stats.totalPnl)} badge={stats.totalPnl >= 0 ? "Profit" : "Loss"} tone={stats.totalPnl >= 0 ? "green" : "red"} />
@@ -13658,16 +13664,17 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
 
       {activeTab === "Patterns" && (
         <div className="mt-10">
+          <p className="mb-6 text-sm font-semibold text-zinc-500">Find the habits and conditions that repeat across your trades.</p>
           <StatsSectionTitle title="Weekday Performance (Monday - Friday)" icon={<Calendar size={20} />} />
           <div className="mt-5 grid gap-4 xl:grid-cols-5">
             {weekdayRows.map((day) => <WeekdayTile key={day.short} day={day} />)}
           </div>
           <div className="mt-6 grid gap-6 xl:grid-cols-2">
             <SimplePanel title="Best Sessions" subtitle="Sessions where your performance is strongest." icon={<Target size={24} />}>
-              <SimpleStatsRows rows={sessionRows.slice(0, 5)} empty="No session data yet." />
+              <SimpleStatsRows rows={sessionRows.slice(0, 5)} empty="Add session tags to trades to see which sessions perform best." />
             </SimplePanel>
             <SimplePanel title="Costly Mistakes" subtitle="Mistakes that cost the most money." icon={<ShieldCheck size={24} />}>
-              <SimpleStatsRows rows={mistakeRows.slice(0, 5)} empty="No mistake data yet." negative />
+              <SimpleStatsRows rows={mistakeRows.slice(0, 5)} empty="Tag mistakes on losing trades to see what is costing the most." negative />
             </SimplePanel>
           </div>
         </div>
@@ -13675,6 +13682,7 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
 
       {activeTab === "Strategies" && (
         <div className="mt-10">
+          <p className="mb-6 text-sm font-semibold text-zinc-500">See which setups deserve more size — and which ones need review.</p>
           <StatsSectionTitle title="Strategy Performance" icon={<Sparkles size={20} />} />
           <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {strategyRows.length ? strategyRows.map(([name, item]) => {
@@ -13685,7 +13693,12 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
               return (
                 <StrategyStatsCard key={name} name={name} item={item} winRate={winRate} avgRR={avgRR} pnl={pnl} />
               );
-            }) : <div className="rounded-lg border border-dashed border-white/10 p-5 text-sm font-semibold text-zinc-500">No strategy data yet.</div>}
+            }) : (
+              <div className="col-span-full rounded-xl border border-dashed border-white/10 bg-black/20 px-5 py-8 text-center">
+                <ListChecks size={22} className="mx-auto mb-2 text-zinc-600" />
+                <p className="text-sm font-semibold text-zinc-500">Log at least 10 trades with strategy tags to compare setups reliably.</p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -13693,16 +13706,19 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
       {activeTab === "News" && (
         <div className="mt-10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <StatsSectionTitle title="News-Day Performance" icon={<BookOpen size={20} />} />
+            <div>
+              <StatsSectionTitle title="News-Day Performance" icon={<BookOpen size={20} />} />
+              <p className="mt-2 text-sm font-semibold text-zinc-500">Review how economic events affect your trading results.</p>
+            </div>
             <button onClick={onRefreshEconomicCalendar} className="w-fit rounded-xl border border-white/10 bg-black px-3 py-2 text-sm font-black text-zinc-300 hover:border-fuchsia-500/45">
               <RefreshCwIcon /> Refresh News
             </button>
           </div>
           <div className="mt-5 grid min-w-0 gap-5 md:grid-cols-2 xl:grid-cols-4">
-            <SimpleStatCard label="Best News Day" value={newsStats.best ? formatMoney(newsStats.best.pnl) : "$0"} detail={newsStats.best ? `${newsStats.best.event.country} · ${newsStats.best.event.title}` : "No trades on event days yet."} tone="green" />
-            <SimpleStatCard label="Worst News Day" value={newsStats.worst ? formatMoney(newsStats.worst.pnl) : "$0"} detail={newsStats.worst ? `${newsStats.worst.event.country} · ${newsStats.worst.event.title}` : "No losing event day yet."} tone="amber" />
-            <SimpleStatCard label="Event Days Traded" value={newsStats.rows.length} detail={`${newsStats.totalNewsTrades || 0} trades on ${newsStats.totalEventCount || 0} loaded events.`} tone="fuchsia" />
-            <SimpleStatCard label="Top Currency" value={newsStats.currencyRows[0]?.name || "No data"} detail={newsStats.currencyRows[0] ? `${formatMoney(newsStats.currencyRows[0].pnl)} across ${newsStats.currencyRows[0].trades} trades` : "Trade on news days to measure."} tone="green" />
+            <SimpleStatCard label="Best News Day" value={newsStats.best ? formatMoney(newsStats.best.pnl) : "—"} detail={newsStats.best ? `${newsStats.best.event.country} · ${newsStats.best.event.title}` : "Log trades on economic event days to see news impact."} tone="green" />
+            <SimpleStatCard label="Worst News Day" value={newsStats.worst ? formatMoney(newsStats.worst.pnl) : "—"} detail={newsStats.worst ? `${newsStats.worst.event.country} · ${newsStats.worst.event.title}` : "Log trades on economic event days to see news impact."} tone="amber" />
+            <SimpleStatCard label="Event Days Traded" value={newsStats.rows.length || "—"} detail={newsStats.rows.length ? `${newsStats.totalNewsTrades || 0} trades on ${newsStats.totalEventCount || 0} loaded events` : "Log trades on event days to start tracking."} tone="fuchsia" />
+            <SimpleStatCard label="Top Currency" value={newsStats.currencyRows[0]?.name || "—"} detail={newsStats.currencyRows[0] ? `${formatMoney(newsStats.currencyRows[0].pnl)} across ${newsStats.currencyRows[0].trades} trades` : "Log trades on event days to measure currency impact."} tone="green" />
           </div>
 
           <div className="mt-6 grid min-w-0 gap-6 xl:grid-cols-2">
@@ -13715,7 +13731,11 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
                   </div>
                   <div className={`shrink-0 whitespace-nowrap ${row.pnl >= 0 ? "font-black text-emerald-400" : "font-black text-red-400"}`}>{formatMoney(row.pnl)}</div>
                 </div>
-              )) : <div className="text-sm font-semibold text-zinc-500">No news-day trade matches yet.</div>}
+              )) : (
+                <div className="rounded-xl border border-dashed border-white/10 bg-black/20 px-4 py-6 text-center">
+                  <p className="text-sm font-semibold text-zinc-500">Log trades on economic event days to see news impact.</p>
+                </div>
+              )}
             </SimplePanel>
             <SimplePanel title="Currency Impact" subtitle="Which economic currencies line up with your best or worst days." icon={<Target size={24} />}>
               {newsStats.currencyRows.length ? newsStats.currencyRows.slice(0, 8).map((row) => (
@@ -13728,18 +13748,16 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
                     <div className={`shrink-0 whitespace-nowrap ${row.pnl >= 0 ? "font-black text-emerald-400" : "font-black text-red-400"}`}>{formatMoney(row.pnl)}</div>
                   </div>
                   <div className="mt-3 grid gap-2 text-xs font-black sm:grid-cols-3">
-                    <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-emerald-200">
-                      Won {formatMoney(row.grossWin || 0)}
-                    </div>
-                    <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-red-200">
-                      Lost {formatMoney(Math.abs(row.grossLoss || 0))}
-                    </div>
-                    <div className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-zinc-300">
-                      {row.wins || 0}W / {row.losses || 0}L / {row.breakEvens || 0}BE
-                    </div>
+                    <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-emerald-200">Won {formatMoney(row.grossWin || 0)}</div>
+                    <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-red-200">Lost {formatMoney(Math.abs(row.grossLoss || 0))}</div>
+                    <div className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-zinc-300">{row.wins || 0}W / {row.losses || 0}L / {row.breakEvens || 0}BE</div>
                   </div>
                 </div>
-              )) : <div className="text-sm font-semibold text-zinc-500">No currency impact data yet.</div>}
+              )) : (
+                <div className="rounded-xl border border-dashed border-white/10 bg-black/20 px-4 py-6 text-center">
+                  <p className="text-sm font-semibold text-zinc-500">Log trades on economic event days to see news impact.</p>
+                </div>
+              )}
             </SimplePanel>
           </div>
         </div>
