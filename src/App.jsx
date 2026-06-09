@@ -9934,20 +9934,23 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
       {/* Header banner — Sydview style */}
       <div className="mb-6 overflow-hidden rounded-2xl border border-fuchsia-500/20 bg-gradient-to-r from-[#1a0a2e] via-[#120820] to-[#0d0514] px-5 py-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          {/* Left: nav + month */}
-          <div className="flex items-center gap-3">
-            <button onClick={() => setCalendarMonth(new Date(year, monthIndex - 1, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-300 transition hover:border-fuchsia-500/40 hover:text-white">
-              <ChevronLeft size={15} />
-            </button>
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-fuchsia-500/20 text-fuchsia-300">
-                <Calendar size={15} />
+          {/* Left: nav + month + subtitle */}
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-3">
+              <button onClick={() => setCalendarMonth(new Date(year, monthIndex - 1, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-300 transition hover:border-fuchsia-500/40 hover:text-white">
+                <ChevronLeft size={15} />
+              </button>
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-fuchsia-500/20 text-fuchsia-300">
+                  <Calendar size={15} />
+                </div>
+                <h1 className="text-xl font-black tracking-tight text-white">{monthName}</h1>
               </div>
-              <h1 className="text-xl font-black tracking-tight text-white">{monthName}</h1>
+              <button onClick={() => setCalendarMonth(new Date(year, monthIndex + 1, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-300 transition hover:border-fuchsia-500/40 hover:text-white">
+                <ChevronRight size={15} />
+              </button>
             </div>
-            <button onClick={() => setCalendarMonth(new Date(year, monthIndex + 1, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-300 transition hover:border-fuchsia-500/40 hover:text-white">
-              <ChevronRight size={15} />
-            </button>
+            <p className="text-xs font-semibold text-zinc-500 pl-1">See which days you trade best and when you should slow down.</p>
           </div>
           {/* Right: stats + today */}
           <div className="flex flex-wrap items-center gap-2">
@@ -10065,6 +10068,13 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
         </div>
       </div>
 
+      {trades.length === 0 && (
+        <div className="mt-5 rounded-xl border border-dashed border-white/10 bg-black/20 px-5 py-6 text-center">
+          <Calendar size={22} className="mx-auto mb-2 text-zinc-600" />
+          <p className="text-sm font-semibold text-zinc-500">Log trades to see your trading activity on the calendar.</p>
+        </div>
+      )}
+
       <EconomicCalendarPanel economicCalendar={economicCalendar} trades={trades} selectedCurrencies={selectedNewsCurrencies} onSelectedCurrenciesChange={setSelectedNewsCurrencies} onRefresh={onRefreshEconomicCalendar} />
 
       {dayModalDate && (
@@ -10136,7 +10146,7 @@ function CalendarDayDetailsModal({ dateKey, trades = [], events = [], onClose, o
                 events.slice(0, 6).map((event) => <EconomicEventRow key={event.id} event={event} compact />)
               ) : (
                 <div className="rounded-xl border border-dashed border-white/10 bg-black/25 px-4 py-3 text-sm font-semibold text-zinc-500">
-                  No economic events listed for this day.
+                  No economic events found for this period.
                 </div>
               )}
             </div>
@@ -10262,8 +10272,9 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], selectedCurrenci
           <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 text-fuchsia-300"><TrendingUp size={22} /></div>
           <div>
             <h2 className="text-2xl font-black text-white">Economic Calendar</h2>
-            <p className="mt-1 text-sm font-semibold text-zinc-400">
-              Live economic feed · {visibleEvents.length} events · {economicCalendar?.updatedAt ? new Date(economicCalendar.updatedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "updating"}
+            <p className="mt-1 text-sm font-semibold text-zinc-400">See how news days affect your trading.</p>
+            <p className="mt-0.5 text-xs font-semibold text-zinc-600">
+              {visibleEvents.length} events loaded{economicCalendar?.updatedAt ? ` · updated ${new Date(economicCalendar.updatedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}` : ""}
             </p>
           </div>
         </div>
@@ -10278,9 +10289,9 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], selectedCurrenci
       </div>
 
       <div className="mt-5 grid gap-3 xl:grid-cols-[1fr_1fr_1fr]">
-        <EconomicMiniMetric label="Best News Day" value={newsStats.best ? formatMoney(newsStats.best.pnl) : "$0"} detail={newsStats.best ? `${newsStats.best.event.country} · ${newsStats.best.event.title}` : "No trades on event days yet"} />
-        <EconomicMiniMetric label="Worst News Day" value={newsStats.worst ? formatMoney(newsStats.worst.pnl) : "$0"} detail={newsStats.worst ? `${newsStats.worst.event.country} · ${newsStats.worst.event.title}` : "No losses on event days yet"} tone="amber" />
-        <EconomicMiniMetric label="Tracked Events" value={visibleEvents.length} detail={`${newsStats.rows.length} event days with trades`} tone="fuchsia" />
+        <EconomicMiniMetric label="Best News Day" value={newsStats.best ? formatMoney(newsStats.best.pnl) : "—"} detail={newsStats.best ? `${newsStats.best.event.country} · ${newsStats.best.event.title}` : "Log trades on economic event days to see news impact."} />
+        <EconomicMiniMetric label="Worst News Day" value={newsStats.worst ? formatMoney(newsStats.worst.pnl) : "—"} detail={newsStats.worst ? `${newsStats.worst.event.country} · ${newsStats.worst.event.title}` : "Log trades on economic event days to see news impact."} tone="amber" />
+        <EconomicMiniMetric label="Event Days Traded" value={newsStats.rows.length || "—"} detail={newsStats.rows.length ? `${newsStats.rows.length} event day${newsStats.rows.length === 1 ? "" : "s"} with trades` : "Log trades on event days to track patterns."} tone="fuchsia" />
       </div>
 
       {filtersOpen && (
@@ -10326,8 +10337,17 @@ function EconomicCalendarPanel({ economicCalendar, trades = [], selectedCurrenci
             </div>
           </div>
         )) : (
-          <div className="rounded-xl border border-white/10 bg-black/40 p-5 text-sm font-bold text-zinc-400">No events match these filters.</div>
+          <div className="rounded-xl border border-dashed border-white/10 bg-black/25 p-5 text-center">
+            <TrendingUp size={20} className="mx-auto mb-2 text-zinc-600" />
+            <div className="text-sm font-bold text-zinc-400">No economic events found for this period.</div>
+            <p className="mt-1 text-xs font-semibold text-zinc-600">Try changing the impact filter or currency selection.</p>
+          </div>
         )}
+      </div>
+
+      {/* Disclaimer */}
+      <div className="mt-5 rounded-xl border border-white/8 bg-black/20 px-4 py-3 text-xs font-semibold leading-5 text-zinc-600">
+        News data is for review context only. TryCritique does not provide trading signals or investment advice.
       </div>
     </section>
   );
@@ -10395,8 +10415,8 @@ function CalendarGuide() {
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div>
           <div className="text-xs font-black uppercase tracking-widest text-fuchsia-300">How to read the calendar</div>
-          <h3 className="mt-2 text-2xl font-black text-white">Each day tells you the result instantly.</h3>
-          <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-zinc-400">Green days are profitable, red days are losing, amber days are break-even, and purple empty days mean no trade or weekend.</p>
+          <h3 className="mt-2 text-2xl font-black text-white">Each day shows your result at a glance.</h3>
+          <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-zinc-400">Green days are profitable, red days are losing, amber days are break-even. Click any day to review trades and see economic events for that date.</p>
         </div>
         <div className="calendar-legend-pro">
           <span><i className="bg-emerald-400" /> Win day</span>
