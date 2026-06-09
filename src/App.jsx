@@ -4852,6 +4852,14 @@ const THEME_STYLE_CSS = `
     color: #720cb0 !important;
   }
 
+  .light-theme .account-create-label {
+    color: #3b0764 !important;
+  }
+
+  .light-theme .account-create-sublabel {
+    color: #720cb0 !important;
+  }
+
   .light-theme .segmented-choice-active,
   .light-theme .segmented-choice-active.font-black {
     background: linear-gradient(135deg, #b24bf3 0%, #a855f7 100%) !important;
@@ -8815,8 +8823,8 @@ Skipped duplicates: ${duplicateCount}
               <button onClick={createNewAccount} className="account-create-button flex w-full items-center gap-3 border-t border-white/10 px-4 py-4 text-left transition hover:bg-fuchsia-500/10">
                 <span className="account-create-icon flex h-9 w-9 items-center justify-center rounded-lg bg-fuchsia-500/15 text-xl font-black text-fuchsia-300">+</span>
                 <span>
-                  <span className="block text-sm font-black text-[#0f0a1e]">Create New Account</span>
-                  <span className="block text-xs font-semibold text-[#0f0a1e]/70">Add another trading account</span>
+                  <span className="account-create-label block text-sm font-black text-zinc-100">Create New Account</span>
+                  <span className="account-create-sublabel block text-xs font-semibold text-zinc-400">Add another trading account</span>
                 </span>
               </button>
             </motion.div>
