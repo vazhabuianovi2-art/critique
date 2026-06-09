@@ -112,17 +112,16 @@ export function LandingHero({ isLight, setAuthPage, onWatchDemo }) {
             ))}
 
             {/* Focus panel */}
-            <div className="relative overflow-hidden rounded-xl border border-violet-500/30 bg-gradient-to-br from-violet-600/20 to-fuchsia-600/15 px-4 py-3.5">
-              <div className="absolute right-0 top-0 h-16 w-16 translate-x-4 -translate-y-4 rounded-full bg-fuchsia-500/20 blur-xl" />
+            <div className="relative overflow-hidden rounded-xl border border-violet-400/20 bg-white/95 px-4 py-3.5">
               <div className="relative">
                 <div className="flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-fuchsia-400" />
-                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-fuchsia-400">This week's focus</div>
+                  <div className="h-1.5 w-1.5 rounded-full bg-fuchsia-500" />
+                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-fuchsia-500">This week's focus</div>
                 </div>
-                <p className="mt-2 text-sm font-black text-white">
+                <p className="mt-2 text-sm font-black text-slate-900">
                   Stop entering trades in the first 15 minutes after a major news event.
                 </p>
-                <p className="mt-1 text-xs font-semibold text-white/70">
+                <p className="mt-1 text-xs font-semibold text-slate-700">
                   Fixing this alone recovers an estimated $840 per week.
                 </p>
               </div>
