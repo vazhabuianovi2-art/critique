@@ -26,15 +26,15 @@ import {
 import { BRAND_NAME } from "./utils/constants";
 import { BrandBolt } from "./components/ui/BrandBolt";
 import { DashboardEmptyState } from "./components/ui/EmptyState";
-import { LandingHeader } from "./components/landing/LandingHeader";
-import { LandingHero } from "./components/landing/LandingHero";
-import { LandingFeatures } from "./components/landing/LandingFeatures";
-import { LandingHowItWorks } from "./components/landing/LandingHowItWorks";
-import { LandingTestimonials } from "./components/landing/LandingTestimonials";
-import { LandingPricing } from "./components/landing/LandingPricing";
-import { LandingFAQ } from "./components/landing/LandingFAQ";
-import { LandingFinalCTA } from "./components/landing/LandingFinalCTA";
-import { LandingFooter } from "./components/landing/LandingFooter";
+const LandingHeader      = React.lazy(() => import("./components/landing/LandingHeader").then(m => ({ default: m.LandingHeader })));
+const LandingHero        = React.lazy(() => import("./components/landing/LandingHero").then(m => ({ default: m.LandingHero })));
+const LandingFeatures    = React.lazy(() => import("./components/landing/LandingFeatures").then(m => ({ default: m.LandingFeatures })));
+const LandingHowItWorks  = React.lazy(() => import("./components/landing/LandingHowItWorks").then(m => ({ default: m.LandingHowItWorks })));
+const LandingTestimonials= React.lazy(() => import("./components/landing/LandingTestimonials").then(m => ({ default: m.LandingTestimonials })));
+const LandingPricing     = React.lazy(() => import("./components/landing/LandingPricing").then(m => ({ default: m.LandingPricing })));
+const LandingFAQ         = React.lazy(() => import("./components/landing/LandingFAQ").then(m => ({ default: m.LandingFAQ })));
+const LandingFinalCTA    = React.lazy(() => import("./components/landing/LandingFinalCTA").then(m => ({ default: m.LandingFinalCTA })));
+const LandingFooter      = React.lazy(() => import("./components/landing/LandingFooter").then(m => ({ default: m.LandingFooter })));
 import { createClient } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
 import {
@@ -17385,19 +17385,23 @@ function LandingPage({ setAuthPage, theme, setTheme }) {
     <div className={isLight ? 'min-h-screen overflow-x-hidden bg-[#f8fafc] text-slate-950' : 'min-h-screen overflow-x-hidden bg-transparent text-white'}>
       {!isLight && <ShaderBackground />}
       <div className={isLight ? 'pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(178,74,242,0.12),transparent_30%),radial-gradient(circle_at_82%_62%,rgba(20,184,166,0.12),transparent_30%),linear-gradient(135deg,#f8fafc_0%,#ffffff_46%,#f7f0ff_100%)]' : 'pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_70%_18%,rgba(126,34,206,0.05),transparent_31%)]'} />
-      <LandingHeader isLight={isLight} theme={theme} setTheme={setTheme} setAuthPage={setAuthPage} onGoHome={goHome} />
+      <React.Suspense fallback={null}>
+        <LandingHeader isLight={isLight} theme={theme} setTheme={setTheme} setAuthPage={setAuthPage} onGoHome={goHome} />
+      </React.Suspense>
       <main className="relative z-10 pt-16">
-        <LandingHero isLight={isLight} setAuthPage={setAuthPage} onWatchDemo={() => setIsDemoOpen(true)} />
-        <div className="section-divider mx-5 lg:mx-8" />
-        <LandingFeatures isLight={isLight} />
-        <div className="section-divider mx-5 lg:mx-8" />
-        <LandingHowItWorks isLight={isLight} />
-        <LandingTestimonials isLight={isLight} />
-        <LandingPricing isLight={isLight} setAuthPage={setAuthPage} />
-        <LandingFAQ isLight={isLight} />
-        <LandingFinalCTA isLight={isLight} setAuthPage={setAuthPage} />
-        <LandingFooter isLight={isLight} setAuthPage={setAuthPage} />
-        {isDemoOpen && <WatchDemoModal onClose={() => setIsDemoOpen(false)} onStart={() => setAuthPage('register')} isLight={isLight} />}
+        <React.Suspense fallback={<div className="min-h-screen" />}>
+          <LandingHero isLight={isLight} setAuthPage={setAuthPage} onWatchDemo={() => setIsDemoOpen(true)} />
+          <div className="section-divider mx-5 lg:mx-8" />
+          <LandingFeatures isLight={isLight} />
+          <div className="section-divider mx-5 lg:mx-8" />
+          <LandingHowItWorks isLight={isLight} />
+          <LandingTestimonials isLight={isLight} />
+          <LandingPricing isLight={isLight} setAuthPage={setAuthPage} />
+          <LandingFAQ isLight={isLight} />
+          <LandingFinalCTA isLight={isLight} setAuthPage={setAuthPage} />
+          <LandingFooter isLight={isLight} setAuthPage={setAuthPage} />
+          {isDemoOpen && <WatchDemoModal onClose={() => setIsDemoOpen(false)} onStart={() => setAuthPage('register')} isLight={isLight} />}
+        </React.Suspense>
       </main>
     </div>
   );
