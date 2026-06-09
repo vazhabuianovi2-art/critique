@@ -73,11 +73,11 @@ export function LandingHero({ isLight, setAuthPage, onWatchDemo }) {
           <div className="pointer-events-none absolute inset-0 opacity-[0.04]" style={{backgroundImage:"linear-gradient(rgba(139,92,246,1) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,1) 1px,transparent 1px)",backgroundSize:"32px 32px"}} />
 
           {/* Header */}
-          <div className="relative border-b border-violet-500/20 px-6 py-4">
+          <div className="relative border-b border-violet-500/20 bg-white/[0.06] px-6 py-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-violet-400">Mistake Report</div>
-                <div className="mt-0.5 text-base font-black text-white">This Week</div>
+                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-violet-300">Mistake Report</div>
+                <div className="mt-0.5 text-base font-black text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">This Week</div>
               </div>
               <span className="rounded-full border border-red-500/40 bg-red-500/15 px-3 py-1 text-xs font-black text-red-400">4 patterns found</span>
             </div>
