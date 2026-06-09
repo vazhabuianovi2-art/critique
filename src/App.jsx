@@ -10543,6 +10543,13 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
       return [];
     }
   });
+  // Keep customStrategies in sync when strategiesObjects is updated externally
+  // (e.g. after renaming a strategy in TradingStrategiesModal while this modal is open)
+  useEffect(() => {
+    if (strategiesObjects.length > 0) {
+      setCustomStrategies(strategiesObjects.map((s) => s.name).filter((n) => n && !LEGACY_DEFAULT_STRATEGIES.includes(n)));
+    }
+  }, [strategiesObjects]);
   const [newStrategyName, setNewStrategyName] = useState("");
   const [showErrors, setShowErrors] = useState(false);
   // Merge strategiesObjects names + customStrategies (legacy) + form.strategy
@@ -11006,7 +11013,7 @@ function TradingStrategiesModal({ strategies = [], onSave, onClose }) {
     }
     setList(next);
     onSave(next);
-    setSelected(null);
+    onClose();
   }
   function deleteStrategy(idx) {
     if (!window.confirm(`Delete strategy "${list[idx].name}"?`)) return;
