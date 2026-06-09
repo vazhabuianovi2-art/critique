@@ -684,6 +684,24 @@ const THEME_STYLE_CSS = `
     color: #0f172a !important;
   }
 
+  /* Demo modal always stays dark regardless of light-theme */
+  .light-theme .demo-modal-root { color: #ffffff !important; }
+  .light-theme .demo-modal-root .text-white { color: #ffffff !important; }
+  .light-theme .demo-modal-root .text-zinc-300 { color: rgba(212,212,216,1) !important; }
+  .light-theme .demo-modal-root .text-zinc-400 { color: rgba(161,161,170,1) !important; }
+  .light-theme .demo-modal-root .text-zinc-500 { color: rgba(113,113,122,1) !important; }
+  .light-theme .demo-modal-root .text-zinc-600 { color: rgba(82,82,91,1) !important; }
+  .light-theme .demo-modal-root .text-violet-200 { color: #ddd6fe !important; }
+  .light-theme .demo-modal-root .text-violet-300 { color: #c4b5fd !important; }
+  .light-theme .demo-modal-root .text-violet-400 { color: #a78bfa !important; }
+  .light-theme .demo-modal-root .text-fuchsia-400 { color: #e879f9 !important; }
+  .light-theme .demo-modal-root .text-emerald-400 { color: #34d399 !important; }
+  .light-theme .demo-modal-root .text-cyan-400 { color: #22d3ee !important; }
+  .light-theme .demo-modal-root .text-amber-300 { color: #fcd34d !important; }
+  .light-theme .demo-modal-root .text-amber-400 { color: #fbbf24 !important; }
+  .light-theme .demo-modal-root .text-red-400 { color: #f87171 !important; }
+  .light-theme .demo-modal-root .text-red-300 { color: #fca5a5 !important; }
+
   .light-theme main.app-main {
     background: linear-gradient(135deg, #fbf7ff 0%, #ffffff 45%, #f8fbff 100%) !important;
     color: #0f172a !important;
@@ -17472,7 +17490,7 @@ function WatchDemoModal({ onClose, onStart, isLight }) {
   const accentBg    = { emerald: "bg-emerald-500/10",              fuchsia: "bg-fuchsia-500/10",              cyan: "bg-cyan-500/10",               amber: "bg-amber-500/10"        }[scene.accent] || "bg-fuchsia-500/10";
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 px-4 py-6 backdrop-blur-xl">
+    <div className="demo-modal-root fixed inset-0 z-[100] flex items-center justify-center bg-black/85 px-4 py-6 backdrop-blur-xl">
       <motion.div initial={{ opacity: 0, y: 20, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 260, damping: 26 }}
         className="w-full max-w-5xl overflow-hidden rounded-[1.75rem] border border-violet-500/25 bg-gradient-to-b from-[#0c0814] to-[#07050f] text-white shadow-[0_40px_130px_rgba(109,40,217,0.35),0_0_0_1px_rgba(139,92,246,0.12)]">
 
