@@ -6989,7 +6989,7 @@ export default function TradingJournalDashboard() {
   const [strategiesObjects, setStrategiesObjects] = useState(() => {
     try { return JSON.parse(localStorage.getItem(STRATEGIES_OBJ_KEY) || "[]"); } catch { return []; }
   });
-  function saveStrategiesObjects(next) {
+  function saveStrategiesObjects(next, renameInfo) {
     setStrategiesObjects(next);
     localStorage.setItem(STRATEGIES_OBJ_KEY, JSON.stringify(next));
     // sync names into CUSTOM_STRATEGIES_KEY so existing strategy dropdown stays in sync
@@ -7000,6 +7000,27 @@ export default function TradingJournalDashboard() {
       postSupabaseSync("saveStrategies", { strategies: next }).catch((err) =>
         console.warn("Could not sync strategies to cloud:", err?.message)
       );
+    }
+    // If a strategy was renamed, update every trade that referenced the old name
+    if (renameInfo?.oldName && renameInfo?.newName && renameInfo.oldName !== renameInfo.newName) {
+      setTrades((currentTrades) => {
+        const updatedTrades = currentTrades.map((trade) =>
+          trade.setup === renameInfo.oldName ? { ...trade, setup: renameInfo.newName } : trade
+        );
+        const changedTrades = updatedTrades.filter((t, i) => t !== currentTrades[i]);
+        if (changedTrades.length > 0) {
+          saveLocalTradesFallback(updatedTrades, authUser?.id);
+          if (authUser?.id) {
+            saveRestoreCache(authUser.id, { trades: updatedTrades, account, routine, theme });
+            changedTrades.forEach((trade) => {
+              saveTradeToSupabase(authUser.id, trade).catch((err) =>
+                console.warn("Could not update trade strategy name in cloud:", err?.message)
+              );
+            });
+          }
+        }
+        return updatedTrades;
+      });
     }
   }
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
@@ -11005,13 +11026,19 @@ function TradingStrategiesModal({ strategies = [], onSave, onClose }) {
   function save() {
     if (!draft.name.trim()) return;
     let next;
+    let renameInfo = null;
     if (selected === "new") {
       next = [...list, { id: Date.now(), name: draft.name.trim(), description: draft.description, items: draft.items || [] }];
     } else {
-      next = list.map((s, i) => i === selected ? { ...s, ...draft, name: draft.name.trim() } : s);
+      const oldName = list[selected]?.name || "";
+      const newName = draft.name.trim();
+      if (oldName && oldName !== newName) {
+        renameInfo = { oldName, newName };
+      }
+      next = list.map((s, i) => i === selected ? { ...s, ...draft, name: newName } : s);
     }
     setList(next);
-    onSave(next);
+    onSave(next, renameInfo);
     onClose();
   }
   function deleteStrategy(idx) {
