@@ -3210,6 +3210,9 @@ const THEME_STYLE_CSS = `
     text-shadow: 0 2px 18px rgba(0,0,0,.72);
   }
   .light-theme .animated-number { text-shadow: none !important; }
+  .light-theme .stat-card-value { color: #1e293b !important; }
+  .light-theme .stat-card-label { color: #64748b !important; }
+  .light-theme .stat-card-item { background: #ffffff !important; border-color: rgba(226,232,240,.85) !important; }
 
   @keyframes animatedNumberPop {
     0% { opacity: .35; transform: translateY(8px) scale(.96); filter: brightness(.8); }
@@ -16837,9 +16840,9 @@ function StatCard({ title, value, green, gold }) {
   const valueColor = green ? "text-emerald-400" : gold ? "text-amber-400" : "text-zinc-100";
   const accentColor = green ? "bg-emerald-500/8 border-b-2 border-emerald-500/30" : gold ? "bg-amber-500/8 border-b-2 border-amber-500/30" : "bg-fuchsia-500/8 border-b-2 border-fuchsia-500/30";
   return (
-    <div className={`group relative overflow-hidden rounded-xl border border-white/8 bg-[#0d0d0d] p-5 transition-all duration-200 hover:border-white/15 hover:-translate-y-0.5 ${accentColor}`}>
-      <div className="text-[11px] font-black uppercase tracking-widest text-zinc-600">{title}</div>
-      <div className={`mt-3 text-2xl font-black ${valueColor}`}><AnimatedValue value={value} /></div>
+    <div className={`stat-card-item group relative overflow-hidden rounded-xl border border-white/8 bg-[#0d0d0d] p-5 transition-all duration-200 hover:border-white/15 hover:-translate-y-0.5 ${accentColor}`}>
+      <div className="stat-card-label text-[11px] font-black uppercase tracking-widest text-zinc-600">{title}</div>
+      <div className={`stat-card-value mt-3 text-2xl font-black ${valueColor}`}><AnimatedValue value={value} /></div>
     </div>
   );
 }
