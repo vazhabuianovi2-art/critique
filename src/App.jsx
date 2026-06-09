@@ -1,4 +1,40 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  formatMoney,
+  formatTimeInput,
+  formatDisplayName,
+  getFirstDisplayName,
+  getPnlToneClass,
+  getPnlPillClass,
+  getPnlArrow,
+  getAccountTypeLabel,
+  formatEconomicRangeDate,
+  getEconomicWeekLabel,
+  getEventImpactTone,
+  getEventImpactClass,
+  getEventImpactLabel,
+  getEventImpactFolderClass,
+} from "./utils/formatters";
+import {
+  formatDateKey,
+  getMondayDate,
+  isWeekendDateKey,
+  getWeekGroupKey,
+  getMonthGroupKey,
+  getYearGroupKey,
+} from "./utils/dates";
+import { BRAND_NAME } from "./utils/constants";
+import { BrandBolt } from "./components/ui/BrandBolt";
+import { DashboardEmptyState } from "./components/ui/EmptyState";
+import { LandingHeader } from "./components/landing/LandingHeader";
+import { LandingHero } from "./components/landing/LandingHero";
+import { LandingFeatures } from "./components/landing/LandingFeatures";
+import { LandingHowItWorks } from "./components/landing/LandingHowItWorks";
+import { LandingTestimonials } from "./components/landing/LandingTestimonials";
+import { LandingPricing } from "./components/landing/LandingPricing";
+import { LandingFAQ } from "./components/landing/LandingFAQ";
+import { LandingFinalCTA } from "./components/landing/LandingFinalCTA";
+import { LandingFooter } from "./components/landing/LandingFooter";
 import { createClient } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
 import {
@@ -76,7 +112,9 @@ const ACTIVE_PAGE_KEY = "critique_active_page_v1";
 const SIDEBAR_COLLAPSED_KEY = "critique_sidebar_collapsed_v1";
 const STRATEGIES_OBJ_KEY = "critique_strategies_objects_v1";
 const RESTORE_CACHE_PREFIX = "critique_last_successful_restore_v1";
-const BILLING_ACCESS_CACHE_KEY = "critique_billing_access_v1";
+function getBillingCacheKey(userId) {
+  return userId ? `critique_billing_access_v2_${userId}` : null;
+}
 const USER_TRADES_KEY_PREFIX = "critique_user_trades_v2";
 const USER_TRADES_BACKUP_KEY_PREFIX = "critique_user_trades_last_nonempty_v1";
 const DELETED_TRADES_KEY_PREFIX = "critique_deleted_trades_v1";
@@ -87,7 +125,6 @@ const TRADING_PREFERENCES_KEY = "critique_settings_preferences_v1";
 const CUSTOM_STRATEGIES_KEY = "critique_custom_strategies_v1";
 const ECONOMIC_CALENDAR_CACHE_KEY = "critique_economic_calendar_v1";
 const MAX_SCREENSHOTS = 5;
-const BRAND_NAME = "TryCritique";
 const OWNER_ADMIN_EMAILS = (
   (typeof import.meta !== "undefined" && import.meta.env?.VITE_OWNER_ADMIN_EMAILS) ||
   "vazhabuianovi2@gmail.com"
@@ -361,7 +398,7 @@ function isSubscriptionAccessActive(subscription) {
 async function fetchBillingSubscription(authUser) {
   if (!authUser?.id && !authUser?.email) return null;
   const accessToken = await getCurrentAccessToken();
-  if (!accessToken && !authUser?.email) return null;
+  if (!accessToken) return null;
   const response = await fetch("/api/billing-status", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -463,55 +500,6 @@ async function postSupabaseSync(action, payload = {}) {
   return result;
 }
 
-function BrandBolt({ className = "" }) {
-  return (
-    <svg className={className} viewBox="0 0 36 36" fill="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="bb-bg" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#4c1d95" />
-          <stop offset="1" stopColor="#720cb0" />
-        </linearGradient>
-      </defs>
-
-      {/* Background */}
-      <rect width="36" height="36" rx="10" fill="url(#bb-bg)" />
-
-      {/* Outer dashed ring — slow rotation */}
-      <g>
-        <animateTransform attributeName="transform" type="rotate"
-          from="0 18 18" to="360 18 18" dur="12s" repeatCount="indefinite" />
-        <circle cx="18" cy="18" r="14" stroke="#c270f5" strokeOpacity="0.3"
-          strokeWidth="0.8" strokeDasharray="3.5 5" fill="none" />
-      </g>
-
-      {/* Inner soft glow — breathing */}
-      <circle cx="18" cy="18" r="9" fill="#9e1aef" fillOpacity="0.18">
-        <animate attributeName="r" values="8;10.5;8" dur="5s" repeatCount="indefinite" />
-        <animate attributeName="fill-opacity" values="0.12;0.28;0.12" dur="5s" repeatCount="indefinite" />
-      </circle>
-
-      {/* Chart line — slow draw & redraw */}
-      <polyline points="9,24 13,19 17,21 22,13 27,17"
-        stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-        fill="none" strokeDasharray="28" strokeDashoffset="28">
-        <animate attributeName="stroke-dashoffset"
-          values="28;0;0;28" keyTimes="0;0.45;0.75;1"
-          dur="3.5s" repeatCount="indefinite" calcMode="spline"
-          keySplines="0.4 0 0.2 1;0 0 1 1;0 0 1 1" />
-      </polyline>
-
-      {/* Arrow tip — fades in with line */}
-      <polyline points="23.5,12.5 27,12.5 27,16"
-        stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-        fill="none" opacity="0">
-        <animate attributeName="opacity"
-          values="0;0;1;1;0" keyTimes="0;0.4;0.5;0.75;1"
-          dur="3.5s" repeatCount="indefinite" />
-      </polyline>
-    </svg>
-  );
-}
-
 function SafeResponsiveContainer({ children, minHeight = 240 }) {
   const hostRef = useRef(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -565,18 +553,6 @@ async function toggleAppFullscreen() {
   }
   const request = element.requestFullscreen || element.webkitRequestFullscreen || element.msRequestFullscreen;
   if (request) await request.call(element);
-}
-
-function formatDisplayName(value, fallback = "User") {
-  const raw = String(value || "").trim();
-  if (!raw) return fallback;
-  const name = raw.includes("@") ? raw.split("@")[0] : raw;
-  const cleaned = name.replace(/[._-]+/g, " ").replace(/\s+/g, " ").trim();
-  if (!cleaned) return fallback;
-  return cleaned
-    .split(" ")
-    .map((part) => part ? part.charAt(0).toUpperCase() + part.slice(1) : "")
-    .join(" ");
 }
 
 function getUserDisplayName(user, fallback = "User") {
@@ -636,11 +612,6 @@ function getStoredProfilePhoto(user) {
   } catch {
     return "";
   }
-}
-
-function getFirstDisplayName(name, fallback = "User") {
-  const displayName = formatDisplayName(name, fallback);
-  return displayName.split(" ")[0] || fallback;
 }
 
 const THEME_STYLE_CSS = `
@@ -5514,10 +5485,6 @@ function getAccountTypeOption(type) {
   return ACCOUNT_TYPE_OPTIONS.find((option) => option.type === type) || ACCOUNT_TYPE_OPTIONS[1];
 }
 
-function getAccountTypeLabel(type) {
-  return String(type || "Demo Account").replace(/\s+Account$/i, "").toLowerCase();
-}
-
 const createAccountPlaceholder = {
   ...defaultAccount,
   id: "create-account",
@@ -5645,12 +5612,6 @@ function syncResultTag(tagsValue, pnl, result) {
   return [resultToTag(normalizeTradeResult(result) || getResultFromPnl(pnl)), ...tags].join(", ");
 }
 
-function formatMoney(value) {
-  const number = Number(value || 0);
-  const prefix = number >= 0 ? "$" : "-$";
-  return `${prefix}${Math.abs(number).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-}
-
 function parseAnimatedValue(value) {
   if (typeof value === "number") {
     return {
@@ -5736,13 +5697,6 @@ function RotatingPnlValue({ pnl, balance }) {
   );
 }
 
-function formatDateKey(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
 function getTradeDateKey(trade) {
   if (!trade?.date) return "";
   const raw = String(trade.date).trim();
@@ -5772,50 +5726,6 @@ function groupEconomicEventsByDate(events = []) {
     map[dateKey].push(event);
     return map;
   }, {});
-}
-
-function getEventImpactTone(impact) {
-  const value = String(impact || "").toLowerCase();
-  if (value.includes("high")) return "red";
-  if (value.includes("medium")) return "amber";
-  if (value.includes("holiday")) return "zinc";
-  return "blue";
-}
-
-function getEventImpactClass(impact) {
-  const tone = getEventImpactTone(impact);
-  if (tone === "red") return "border-red-500/35 bg-red-500/10 text-red-300";
-  if (tone === "amber") return "border-amber-500/35 bg-amber-500/10 text-amber-300";
-  if (tone === "zinc") return "border-white/10 bg-white/8 text-zinc-400";
-  return "border-blue-500/35 bg-blue-500/10 text-blue-300";
-}
-
-function getEventImpactLabel(impact) {
-  const tone = getEventImpactTone(impact);
-  if (tone === "red") return "High";
-  if (tone === "amber") return "Medium";
-  if (tone === "zinc") return "Holiday";
-  return "Low";
-}
-
-function getEventImpactFolderClass(impact) {
-  const tone = getEventImpactTone(impact);
-  if (tone === "red") return "bg-red-500 shadow-[0_0_10px_rgba(248,113,113,0.35)]";
-  if (tone === "amber") return "bg-orange-400 shadow-[0_0_10px_rgba(251,146,60,0.30)]";
-  if (tone === "zinc") return "bg-zinc-500 shadow-[0_0_10px_rgba(113,113,122,0.22)]";
-  return "bg-yellow-300 shadow-[0_0_10px_rgba(250,204,21,0.28)]";
-}
-
-function getEconomicWeekLabel(value) {
-  if (value === "last") return "Last Week";
-  if (value === "next") return "Next Week";
-  return "This Week";
-}
-
-function formatEconomicRangeDate(dateKey) {
-  const date = new Date(`${dateKey}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return dateKey;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 function getEconomicWeekRange(events = [], week) {
@@ -6033,27 +5943,6 @@ function isBreakEvenTrade(trade) {
   return Number(trade?.pnl || 0) === 0;
 }
 
-function getPnlToneClass(value) {
-  const pnl = Number(value || 0);
-  if (pnl > 0) return "text-emerald-400";
-  if (pnl < 0) return "text-red-400";
-  return "text-amber-400";
-}
-
-function getPnlPillClass(value) {
-  const pnl = Number(value || 0);
-  if (pnl > 0) return "border-emerald-500/30 bg-emerald-500/15 text-emerald-300";
-  if (pnl < 0) return "border-red-500/30 bg-red-500/15 text-red-300";
-  return "border-amber-500/30 bg-amber-500/15 text-amber-300";
-}
-
-function getPnlArrow(value) {
-  const pnl = Number(value || 0);
-  if (pnl > 0) return "↗";
-  if (pnl < 0) return "↘";
-  return "—";
-}
-
 function getTradeResultClass(result) {
   const normalized = normalizeTradeResult(result) || "Break Even";
   if (normalized === "Win") return "border-transparent bg-transparent text-emerald-400";
@@ -6216,12 +6105,6 @@ function getCalendarCells(year, monthIndex) {
     date.setDate(start.getDate() + index);
     return { key: formatDateKey(date), day: date.getDate(), dayIndex: date.getDay(), isCurrentMonth: date.getMonth() === monthIndex };
   });
-}
-
-function isWeekendDateKey(dateKey) {
-  const date = new Date(`${dateKey}T00:00:00`);
-  const day = date.getDay();
-  return day === 0 || day === 6;
 }
 
 function getLastTradingDays(count = 20) {
@@ -7132,6 +7015,7 @@ export default function TradingJournalDashboard() {
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
   const [isTradeSaving, setIsTradeSaving] = useState(false);
   const tradeSavingRef = useRef(false);
+  const [tradeModalError, setTradeModalError] = useState("");
   const [isRoutineOpen, setIsRoutineOpen] = useState(false);
   const [routine, setRoutine] = useState(() => {
     try {
@@ -7182,10 +7066,9 @@ export default function TradingJournalDashboard() {
   const [passwordRecoverySession, setPasswordRecoverySession] = useState(false);
   const [tradesLoading, setTradesLoading] = useState(false);
   const [hasLoadedRemoteTrades, setHasLoadedRemoteTrades] = useState(false);
-  const cachedBillingAccess = (() => { try { return localStorage.getItem(BILLING_ACCESS_CACHE_KEY) === "true"; } catch { return false; } })();
   const [billingSubscription, setBillingSubscription] = useState(null);
   const [billingLoading, setBillingLoading] = useState(false);
-  const [billingChecked, setBillingChecked] = useState(cachedBillingAccess);
+  const [billingChecked, setBillingChecked] = useState(false);
   const [billingGateMessage, setBillingGateMessage] = useState("");
   const [billingRefreshTick, setBillingRefreshTick] = useState(0);
   const [hasAdminAccess, setHasAdminAccess] = useState(false);
@@ -7251,7 +7134,11 @@ export default function TradingJournalDashboard() {
         if (!cancelled) {
           setBillingSubscription(subscription);
           const hasAccess = isSubscriptionAccessActive(subscription);
-          try { localStorage.setItem(BILLING_ACCESS_CACHE_KEY, hasAccess ? "true" : "false"); } catch {}
+          try {
+            const cacheKey = getBillingCacheKey(authUser?.id);
+            if (cacheKey) localStorage.setItem(cacheKey, hasAccess ? "true" : "false");
+            localStorage.removeItem("critique_billing_access_v1");
+          } catch {}
         }
       } catch (error) {
         if (!cancelled) {
@@ -7940,6 +7827,7 @@ export default function TradingJournalDashboard() {
   function closeTradeModal() {
     tradeSavingRef.current = false;
     setIsTradeSaving(false);
+    setTradeModalError("");
     setEditingTradeId(null);
     setForm(createEmptyTradeForm());
     setIsTradeModalOpen(false);
@@ -7968,6 +7856,18 @@ export default function TradingJournalDashboard() {
     const existingTrade = trades.find((item) => item.id === editingTradeId);
     const trade = createTradeFromForm({ ...form, result: normalizedResult, tags: [resultToTag(normalizedResult), ...normalizedTags].join(", "), pnl, quantity, risk }, editingTradeId || existingTrade?.id, account, existingTrade);
     const tradeForSave = existingTrade?.supabaseId ? { ...trade, supabaseId: existingTrade.supabaseId } : trade;
+
+    if (!editingTradeId) {
+      const newKey = getTradeDuplicateKey(tradeForSave);
+      const isDuplicate = trades.some((t) => getTradeDuplicateKey(t) === newKey);
+      if (isDuplicate) {
+        setTradeModalError("This trade already exists in your journal.");
+        tradeSavingRef.current = false;
+        setIsTradeSaving(false);
+        return;
+      }
+    }
+    setTradeModalError("");
 
     try {
       setDataMessage("");
@@ -8183,7 +8083,7 @@ Skipped duplicates: ${duplicateCount}
 
   // While billing check is in progress AND no cached access: show minimal loader
   // (Users with cached access skip this and go straight to app)
-  if (!billingChecked && !cachedBillingAccess && !canUseAdminTools) {
+  if (!billingChecked && !canUseAdminTools) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#050308]">
         <div className="flex flex-col items-center gap-4">
@@ -8515,7 +8415,7 @@ Skipped duplicates: ${duplicateCount}
       <TawkToWidget authUser={authUser} />
       <input ref={importFileRef} type="file" accept=".csv,text/csv" onChange={importTradesFromFile} className="hidden" />
       <input ref={backupFileRef} type="file" accept=".json,application/json" onChange={restoreBackupFromFile} className="hidden" />
-      {isTradeModalOpen && <AddTradeModal isEditing={Boolean(editingTradeId)} isSaving={isTradeSaving} form={form} setForm={setForm} onClose={closeTradeModal} onSave={saveTrade} account={account} accounts={accounts} trades={trades} accountBalance={accountBalance} onSelectAccount={setActiveAccountId} onAddAccount={createNewAccount} onOpenStrategies={() => setIsStrategiesModalOpen(true)} strategiesObjects={strategiesObjects} />}
+      {isTradeModalOpen && <AddTradeModal isEditing={Boolean(editingTradeId)} isSaving={isTradeSaving} form={form} setForm={setForm} onClose={closeTradeModal} onSave={saveTrade} account={account} accounts={accounts} trades={trades} accountBalance={accountBalance} onSelectAccount={setActiveAccountId} onAddAccount={createNewAccount} onOpenStrategies={() => setIsStrategiesModalOpen(true)} strategiesObjects={strategiesObjects} errorMessage={tradeModalError} />}
       {isStrategiesModalOpen && <TradingStrategiesModal strategies={strategiesObjects} onSave={saveStrategiesObjects} onClose={() => setIsStrategiesModalOpen(false)} />}
       {importPreview && <ImportPreviewModal preview={importPreview} onConfirm={confirmImportTrades} onClose={() => setImportPreview(null)} />}
       {isRoutineOpen && <PreTradeRoutineModal routine={routine} setRoutine={setRoutine} onClose={() => setIsRoutineOpen(false)} />}
@@ -9075,44 +8975,6 @@ function OnboardingChecklist({ trades, account, onOpenJournal, onOpenAccount, on
             <button onClick={step.action} className="mt-4 rounded-xl border border-white/10 bg-zinc-950 px-3 py-2 text-sm font-black text-zinc-200 transition hover:border-fuchsia-400/60 hover:text-fuchsia-200">{step.actionLabel}</button>
           </div>
         ))}
-      </div>
-    </section>
-  );
-}
-
-function DashboardEmptyState({ onAddTrade, onOpenJournal }) {
-  const features = [
-    { icon: <TrendingUp size={20} />, title: "Track Performance", detail: "Monitor your P&L and trading metrics" },
-    { icon: <BarChart3 size={20} />, title: "Analyze Trends", detail: "Visualize your trading patterns" },
-    { icon: <Target size={20} />, title: "Set Goals", detail: "Define and achieve trading targets" },
-  ];
-  return (
-    <section className="dashboard-empty mt-8 rounded-2xl border-2 border-dashed border-white/10 bg-black px-6 py-16 transition-all duration-300 sm:px-10 sm:py-20">
-      <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
-        <div className="relative mb-8 flex h-32 w-32 items-center justify-center">
-          <div className="absolute h-32 w-32 rounded-full bg-white/[0.03] blur-2xl" aria-hidden="true" />
-          <div className="absolute right-1 top-0 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/70 text-emerald-400" aria-hidden="true"><BarChart3 size={16} /></div>
-          <div className="absolute left-1 top-12 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/70 text-sky-400" aria-hidden="true"><Target size={16} /></div>
-          <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-white/15 bg-[#0a0a0d] text-fuchsia-300"><TrendingUp size={34} /></div>
-        </div>
-
-        <h2 className="text-3xl font-black text-white sm:text-4xl">Welcome to <span className="bg-gradient-to-r from-fuchsia-300 to-fuchsia-500 bg-clip-text text-transparent">{BRAND_NAME}</span>!</h2>
-        <p className="mt-4 max-w-md text-base font-semibold leading-relaxed text-zinc-400">Your trading journey starts here. Log your first trade to see your performance analytics, track your progress, and unlock powerful insights.</p>
-
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Button onClick={onAddTrade} className="border border-fuchsia-500/35 bg-fuchsia-950/45 px-6 py-3 font-black text-fuchsia-100 hover:border-fuchsia-400/55 hover:bg-fuchsia-950/65"><Plus size={18} /> Log Your First Trade</Button>
-          <Button onClick={onOpenJournal} className="border border-white/15 bg-black px-6 py-3 font-black text-white hover:bg-white/5">Explore Journal</Button>
-        </div>
-
-        <div className="mt-12 grid w-full gap-8 sm:grid-cols-3">
-          {features.map((feature) => (
-            <div key={feature.title} className="flex flex-col items-center text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-[#0a0a0d] text-fuchsia-300">{feature.icon}</div>
-              <h3 className="mt-4 text-base font-black text-white">{feature.title}</h3>
-              <p className="mt-1 max-w-[180px] text-sm font-semibold text-zinc-500">{feature.detail}</p>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
   );
@@ -10439,7 +10301,7 @@ function TagInput({ value, onChange }) {
   );
 }
 
-function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, onSave, account, accounts = [], trades = [], accountBalance, onSelectAccount, onAddAccount, onOpenStrategies, strategiesObjects = [] }) {
+function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, onSave, account, accounts = [], trades = [], accountBalance, onSelectAccount, onAddAccount, onOpenStrategies, strategiesObjects = [], errorMessage = "" }) {
   const rr = Number(form.risk) ? (Number(form.pnl || 0) / Number(form.risk)).toFixed(2) : "—";
   const screenshots = normalizeScreenshots(form);
   const riskWarnings = getRiskWarnings(form, accountBalance);
@@ -10741,6 +10603,11 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
         </Section>
 
 
+        {errorMessage && (
+          <div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm font-medium text-amber-300">
+            {errorMessage}
+          </div>
+        )}
         <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
           <Button variant="ghost" onClick={onClose} className="text-white hover:bg-white/10">Cancel</Button>
           <Button onClick={handleSaveClick} disabled={isSaving} className="bg-fuchsia-500 text-black hover:bg-fuchsia-400 disabled:cursor-not-allowed disabled:opacity-40">{isSaving ? <RefreshCwIcon /> : <Plus size={16} />} {isSaving ? "Saving..." : isEditing ? "Update Trade" : "Save Trade"}</Button>
@@ -11316,36 +11183,6 @@ function PreTradeRoutineModal({ routine, setRoutine, onClose }) {
       </motion.div>
     </div>
   );
-}
-
-function getMondayDate(date) {
-  const next = new Date(date);
-  const day = next.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  next.setDate(next.getDate() + diff);
-  next.setHours(0, 0, 0, 0);
-  return next;
-}
-
-function getWeekGroupKey(dateKey) {
-  const date = new Date(`${dateKey}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return dateKey || "Unknown";
-  const monday = getMondayDate(date);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  return `${formatDateKey(monday)}|${monday.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${sunday.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
-}
-
-function getMonthGroupKey(dateKey) {
-  const date = new Date(`${dateKey}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return dateKey || "Unknown";
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}|${date.toLocaleDateString("en-US", { month: "long" })}`;
-}
-
-function getYearGroupKey(dateKey) {
-  const date = new Date(`${dateKey}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return dateKey || "Unknown";
-  return `${date.getFullYear()}|${date.getFullYear()}`;
 }
 
 function summarizeGroupedTrades(trades, getKey) {
@@ -15658,13 +15495,6 @@ function TopPill({ label, value, green, red }) {
 }
 function Section({ title, icon, children }) { return <div className="mt-6 rounded-xl border border-white/8 bg-[#0a0a0a]"><div className="flex items-center gap-3 border-b border-white/8 px-6 py-4 rounded-t-xl"><span className="flex h-8 w-8 items-center justify-center rounded-lg border border-fuchsia-500/20 bg-fuchsia-500/8 text-fuchsia-400">{icon}</span><h3 className="text-sm font-black uppercase tracking-wider text-zinc-300">{title}</h3></div><div className="p-6">{children}</div></div>; }
 function Field({ label, children }) { return <label className="block text-sm font-semibold text-white"><span className="mb-2 block">{label}</span>{children}</label>; }
-function formatTimeInput(raw) {
-  // strips non-digits, limits to 4, inserts colon after 2 digits
-  const digits = String(raw).replace(/\D/g, "").slice(0, 4);
-  if (digits.length <= 2) return digits;
-  return `${digits.slice(0, 2)}:${digits.slice(2)}`;
-}
-
 function inputPurpleClass(extra = "") {
   return `border-white/15 bg-black text-white outline-none transition-all focus-visible:border-fuchsia-400 focus-visible:ring-2 focus-visible:ring-fuchsia-500/45 focus-visible:ring-offset-0 focus-visible:shadow-[0_0_16px_rgba(178,74,242,0.30)] ${extra}`;
 }
@@ -16383,562 +16213,30 @@ const DEMO_SCENES = [
 ];
 
 function LandingPage({ setAuthPage, theme, setTheme }) {
-  const isLight = theme === "light";
+  const isLight = theme === 'light';
   const [isDemoOpen, setIsDemoOpen] = useState(false);
-  const navItems = ["Features", "How it works", "Pricing", "FAQ"];
-  const metrics = [
-    ["Portfolio Value", "$247,890"],
-    ["Win Rate", "78.3%"],
-    ["Risk", "1.2%"],
-  ];
   const goHome = () => {
-    window.history.replaceState(null, "", "/");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.history.replaceState(null, '', '/');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <div className={isLight ? "min-h-screen overflow-x-hidden bg-[#f8fafc] text-slate-950" : "min-h-screen overflow-x-hidden bg-transparent text-white"}>
+    <div className={isLight ? 'min-h-screen overflow-x-hidden bg-[#f8fafc] text-slate-950' : 'min-h-screen overflow-x-hidden bg-transparent text-white'}>
       {!isLight && <ShaderBackground />}
-      <div
-        className={
-          isLight
-            ? "pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(178,74,242,0.12),transparent_30%),radial-gradient(circle_at_82%_62%,rgba(20,184,166,0.12),transparent_30%),linear-gradient(135deg,#f8fafc_0%,#ffffff_46%,#f7f0ff_100%)]"
-            : "pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_70%_18%,rgba(126,34,206,0.05),transparent_31%)]"
-        }
-      />
-      <header className={isLight ? "fixed inset-x-0 top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl" : "fixed inset-x-0 top-0 z-50 border-b border-white/[0.06] bg-black/60 backdrop-blur-2xl shadow-[0_1px_0_rgba(178,74,242,0.12)]"}>
-        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-5 lg:px-8">
-          <button type="button" onClick={goHome} className="flex items-center gap-3 text-xl font-black">
-            <span className="text-fuchsia-400 drop-shadow-[0_0_6px_rgba(178,74,242,0.2)]">{BRAND_MARK}</span>
-            <span>{BRAND_NAME}</span>
-          </button>
-          <nav className={isLight ? "hidden items-center gap-9 text-sm font-black text-slate-500 md:flex" : "hidden items-center gap-9 text-sm font-black text-zinc-400 md:flex"}>
-            {navItems.map((item) => (
-              <a key={item} href={`#${item.toLowerCase().replaceAll(" ", "-")}`} className={isLight ? "transition hover:text-slate-950" : "transition hover:text-white"}>
-                {item}
-              </a>
-            ))}
-          </nav>
-          <div className="flex items-center gap-2 sm:gap-4">
-            <button
-              type="button"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className={isLight ? "flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-black text-slate-800 shadow-sm transition hover:border-fuchsia-300" : "flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-sm font-black text-zinc-300 transition hover:border-fuchsia-500/50 hover:text-white"}
-              aria-label="Toggle theme"
-            >
-              {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
-            </button>
-            <button type="button" onClick={() => setAuthPage("login")} className={isLight ? "inline-flex text-sm font-black text-slate-600 transition hover:text-slate-950" : "inline-flex text-sm font-black text-zinc-200 transition hover:text-white"}>
-              Log In
-            </button>
-            <button type="button" onClick={() => setAuthPage("register")} className="rounded-xl bg-fuchsia-500 px-4 py-2.5 text-sm font-black text-white shadow-[0_18px_42px_rgba(178,74,242,0.28)] transition hover:bg-fuchsia-400">
-              Try 7 Days Free
-            </button>
-          </div>
-        </div>
-      </header>
-
+      <div className={isLight ? 'pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(178,74,242,0.12),transparent_30%),radial-gradient(circle_at_82%_62%,rgba(20,184,166,0.12),transparent_30%),linear-gradient(135deg,#f8fafc_0%,#ffffff_46%,#f7f0ff_100%)]' : 'pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_70%_18%,rgba(126,34,206,0.05),transparent_31%)]'} />
+      <LandingHeader isLight={isLight} theme={theme} setTheme={setTheme} setAuthPage={setAuthPage} onGoHome={goHome} />
       <main className="relative z-10 pt-16">
-        <section className="relative mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-14 px-5 py-16 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
-          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="max-w-2xl">
-            <div className={isLight ? "mb-7 inline-flex items-center gap-2 rounded-full border border-fuchsia-300 bg-fuchsia-50 px-4 py-2 text-xs font-black uppercase tracking-wider text-slate-950" : "eyebrow-badge mb-7"}>
-              <Sparkles size={13} />
-              Trading journal for serious growth
-            </div>
-            <h1 className="text-6xl font-black leading-[0.93] tracking-tight sm:text-7xl lg:text-8xl">
-              Trade<br />
-              Smarter<br />
-              <span className={isLight ? "bg-gradient-to-r from-blue-500 via-fuchsia-500 to-emerald-500 bg-clip-text text-transparent" : "text-gradient-hero"}>Not Harder</span>
-            </h1>
-            <p className={isLight ? "mt-8 max-w-xl text-lg font-semibold leading-8 text-slate-600 sm:text-xl" : "mt-8 max-w-xl text-lg font-semibold leading-[1.75] text-zinc-400 sm:text-xl"}>
-              The all-in-one trading journal that tracks your psychology, reveals your edge, and turns every trade into a sharper decision.
-            </p>
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <button type="button" onClick={() => setAuthPage("register")} className={isLight ? "inline-flex h-14 items-center justify-center gap-3 rounded-xl bg-white px-8 text-base font-black text-slate-950 shadow-[0_22px_50px_rgba(15,23,42,0.10)] transition hover:scale-[1.02] hover:bg-slate-50" : "btn-primary-glow inline-flex h-14 items-center justify-center gap-3 rounded-xl px-8 text-base font-black text-white"}>
-                Start Free Trial
-                <ChevronRight size={19} />
-              </button>
-              <button type="button" onClick={() => setIsDemoOpen(true)} className={isLight ? "inline-flex h-14 items-center justify-center gap-3 rounded-xl border border-fuchsia-200 bg-white/65 px-8 text-base font-black text-slate-950 transition hover:border-fuchsia-300 hover:bg-white" : "btn-ghost-glow inline-flex h-14 items-center justify-center gap-3 rounded-xl px-8 text-base font-black text-white"}>
-                <PlayCircle size={20} />
-                Watch Demo
-              </button>
-            </div>
-
-            {/* Free trial note */}
-            <div className={isLight ? "mt-4 flex items-center gap-2 text-sm font-semibold text-slate-500" : "mt-4 flex items-center gap-2 text-sm font-semibold text-zinc-500"}>
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 text-[10px] text-emerald-400">✓</span>
-              7-day free trial — no credit card required
-            </div>
-
-            {/* Trust bar */}
-            <div className="mt-8 flex flex-wrap items-center gap-6">
-              {[
-                ["500+", "Active traders"],
-                ["50k+", "Trades logged"],
-                ["4.9★", "User rating"],
-              ].map(([val, label]) => (
-                <div key={label} className="flex items-center gap-2">
-                  <span className={isLight ? "text-lg font-black text-slate-950" : "text-lg font-black text-white"}>{val}</span>
-                  <span className={isLight ? "text-sm font-semibold text-slate-500" : "text-sm font-semibold text-zinc-500"}>{label}</span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0, y: 24, rotate: -2 }} animate={{ opacity: 1, y: 0, rotate: -2 }} whileHover={{ scale: 1.03, rotate: -1, y: -6 }} transition={{ delay: 0.1, duration: 0.65, hover: { type: "spring", stiffness: 200, damping: 20 } }} className="hero-dashboard-stage relative mx-auto w-full max-w-[660px] py-16">
-            <div className={isLight ? "hero-float-card hero-float-profit absolute left-0 top-12 z-20 rounded-2xl border border-fuchsia-200 bg-white/90 px-6 py-4 shadow-[0_20px_70px_rgba(15,23,42,0.16)] backdrop-blur-xl" : "hero-float-card hero-float-profit float-card-glow absolute left-0 top-12 z-20 rounded-2xl px-6 py-4"}>
-              <div className="flex items-center gap-4">
-                <span className="text-3xl font-black text-emerald-400">$</span>
-                <div>
-                  <div className={isLight ? "text-xs font-black text-slate-500" : "text-xs font-black text-zinc-500"}>Today's P&L</div>
-                  <div className="text-xl font-black text-emerald-400">+$4,280</div>
-                </div>
-              </div>
-            </div>
-            <div className={isLight ? "hero-float-card hero-float-streak absolute right-1 top-40 z-20 rounded-2xl border border-fuchsia-200 bg-white/90 px-5 py-6 shadow-[0_20px_70px_rgba(15,23,42,0.16)] backdrop-blur-xl" : "hero-float-card hero-float-streak float-card-glow absolute right-1 top-40 z-20 rounded-2xl px-5 py-6"}>
-              <TrendingUp className="text-fuchsia-300" size={24} />
-              <div className={isLight ? "mt-3 text-xs font-black text-slate-500" : "mt-3 text-xs font-black text-zinc-500"}>Streak</div>
-              <div className="text-2xl font-black text-fuchsia-300">12W</div>
-            </div>
-            <div className={isLight ? "hero-float-card hero-float-dd absolute bottom-16 right-12 z-20 rounded-xl border border-slate-200 bg-white/90 px-5 py-3 text-sm font-black text-slate-950 shadow-[0_20px_70px_rgba(15,23,42,0.14)]" : "hero-float-card hero-float-dd float-card-glow absolute bottom-16 right-12 z-20 rounded-xl px-5 py-3 text-sm font-black text-cyan-300"}>
-              Max DD: 3.2%
-            </div>
-
-            <div className={isLight ? "hero-dashboard-card relative overflow-hidden rounded-[2rem] border border-fuchsia-200/70 bg-gradient-to-br from-white via-fuchsia-100/60 to-emerald-100/55 p-8 shadow-[0_34px_100px_rgba(126,34,206,0.16)]" : "hero-dashboard-card glass-card-vivid gradient-border glow-fuchsia relative overflow-hidden rounded-[2rem] p-8"}>
-              <div className={isLight ? "absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(178,74,242,0.12),transparent_30%),radial-gradient(circle_at_88%_20%,rgba(16,185,129,0.12),transparent_32%)]" : "absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(178,74,242,0.24),transparent_28%),radial-gradient(circle_at_88%_20%,rgba(16,185,129,0.18),transparent_32%)]"} />
-              <div className="relative z-10">
-                <div className="mb-8 flex items-center justify-between">
-                  <div className="flex gap-2">
-                    <span className="h-3 w-3 rounded-full bg-red-500" />
-                    <span className="h-3 w-3 rounded-full bg-amber-400" />
-                    <span className="h-3 w-3 rounded-full bg-emerald-400" />
-                  </div>
-                  <span className={isLight ? "font-mono text-sm font-black text-slate-400" : "font-mono text-sm font-black text-zinc-400"}>{BRAND_NAME} Pro</span>
-                </div>
-                <div className="flex items-start justify-between gap-6">
-                  <div>
-                    <div className={isLight ? "text-lg font-black text-slate-600" : "text-lg font-black text-zinc-200"}>Portfolio Value</div>
-                    <div className={isLight ? "mt-8 h-3 w-56 rounded-full bg-slate-300" : "mt-8 h-3 w-56 rounded-full bg-zinc-800"}>
-                      <div className="hero-progress-fill h-full w-[78%] origin-left rounded-full bg-gradient-to-r from-emerald-400 to-blue-500" />
-                    </div>
-                  </div>
-                  <div className="text-right text-4xl font-black text-emerald-400">$247,890</div>
-                </div>
-                <div className="mt-7 grid grid-cols-3 gap-4">
-                  {metrics.map(([label, value]) => (
-                    <div key={label} className={isLight ? "hero-metric-card rounded-2xl border border-slate-200 bg-white/75 p-5 shadow-sm" : "hero-metric-card rounded-2xl border border-white/8 bg-black/20 p-5"}>
-                      <div className={isLight ? "text-xs font-black text-slate-500" : "text-xs font-black text-zinc-500"}>{label}</div>
-                      <div className={isLight ? "mt-3 text-2xl font-black text-slate-950" : "mt-3 text-2xl font-black text-white"}>{value}</div>
-                    </div>
-                  ))}
-                </div>
-                <div className={isLight ? "mt-6 flex items-center gap-3 rounded-2xl border border-emerald-300 bg-emerald-50 px-5 py-4 text-sm font-black text-emerald-600" : "mt-6 flex items-center gap-3 rounded-2xl border border-emerald-400/25 bg-emerald-400/10 px-5 py-4 text-sm font-black text-emerald-300"}>
-                  <ShieldCheck size={18} />
-                  Trading on track: strong momentum
-                </div>
-              </div>
-            </div>
-          </motion.div>
-          {/* Scroll indicator */}
-          {!isLight && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }} className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-              <span className="text-xs font-bold tracking-widest text-zinc-600 uppercase">Scroll</span>
-              <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}>
-                <ChevronDown size={20} className="text-zinc-600" />
-              </motion.div>
-            </motion.div>
-          )}
-        </section>
-
+        <LandingHero isLight={isLight} setAuthPage={setAuthPage} onWatchDemo={() => setIsDemoOpen(true)} />
         <div className="section-divider mx-5 lg:mx-8" />
-        <section id="features" className="mx-auto min-h-screen w-full max-w-7xl scroll-mt-16 px-5 py-24 lg:px-8">
-          <div className="max-w-3xl">
-            <div className={isLight ? "text-sm font-black uppercase tracking-[0.22em] text-fuchsia-500" : "eyebrow-badge inline-flex mb-2"}>Features</div>
-            <h2 className={isLight ? "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl" : "mt-5 text-5xl font-black leading-[0.97] tracking-tight sm:text-6xl"}>
-              {isLight ? <>Everything you need.<br />Nothing you don&apos;t.</> : <><span className="text-white">Everything you need.</span><br /><span className="text-gradient-primary">Nothing you don&apos;t.</span></>}
-            </h2>
-          </div>
-
-          <div className="mt-24 grid items-center gap-14 lg:grid-cols-[0.86fr_1.14fr]">
-            <div className="max-w-lg">
-              <div className="text-sm font-black uppercase tracking-[0.22em] text-fuchsia-400">Smart Trade Journal</div>
-              <h3 className={isLight ? "mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl" : "mt-5 text-3xl font-black leading-tight text-white sm:text-4xl"}>
-                Every trade. Every detail.<br />Instantly searchable.
-              </h3>
-              <p className={isLight ? "mt-6 text-lg font-semibold leading-8 text-slate-600" : "mt-6 text-lg font-semibold leading-8 text-zinc-400"}>
-                Log trades in seconds, attach screenshots, add strategy tags, filter by session, emotion, or outcome. Replaces your spreadsheet completely.
-              </p>
-            </div>
-
-            <motion.div whileHover={{ scale: 1.025, y: -8 }} transition={{ type: "spring", stiffness: 220, damping: 22 }} className={isLight ? "overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white/78 shadow-[0_28px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl" : "glass-card gradient-border glow-fuchsia overflow-hidden rounded-[1.35rem]"}>
-              <div className={isLight ? "flex items-center justify-between border-b border-slate-200 px-5 py-4" : "flex items-center justify-between border-b border-white/10 px-5 py-4"}>
-                <div className={isLight ? "text-sm font-black text-slate-950" : "text-sm font-black text-white"}>Trade Journal</div>
-                <div className="flex items-center gap-4">
-                  <button type="button" className={isLight ? "rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-500" : "rounded-lg border border-white/12 bg-black px-3 py-1.5 text-xs font-bold text-zinc-400"}>Sort: Date</button>
-                  <span className={isLight ? "text-xs font-bold text-slate-500" : "text-xs font-bold text-zinc-400"}>47 trades</span>
-                  <span className="grid h-8 w-8 grid-cols-2 gap-0.5 rounded-lg bg-fuchsia-500/18 p-2">
-                    <i className="rounded-sm bg-fuchsia-400" />
-                    <i className="rounded-sm bg-fuchsia-400/55" />
-                    <i className="rounded-sm bg-fuchsia-400/55" />
-                    <i className="rounded-sm bg-fuchsia-400" />
-                  </span>
-                </div>
-              </div>
-
-              <div className={isLight ? "grid grid-cols-5 border-b border-slate-200 text-center" : "grid grid-cols-5 border-b border-white/10 text-center"}>
-                {[
-                  ["+$4,280", "Total P&L", "text-emerald-400"],
-                  ["68%", "Win Rate", "text-fuchsia-400"],
-                  ["47", "Trades", "text-cyan-400"],
-                  ["$184", "Avg Win", "text-emerald-400"],
-                  ["1.9R", "Avg R", "text-amber-400"],
-                ].map(([value, label, tone]) => (
-                  <div key={label} className={isLight ? "border-r border-slate-200 px-3 py-4 last:border-r-0" : "border-r border-white/10 px-3 py-4 last:border-r-0"}>
-                    <div className={`text-sm font-black ${tone}`}>{value}</div>
-                    <div className={isLight ? "mt-1 text-[11px] font-bold text-slate-500" : "mt-1 text-[11px] font-bold text-zinc-400"}>{label}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="grid gap-4 p-4 sm:grid-cols-2">
-                {[
-                  ["NQ", "Long", "NY AM · Breakout", "+$580", ["confluence", "trend"], "green"],
-                  ["ES", "Short", "London · Mean Revert", "$120", ["fakeout"], "red"],
-                  ["AAPL", "Long", "NY AM · Trend Follow", "+$340", ["momentum"], "green"],
-                  ["CL", "Long", "NY PM · Breakout", "+$210", ["news", "vol"], "green"],
-                ].map(([symbol, side, meta, pnl, tags, tone]) => (
-                  <motion.div key={symbol} whileHover={{ scale: 1.03, y: -3 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className={tone === "red" ? "rounded-2xl border border-red-500/30 bg-red-500/8 p-4 cursor-pointer" : "rounded-2xl border border-emerald-500/30 bg-emerald-500/8 p-4 cursor-pointer"}>
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div className={isLight ? "text-lg font-black text-slate-950" : "text-lg font-black text-white"}>
-                          {symbol} <span className={tone === "red" ? "rounded-md bg-red-500/20 px-2 py-1 text-[10px] font-black text-red-400" : "rounded-md bg-emerald-500/20 px-2 py-1 text-[10px] font-black text-emerald-400"}>{side}</span>
-                        </div>
-                        <div className={isLight ? "mt-3 text-xs font-semibold text-slate-500" : "mt-3 text-xs font-semibold text-zinc-400"}>{meta}</div>
-                      </div>
-                      <div className={tone === "red" ? "text-sm font-black text-red-400" : "text-sm font-black text-emerald-400"}>{tone === "red" ? "↘" : "↗"} {pnl}</div>
-                    </div>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {tags.map((tag) => (
-                        <span key={tag} className="rounded-full border border-fuchsia-500/35 bg-fuchsia-500/12 px-2.5 py-1 text-[11px] font-bold text-fuchsia-300">{tag}</span>
-                      ))}
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
+        <LandingFeatures isLight={isLight} />
         <div className="section-divider mx-5 lg:mx-8" />
-        <section id="how-it-works" className="mx-auto min-h-screen w-full max-w-7xl scroll-mt-16 px-5 py-24 lg:px-8">
-          <div className="grid items-start gap-14 lg:grid-cols-[0.9fr_1.1fr]">
-            <div className="max-w-xl">
-              <div className={isLight ? "text-sm font-black uppercase tracking-[0.22em] text-fuchsia-500" : "eyebrow-badge inline-flex mb-2"}>How it works</div>
-              <h2 className={isLight ? "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl" : "mt-5 text-5xl font-black leading-[0.97] tracking-tight sm:text-6xl"}>
-                {isLight ? <>From setup to insight<br />in three clean steps.</> : <><span className="text-white">From setup to insight</span><br /><span className="text-gradient-primary">in three clean steps.</span></>}
-              </h2>
-              <p className={isLight ? "mt-6 text-lg font-semibold leading-8 text-slate-600" : "mt-6 text-lg font-semibold leading-8 text-zinc-400"}>
-                Critique keeps the flow simple: capture the trade, review the psychology, then use the dashboard to see what is actually improving.
-              </p>
-
-              <div className="mt-12 space-y-4">
-                {[
-                  ["01", "Log the trade", "Add symbol, session, direction, risk, result, screenshots and tags in one focused form."],
-                  ["02", "Review your behavior", "Mark the mistake, emotion, rule follow-through and what you would improve next time."],
-                  ["03", "Find your edge", "Filter patterns across your journal and turn repeated problems into a practical focus plan."],
-                ].map(([step, title, copy]) => (
-                  <div key={step} className={isLight ? "rounded-2xl border border-slate-200 bg-white/78 p-5 shadow-sm" : "glass-card rounded-2xl p-5 transition-all duration-300 hover:border-purple-500/30"}>
-                    <div className="flex gap-4">
-                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/12 text-sm font-black text-fuchsia-300">{step}</span>
-                      <div>
-                        <div className={isLight ? "text-lg font-black text-slate-950" : "text-lg font-black text-white"}>{title}</div>
-                        <p className={isLight ? "mt-2 text-sm font-semibold leading-6 text-slate-600" : "mt-2 text-sm font-semibold leading-6 text-zinc-400"}>{copy}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <motion.div whileHover={{ scale: 1.025, y: -8 }} transition={{ type: "spring", stiffness: 220, damping: 22 }} className={isLight ? "relative overflow-hidden rounded-[1.6rem] border border-slate-200 bg-white/80 p-5 shadow-[0_28px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl" : "glass-card gradient-border glow-fuchsia relative overflow-hidden rounded-[1.6rem] p-5"}>
-              <div className={isLight ? "absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(178,74,242,0.12),transparent_28%),radial-gradient(circle_at_90%_80%,rgba(16,185,129,0.10),transparent_30%)]" : "absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(178,74,242,0.18),transparent_28%),radial-gradient(circle_at_90%_80%,rgba(16,185,129,0.12),transparent_30%)]"} />
-              <div className="relative z-10">
-                <div className="mb-5 flex items-center justify-between">
-                  <div>
-                    <div className={isLight ? "text-sm font-black text-slate-950" : "text-sm font-black text-white"}>Today&apos;s Workflow</div>
-                    <div className={isLight ? "mt-1 text-xs font-bold text-slate-500" : "mt-1 text-xs font-bold text-zinc-500"}>Pre-market to post-trade review</div>
-                  </div>
-                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/12 px-3 py-1 text-xs font-black text-emerald-400">On track</span>
-                </div>
-
-                <div className="grid gap-4 lg:grid-cols-[0.92fr_1.08fr]">
-                  <div className={isLight ? "rounded-2xl border border-slate-200 bg-slate-50/80 p-4" : "rounded-2xl border border-white/10 bg-black/35 p-4"}>
-                    <div className={isLight ? "text-xs font-black uppercase tracking-wider text-slate-500" : "text-xs font-black uppercase tracking-wider text-zinc-500"}>Add Trade</div>
-                    {[
-                      ["Symbol", "NQ"],
-                      ["Session", "NY AM"],
-                      ["Direction", "Long"],
-                      ["Risk", "$120"],
-                    ].map(([label, value]) => (
-                      <div key={label} className={isLight ? "mt-3 flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-3" : "mt-3 flex items-center justify-between rounded-xl border border-white/10 bg-black/45 px-3 py-3"}>
-                        <span className={isLight ? "text-xs font-bold text-slate-500" : "text-xs font-bold text-zinc-500"}>{label}</span>
-                        <span className={isLight ? "text-sm font-black text-slate-950" : "text-sm font-black text-white"}>{value}</span>
-                      </div>
-                    ))}
-                    <div className="mt-4 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 px-4 py-3 text-center text-sm font-black text-white">Save Trade</div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className={isLight ? "rounded-2xl border border-slate-200 bg-white p-5" : "rounded-2xl border border-white/10 bg-black/35 p-5"}>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className={isLight ? "text-xs font-black uppercase tracking-wider text-slate-500" : "text-xs font-black uppercase tracking-wider text-zinc-500"}>Review Signal</div>
-                          <div className={isLight ? "mt-2 text-2xl font-black text-slate-950" : "mt-2 text-2xl font-black text-white"}>Discipline: 84%</div>
-                        </div>
-                        <ListChecks className="text-fuchsia-400" size={28} />
-                      </div>
-                      <div className={isLight ? "mt-5 h-3 rounded-full bg-slate-200" : "mt-5 h-3 rounded-full bg-white/10"}>
-                        <div className="h-full w-[84%] rounded-full bg-gradient-to-r from-fuchsia-500 to-emerald-400" />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className={isLight ? "rounded-2xl border border-emerald-200 bg-emerald-50 p-4" : "rounded-2xl border border-emerald-500/25 bg-emerald-500/10 p-4"}>
-                        <div className="text-xs font-black text-emerald-500">Best setup</div>
-                        <div className={isLight ? "mt-2 text-xl font-black text-slate-950" : "mt-2 text-xl font-black text-white"}>Breakout</div>
-                      </div>
-                      <div className={isLight ? "rounded-2xl border border-red-200 bg-red-50 p-4" : "rounded-2xl border border-red-500/25 bg-red-500/10 p-4"}>
-                        <div className="text-xs font-black text-red-400">Main leak</div>
-                        <div className={isLight ? "mt-2 text-xl font-black text-slate-950" : "mt-2 text-xl font-black text-white"}>FOMO</div>
-                      </div>
-                    </div>
-
-                    <div className={isLight ? "rounded-2xl border border-fuchsia-200 bg-fuchsia-50 p-4" : "rounded-2xl border border-fuchsia-500/25 bg-fuchsia-500/10 p-4"}>
-                      <div className="text-xs font-black uppercase tracking-wider text-fuchsia-400">Next focus</div>
-                      <p className={isLight ? "mt-2 text-sm font-semibold leading-6 text-slate-600" : "mt-2 text-sm font-semibold leading-6 text-zinc-300"}>Wait for full confirmation before entering the second setup.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* ── Testimonials ── */}
-        <section className="mx-auto w-full max-w-7xl px-5 py-20 lg:px-8">
-          <div className="section-divider mb-20" />
-          <div className="text-center mb-14">
-            <div className={isLight ? "text-sm font-black uppercase tracking-[0.22em] text-fuchsia-500" : "eyebrow-badge inline-flex mb-3"}>Traders love it</div>
-            <h2 className={isLight ? "mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl" : "mt-4 text-4xl font-black tracking-tight sm:text-5xl"}>
-              {isLight ? "Real results from real traders." : <><span className="text-white">Real results from</span> <span className="text-gradient-primary">real traders.</span></>}
-            </h2>
-          </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              { name: "Alex M.", role: "Futures trader · 2 years", quote: "I went from losing 3 weeks in a row to finally understanding why. The mistake detector showed me I was overtrading after lunch every single day.", rating: 5, accent: "emerald" },
-              { name: "Sarah K.", role: "Forex trader · 4 years", quote: "The calendar view changed everything. I can see exactly which sessions I perform best in. I cut my losing days in half within the first month.", rating: 5, accent: "fuchsia" },
-              { name: "Daniel R.", role: "Options trader · 1 year", quote: "Replaces my old spreadsheet completely. Logging a trade takes 30 seconds and the psychology tracking is something no spreadsheet can do.", rating: 5, accent: "cyan" },
-            ].map(({ name, role, quote, rating, accent }) => (
-              <motion.div key={name} whileHover={{ y: -6, scale: 1.02 }} transition={{ type: "spring", stiffness: 260, damping: 22 }} className={isLight ? "rounded-[1.35rem] border border-slate-200 bg-white/80 p-6 shadow-sm" : "glass-card gradient-border rounded-[1.35rem] p-6"}>
-                <div className="flex gap-1 mb-4">
-                  {Array.from({ length: rating }).map((_, i) => (
-                    <span key={i} className="text-amber-400 text-sm">★</span>
-                  ))}
-                </div>
-                <p className={isLight ? "text-sm font-semibold leading-7 text-slate-700" : "text-sm font-semibold leading-7 text-zinc-300"}>"{quote}"</p>
-                <div className="mt-5 flex items-center gap-3">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-black ${accent === "emerald" ? "bg-emerald-500/20 text-emerald-400" : accent === "fuchsia" ? "bg-fuchsia-500/20 text-fuchsia-400" : "bg-cyan-500/20 text-cyan-400"}`}>
-                    {name[0]}
-                  </div>
-                  <div>
-                    <div className={isLight ? "text-sm font-black text-slate-950" : "text-sm font-black text-white"}>{name}</div>
-                    <div className={isLight ? "text-xs font-semibold text-slate-500" : "text-xs font-semibold text-zinc-500"}>{role}</div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
-        <section id="pricing" className="mx-auto min-h-screen w-full max-w-7xl scroll-mt-16 px-5 py-24 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className={isLight ? "text-sm font-black uppercase tracking-[0.22em] text-fuchsia-500" : "eyebrow-badge inline-flex mb-2"}>Pricing</div>
-            <h2 className={isLight ? "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl" : "mt-5 text-5xl font-black leading-[0.97] tracking-tight sm:text-6xl"}>
-              {isLight ? <>Simple price.<br />Serious trading clarity.</> : <><span className="text-white">Simple price.</span><br /><span className="text-gradient-primary">Serious trading clarity.</span></>}
-            </h2>
-            <p className={isLight ? "mx-auto mt-6 max-w-2xl text-lg font-semibold leading-8 text-slate-600" : "mx-auto mt-6 max-w-2xl text-lg font-semibold leading-8 text-zinc-400"}>
-              One plan with the core tools you need to journal, review, and improve every trading session.
-            </p>
-          </div>
-
-          <div className="mx-auto mt-16 grid max-w-5xl items-center gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className={isLight ? "relative overflow-hidden rounded-[1.6rem] border border-fuchsia-200 bg-white/85 p-8 shadow-[0_28px_90px_rgba(15,23,42,0.12)]" : "glass-card-vivid gradient-border glow-fuchsia relative overflow-hidden rounded-[1.6rem] p-8"}>
-              <div className="absolute right-0 top-0 h-40 w-40 rounded-bl-[4rem] bg-fuchsia-500/12" />
-              <div className="relative z-10">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <div className={isLight ? "text-sm font-black uppercase tracking-[0.18em] text-slate-500" : "text-sm font-black uppercase tracking-[0.18em] text-zinc-500"}>Critique Pro</div>
-                    <div className={isLight ? "mt-2 text-2xl font-black text-slate-950" : "mt-2 text-2xl font-black text-white"}>Trading journal subscription</div>
-                  </div>
-                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/12 px-3 py-1 text-xs font-black text-emerald-400">Best value</span>
-                </div>
-
-                {/* 7-day trial banner */}
-                <div className="mt-6 flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-black">7</span>
-                  <div>
-                    <div className="text-sm font-black text-emerald-400">7-day free trial</div>
-                    <div className={isLight ? "text-xs font-semibold text-slate-500" : "text-xs font-semibold text-zinc-500"}>No credit card required to start</div>
-                  </div>
-                </div>
-
-                <div className="mt-6 flex items-end gap-3">
-                  <span className={isLight ? "text-7xl font-black tracking-tight text-slate-950" : "text-7xl font-black tracking-tight text-white"}>$10</span>
-                  <span className={isLight ? "pb-3 text-lg font-black text-slate-500" : "pb-3 text-lg font-black text-zinc-400"}>/ month after trial</span>
-                </div>
-
-                <p className={isLight ? "mt-5 text-sm font-semibold leading-6 text-slate-600" : "mt-5 text-sm font-semibold leading-6 text-zinc-400"}>
-                  Built for traders who want a simple system for tracking decisions, mistakes, risk, and progress.
-                </p>
-                <p className={isLight ? "mt-3 text-xs font-bold leading-5 text-slate-500" : "mt-3 text-xs font-bold leading-5 text-zinc-500"}>
-                  Payments are handled by Dodo Payments as Merchant of Record. TryCritique is a journal and analytics tool, not investment advice or trading signals.
-                </p>
-
-                <button type="button" onClick={() => setAuthPage("register")} className="mt-6 flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-sm font-black text-white shadow-[0_18px_36px_rgba(178,74,242,0.24)] transition hover:scale-[1.01]">
-                  Start 7-Day Free Trial
-                  <ChevronRight size={18} />
-                </button>
-                <div className="mt-3 text-center text-xs font-semibold text-zinc-500">No credit card · Cancel anytime</div>
-              </div>
-            </div>
-
-            <div className={isLight ? "rounded-[1.6rem] border border-slate-200 bg-white/72 p-6 shadow-sm backdrop-blur-xl" : "rounded-[1.6rem] border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl"}>
-              <div className={isLight ? "mb-5 text-sm font-black uppercase tracking-[0.18em] text-slate-500" : "mb-5 text-sm font-black uppercase tracking-[0.18em] text-zinc-500"}>Included</div>
-              <div className="grid gap-3">
-                {[
-                  ["Unlimited trades", "Log every setup, result, screenshot and review note."],
-                  ["Dashboard analytics", "Track win rate, P&L curve, R multiple and account performance."],
-                  ["Mistake detector", "See repeated behavioral leaks and focus on the highest-impact fix."],
-                  ["Calendar and statistics", "Review sessions, months, strategies and trading consistency."],
-                  ["Backup and restore", "Export or restore your journal data when you need it."],
-                ].map(([title, copy]) => (
-                  <div key={title} className={isLight ? "rounded-2xl border border-slate-200 bg-slate-50/80 p-4" : "rounded-2xl border border-white/10 bg-black/35 p-4"}>
-                    <div className="flex gap-3">
-                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-xs font-black text-emerald-400">✓</span>
-                      <div>
-                        <div className={isLight ? "text-sm font-black text-slate-950" : "text-sm font-black text-white"}>{title}</div>
-                        <p className={isLight ? "mt-1 text-sm font-semibold leading-6 text-slate-600" : "mt-1 text-sm font-semibold leading-6 text-zinc-400"}>{copy}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="faq" className="mx-auto min-h-screen w-full max-w-7xl scroll-mt-16 px-5 py-24 lg:px-8">
-          <div className="grid gap-14 lg:grid-cols-[0.9fr_1.1fr]">
-            <div className="max-w-xl">
-              <div className={isLight ? "text-sm font-black uppercase tracking-[0.22em] text-fuchsia-500" : "eyebrow-badge inline-flex mb-2"}>FAQ</div>
-              <h2 className={isLight ? "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl" : "mt-5 text-5xl font-black leading-[0.97] tracking-tight sm:text-6xl"}>
-                {isLight ? <>Questions before<br />you start?</> : <><span className="text-white">Questions before</span><br /><span className="text-gradient-primary">you start?</span></>}
-              </h2>
-              <p className={isLight ? "mt-6 text-lg font-semibold leading-8 text-slate-600" : "mt-6 text-lg font-semibold leading-8 text-zinc-400"}>
-                The short version: Critique is built to help you keep your journal simple, searchable, and useful after every trading day.
-              </p>
-
-              <div className={isLight ? "mt-10 rounded-[1.35rem] border border-fuchsia-200 bg-white/80 p-6 shadow-sm" : "mt-10 rounded-[1.35rem] border border-fuchsia-500/25 bg-fuchsia-500/8 p-6"}>
-                <div className="flex items-start gap-4">
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-fuchsia-500/15 text-fuchsia-300">
-                    <Sparkles size={22} />
-                  </span>
-                  <div>
-                    <div className={isLight ? "text-lg font-black text-slate-950" : "text-lg font-black text-white"}>Designed for quick review</div>
-                    <p className={isLight ? "mt-2 text-sm font-semibold leading-6 text-slate-600" : "mt-2 text-sm font-semibold leading-6 text-zinc-400"}>
-                      Use it during your session, then come back later to review patterns without rebuilding spreadsheets.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {[
-                ["Do I need Supabase to use it?", "Supabase sync is supported, but your journal also keeps a local browser backup so your trades remain available on this device."],
-                ["Can I attach screenshots?", "Yes. Trades can include screenshots, notes, tags, rule review, emotion, setup quality, entry quality and exit quality."],
-                ["Will it show my mistakes?", "Yes. The mistake detector groups repeated issues and helps you choose one focus area instead of guessing what to fix."],
-                ["Can I export my data?", "Yes. You can export CSV files and also create a JSON backup for restoring your journal later."],
-                ["What happens after I click Get Started?", "You create an account, then the app opens your dashboard, journal, calendar, statistics and settings pages."],
-              ].map(([question, answer], index) => (
-                <details key={question} className={isLight ? "group rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm open:border-fuchsia-200" : "group glass-card rounded-2xl p-5 open:border-fuchsia-500/40 transition-all duration-300"}>
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/12 text-xs font-black text-fuchsia-300">{String(index + 1).padStart(2, "0")}</span>
-                      <span className={isLight ? "text-base font-black text-slate-950" : "text-base font-black text-white"}>{question}</span>
-                    </div>
-                    <span className="text-xl font-black text-fuchsia-400 transition group-open:rotate-45">+</span>
-                  </summary>
-                  <p className={isLight ? "mt-4 pl-13 text-sm font-semibold leading-6 text-slate-600" : "mt-4 pl-13 text-sm font-semibold leading-6 text-zinc-400"}>
-                    {answer}
-                  </p>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── Final CTA ── */}
-        <section className={isLight ? "mx-auto w-full max-w-7xl px-5 py-20 lg:px-8" : "mx-auto w-full max-w-7xl px-5 py-20 lg:px-8"}>
-          <div className="section-divider mb-20" />
-          <motion.div whileHover={{ scale: 1.01 }} transition={{ type: "spring", stiffness: 200, damping: 25 }} className={isLight ? "relative overflow-hidden rounded-[2rem] border border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 via-white to-purple-50 p-12 text-center shadow-[0_28px_90px_rgba(126,34,206,0.12)]" : "glass-card-vivid gradient-border glow-fuchsia relative overflow-hidden rounded-[2rem] p-12 text-center"}>
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(178,74,242,0.18),transparent_60%)]" />
-            <div className="relative z-10">
-              <div className={isLight ? "eyebrow-badge-light mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-fuchsia-300 bg-fuchsia-50 px-4 py-2 text-xs font-black uppercase tracking-wider text-fuchsia-600" : "eyebrow-badge mx-auto mb-6 inline-flex"}>
-                <Sparkles size={13} /> 7-day free trial — no card required
-              </div>
-              <h2 className={isLight ? "text-4xl font-black tracking-tight text-slate-950 sm:text-5xl lg:text-6xl" : "text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl"}>
-                {isLight ? "Your edge is waiting." : <><span className="text-white">Your edge is</span> <span className="text-gradient-hero">waiting.</span></>}
-              </h2>
-              <p className={isLight ? "mx-auto mt-5 max-w-xl text-lg font-semibold leading-8 text-slate-600" : "mx-auto mt-5 max-w-xl text-lg font-semibold leading-8 text-zinc-400"}>
-                Join traders who stopped guessing and started improving with data.
-              </p>
-              <button type="button" onClick={() => setAuthPage("register")} className={isLight ? "mt-8 inline-flex h-14 items-center gap-3 rounded-xl bg-fuchsia-500 px-10 text-base font-black text-white shadow-[0_18px_42px_rgba(178,74,242,0.28)] transition hover:scale-[1.02] hover:bg-fuchsia-400" : "btn-primary-glow mt-8 inline-flex h-14 items-center gap-3 rounded-xl px-10 text-base font-black text-white"}>
-                Start 7-Day Free Trial <ChevronRight size={19} />
-              </button>
-              <p className={isLight ? "mt-3 text-sm font-semibold text-slate-500" : "mt-3 text-sm font-semibold text-zinc-500"}>No credit card required · Cancel anytime</p>
-            </div>
-          </motion.div>
-        </section>
-
-        <footer className={isLight ? "border-t border-slate-200 bg-white/60 px-5 py-12 text-sm font-bold text-slate-500 lg:px-8" : "border-t border-white/[0.06] px-5 py-12 text-sm font-bold text-zinc-500 lg:px-8"}>
-          <div className="mx-auto max-w-7xl flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
-            <div className="max-w-sm">
-              <div className="flex items-center gap-3 mb-3">
-                <BrandBolt className="h-9 w-9 drop-shadow-[0_0_8px_rgba(178,74,242,0.25)]" />
-                <span className={isLight ? "text-lg font-black text-slate-950" : "text-lg font-black text-white"}>{BRAND_NAME}</span>
-              </div>
-              <p className="leading-6 text-xs">A trading journal and analytics product for self-review. No investment advice, signals, brokerage, or guaranteed returns.</p>
-            </div>
-            <div className="flex flex-col gap-2">
-              <div className={isLight ? "text-xs font-black uppercase tracking-wider text-slate-400 mb-1" : "text-xs font-black uppercase tracking-wider text-zinc-600 mb-1"}>Legal</div>
-              <button onClick={() => setAuthPage("terms")} className="text-left hover:text-fuchsia-300 transition-colors">Terms of Service</button>
-              <button onClick={() => setAuthPage("privacy")} className="text-left hover:text-fuchsia-300 transition-colors">Privacy Policy</button>
-              <button onClick={() => setAuthPage("refund")} className="text-left hover:text-fuchsia-300 transition-colors">Refund Policy</button>
-              <button onClick={() => setAuthPage("contact")} className="text-left hover:text-fuchsia-300 transition-colors">Contact Us</button>
-            </div>
-            <div className="flex flex-col gap-2">
-              <div className={isLight ? "text-xs font-black uppercase tracking-wider text-slate-400 mb-1" : "text-xs font-black uppercase tracking-wider text-zinc-600 mb-1"}>Product</div>
-              {["Features", "How it works", "Pricing", "FAQ"].map(item => (
-                <a key={item} href={`#${item.toLowerCase().replaceAll(" ", "-")}`} className="hover:text-fuchsia-300 transition-colors">{item}</a>
-              ))}
-            </div>
-          </div>
-          <div className={isLight ? "mx-auto mt-10 max-w-7xl border-t border-slate-200 pt-6 text-center text-xs text-slate-400" : "mx-auto mt-10 max-w-7xl border-t border-white/[0.06] pt-6 text-center text-xs text-zinc-600"}>
-            © {new Date().getFullYear()} TryCritique. Built for traders, by traders.
-          </div>
-        </footer>
-        {isDemoOpen && <WatchDemoModal onClose={() => setIsDemoOpen(false)} onStart={() => setAuthPage("register")} isLight={isLight} />}
+        <LandingHowItWorks isLight={isLight} />
+        <LandingTestimonials isLight={isLight} />
+        <LandingPricing isLight={isLight} setAuthPage={setAuthPage} />
+        <LandingFAQ isLight={isLight} />
+        <LandingFinalCTA isLight={isLight} setAuthPage={setAuthPage} />
+        <LandingFooter isLight={isLight} setAuthPage={setAuthPage} />
+        {isDemoOpen && <WatchDemoModal onClose={() => setIsDemoOpen(false)} onStart={() => setAuthPage('register')} isLight={isLight} />}
       </main>
     </div>
   );

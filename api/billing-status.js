@@ -2,6 +2,13 @@ function json(res, status, body) {
   res.status(status).json(body);
 }
 
+// Owner emails always have admin-level billing access (synthetic fallback when no DB row exists).
+const OWNER_ADMIN_EMAILS = (process.env.OWNER_ADMIN_EMAILS || "vazhabuianovi2@gmail.com")
+  .split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+if (!OWNER_ADMIN_EMAILS.includes("vazhabuianovi2@gmail.com")) {
+  OWNER_ADMIN_EMAILS.push("vazhabuianovi2@gmail.com");
+}
+
 async function readBody(req) {
   if (req.body && typeof req.body === "object") return req.body;
   const chunks = [];
@@ -112,9 +119,25 @@ export default async function handler(req, res) {
       ? await fetchLatestSubscription(supabaseUrl, serviceRoleKey, `provider=eq.admin&email=eq.${encodeURIComponent(email)}`)
       : null;
     const byUser = await fetchLatestSubscription(supabaseUrl, serviceRoleKey, `user_id=eq.${encodeURIComponent(user.id)}`);
-    const subscription = adminGrant || byUser || (email
+    let subscription = adminGrant || byUser || (email
       ? await fetchLatestSubscription(supabaseUrl, serviceRoleKey, `email=eq.${encodeURIComponent(email)}`)
       : null);
+
+    // Owner emails always have admin access — synthesize a subscription if no DB row exists
+    if (!subscription && email && OWNER_ADMIN_EMAILS.includes(email)) {
+      subscription = {
+        provider: "admin",
+        email,
+        plan: "Admin Pro",
+        status: "active",
+        current_period_start: new Date().toISOString(),
+        current_period_end: "2099-12-31T23:59:59.000Z",
+        trial_start: null,
+        trial_end: null,
+        cancel_at_period_end: false,
+        canceled_at: null,
+      };
+    }
 
     return json(res, 200, { ok: true, subscription: publicSubscription(subscription) });
   } catch (error) {
