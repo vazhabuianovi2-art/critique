@@ -8799,8 +8799,8 @@ Skipped duplicates: ${duplicateCount}
               <button onClick={createNewAccount} className="account-create-button flex w-full items-center gap-3 border-t border-white/10 px-4 py-4 text-left transition hover:bg-fuchsia-500/10">
                 <span className="account-create-icon flex h-9 w-9 items-center justify-center rounded-lg bg-fuchsia-500/15 text-xl font-black text-fuchsia-300">+</span>
                 <span>
-                  <span className="block text-sm font-black text-fuchsia-300">Create New Account</span>
-                  <span className="block text-xs font-semibold text-zinc-400">Add another trading account</span>
+                  <span className="block text-sm font-black text-white">Create New Account</span>
+                  <span className="block text-xs font-semibold text-white/60">Add another trading account</span>
                 </span>
               </button>
             </motion.div>
