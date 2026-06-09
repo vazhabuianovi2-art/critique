@@ -1310,6 +1310,65 @@ const THEME_STYLE_CSS = `
     color: #64748b !important;
   }
 
+  /* ── Pale color classes → vibrant equivalents for light mode ── */
+  .light-theme .text-emerald-200 { color: #047857 !important; }
+  .light-theme .text-emerald-300 { color: #059669 !important; }
+  .light-theme .text-emerald-400 { color: #059669 !important; }
+  .light-theme .text-red-200     { color: #b91c1c !important; }
+  .light-theme .text-red-300     { color: #dc2626 !important; }
+  .light-theme .text-red-400     { color: #dc2626 !important; }
+  .light-theme .text-amber-200   { color: #92400e !important; }
+  .light-theme .text-amber-300   { color: #b45309 !important; }
+  .light-theme .text-amber-400   { color: #d97706 !important; }
+  .light-theme .text-fuchsia-200 { color: #7e22ce !important; }
+  .light-theme .text-fuchsia-300 { color: #9333ea !important; }
+  .light-theme .text-fuchsia-400 { color: #9333ea !important; }
+  .light-theme .text-violet-200  { color: #6d28d9 !important; }
+  .light-theme .text-violet-300  { color: #7c3aed !important; }
+  .light-theme .text-cyan-200    { color: #0e7490 !important; }
+  .light-theme .text-cyan-300    { color: #0891b2 !important; }
+  .light-theme .text-blue-200    { color: #1d4ed8 !important; }
+  .light-theme .text-blue-300    { color: #2563eb !important; }
+  .light-theme .text-sky-300     { color: #0284c7 !important; }
+  .light-theme .text-pink-300    { color: #db2777 !important; }
+
+  /* ── Low-opacity colored backgrounds → visible tints for light mode ── */
+  .light-theme [class*="bg-emerald-500/1"],
+  .light-theme [class*="bg-emerald-500/2"] {
+    background: rgba(5,150,105,.13) !important;
+    border-color: rgba(5,150,105,.32) !important;
+  }
+  .light-theme [class*="bg-red-500/1"],
+  .light-theme [class*="bg-red-500/2"] {
+    background: rgba(220,38,38,.11) !important;
+    border-color: rgba(220,38,38,.30) !important;
+  }
+  .light-theme [class*="bg-amber-500/1"],
+  .light-theme [class*="bg-amber-500/2"] {
+    background: rgba(217,119,6,.11) !important;
+    border-color: rgba(217,119,6,.30) !important;
+  }
+  .light-theme [class*="bg-fuchsia-500/1"],
+  .light-theme [class*="bg-fuchsia-500/2"] {
+    background: rgba(147,51,234,.10) !important;
+    border-color: rgba(147,51,234,.28) !important;
+  }
+  .light-theme [class*="bg-violet-500/1"],
+  .light-theme [class*="bg-violet-500/2"] {
+    background: rgba(124,58,237,.10) !important;
+    border-color: rgba(124,58,237,.28) !important;
+  }
+  .light-theme [class*="bg-cyan-500/1"],
+  .light-theme [class*="bg-cyan-500/2"] {
+    background: rgba(8,145,178,.11) !important;
+    border-color: rgba(8,145,178,.28) !important;
+  }
+  .light-theme [class*="bg-blue-500/1"],
+  .light-theme [class*="bg-blue-500/2"] {
+    background: rgba(37,99,235,.10) !important;
+    border-color: rgba(37,99,235,.28) !important;
+  }
+
   .light-theme .text-black {
     color: #0f172a !important;
   }
@@ -4092,6 +4151,60 @@ const THEME_STYLE_CSS = `
     color: #111827 !important;
     border-color: rgba(226,232,240,.9) !important;
   }
+
+  /* ── Currency Impact pills (light mode) ── */
+  .light-theme .currency-impact-item {
+    background: #ffffff !important;
+    border-color: rgba(226,232,240,.85) !important;
+    box-shadow: 0 2px 10px rgba(15,23,42,.06) !important;
+  }
+  .light-theme .currency-pill-win {
+    background: rgba(5,150,105,.12) !important;
+    border-color: rgba(5,150,105,.35) !important;
+    color: #047857 !important;
+  }
+  .light-theme .currency-pill-loss {
+    background: rgba(220,38,38,.10) !important;
+    border-color: rgba(220,38,38,.30) !important;
+    color: #b91c1c !important;
+  }
+  .light-theme .currency-pill-neutral {
+    background: #f1f5f9 !important;
+    border-color: rgba(148,163,184,.45) !important;
+    color: #334155 !important;
+  }
+
+  /* ── Activity stat cards (light mode) ── */
+  .light-theme .activity-stat-fuchsia {
+    background: linear-gradient(135deg, #fdf4ff, #faf5ff) !important;
+    border-color: rgba(147,51,234,.30) !important;
+  }
+  .light-theme .activity-stat-fuchsia .text-fuchsia-300,
+  .light-theme .activity-stat-fuchsia .text-zinc-400 { color: #7e22ce !important; }
+
+  .light-theme .activity-stat-emerald {
+    background: linear-gradient(135deg, #f0fdf4, #ecfdf5) !important;
+    border-color: rgba(5,150,105,.30) !important;
+  }
+  .light-theme .activity-stat-emerald .text-emerald-300,
+  .light-theme .activity-stat-emerald .text-zinc-400 { color: #047857 !important; }
+
+  .light-theme .activity-stat-red {
+    background: linear-gradient(135deg, #fef2f2, #fff5f5) !important;
+    border-color: rgba(220,38,38,.28) !important;
+  }
+  .light-theme .activity-stat-red .text-red-300,
+  .light-theme .activity-stat-red .text-zinc-400 { color: #b91c1c !important; }
+
+  .light-theme .activity-stat-amber {
+    background: linear-gradient(135deg, #fffbeb, #fefce8) !important;
+    border-color: rgba(217,119,6,.28) !important;
+  }
+  .light-theme .activity-stat-amber .text-amber-300,
+  .light-theme .activity-stat-amber .text-zinc-400 { color: #92400e !important; }
+
+  .light-theme [class*="activity-stat-"] .bg-white\/5 { opacity: 0 !important; }
+  .light-theme [class*="activity-stat-"] .text-zinc-400 { font-weight: 800 !important; }
 
   .light-theme .calendar-day-number,
   .light-theme .date-picker-day-number {
@@ -14327,7 +14440,7 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
             </SimplePanel>
             <SimplePanel title="Currency Impact" subtitle="Which economic currencies line up with your best or worst days." icon={<Target size={24} />}>
               {newsStats.currencyRows.length ? newsStats.currencyRows.slice(0, 8).map((row) => (
-                <div key={row.name} className="mb-3 rounded-xl border border-white/10 bg-black/35 px-4 py-3">
+                <div key={row.name} className="currency-impact-item mb-3 rounded-xl border border-white/10 bg-black/35 px-4 py-3">
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
                       <div className="font-black text-white">{row.name}</div>
@@ -14336,9 +14449,9 @@ function SimpleStatisticsPage({ trades = [], onExport, economicCalendar, onRefre
                     <div className={`shrink-0 whitespace-nowrap ${row.pnl >= 0 ? "font-black text-emerald-400" : "font-black text-red-400"}`}>{formatMoney(row.pnl)}</div>
                   </div>
                   <div className="mt-3 grid gap-2 text-xs font-black sm:grid-cols-3">
-                    <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-emerald-200">Won {formatMoney(row.grossWin || 0)}</div>
-                    <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-red-200">Lost {formatMoney(Math.abs(row.grossLoss || 0))}</div>
-                    <div className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-zinc-300">{row.wins || 0}W / {row.losses || 0}L / {row.breakEvens || 0}BE</div>
+                    <div className="currency-pill-win rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-emerald-200">Won {formatMoney(row.grossWin || 0)}</div>
+                    <div className="currency-pill-loss rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-red-200">Lost {formatMoney(Math.abs(row.grossLoss || 0))}</div>
+                    <div className="currency-pill-neutral rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-zinc-300">{row.wins || 0}W / {row.losses || 0}L / {row.breakEvens || 0}BE</div>
                   </div>
                 </div>
               )) : (
