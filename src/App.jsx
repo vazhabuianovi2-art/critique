@@ -3585,17 +3585,136 @@ const THEME_STYLE_CSS = `
     color: #5b21b6 !important;
   }
   .light-theme .sidebar-nav-item-active {
-    background: linear-gradient(135deg, rgba(124,58,237,.13) 0%, rgba(139,92,246,.08) 100%) !important;
-    color: #6d28d9 !important;
+    background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%) !important;
+    color: #ffffff !important;
     font-weight: 700 !important;
-    border-left: 3px solid #7c3aed !important;
-    box-shadow: 0 2px 10px rgba(124,58,237,.12) !important;
+    border-left: none !important;
+    box-shadow: 0 4px 14px rgba(109,40,217,.32) !important;
   }
   .light-theme .sidebar-nav-item-active svg,
-  .light-theme .sidebar-nav-item-active .text-fuchsia-400 { color: #6d28d9 !important; }
+  .light-theme .sidebar-nav-item-active .text-fuchsia-400,
+  .light-theme .sidebar-nav-item-active .text-fuchsia-200 { color: #ffffff !important; }
   .light-theme .sidebar-nav-item svg { color: #94a3b8 !important; }
   .light-theme .sidebar-nav-item:hover svg { color: #5b21b6 !important; }
-  .light-theme .sidebar-nav-item-active .bg-fuchsia-500 { background: #7c3aed !important; }
+  .light-theme .sidebar-nav-item-active .bg-fuchsia-500 { background: rgba(255,255,255,.25) !important; }
+
+  /* ── Journal trade rows (light mode) ── */
+  .light-theme .trade-list-row {
+    background: #ffffff !important;
+    border-color: rgba(226,232,240,.85) !important;
+  }
+  .light-theme .trade-list-row:hover {
+    background: #f8f5ff !important;
+    border-color: rgba(124,58,237,.28) !important;
+  }
+  .light-theme .trade-list-row .text-white { color: #0f172a !important; }
+  .light-theme .trade-list-row .text-zinc-300 { color: #334155 !important; }
+  .light-theme .trade-list-row .text-zinc-400,
+  .light-theme .trade-list-row .text-zinc-500,
+  .light-theme .trade-list-row .text-zinc-600 { color: #64748b !important; }
+  .light-theme .trade-list-row .border-white\/8 { border-color: rgba(226,232,240,.8) !important; }
+  .light-theme .trade-list-row .bg-white\/\[0\.03\] { background: #f1f5f9 !important; }
+  .light-theme .trade-list-row .border-\[#0d0d0d\] { border-color: #ffffff !important; }
+
+  /* ── Dashboard mini-calendar (light mode) ── */
+  .light-theme .activity-day-header {
+    background: #f1f5f9 !important;
+    border-color: rgba(226,232,240,.85) !important;
+    color: #64748b !important;
+  }
+  .light-theme .dashboard-activity-grid {
+    background: #f8fafc !important;
+    border-color: rgba(226,232,240,.85) !important;
+    box-shadow: none !important;
+  }
+
+  /* ── Trading Strategies Modal (light mode) ── */
+  .light-theme .strategies-modal-panel {
+    background: #ffffff !important;
+    border-color: rgba(226,232,240,.9) !important;
+    color: #0f172a !important;
+  }
+  .light-theme .strategies-modal-panel .border-white\/8,
+  .light-theme .strategies-modal-panel .border-white\/10,
+  .light-theme .strategies-modal-panel .border-white\/15 { border-color: rgba(226,232,240,.85) !important; }
+  .light-theme .strategies-modal-panel .bg-\[#0a0a0a\],
+  .light-theme .strategies-modal-panel .bg-black,
+  .light-theme .strategies-modal-panel .bg-black\/40 { background: #f8fafc !important; }
+  .light-theme .strategies-modal-panel .text-white,
+  .light-theme .strategies-modal-panel .text-zinc-100,
+  .light-theme .strategies-modal-panel .text-zinc-200 { color: #0f172a !important; }
+  .light-theme .strategies-modal-panel .text-zinc-400,
+  .light-theme .strategies-modal-panel .text-zinc-500 { color: #64748b !important; }
+  .light-theme .strategies-modal-panel .text-fuchsia-300,
+  .light-theme .strategies-modal-panel .text-fuchsia-200 { color: #7c3aed !important; }
+  .light-theme .strategies-modal-panel input,
+  .light-theme .strategies-modal-panel textarea {
+    background: #ffffff !important;
+    border-color: rgba(148,163,184,.4) !important;
+    color: #0f172a !important;
+  }
+  .light-theme .strategies-modal-panel .hover\:border-white\/15:hover { border-color: rgba(124,58,237,.3) !important; }
+  .light-theme .strategies-modal-panel .border-fuchsia-500\/40 { border-color: rgba(124,58,237,.45) !important; }
+  .light-theme .strategies-modal-panel .bg-fuchsia-500\/8 { background: rgba(124,58,237,.08) !important; }
+  .light-theme .strategies-modal-panel .border-white\/20 { border-color: rgba(148,163,184,.5) !important; }
+
+  /* ── MultiSelect Dropdown (light mode) ── */
+  .light-theme .multi-select-trigger {
+    background: #ffffff !important;
+    border-color: rgba(148,163,184,.45) !important;
+    color: #0f172a !important;
+  }
+  .light-theme .multi-select-trigger .text-zinc-600 { color: #94a3b8 !important; }
+  .light-theme .multi-select-trigger .text-zinc-200 { color: #0f172a !important; }
+  .light-theme .multi-select-menu {
+    background: #ffffff !important;
+    border-color: rgba(226,232,240,.9) !important;
+    box-shadow: 0 12px 32px rgba(15,23,42,.14) !important;
+  }
+  .light-theme .multi-select-menu button { color: #334155 !important; }
+  .light-theme .multi-select-menu button:hover { background: rgba(124,58,237,.06) !important; }
+  .light-theme .multi-select-menu .border-white\/20 { border-color: rgba(148,163,184,.45) !important; }
+  .light-theme .multi-select-menu .text-zinc-400 { color: #64748b !important; }
+  .light-theme .multi-select-menu .text-zinc-200 { color: #1e293b !important; }
+
+  /* ── Strategy Dropdown (light mode) ── */
+  .light-theme .strategy-dropdown-trigger {
+    background: #ffffff !important;
+    border-color: rgba(148,163,184,.45) !important;
+    color: #0f172a !important;
+  }
+  .light-theme .strategy-dropdown-trigger .text-zinc-400 { color: #94a3b8 !important; }
+  .light-theme .strategy-dropdown-menu {
+    background: #ffffff !important;
+    border-color: rgba(226,232,240,.9) !important;
+    box-shadow: 0 12px 32px rgba(15,23,42,.14) !important;
+  }
+  .light-theme .strategy-dropdown-menu button { color: #334155 !important; }
+  .light-theme .strategy-dropdown-menu button:hover { background: rgba(124,58,237,.07) !important; color: #6d28d9 !important; }
+  .light-theme .strategy-dropdown-menu .text-zinc-300 { color: #334155 !important; }
+  .light-theme .strategy-dropdown-menu .text-fuchsia-400 { color: #7c3aed !important; }
+  .light-theme .strategy-dropdown-menu .border-white\/8 { border-color: rgba(226,232,240,.8) !important; }
+
+  /* ── Account Dropdown (light mode) ── */
+  .light-theme .account-dropdown-trigger {
+    background: #ffffff !important;
+    border-color: rgba(148,163,184,.45) !important;
+  }
+  .light-theme .account-dropdown-trigger .text-white { color: #0f172a !important; }
+  .light-theme .account-dropdown-trigger .text-zinc-400 { color: #64748b !important; }
+  .light-theme .account-dropdown-trigger .text-fuchsia-400 { color: #7c3aed !important; }
+  .light-theme .account-dropdown-menu {
+    background: #ffffff !important;
+    border-color: rgba(226,232,240,.9) !important;
+    box-shadow: 0 12px 32px rgba(15,23,42,.14) !important;
+  }
+  .light-theme .account-dropdown-menu button { color: #334155 !important; }
+  .light-theme .account-dropdown-menu button:hover { background: rgba(124,58,237,.06) !important; }
+  .light-theme .account-dropdown-menu .text-zinc-200 { color: #0f172a !important; }
+  .light-theme .account-dropdown-menu .text-zinc-500 { color: #64748b !important; }
+  .light-theme .account-dropdown-menu .text-fuchsia-400 { color: #7c3aed !important; }
+  .light-theme .account-dropdown-menu .text-white { color: #0f172a !important; }
+  .light-theme .account-dropdown-menu .hover\:bg-fuchsia-500\/\[0\.06\]:hover { background: rgba(124,58,237,.07) !important; }
 
   /* ── Add Trade Modal (light mode) ── */
   .light-theme .trade-modal-panel {
@@ -9275,7 +9394,7 @@ function TradeListRow({ trade, onView, onEdit, onRemove }) {
                                "bg-amber-400";
 
   return (
-    <div className="group relative flex flex-col gap-3 overflow-hidden rounded-xl border border-white/8 bg-[#0d0d0d] px-5 py-4 transition-all duration-200 hover:border-white/15 hover:bg-[#0f0f0f] sm:flex-row sm:items-center sm:justify-between sm:gap-5">
+    <div className="trade-list-row group relative flex flex-col gap-3 overflow-hidden rounded-xl border border-white/8 bg-[#0d0d0d] px-5 py-4 transition-all duration-200 hover:border-white/15 hover:bg-[#0f0f0f] sm:flex-row sm:items-center sm:justify-between sm:gap-5">
 
       {/* Left — pair + result dot + strategy + meta */}
       <div className="flex min-w-0 items-center gap-3">
@@ -9951,7 +10070,7 @@ function TradingActivityPanel({ trades, selectedDate, onSelectDate }) {
       <div className="dashboard-activity-grid relative z-10 mt-4 rounded-2xl border border-white/10 bg-black/40 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
         <div className="mb-4 grid grid-cols-7 gap-2 text-center text-xs font-black">
           {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map((day) => (
-            <div key={day} className={`rounded-xl border py-2 border-white/10 bg-[#090909] text-zinc-400`}>
+            <div key={day} className={`activity-day-header rounded-xl border py-2 border-white/10 bg-[#090909] text-zinc-400`}>
               {day}
             </div>
           ))}
@@ -10849,13 +10968,13 @@ function MultiSelectDropdown({ value, options = [], onChange, placeholder = "Sel
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-between rounded-xl border border-white/15 bg-black px-4 py-2.5 text-left text-sm transition hover:border-white/25 focus:outline-none"
+        className="multi-select-trigger flex w-full items-center justify-between rounded-xl border border-white/15 bg-black px-4 py-2.5 text-left text-sm transition hover:border-white/25 focus:outline-none"
       >
         <span className={selected.length === 0 ? "text-zinc-600" : "text-zinc-200 truncate"}>{displayText}</span>
         <ChevronDown size={15} className={`ml-2 shrink-0 text-zinc-500 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
-        <div className="absolute z-50 mt-1 w-full rounded-xl border border-white/15 bg-[#0d0d0d] py-1 shadow-xl">
+        <div className="multi-select-menu absolute z-50 mt-1 w-full rounded-xl border border-white/15 bg-[#0d0d0d] py-1 shadow-xl">
           {options.filter((o) => o !== "None").map((option) => {
             const checked = selected.includes(option);
             return (
@@ -11273,7 +11392,7 @@ function AccountDropdown({ account, accounts = [], trades = [], accountBalance, 
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((current) => !current)}
-        className={`flex h-10 w-full items-center justify-between rounded-md border bg-black px-3 text-left transition ${open ? "border-white/20" : "border-white/15 hover:border-white/25"}`}
+        className={`account-dropdown-trigger flex h-10 w-full items-center justify-between rounded-md border bg-black px-3 text-left transition ${open ? "border-white/20" : "border-white/15 hover:border-white/25"}`}
       >
         <span className="flex min-w-0 items-center gap-2.5">
           <span className="shrink-0 text-sm">{selectedType.emoji}</span>
@@ -11290,7 +11409,7 @@ function AccountDropdown({ account, accounts = [], trades = [], accountBalance, 
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
           role="listbox"
-          className="absolute left-0 top-[44px] z-[100] w-full overflow-hidden rounded-md border border-white/15 bg-[#09090b] py-1 shadow-[0_18px_55px_rgba(0,0,0,0.9)]"
+          className="account-dropdown-menu absolute left-0 top-[44px] z-[100] w-full overflow-hidden rounded-md border border-white/15 bg-[#09090b] py-1 shadow-[0_18px_55px_rgba(0,0,0,0.9)]"
         >
           {accounts.map((item) => {
             const isSelected = String(item.id) === String(account?.id);
@@ -11345,12 +11464,12 @@ function StrategyDropdown({ value, options = [], onChange, onAddNew }) {
   return (
     <div ref={ref} className="relative">
       <button type="button" onClick={() => setOpen((o) => !o)}
-        className="flex h-10 w-full items-center justify-between rounded-md border border-white/15 bg-black px-3 text-left text-sm text-zinc-200 outline-none transition hover:border-fuchsia-400/50">
+        className="strategy-dropdown-trigger flex h-10 w-full items-center justify-between rounded-md border border-white/15 bg-black px-3 text-left text-sm text-zinc-200 outline-none transition hover:border-fuchsia-400/50">
         <span className="font-semibold">{selected || "Select strategy"}</span>
         <ChevronDown size={15} className={`text-zinc-400 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
-        <div className="absolute left-0 top-11 z-[9999] w-full overflow-hidden rounded-xl border border-white/10 bg-[#0e0e0e] shadow-[0_18px_55px_rgba(0,0,0,0.9)]">
+        <div className="strategy-dropdown-menu absolute left-0 top-11 z-[9999] w-full overflow-hidden rounded-xl border border-white/10 bg-[#0e0e0e] shadow-[0_18px_55px_rgba(0,0,0,0.9)]">
           {options.length === 0 && (
             <div className="px-4 py-3 text-sm text-zinc-500">No strategies yet</div>
           )}
@@ -11425,7 +11544,7 @@ function TradingStrategiesModal({ strategies = [], onSave, onClose }) {
   return (
     <div className="fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto bg-black/80 p-4 backdrop-blur-md sm:items-center">
       <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] shadow-2xl">
+        className="strategies-modal-panel w-full max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] shadow-2xl">
         {/* Header */}
         <div className="flex items-start justify-between border-b border-white/8 p-6">
           <div className="flex items-center gap-3">
