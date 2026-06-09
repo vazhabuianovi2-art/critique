@@ -3209,6 +3209,7 @@ const THEME_STYLE_CSS = `
     animation: animatedNumberPop .95s ease both;
     text-shadow: 0 2px 18px rgba(0,0,0,.72);
   }
+  .light-theme .animated-number { text-shadow: none !important; }
 
   @keyframes animatedNumberPop {
     0% { opacity: .35; transform: translateY(8px) scale(.96); filter: brightness(.8); }
