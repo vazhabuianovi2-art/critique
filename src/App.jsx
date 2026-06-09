@@ -13746,92 +13746,286 @@ function SimpleMistakeDetectorPage({ trades = [] }) {
   const mainIssue = detector.mainIssue;
   const root = detector.mainRoot;
   const focusPlan = detector.focusPlan || [];
-  const topIssues = detector.issues.slice(0, 4);
+  const topIssues = detector.issues.slice(0, 5);
   const worstSetup = extra.lossGroupsBySetup[0];
   const worstSession = extra.lossGroupsBySession[0];
+  const lossSession = detector.lossProfile?.session && detector.lossProfile.session !== "No session" ? detector.lossProfile.session : null;
+
+  // Data state flags
+  const noTrades = visibleTrades.length === 0;
+  const noLosses = !noTrades && losses.length === 0;
+  const isSingleLoss = losses.length === 1;
+  const isEarlyData = losses.length > 0 && (losses.length < 4 || (mainIssue && mainIssue.count < 2));
+  const isLowConfidence = mainIssue && (detector.confidence || 0) < 50;
+  const hasEnoughData = losses.length >= 3 && mainIssue && !isLowConfidence;
+
+  // Headline wording — no invented certainty
+  let headline, headlineAccent, confidenceNote;
+  if (noTrades) {
+    headline = "Log your first trades to generate your coach report.";
+    headlineAccent = "text-zinc-500";
+    confidenceNote = null;
+  } else if (noLosses) {
+    headline = "No losing trade patterns detected yet.";
+    headlineAccent = "text-emerald-300";
+    confidenceNote = "Keep logging and reviewing trades to track patterns over time.";
+  } else if (!mainIssue) {
+    headline = "Add more tagged losing trades for a full report.";
+    headlineAccent = "text-zinc-400";
+    confidenceNote = null;
+  } else if (isSingleLoss) {
+    headline = "Early signal: " + translateDetectorText(mainIssue.title);
+    headlineAccent = "text-amber-300";
+    confidenceNote = "Based on 1 losing trade. Add more tagged trades to build a stronger pattern.";
+  } else if (isEarlyData || isLowConfidence) {
+    headline = "Possible pattern: " + translateDetectorText(mainIssue.title);
+    headlineAccent = "text-amber-200";
+    confidenceNote = isLowConfidence
+      ? "Low confidence — add more losing trades for a stronger pattern."
+      : "Early data — add more tagged losing trades to confirm this pattern.";
+  } else {
+    headline = "Your #1 Costly Mistake: " + translateDetectorText(mainIssue.title);
+    headlineAccent = "text-red-300";
+    confidenceNote = null;
+  }
 
   return (
     <SimplePageShell
       crumb="Mistake Detector"
-      title="Mistake Detector"
-      subtitle="A simple coach report. It shows your biggest mistake, why it happens, how much it costs, and what to fix next."
+      title="Your AI Coach Report"
+      subtitle="A data-driven review of your losing trade patterns — what's going wrong, where it happens, what it costs, and what to do before your next session."
     >
-      <div className="rounded-lg border border-fuchsia-500/25 bg-gradient-to-r from-fuchsia-950/30 via-black to-red-950/10 p-6">
-        <div className="text-xs font-black uppercase tracking-[0.18em] text-fuchsia-300">Coach Summary</div>
-        <div className="mt-2 text-3xl font-black text-white">{mainIssue ? translateDetectorText(mainIssue.title) : "No clear mistake yet"}</div>
-        <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-zinc-400">
-          {mainIssue ? `${mainIssue.count} losing trade${mainIssue.count === 1 ? "" : "s"} match this pattern. Estimated cost: ${formatMoney(Math.abs(detector.affectedPnl || 0))}.` : "Add losing trades with mistake, emotion, timing and notes so the detector can find patterns."}
-        </p>
+      {/* ── Report headline ─────────────────────────────────────── */}
+      <div className="overflow-hidden rounded-xl border border-fuchsia-500/20 bg-gradient-to-r from-fuchsia-950/30 via-black to-red-950/10 px-6 py-5">
+        <div className="mb-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-fuchsia-400/70">
+          <Target size={11} className="shrink-0" /> AI Coach Report
+        </div>
+        <div className={`text-2xl font-black leading-snug ${headlineAccent}`}>{headline}</div>
+        {confidenceNote && (
+          <p className="mt-2 text-sm font-semibold leading-6 text-zinc-500">{confidenceNote}</p>
+        )}
+        {mainIssue && !noLosses && (
+          <p className="mt-2 text-sm font-semibold leading-6 text-zinc-400">
+            {mainIssue.count} losing trade{mainIssue.count === 1 ? "" : "s"} match this pattern.
+            {detector.affectedPnl ? ` Estimated cost: ${formatMoney(Math.abs(detector.affectedPnl))}.` : ""}
+          </p>
+        )}
       </div>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <SimpleStatCard label="Losses Analyzed" value={losses.length} detail="Only losing trades are used for mistake detection." tone="red" />
-        <SimpleStatCard label="Confidence" value={`${detector.confidence || 0}%`} detail="How often the main mistake appears." tone="fuchsia" />
-        <SimpleStatCard label="Lost P&L" value={formatMoney(Math.abs(detector.affectedPnl || 0))} detail="Total money lost due to this pattern." tone="red" />
-        <SimpleStatCard label="Data Quality" value={`${extra.dataQuality || 0}%`} detail="More filled fields means better analysis." tone={(extra.dataQuality || 0) >= 70 ? "green" : "amber"} />
+      {/* ── Summary cards ─────────────────────────────────────────── */}
+      <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        <SimpleStatCard
+          label="Affected P&L"
+          value={mainIssue ? formatMoney(Math.abs(detector.affectedPnl || 0)) : "—"}
+          detail={mainIssue ? "Total loss tied to this pattern" : "No pattern data yet"}
+          tone="red"
+        />
+        <SimpleStatCard
+          label="Losses Analyzed"
+          value={losses.length}
+          detail="Only losing trades are analyzed"
+          tone="red"
+        />
+        <SimpleStatCard
+          label="Confidence"
+          value={mainIssue ? `${detector.confidence || 0}%` : "—"}
+          detail={
+            !mainIssue ? "Need more data" :
+            (detector.confidence || 0) >= 70 ? "Strong pattern signal" :
+            (detector.confidence || 0) >= 50 ? "Moderate — add more trades" :
+            "Low — needs more tagged losses"
+          }
+          tone={(detector.confidence || 0) >= 70 ? "green" : (detector.confidence || 0) >= 50 ? "fuchsia" : "amber"}
+        />
+        <SimpleStatCard
+          label="Root Cause"
+          value={root ? translateDetectorText(root.title) : "Unknown"}
+          detail="Main category behind the mistake"
+          tone="amber"
+        />
+        <SimpleStatCard
+          label="Data Quality"
+          value={`${extra.dataQuality || 0}%`}
+          detail="More filled fields = better analysis"
+          tone={(extra.dataQuality || 0) >= 70 ? "green" : "amber"}
+        />
       </div>
 
+      {/* ── Low-data notice ───────────────────────────────────────── */}
+      {losses.length > 0 && losses.length < 3 && (
+        <div className="mt-5 flex gap-4 rounded-xl border border-amber-500/25 bg-amber-500/[0.06] px-5 py-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/12 font-black text-amber-300">!</div>
+          <div>
+            <div className="font-black text-white">More data will strengthen this report.</div>
+            <div className="mt-1 text-sm font-semibold leading-6 text-zinc-400">
+              For best accuracy, log at least 3 losing trades and fill in: Mistake, Emotion, Entry Timing, Rule Broken, Setup Quality, Notes, and Screenshot.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── What Went Wrong + Fix Plan ────────────────────────────── */}
       <div className="mt-6 grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-        <SimplePanel title="What Went Wrong" subtitle="The main pattern behind losing trades." icon={<Target size={24} />}>
-          <div className="rounded-lg border border-red-500/25 bg-red-500/10 p-5">
-            <div className="text-sm font-black uppercase tracking-[0.18em] text-red-300">Main Mistake</div>
-            <div className="mt-3 text-3xl font-black text-white">{mainIssue ? translateDetectorText(mainIssue.title) : "No data yet"}</div>
-            <div className="mt-3 text-sm font-semibold leading-6 text-zinc-400">{mainIssue ? translateDetectorFix(mainIssue.fix) : "Log more losing trades to build a reliable pattern."}</div>
-          </div>
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
-            <SimpleStatCard label="Root Cause" value={root ? translateDetectorText(root.title) : "Unknown"} detail="Main reason behind the mistake." tone="amber" />
-            <SimpleStatCard label="Risk Level" value={extra.severityLabel || "Low"} detail="Based on frequency and cost." tone={extra.severity >= 75 ? "red" : extra.severity >= 45 ? "amber" : "green"} />
-          </div>
+        <SimplePanel title="What Went Wrong" subtitle="The main mistake pattern behind your losing trades." icon={<Target size={20} />}>
+          {mainIssue ? (
+            <>
+              <div className="rounded-xl border border-red-500/25 bg-red-500/[0.08] p-5">
+                <div className="text-[10px] font-black uppercase tracking-widest text-red-400">Main Mistake</div>
+                <div className="mt-2 text-2xl font-black text-white">{translateDetectorText(mainIssue.title)}</div>
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <div className="rounded-lg border border-white/8 bg-black/25 p-3">
+                    <div className="text-[10px] font-black uppercase text-zinc-600">Occurrences</div>
+                    <div className="mt-1 font-black text-white">{mainIssue.count} loss{mainIssue.count === 1 ? "" : "es"}</div>
+                  </div>
+                  <div className="rounded-lg border border-white/8 bg-black/25 p-3">
+                    <div className="text-[10px] font-black uppercase text-zinc-600">Cost</div>
+                    <div className="mt-1 font-black text-red-300">{formatMoney(Math.abs(mainIssue.pnl || 0))}</div>
+                  </div>
+                </div>
+                {mainIssue.fix && (
+                  <div className="mt-3 text-sm font-semibold leading-6 text-zinc-400">{translateDetectorFix(mainIssue.fix)}</div>
+                )}
+              </div>
+
+              {topIssues.length > 1 && (
+                <div className="mt-4 space-y-2">
+                  <div className="mb-2 text-[10px] font-black uppercase tracking-widest text-zinc-600">All Ranked Mistakes</div>
+                  {topIssues.map((issue, index) => {
+                    const pct = losses.length ? Math.round((issue.count / losses.length) * 100) : 0;
+                    return (
+                      <div key={issue.key} className="flex items-center gap-3 rounded-lg border border-white/8 bg-black/20 px-4 py-3">
+                        <span className="w-5 shrink-0 text-xs font-black text-zinc-600">{index + 1}</span>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-black text-white">{translateDetectorText(issue.title)}</div>
+                          <div className="mt-0.5 text-xs font-bold text-zinc-500">
+                            {issue.count} loss{issue.count === 1 ? "" : "es"} · {formatMoney(Math.abs(issue.pnl || 0))}
+                          </div>
+                        </div>
+                        <span className="shrink-0 rounded-full border border-red-500/25 bg-red-500/10 px-2 py-0.5 text-[11px] font-black text-red-300">{pct}%</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          ) : (
+            <EmptyDetectorText
+              text={
+                noTrades
+                  ? "Log your first trades to detect mistake patterns."
+                  : noLosses
+                    ? "No losing trades yet — patterns appear once you have a loss."
+                    : "Add losing trades with mistake, emotion, timing, and notes to build a pattern."
+              }
+            />
+          )}
         </SimplePanel>
 
-        <SimplePanel title="Fix Plan" subtitle="Use this before your next trade." icon={<ListChecks size={24} />}>
-          <div className="space-y-3">
-            {(focusPlan.length ? focusPlan.slice(0, 3) : ["Wait for the full setup before entry.", "Do not increase risk after a loss.", "Review the trade before taking the next setup."]).map((step, index) => (
-              <div key={step} className="flex gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-sm font-black text-black">{index + 1}</div>
-                <div className="text-sm font-semibold leading-6 text-zinc-200">{step}</div>
+        <SimplePanel title="Fix Plan" subtitle="Use these rules before, during, and after your next trade." icon={<ListChecks size={20} />}>
+          {focusPlan.length ? (
+            <div className="space-y-3">
+              {focusPlan.slice(0, 3).map((step, index) => (
+                <div key={step} className="flex gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.08] p-4">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-sm font-black text-black">{index + 1}</div>
+                  <div className="text-sm font-semibold leading-6 text-zinc-200">{step}</div>
+                </div>
+              ))}
+              <div className="rounded-xl border border-white/8 bg-black/20 px-4 py-3 text-xs font-semibold leading-5 text-zinc-500">
+                These steps are generated from your tagged mistake and root cause data. They update as you log more trades.
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <EmptyDetectorText
+              text={
+                noTrades
+                  ? "Log your first trades to generate a fix plan."
+                  : noLosses
+                    ? "A fix plan will appear once you have losing trades."
+                    : "Tag mistakes and root causes on losing trades to unlock a personalized fix plan."
+              }
+            />
+          )}
         </SimplePanel>
       </div>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-3">
-        <SimplePanel title="Top Mistakes" subtitle="The most common losing patterns.">
-          <div className="space-y-3">
-            {topIssues.length ? topIssues.map((issue, index) => (
-              <div key={issue.key} className="rounded-lg border border-white/10 bg-black/35 p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="font-black text-white">{index + 1}. {translateDetectorText(issue.title)}</div>
-                    <div className="mt-1 text-xs font-bold text-zinc-400">{issue.count} loss{issue.count === 1 ? "" : "es"} · {formatMoney(Math.abs(issue.pnl))} lost</div>
-                  </div>
-                  <span className="rounded-full bg-red-500/15 px-2 py-1 text-xs font-black text-red-300">{losses.length ? Math.round((issue.count / losses.length) * 100) : 0}%</span>
+      {/* ── Where It Happens ──────────────────────────────────────── */}
+      <div className="mt-6">
+        <SimplePanel title="Where It Happens" subtitle="Session and setup context for your losing trades.">
+          {worstSetup || worstSession || lossSession ? (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              <div className="rounded-xl border border-amber-500/25 bg-amber-500/[0.06] p-4">
+                <div className="text-[10px] font-black uppercase tracking-widest text-amber-400">Worst Setup</div>
+                <div className="mt-2 text-lg font-black text-white">
+                  {worstSetup ? translateDetectorText(worstSetup.name) : "No setup data"}
+                </div>
+                <div className="mt-1 text-sm font-semibold text-zinc-500">
+                  {worstSetup
+                    ? `${worstSetup.count} loss${worstSetup.count === 1 ? "" : "es"} · ${formatMoney(worstSetup.pnl)}`
+                    : "Add setup tags to losing trades"}
                 </div>
               </div>
-            )) : <EmptyDetectorText text="No mistake pattern yet." />}
-          </div>
-        </SimplePanel>
-
-        <SimplePanel title="Where It Happens" subtitle="Setup and session with most loss impact.">
-          <div className="space-y-3">
-            <SimpleStatCard label="Worst Setup" value={worstSetup ? translateDetectorText(worstSetup.name) : "No data"} detail={worstSetup ? formatMoney(worstSetup.pnl) : "Needs more trades"} tone="red" />
-            <SimpleStatCard label="Worst Session" value={worstSession ? translateDetectorText(worstSession.name) : "No data"} detail={worstSession ? formatMoney(worstSession.pnl) : "Needs more trades"} tone="amber" />
-          </div>
-        </SimplePanel>
-
-        <SimplePanel title="Improve Accuracy" subtitle="Fill these fields for better results.">
-          <div className="mb-4 h-3 overflow-hidden rounded-full bg-white/10">
-            <div className="h-full rounded-full bg-gradient-to-r from-fuchsia-500 to-emerald-400" style={{ width: `${extra.dataQuality || 0}%` }} />
-          </div>
-          <div className="space-y-2">
-            {extra.missingTop?.length ? extra.missingTop.slice(0, 4).map((item) => (
-              <div key={item.key} className="flex items-center justify-between rounded-lg border border-white/10 bg-black/35 px-3 py-2 text-sm">
-                <span className="font-bold text-zinc-300">{item.label}</span>
-                <span className="font-black text-amber-300">missing {item.count}</span>
+              <div className="rounded-xl border border-cyan-500/25 bg-cyan-500/[0.06] p-4">
+                <div className="text-[10px] font-black uppercase tracking-widest text-cyan-400">Worst Session</div>
+                <div className="mt-2 text-lg font-black text-white">
+                  {worstSession ? translateDetectorText(worstSession.name) : "No session data"}
+                </div>
+                <div className="mt-1 text-sm font-semibold text-zinc-500">
+                  {worstSession
+                    ? `${worstSession.count} loss${worstSession.count === 1 ? "" : "es"} · ${formatMoney(worstSession.pnl)}`
+                    : "Add session tags to losing trades"}
+                </div>
               </div>
-            )) : <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 p-4 text-sm font-bold text-emerald-300">Your important fields are filled.</div>}
+              {lossSession && (
+                <div className="rounded-xl border border-red-500/25 bg-red-500/[0.06] p-4">
+                  <div className="text-[10px] font-black uppercase tracking-widest text-red-400">Most Common Loss Session</div>
+                  <div className="mt-2 text-lg font-black text-white">{lossSession}</div>
+                  <div className="mt-1 text-sm font-semibold text-zinc-500">Session that appears most in losing trades</div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <EmptyDetectorText text="Add more tagged trades to see where this pattern appears." />
+          )}
+        </SimplePanel>
+      </div>
+
+      {/* ── Improve Accuracy ──────────────────────────────────────── */}
+      <div className="mt-6">
+        <SimplePanel title="Improve Accuracy" subtitle="Tag these fields on losing trades to improve future reports.">
+          <div className="mb-5">
+            <div className="mb-2 flex items-center justify-between text-sm">
+              <span className="font-black text-zinc-400">Data Quality</span>
+              <span className={`font-black ${(extra.dataQuality || 0) >= 70 ? "text-emerald-300" : "text-amber-300"}`}>
+                {extra.dataQuality || 0}%
+              </span>
+            </div>
+            <div className="h-2.5 overflow-hidden rounded-full bg-white/8">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-fuchsia-500 to-emerald-400 transition-all duration-500"
+                style={{ width: `${extra.dataQuality || 0}%` }}
+              />
+            </div>
           </div>
+          {extra.missingTop?.length ? (
+            <div className="space-y-2">
+              {extra.missingTop.slice(0, 5).map((item) => (
+                <div
+                  key={item.key}
+                  className="flex items-center justify-between rounded-lg border border-white/8 bg-black/25 px-4 py-2.5 text-sm"
+                >
+                  <span className="font-semibold text-zinc-300">{item.label}</span>
+                  <span className="font-black text-amber-300">missing {item.count}</span>
+                </div>
+              ))}
+              <div className="mt-2 rounded-xl border border-white/8 bg-black/20 px-4 py-3 text-xs font-semibold leading-5 text-zinc-500">
+                Tag mistakes, emotions, rule breaks, setup quality, and screenshots to improve future reports.
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/[0.08] p-4 text-sm font-black text-emerald-300">
+              Your important fields are filled. Keep tagging trades to maintain report accuracy.
+            </div>
+          )}
         </SimplePanel>
       </div>
     </SimplePageShell>
