@@ -66,56 +66,82 @@ export function LandingHero({ isLight, setAuthPage, onWatchDemo }) {
           <div className="text-xl font-black text-red-400">− $2,360</div>
         </div>
 
-        <div className={isLight ? "overflow-hidden rounded-[1.6rem] border border-violet-300/60 bg-gradient-to-br from-white via-violet-50/40 to-fuchsia-50/30 p-6 shadow-[0_34px_100px_rgba(126,34,206,0.18),0_4px_20px_rgba(109,40,217,0.10)]" : "glass-card-vivid gradient-border glow-fuchsia overflow-hidden rounded-[1.6rem] p-6"}>
-          <div className="mb-5 flex items-center justify-between">
-            <div className={isLight ? "text-sm font-black text-slate-950" : "text-sm font-black text-white"}>Mistake Report · This Week</div>
-            <span className="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-black text-red-400">4 patterns found</span>
-          </div>
+        <div className={isLight ? "overflow-hidden rounded-[1.6rem] border border-violet-200/60 bg-white shadow-[0_40px_110px_rgba(109,40,217,0.16),0_8px_30px_rgba(109,40,217,0.08)]" : "glass-card-vivid gradient-border glow-fuchsia overflow-hidden rounded-[1.6rem]"}>
 
-          <div className="space-y-3">
-            {[
-              { label: "FOMO entries after news spike", count: 6, pct: 72, cost: "− $840", color: "red" },
-              { label: "Trades during London close", count: 4, pct: 48, cost: "− $520", color: "red" },
-              { label: "Oversized risk after a loss", count: 3, pct: 36, cost: "− $390", color: "amber" },
-              { label: "Early exit — fear of giving back", count: 7, pct: 84, cost: "− $610", color: "amber" },
-            ].map(({ label, count, pct, cost, color }) => (
-              <div
-                key={label}
-                className={
-                  isLight
-                    ? color === "red"
-                      ? "rounded-2xl border border-red-300/70 bg-gradient-to-br from-red-50 to-rose-50/60 p-4 shadow-[0_2px_10px_rgba(239,68,68,0.08)]"
-                      : "rounded-2xl border border-amber-300/60 bg-gradient-to-br from-amber-50 to-yellow-50/60 p-4 shadow-[0_2px_10px_rgba(245,158,11,0.08)]"
-                    : color === "red"
-                      ? "rounded-2xl border border-red-500/25 bg-red-500/8 p-4"
-                      : "rounded-2xl border border-amber-500/25 bg-amber-500/8 p-4"
-                }
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className={isLight ? "text-sm font-black text-slate-950" : "text-sm font-black text-white"}>{label}</div>
-                  <div className={color === "red" ? "shrink-0 text-sm font-black text-red-400" : "shrink-0 text-sm font-black text-amber-400"}>{cost}</div>
+          {/* Dark header */}
+          {isLight && (
+            <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-violet-950 to-slate-900 px-6 py-4">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(139,92,246,0.25),transparent_60%)]" />
+              <div className="relative flex items-center justify-between">
+                <div>
+                  <div className="text-[11px] font-black uppercase tracking-widest text-violet-400">Mistake Report</div>
+                  <div className="mt-0.5 text-sm font-black text-white">This Week</div>
                 </div>
-                <div className="mt-2 flex items-center gap-3">
-                  <div className={isLight ? color === "red" ? "h-2 flex-1 rounded-full bg-red-100" : "h-2 flex-1 rounded-full bg-amber-100" : "h-2 flex-1 rounded-full bg-white/10"}>
-                    <div
-                      className={color === "red" ? "h-full rounded-full bg-gradient-to-r from-red-500 to-rose-400" : "h-full rounded-full bg-gradient-to-r from-amber-500 to-yellow-400"}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                  <span className={isLight ? "text-xs font-bold text-slate-500" : "text-xs font-bold text-zinc-500"}>{count}×</span>
-                </div>
+                <span className="rounded-full border border-red-400/40 bg-red-500/20 px-3 py-1 text-xs font-black text-red-300">4 patterns found</span>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
 
-          <div className={isLight ? "mt-5 rounded-2xl border border-violet-300/60 bg-gradient-to-br from-violet-50 to-fuchsia-50/60 p-4 shadow-[0_2px_10px_rgba(109,40,217,0.08)]" : "mt-5 rounded-2xl border border-fuchsia-500/25 bg-fuchsia-500/8 p-4"}>
-            <div className="text-xs font-black uppercase tracking-wider text-fuchsia-400">This week&apos;s focus</div>
-            <p className={isLight ? "mt-2 text-sm font-black text-slate-950" : "mt-2 text-sm font-black text-white"}>
-              Stop entering trades in the first 15 minutes after a major news event.
-            </p>
-            <p className={isLight ? "mt-1 text-xs font-semibold text-slate-500" : "mt-1 text-xs font-semibold text-zinc-400"}>
-              Fixing this alone recovers an estimated $840 per week.
-            </p>
+          <div className={isLight ? "p-5" : "p-6"}>
+            {!isLight && (
+              <div className="mb-5 flex items-center justify-between">
+                <div className="text-sm font-black text-white">Mistake Report · This Week</div>
+                <span className="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-black text-red-400">4 patterns found</span>
+              </div>
+            )}
+
+            <div className="space-y-2.5">
+              {[
+                { label: "FOMO entries after news spike", count: 6, pct: 72, cost: "− $840", color: "red" },
+                { label: "Trades during London close", count: 4, pct: 48, cost: "− $520", color: "red" },
+                { label: "Oversized risk after a loss", count: 3, pct: 36, cost: "− $390", color: "amber" },
+                { label: "Early exit — fear of giving back", count: 7, pct: 84, cost: "− $610", color: "amber" },
+              ].map(({ label, count, pct, cost, color }) => (
+                <div
+                  key={label}
+                  className={
+                    isLight
+                      ? color === "red"
+                        ? "flex items-center gap-3 overflow-hidden rounded-xl border border-red-100 bg-gradient-to-r from-red-50/80 to-white pl-0 pr-4 py-3 shadow-[0_1px_4px_rgba(239,68,68,0.07)]"
+                        : "flex items-center gap-3 overflow-hidden rounded-xl border border-amber-100 bg-gradient-to-r from-amber-50/80 to-white pl-0 pr-4 py-3 shadow-[0_1px_4px_rgba(245,158,11,0.07)]"
+                      : color === "red"
+                        ? "rounded-2xl border border-red-500/25 bg-red-500/8 p-4"
+                        : "rounded-2xl border border-amber-500/25 bg-amber-500/8 p-4"
+                  }
+                >
+                  {isLight && (
+                    <div className={color === "red" ? "h-full w-1 self-stretch rounded-r-full bg-gradient-to-b from-red-500 to-rose-400 shrink-0" : "h-full w-1 self-stretch rounded-r-full bg-gradient-to-b from-amber-500 to-yellow-400 shrink-0"} />
+                  )}
+                  <div className={isLight ? "flex-1 min-w-0" : "w-full"}>
+                    <div className={isLight ? "flex items-center justify-between gap-2" : "flex items-center justify-between gap-3"}>
+                      <div className={isLight ? "text-sm font-black text-slate-800 truncate" : "text-sm font-black text-white"}>{label}</div>
+                      <div className={color === "red" ? "shrink-0 text-sm font-black text-red-500" : "shrink-0 text-sm font-black text-amber-500"}>{cost}</div>
+                    </div>
+                    <div className="mt-2 flex items-center gap-3">
+                      <div className={isLight ? color === "red" ? "h-1.5 flex-1 rounded-full bg-red-100" : "h-1.5 flex-1 rounded-full bg-amber-100" : "h-2 flex-1 rounded-full bg-white/10"}>
+                        <div
+                          className={color === "red" ? "h-full rounded-full bg-gradient-to-r from-red-500 to-rose-400" : "h-full rounded-full bg-gradient-to-r from-amber-500 to-yellow-400"}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <span className={isLight ? "text-xs font-bold text-slate-400" : "text-xs font-bold text-zinc-500"}>{count}×</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className={isLight
+              ? "mt-4 overflow-hidden rounded-xl border border-violet-200/70 bg-gradient-to-br from-violet-600 to-fuchsia-600 p-4 shadow-[0_4px_16px_rgba(109,40,217,0.22)]"
+              : "mt-5 rounded-2xl border border-fuchsia-500/25 bg-fuchsia-500/8 p-4"}>
+              <div className={isLight ? "text-[10px] font-black uppercase tracking-widest text-violet-200" : "text-xs font-black uppercase tracking-wider text-fuchsia-400"}>This week&apos;s focus</div>
+              <p className={isLight ? "mt-2 text-sm font-black text-white" : "mt-2 text-sm font-black text-white"}>
+                Stop entering trades in the first 15 minutes after a major news event.
+              </p>
+              <p className={isLight ? "mt-1 text-xs font-semibold text-violet-200" : "mt-1 text-xs font-semibold text-zinc-400"}>
+                Fixing this alone recovers an estimated $840 per week.
+              </p>
+            </div>
           </div>
         </div>
       </motion.div>
