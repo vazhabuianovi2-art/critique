@@ -32,7 +32,7 @@ export function LandingHeader({ isLight, theme, setTheme, setAuthPage, onGoHome 
             Log In
           </button>
           <button type="button" onClick={() => setAuthPage("register")} className="rounded-xl bg-fuchsia-500 px-4 py-2.5 text-sm font-black text-white shadow-[0_18px_42px_rgba(178,74,242,0.28)] transition hover:bg-fuchsia-400">
-            Try 7 Days Free
+            Start Free Trial
           </button>
         </div>
       </div>

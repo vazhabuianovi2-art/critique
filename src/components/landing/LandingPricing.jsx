@@ -7,10 +7,12 @@ export function LandingPricing({ isLight, setAuthPage }) {
       <div className="mx-auto max-w-3xl text-center">
         <div className={isLight ? "text-sm font-black uppercase tracking-[0.22em] text-fuchsia-500" : "eyebrow-badge inline-flex mb-2"}>Pricing</div>
         <h2 className={isLight ? "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl" : "mt-5 text-5xl font-black leading-[0.97] tracking-tight sm:text-6xl"}>
-          {isLight ? <>Simple price.<br />Serious trading clarity.</> : <><span className="text-white">Simple price.</span><br /><span className="text-gradient-primary">Serious trading clarity.</span></>}
+          {isLight
+            ? <>Simple price.<br />Serious trading clarity.</>
+            : <><span className="text-white">Simple price.</span><br /><span className="text-gradient-primary">Serious trading clarity.</span></>}
         </h2>
         <p className={isLight ? "mx-auto mt-6 max-w-2xl text-lg font-semibold leading-8 text-slate-600" : "mx-auto mt-6 max-w-2xl text-lg font-semibold leading-8 text-zinc-400"}>
-          One plan with the core tools you need to journal, review, and improve every trading session.
+          One plan to review every trade, find your leaks, and build consistency — without overcomplicating it.
         </p>
       </div>
 
@@ -28,7 +30,7 @@ export function LandingPricing({ isLight, setAuthPage }) {
 
             {/* 7-day trial banner */}
             <div className="mt-6 flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-black">7</span>
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-sm font-black text-emerald-400">7</span>
               <div>
                 <div className="text-sm font-black text-emerald-400">7-day free trial</div>
                 <div className={isLight ? "text-xs font-semibold text-slate-500" : "text-xs font-semibold text-zinc-500"}>No credit card required to start</div>
@@ -41,13 +43,17 @@ export function LandingPricing({ isLight, setAuthPage }) {
             </div>
 
             <p className={isLight ? "mt-5 text-sm font-semibold leading-6 text-slate-600" : "mt-5 text-sm font-semibold leading-6 text-zinc-400"}>
-              Built for traders who want a simple system for tracking decisions, mistakes, risk, and progress.
+              Built for traders who want a structured system for reviewing decisions, identifying leaks, and building week-on-week consistency.
             </p>
             <p className={isLight ? "mt-3 text-xs font-bold leading-5 text-slate-500" : "mt-3 text-xs font-bold leading-5 text-zinc-500"}>
               Payments are handled by Dodo Payments as Merchant of Record. TryCritique is a journal and analytics tool, not investment advice or trading signals.
             </p>
 
-            <button type="button" onClick={() => setAuthPage("register")} className="mt-6 flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-sm font-black text-white shadow-[0_18px_36px_rgba(178,74,242,0.24)] transition hover:scale-[1.01]">
+            <button
+              type="button"
+              onClick={() => setAuthPage("register")}
+              className="mt-6 flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 text-sm font-black text-white shadow-[0_18px_36px_rgba(178,74,242,0.24)] transition hover:scale-[1.01]"
+            >
               Start 7-Day Free Trial
               <ChevronRight size={18} />
             </button>
@@ -56,14 +62,14 @@ export function LandingPricing({ isLight, setAuthPage }) {
         </div>
 
         <div className={isLight ? "rounded-[1.6rem] border border-slate-200 bg-white/72 p-6 shadow-sm backdrop-blur-xl" : "rounded-[1.6rem] border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl"}>
-          <div className={isLight ? "mb-5 text-sm font-black uppercase tracking-[0.18em] text-slate-500" : "mb-5 text-sm font-black uppercase tracking-[0.18em] text-zinc-500"}>Included</div>
+          <div className={isLight ? "mb-5 text-sm font-black uppercase tracking-[0.18em] text-slate-500" : "mb-5 text-sm font-black uppercase tracking-[0.18em] text-zinc-500"}>Everything included</div>
           <div className="grid gap-3">
             {[
-              ["Unlimited trades", "Log every setup, result, screenshot and review note."],
-              ["Dashboard analytics", "Track win rate, P&L curve, R multiple and account performance."],
-              ["Mistake detector", "See repeated behavioral leaks and focus on the highest-impact fix."],
-              ["Calendar and statistics", "Review sessions, months, strategies and trading consistency."],
-              ["Backup and restore", "Export or restore your journal data when you need it."],
+              ["Unlimited trade logging", "Every trade with screenshots, strategy, session, emotion, and notes."],
+              ["Mistake Detector", "Know your most costly patterns and get one focused fix per week."],
+              ["Session & strategy analytics", "Find which times, setups, and approaches actually earn."],
+              ["Economic calendar & news impact", "See how high-impact events affect your trading results."],
+              ["Pre-trade routine & discipline", "Structured checklists to reduce emotional decisions."],
             ].map(([title, copy]) => (
               <div key={title} className={isLight ? "rounded-2xl border border-slate-200 bg-slate-50/80 p-4" : "rounded-2xl border border-white/10 bg-black/35 p-4"}>
                 <div className="flex gap-3">

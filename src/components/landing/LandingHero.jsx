@@ -1,118 +1,132 @@
 import React from "react";
-import { Sparkles, ChevronRight, PlayCircle, ChevronDown, ShieldCheck, TrendingUp } from "lucide-react";
+import { AlertTriangle, ChevronRight, PlayCircle, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
-import { BRAND_NAME } from "../../utils/constants";
 
 export function LandingHero({ isLight, setAuthPage, onWatchDemo }) {
-  const metrics = [
-    ["Portfolio Value", "$247,890"],
-    ["Win Rate", "78.3%"],
-    ["Risk", "1.2%"],
-  ];
   return (
-    <section className="relative mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-14 px-5 py-16 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
+    <section className="relative mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-14 px-5 py-16 lg:grid-cols-2 lg:px-8">
       <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="max-w-2xl">
-        <div className={isLight ? "mb-7 inline-flex items-center gap-2 rounded-full border border-fuchsia-300 bg-fuchsia-50 px-4 py-2 text-xs font-black uppercase tracking-wider text-slate-950" : "eyebrow-badge mb-7"}>
-          <Sparkles size={13} />
-          Trading journal for serious growth
+        <div className={isLight ? "mb-7 inline-flex items-center gap-2 rounded-full border border-fuchsia-300 bg-fuchsia-50 px-4 py-2 text-xs font-black uppercase tracking-wider text-fuchsia-700" : "eyebrow-badge mb-7"}>
+          <AlertTriangle size={13} />
+          Trading journal that finds your leaks
         </div>
-        <h1 className="text-6xl font-black leading-[0.93] tracking-tight sm:text-7xl lg:text-8xl">
-          Trade<br />
-          Smarter<br />
-          <span className={isLight ? "bg-gradient-to-r from-blue-500 via-fuchsia-500 to-emerald-500 bg-clip-text text-transparent" : "text-gradient-hero"}>Not Harder</span>
+        <h1 className="text-5xl font-black leading-[0.93] tracking-tight sm:text-6xl lg:text-7xl">
+          Stop Repeating<br />
+          the Same<br />
+          <span className={isLight ? "bg-gradient-to-r from-fuchsia-600 via-purple-500 to-emerald-500 bg-clip-text text-transparent" : "text-gradient-hero"}>
+            Trading Mistakes
+          </span>
         </h1>
-        <p className={isLight ? "mt-8 max-w-xl text-lg font-semibold leading-8 text-slate-600 sm:text-xl" : "mt-8 max-w-xl text-lg font-semibold leading-[1.75] text-zinc-400 sm:text-xl"}>
-          The all-in-one trading journal that tracks your psychology, reveals your edge, and turns every trade into a sharper decision.
+        <p className={isLight ? "mt-8 max-w-xl text-lg font-semibold leading-8 text-slate-600" : "mt-8 max-w-xl text-lg font-semibold leading-[1.75] text-zinc-400"}>
+          TryCritique reviews your trades, detects costly patterns, and shows what to fix before your next trading session.
         </p>
         <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-          <button type="button" onClick={() => setAuthPage("register")} className={isLight ? "inline-flex h-14 items-center justify-center gap-3 rounded-xl bg-white px-8 text-base font-black text-slate-950 shadow-[0_22px_50px_rgba(15,23,42,0.10)] transition hover:scale-[1.02] hover:bg-slate-50" : "btn-primary-glow inline-flex h-14 items-center justify-center gap-3 rounded-xl px-8 text-base font-black text-white"}>
-            Start Free Trial
+          <button
+            type="button"
+            onClick={() => setAuthPage("register")}
+            className={isLight ? "inline-flex h-14 items-center justify-center gap-3 rounded-xl bg-fuchsia-500 px-8 text-base font-black text-white shadow-[0_18px_42px_rgba(178,74,242,0.28)] transition hover:scale-[1.02] hover:bg-fuchsia-400" : "btn-primary-glow inline-flex h-14 items-center justify-center gap-3 rounded-xl px-8 text-base font-black text-white"}
+          >
+            Start 7-Day Free Trial
             <ChevronRight size={19} />
           </button>
-          <button type="button" onClick={onWatchDemo} className={isLight ? "inline-flex h-14 items-center justify-center gap-3 rounded-xl border border-fuchsia-200 bg-white/65 px-8 text-base font-black text-slate-950 transition hover:border-fuchsia-300 hover:bg-white" : "btn-ghost-glow inline-flex h-14 items-center justify-center gap-3 rounded-xl px-8 text-base font-black text-white"}>
+          <button
+            type="button"
+            onClick={onWatchDemo}
+            className={isLight ? "inline-flex h-14 items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-8 text-base font-black text-slate-950 transition hover:border-fuchsia-300 hover:bg-fuchsia-50" : "btn-ghost-glow inline-flex h-14 items-center justify-center gap-3 rounded-xl px-8 text-base font-black text-white"}
+          >
             <PlayCircle size={20} />
-            Watch Demo
+            See Example Mistake Report
           </button>
         </div>
 
-        {/* Free trial note */}
-        <div className={isLight ? "mt-4 flex items-center gap-2 text-sm font-semibold text-slate-500" : "mt-4 flex items-center gap-2 text-sm font-semibold text-zinc-500"}>
+        <div className={isLight ? "mt-5 flex items-center gap-2 text-sm font-semibold text-slate-500" : "mt-5 flex items-center gap-2 text-sm font-semibold text-zinc-500"}>
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 text-[10px] text-emerald-400">✓</span>
-          7-day free trial — no credit card required
+          7-day free trial · no credit card required · cancel anytime
         </div>
 
-        {/* Trust bar */}
-        <div className="mt-8 flex flex-wrap items-center gap-6">
-          {[
-            ["500+", "Active traders"],
-            ["50k+", "Trades logged"],
-            ["4.9★", "User rating"],
-          ].map(([val, label]) => (
-            <div key={label} className="flex items-center gap-2">
-              <span className={isLight ? "text-lg font-black text-slate-950" : "text-lg font-black text-white"}>{val}</span>
-              <span className={isLight ? "text-sm font-semibold text-slate-500" : "text-sm font-semibold text-zinc-500"}>{label}</span>
-            </div>
+        <div className="mt-8 flex flex-wrap gap-2">
+          {["Futures", "Forex", "Crypto", "Stocks", "Options", "Indices"].map((market) => (
+            <span key={market} className={isLight ? "rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-black text-slate-500" : "rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-black text-zinc-400"}>
+              {market}
+            </span>
           ))}
         </div>
       </motion.div>
 
-      <motion.div initial={{ opacity: 0, y: 24, rotate: -2 }} animate={{ opacity: 1, y: 0, rotate: -2 }} whileHover={{ scale: 1.03, rotate: -1, y: -6 }} transition={{ delay: 0.1, duration: 0.65, hover: { type: "spring", stiffness: 200, damping: 20 } }} className="hero-dashboard-stage relative mx-auto w-full max-w-[660px] py-16">
-        <div className={isLight ? "hero-float-card hero-float-profit absolute left-0 top-12 z-20 rounded-2xl border border-fuchsia-200 bg-white/90 px-6 py-4 shadow-[0_20px_70px_rgba(15,23,42,0.16)] backdrop-blur-xl" : "hero-float-card hero-float-profit float-card-glow absolute left-0 top-12 z-20 rounded-2xl px-6 py-4"}>
-          <div className="flex items-center gap-4">
-            <span className="text-3xl font-black text-emerald-400">$</span>
-            <div>
-              <div className={isLight ? "text-xs font-black text-slate-500" : "text-xs font-black text-zinc-500"}>Today's P&L</div>
-              <div className="text-xl font-black text-emerald-400">+$4,280</div>
-            </div>
-          </div>
-        </div>
-        <div className={isLight ? "hero-float-card hero-float-streak absolute right-1 top-40 z-20 rounded-2xl border border-fuchsia-200 bg-white/90 px-5 py-6 shadow-[0_20px_70px_rgba(15,23,42,0.16)] backdrop-blur-xl" : "hero-float-card hero-float-streak float-card-glow absolute right-1 top-40 z-20 rounded-2xl px-5 py-6"}>
-          <TrendingUp className="text-fuchsia-300" size={24} />
-          <div className={isLight ? "mt-3 text-xs font-black text-slate-500" : "mt-3 text-xs font-black text-zinc-500"}>Streak</div>
-          <div className="text-2xl font-black text-fuchsia-300">12W</div>
-        </div>
-        <div className={isLight ? "hero-float-card hero-float-dd absolute bottom-16 right-12 z-20 rounded-xl border border-slate-200 bg-white/90 px-5 py-3 text-sm font-black text-slate-950 shadow-[0_20px_70px_rgba(15,23,42,0.14)]" : "hero-float-card hero-float-dd float-card-glow absolute bottom-16 right-12 z-20 rounded-xl px-5 py-3 text-sm font-black text-cyan-300"}>
-          Max DD: 3.2%
+      {/* Mistake report preview */}
+      <motion.div
+        initial={{ opacity: 0, y: 28 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15, duration: 0.6 }}
+        className="relative mx-auto w-full max-w-[520px]"
+      >
+        {/* Floating leak cost badge */}
+        <div className={isLight ? "absolute -top-4 right-4 z-10 rounded-2xl border border-red-200 bg-white px-5 py-3 shadow-[0_8px_30px_rgba(15,23,42,0.12)]" : "absolute -top-4 right-4 z-10 rounded-2xl border border-red-500/30 bg-zinc-950 px-5 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.55)]"}>
+          <div className={isLight ? "text-xs font-black text-slate-400" : "text-xs font-black text-zinc-500"}>Weekly leak cost</div>
+          <div className="text-xl font-black text-red-400">− $2,360</div>
         </div>
 
-        <div className={isLight ? "hero-dashboard-card relative overflow-hidden rounded-[2rem] border border-fuchsia-200/70 bg-gradient-to-br from-white via-fuchsia-100/60 to-emerald-100/55 p-8 shadow-[0_34px_100px_rgba(126,34,206,0.16)]" : "hero-dashboard-card glass-card-vivid gradient-border glow-fuchsia relative overflow-hidden rounded-[2rem] p-8"}>
-          <div className={isLight ? "absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(178,74,242,0.12),transparent_30%),radial-gradient(circle_at_88%_20%,rgba(16,185,129,0.12),transparent_32%)]" : "absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(178,74,242,0.24),transparent_28%),radial-gradient(circle_at_88%_20%,rgba(16,185,129,0.18),transparent_32%)]"} />
-          <div className="relative z-10">
-            <div className="mb-8 flex items-center justify-between">
-              <div className="flex gap-2">
-                <span className="h-3 w-3 rounded-full bg-red-500" />
-                <span className="h-3 w-3 rounded-full bg-amber-400" />
-                <span className="h-3 w-3 rounded-full bg-emerald-400" />
-              </div>
-              <span className={isLight ? "font-mono text-sm font-black text-slate-400" : "font-mono text-sm font-black text-zinc-400"}>{BRAND_NAME} Pro</span>
-            </div>
-            <div className="flex items-start justify-between gap-6">
-              <div>
-                <div className={isLight ? "text-lg font-black text-slate-600" : "text-lg font-black text-zinc-200"}>Portfolio Value</div>
-                <div className={isLight ? "mt-8 h-3 w-56 rounded-full bg-slate-300" : "mt-8 h-3 w-56 rounded-full bg-zinc-800"}>
-                  <div className="hero-progress-fill h-full w-[78%] origin-left rounded-full bg-gradient-to-r from-emerald-400 to-blue-500" />
+        <div className={isLight ? "overflow-hidden rounded-[1.6rem] border border-fuchsia-200/80 bg-white/92 p-6 shadow-[0_34px_100px_rgba(126,34,206,0.14)]" : "glass-card-vivid gradient-border glow-fuchsia overflow-hidden rounded-[1.6rem] p-6"}>
+          <div className="mb-5 flex items-center justify-between">
+            <div className={isLight ? "text-sm font-black text-slate-950" : "text-sm font-black text-white"}>Mistake Report · This Week</div>
+            <span className="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-black text-red-400">4 patterns found</span>
+          </div>
+
+          <div className="space-y-3">
+            {[
+              { label: "FOMO entries after news spike", count: 6, pct: 72, cost: "− $840", color: "red" },
+              { label: "Trades during London close", count: 4, pct: 48, cost: "− $520", color: "red" },
+              { label: "Oversized risk after a loss", count: 3, pct: 36, cost: "− $390", color: "amber" },
+              { label: "Early exit — fear of giving back", count: 7, pct: 84, cost: "− $610", color: "amber" },
+            ].map(({ label, count, pct, cost, color }) => (
+              <div
+                key={label}
+                className={
+                  isLight
+                    ? color === "red"
+                      ? "rounded-2xl border border-red-200 bg-red-50/80 p-4"
+                      : "rounded-2xl border border-amber-200 bg-amber-50/80 p-4"
+                    : color === "red"
+                      ? "rounded-2xl border border-red-500/25 bg-red-500/8 p-4"
+                      : "rounded-2xl border border-amber-500/25 bg-amber-500/8 p-4"
+                }
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className={isLight ? "text-sm font-black text-slate-950" : "text-sm font-black text-white"}>{label}</div>
+                  <div className={color === "red" ? "shrink-0 text-sm font-black text-red-400" : "shrink-0 text-sm font-black text-amber-400"}>{cost}</div>
+                </div>
+                <div className="mt-2 flex items-center gap-3">
+                  <div className={isLight ? "h-2 flex-1 rounded-full bg-slate-200" : "h-2 flex-1 rounded-full bg-white/10"}>
+                    <div
+                      className={color === "red" ? "h-full rounded-full bg-red-400" : "h-full rounded-full bg-amber-400"}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <span className={isLight ? "text-xs font-bold text-slate-500" : "text-xs font-bold text-zinc-500"}>{count}×</span>
                 </div>
               </div>
-              <div className="text-right text-4xl font-black text-emerald-400">$247,890</div>
-            </div>
-            <div className="mt-7 grid grid-cols-3 gap-4">
-              {metrics.map(([label, value]) => (
-                <div key={label} className={isLight ? "hero-metric-card rounded-2xl border border-slate-200 bg-white/75 p-5 shadow-sm" : "hero-metric-card rounded-2xl border border-white/8 bg-black/20 p-5"}>
-                  <div className={isLight ? "text-xs font-black text-slate-500" : "text-xs font-black text-zinc-500"}>{label}</div>
-                  <div className={isLight ? "mt-3 text-2xl font-black text-slate-950" : "mt-3 text-2xl font-black text-white"}>{value}</div>
-                </div>
-              ))}
-            </div>
-            <div className={isLight ? "mt-6 flex items-center gap-3 rounded-2xl border border-emerald-300 bg-emerald-50 px-5 py-4 text-sm font-black text-emerald-600" : "mt-6 flex items-center gap-3 rounded-2xl border border-emerald-400/25 bg-emerald-400/10 px-5 py-4 text-sm font-black text-emerald-300"}>
-              <ShieldCheck size={18} />
-              Trading on track: strong momentum
-            </div>
+            ))}
+          </div>
+
+          <div className={isLight ? "mt-5 rounded-2xl border border-fuchsia-200 bg-fuchsia-50 p-4" : "mt-5 rounded-2xl border border-fuchsia-500/25 bg-fuchsia-500/8 p-4"}>
+            <div className="text-xs font-black uppercase tracking-wider text-fuchsia-400">This week&apos;s focus</div>
+            <p className={isLight ? "mt-2 text-sm font-black text-slate-950" : "mt-2 text-sm font-black text-white"}>
+              Stop entering trades in the first 15 minutes after a major news event.
+            </p>
+            <p className={isLight ? "mt-1 text-xs font-semibold text-slate-500" : "mt-1 text-xs font-semibold text-zinc-400"}>
+              Fixing this alone recovers an estimated $840 per week.
+            </p>
           </div>
         </div>
       </motion.div>
-      {/* Scroll indicator */}
+
       {!isLight && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }} className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        >
           <span className="text-xs font-bold tracking-widest text-zinc-600 uppercase">Scroll</span>
           <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}>
             <ChevronDown size={20} className="text-zinc-600" />

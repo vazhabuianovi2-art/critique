@@ -1,83 +1,130 @@
 import React from "react";
+import { BookOpen, AlertTriangle, BarChart3, Newspaper, Shield, CalendarDays } from "lucide-react";
 import { motion } from "framer-motion";
+
+const FEATURES = [
+  {
+    icon: BookOpen,
+    title: "Smart Trade Journal",
+    copy: "Log trades with screenshots, strategy, session, emotion, mistake, and result. Everything searchable in seconds.",
+    iconDark: "border-fuchsia-500/30 bg-fuchsia-500/12 text-fuchsia-300",
+    iconLight: "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-600",
+    cardDark: "glass-card rounded-[1.35rem] p-6",
+    cardLight: "rounded-[1.35rem] border border-fuchsia-100 bg-white/85 p-6 shadow-sm",
+  },
+  {
+    icon: AlertTriangle,
+    title: "Mistake Detector",
+    copy: "See which mistakes cost you the most money and where they happen. One focused fix per week — no overwhelm.",
+    iconDark: "border-red-500/30 bg-red-500/12 text-red-300",
+    iconLight: "border-red-200 bg-red-50 text-red-500",
+    cardDark: "glass-card rounded-[1.35rem] p-6 border-red-500/20",
+    cardLight: "rounded-[1.35rem] border border-red-100 bg-white/85 p-6 shadow-sm",
+  },
+  {
+    icon: BarChart3,
+    title: "Session & Strategy Analytics",
+    copy: "Find which sessions, setups, and strategies actually perform. Stop trading the hours and setups that drain you.",
+    iconDark: "border-emerald-500/30 bg-emerald-500/12 text-emerald-300",
+    iconLight: "border-emerald-200 bg-emerald-50 text-emerald-600",
+    cardDark: "glass-card rounded-[1.35rem] p-6",
+    cardLight: "rounded-[1.35rem] border border-emerald-100 bg-white/85 p-6 shadow-sm",
+  },
+  {
+    icon: Newspaper,
+    title: "Economic News Impact",
+    copy: "Track how high-impact news days affect your results. See if you trade better or worse around major events.",
+    iconDark: "border-amber-500/30 bg-amber-500/12 text-amber-300",
+    iconLight: "border-amber-200 bg-amber-50 text-amber-600",
+    cardDark: "glass-card rounded-[1.35rem] p-6",
+    cardLight: "rounded-[1.35rem] border border-amber-100 bg-white/85 p-6 shadow-sm",
+  },
+  {
+    icon: Shield,
+    title: "Pre-Trade Discipline",
+    copy: "Use a pre-trade routine checklist before the session starts. Fewer emotional decisions. Fewer rule breaks.",
+    iconDark: "border-cyan-500/30 bg-cyan-500/12 text-cyan-300",
+    iconLight: "border-cyan-200 bg-cyan-50 text-cyan-600",
+    cardDark: "glass-card rounded-[1.35rem] p-6",
+    cardLight: "rounded-[1.35rem] border border-cyan-100 bg-white/85 p-6 shadow-sm",
+  },
+  {
+    icon: CalendarDays,
+    title: "Calendar Review",
+    copy: "See profitable and losing days visually across the month. Spot weekly patterns and consistency gaps instantly.",
+    iconDark: "border-purple-500/30 bg-purple-500/12 text-purple-300",
+    iconLight: "border-purple-200 bg-purple-50 text-purple-600",
+    cardDark: "glass-card rounded-[1.35rem] p-6",
+    cardLight: "rounded-[1.35rem] border border-purple-100 bg-white/85 p-6 shadow-sm",
+  },
+];
 
 export function LandingFeatures({ isLight }) {
   return (
-    <section id="features" className="mx-auto min-h-screen w-full max-w-7xl scroll-mt-16 px-5 py-24 lg:px-8">
-      <div className="max-w-3xl">
-        <div className={isLight ? "text-sm font-black uppercase tracking-[0.22em] text-fuchsia-500" : "eyebrow-badge inline-flex mb-2"}>Features</div>
-        <h2 className={isLight ? "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl" : "mt-5 text-5xl font-black leading-[0.97] tracking-tight sm:text-6xl"}>
-          {isLight ? <>Everything you need.<br />Nothing you don&apos;t.</> : <><span className="text-white">Everything you need.</span><br /><span className="text-gradient-primary">Nothing you don&apos;t.</span></>}
-        </h2>
-      </div>
+    <section id="features" className="mx-auto w-full max-w-7xl scroll-mt-16 px-5 py-24 lg:px-8">
 
-      <div className="mt-24 grid items-center gap-14 lg:grid-cols-[0.86fr_1.14fr]">
-        <div className="max-w-lg">
-          <div className="text-sm font-black uppercase tracking-[0.22em] text-fuchsia-400">Smart Trade Journal</div>
-          <h3 className={isLight ? "mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl" : "mt-5 text-3xl font-black leading-tight text-white sm:text-4xl"}>
-            Every trade. Every detail.<br />Instantly searchable.
-          </h3>
-          <p className={isLight ? "mt-6 text-lg font-semibold leading-8 text-slate-600" : "mt-6 text-lg font-semibold leading-8 text-zinc-400"}>
-            Log trades in seconds, attach screenshots, add strategy tags, filter by session, emotion, or outcome. Replaces your spreadsheet completely.
-          </p>
-        </div>
-
-        <motion.div whileHover={{ scale: 1.025, y: -8 }} transition={{ type: "spring", stiffness: 220, damping: 22 }} className={isLight ? "overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white/78 shadow-[0_28px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl" : "glass-card gradient-border glow-fuchsia overflow-hidden rounded-[1.35rem]"}>
-          <div className={isLight ? "flex items-center justify-between border-b border-slate-200 px-5 py-4" : "flex items-center justify-between border-b border-white/10 px-5 py-4"}>
-            <div className={isLight ? "text-sm font-black text-slate-950" : "text-sm font-black text-white"}>Trade Journal</div>
-            <div className="flex items-center gap-4">
-              <button type="button" className={isLight ? "rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-500" : "rounded-lg border border-white/12 bg-black px-3 py-1.5 text-xs font-bold text-zinc-400"}>Sort: Date</button>
-              <span className={isLight ? "text-xs font-bold text-slate-500" : "text-xs font-bold text-zinc-400"}>47 trades</span>
-              <span className="grid h-8 w-8 grid-cols-2 gap-0.5 rounded-lg bg-fuchsia-500/18 p-2">
-                <i className="rounded-sm bg-fuchsia-400" />
-                <i className="rounded-sm bg-fuchsia-400/55" />
-                <i className="rounded-sm bg-fuchsia-400/55" />
-                <i className="rounded-sm bg-fuchsia-400" />
-              </span>
+      {/* Problem panel */}
+      <div className={isLight ? "mb-16 overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white/82 p-8 shadow-sm" : "mb-16 glass-card overflow-hidden rounded-[1.35rem] p-8"}>
+        <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+          <div>
+            <div className={isLight ? "text-sm font-black uppercase tracking-[0.22em] text-red-500" : "mb-3 text-sm font-black uppercase tracking-[0.22em] text-red-400"}>
+              The real problem
             </div>
+            <h2 className={isLight ? "mt-4 text-4xl font-black leading-[1.05] tracking-tight text-slate-950" : "mt-4 text-4xl font-black leading-[1.05] tracking-tight text-white"}>
+              Most traders know what they did wrong.<br />
+              <span className={isLight ? "text-red-500" : "text-red-400"}>They just keep doing it anyway.</span>
+            </h2>
+            <p className={isLight ? "mt-5 text-base font-semibold leading-7 text-slate-600" : "mt-5 text-base font-semibold leading-7 text-zinc-400"}>
+              Without a structured review, the same patterns repeat every week. Revenge trades after a loss. FOMO entries after a big move. Late exits out of fear. The cost adds up — and most traders never see the full picture.
+            </p>
           </div>
-
-          <div className={isLight ? "grid grid-cols-5 border-b border-slate-200 text-center" : "grid grid-cols-5 border-b border-white/10 text-center"}>
+          <div className="grid grid-cols-2 gap-3">
             {[
-              ["+$4,280", "Total P&L", "text-emerald-400"],
-              ["68%", "Win Rate", "text-fuchsia-400"],
-              ["47", "Trades", "text-cyan-400"],
-              ["$184", "Avg Win", "text-emerald-400"],
-              ["1.9R", "Avg R", "text-amber-400"],
-            ].map(([value, label, tone]) => (
-              <div key={label} className={isLight ? "border-r border-slate-200 px-3 py-4 last:border-r-0" : "border-r border-white/10 px-3 py-4 last:border-r-0"}>
-                <div className={`text-sm font-black ${tone}`}>{value}</div>
-                <div className={isLight ? "mt-1 text-[11px] font-bold text-slate-500" : "mt-1 text-[11px] font-bold text-zinc-400"}>{label}</div>
+              ["Revenge trading", "after a loss"],
+              ["FOMO entries", "chasing moves"],
+              ["Rule breaks", "under pressure"],
+              ["Late exits", "fear of giving back"],
+              ["Oversized risk", "after drawdown"],
+              ["News-day overtrading", "no edge in volatility"],
+            ].map(([mistake, context]) => (
+              <div key={mistake} className={isLight ? "rounded-2xl border border-red-100 bg-red-50/70 p-4" : "rounded-2xl border border-red-500/20 bg-red-500/8 p-4"}>
+                <div className="text-sm font-black text-red-400">{mistake}</div>
+                <div className={isLight ? "mt-1 text-xs font-semibold text-slate-500" : "mt-1 text-xs font-semibold text-zinc-500"}>{context}</div>
               </div>
             ))}
           </div>
+        </div>
+      </div>
 
-          <div className="grid gap-4 p-4 sm:grid-cols-2">
-            {[
-              ["NQ", "Long", "NY AM · Breakout", "+$580", ["confluence", "trend"], "green"],
-              ["ES", "Short", "London · Mean Revert", "$120", ["fakeout"], "red"],
-              ["AAPL", "Long", "NY AM · Trend Follow", "+$340", ["momentum"], "green"],
-              ["CL", "Long", "NY PM · Breakout", "+$210", ["news", "vol"], "green"],
-            ].map(([symbol, side, meta, pnl, tags, tone]) => (
-              <motion.div key={symbol} whileHover={{ scale: 1.03, y: -3 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className={tone === "red" ? "rounded-2xl border border-red-500/30 bg-red-500/8 p-4 cursor-pointer" : "rounded-2xl border border-emerald-500/30 bg-emerald-500/8 p-4 cursor-pointer"}>
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className={isLight ? "text-lg font-black text-slate-950" : "text-lg font-black text-white"}>
-                      {symbol} <span className={tone === "red" ? "rounded-md bg-red-500/20 px-2 py-1 text-[10px] font-black text-red-400" : "rounded-md bg-emerald-500/20 px-2 py-1 text-[10px] font-black text-emerald-400"}>{side}</span>
-                    </div>
-                    <div className={isLight ? "mt-3 text-xs font-semibold text-slate-500" : "mt-3 text-xs font-semibold text-zinc-400"}>{meta}</div>
-                  </div>
-                  <div className={tone === "red" ? "text-sm font-black text-red-400" : "text-sm font-black text-emerald-400"}>{tone === "red" ? "↘" : "↗"} {pnl}</div>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {tags.map((tag) => (
-                    <span key={tag} className="rounded-full border border-fuchsia-500/35 bg-fuchsia-500/12 px-2.5 py-1 text-[11px] font-bold text-fuchsia-300">{tag}</span>
-                  ))}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+      {/* Solution header */}
+      <div className="mb-12 max-w-3xl">
+        <div className={isLight ? "text-sm font-black uppercase tracking-[0.22em] text-fuchsia-500" : "eyebrow-badge inline-flex mb-2"}>The solution</div>
+        <h2 className={isLight ? "mt-4 text-5xl font-black leading-[0.98] tracking-tight text-slate-950 sm:text-6xl" : "mt-5 text-5xl font-black leading-[0.97] tracking-tight sm:text-6xl"}>
+          {isLight
+            ? <>Every tool you need<br />to stop the leak.</>
+            : <><span className="text-white">Every tool you need</span><br /><span className="text-gradient-primary">to stop the leak.</span></>}
+        </h2>
+        <p className={isLight ? "mt-6 text-lg font-semibold leading-8 text-slate-600" : "mt-6 text-lg font-semibold leading-8 text-zinc-400"}>
+          TryCritique turns every session into structured feedback. Log once, and the platform finds the patterns you keep missing.
+        </p>
+      </div>
+
+      {/* Features grid */}
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {FEATURES.map(({ icon: Icon, title, copy, iconDark, iconLight, cardDark, cardLight }) => (
+          <motion.div
+            key={title}
+            whileHover={{ y: -5, scale: 1.015 }}
+            transition={{ type: "spring", stiffness: 280, damping: 22 }}
+            className={isLight ? cardLight : cardDark}
+          >
+            <span className={`mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border ${isLight ? iconLight : iconDark}`}>
+              <Icon size={22} />
+            </span>
+            <div className={isLight ? "text-lg font-black text-slate-950" : "text-lg font-black text-white"}>{title}</div>
+            <p className={isLight ? "mt-3 text-sm font-semibold leading-6 text-slate-600" : "mt-3 text-sm font-semibold leading-6 text-zinc-400"}>{copy}</p>
+          </motion.div>
+        ))}
       </div>
     </section>
   );

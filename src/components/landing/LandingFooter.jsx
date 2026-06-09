@@ -5,25 +5,27 @@ import { BRAND_NAME } from "../../utils/constants";
 export function LandingFooter({ isLight, setAuthPage }) {
   return (
     <footer className={isLight ? "border-t border-slate-200 bg-white/60 px-5 py-12 text-sm font-bold text-slate-500 lg:px-8" : "border-t border-white/[0.06] px-5 py-12 text-sm font-bold text-zinc-500 lg:px-8"}>
-      <div className="mx-auto max-w-7xl flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
+      <div className="mx-auto flex max-w-7xl flex-col gap-8 md:flex-row md:items-start md:justify-between">
         <div className="max-w-sm">
-          <div className="flex items-center gap-3 mb-3">
+          <div className="mb-3 flex items-center gap-3">
             <BrandBolt className="h-9 w-9 drop-shadow-[0_0_8px_rgba(178,74,242,0.25)]" />
             <span className={isLight ? "text-lg font-black text-slate-950" : "text-lg font-black text-white"}>{BRAND_NAME}</span>
           </div>
-          <p className="leading-6 text-xs">A trading journal and analytics product for self-review. No investment advice, signals, brokerage, or guaranteed returns.</p>
+          <p className="text-xs leading-6">
+            TryCritique is a trading journal and self-review tool. It does not provide trading signals, investment advice, brokerage services, or guaranteed returns.
+          </p>
         </div>
         <div className="flex flex-col gap-2">
-          <div className={isLight ? "text-xs font-black uppercase tracking-wider text-slate-400 mb-1" : "text-xs font-black uppercase tracking-wider text-zinc-600 mb-1"}>Legal</div>
-          <button onClick={() => setAuthPage("terms")} className="text-left hover:text-fuchsia-300 transition-colors">Terms of Service</button>
-          <button onClick={() => setAuthPage("privacy")} className="text-left hover:text-fuchsia-300 transition-colors">Privacy Policy</button>
-          <button onClick={() => setAuthPage("refund")} className="text-left hover:text-fuchsia-300 transition-colors">Refund Policy</button>
-          <button onClick={() => setAuthPage("contact")} className="text-left hover:text-fuchsia-300 transition-colors">Contact Us</button>
+          <div className={isLight ? "mb-1 text-xs font-black uppercase tracking-wider text-slate-400" : "mb-1 text-xs font-black uppercase tracking-wider text-zinc-600"}>Legal</div>
+          <button onClick={() => setAuthPage("terms")} className="text-left transition-colors hover:text-fuchsia-300">Terms of Service</button>
+          <button onClick={() => setAuthPage("privacy")} className="text-left transition-colors hover:text-fuchsia-300">Privacy Policy</button>
+          <button onClick={() => setAuthPage("refund")} className="text-left transition-colors hover:text-fuchsia-300">Refund Policy</button>
+          <button onClick={() => setAuthPage("contact")} className="text-left transition-colors hover:text-fuchsia-300">Contact Us</button>
         </div>
         <div className="flex flex-col gap-2">
-          <div className={isLight ? "text-xs font-black uppercase tracking-wider text-slate-400 mb-1" : "text-xs font-black uppercase tracking-wider text-zinc-600 mb-1"}>Product</div>
-          {["Features", "How it works", "Pricing", "FAQ"].map(item => (
-            <a key={item} href={`#${item.toLowerCase().replaceAll(" ", "-")}`} className="hover:text-fuchsia-300 transition-colors">{item}</a>
+          <div className={isLight ? "mb-1 text-xs font-black uppercase tracking-wider text-slate-400" : "mb-1 text-xs font-black uppercase tracking-wider text-zinc-600"}>Product</div>
+          {["Features", "How it works", "Pricing", "FAQ"].map((item) => (
+            <a key={item} href={`#${item.toLowerCase().replaceAll(" ", "-")}`} className="transition-colors hover:text-fuchsia-300">{item}</a>
           ))}
         </div>
       </div>
