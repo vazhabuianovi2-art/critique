@@ -2671,15 +2671,15 @@ const THEME_STYLE_CSS = `
   }
 
   .calendar-day-weekend {
-    border-color: rgba(178,74,242, 0.32) !important;
-    background: radial-gradient(circle at top right, rgba(178,74,242,.12), #070707 50%) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 0 16px rgba(178,74,242,.12) !important;
+    border-color: rgba(255,255,255, 0.06) !important;
+    background: #070707 !important;
+    box-shadow: none !important;
   }
 
   .calendar-day-empty:hover,
   .calendar-day-weekend:hover {
-    border-color: rgba(178,74,242,.34) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 0 16px rgba(178,74,242,.12) !important;
+    border-color: rgba(255,255,255,.12) !important;
+    box-shadow: none !important;
   }
 
   .calendar-day-win:hover {
@@ -2737,8 +2737,8 @@ const THEME_STYLE_CSS = `
   }
 
   .light-theme .calendar-day-weekend {
-    background: linear-gradient(135deg, #faf5ff 0%, #ffffff 58%, #e7c6fb 100%) !important;
-    border-color: rgba(178,74,242, 0.32) !important;
+    background: #ffffff !important;
+    border-color: rgba(0,0,0, 0.08) !important;
   }
 
   .light-theme .calendar-day-number {
@@ -4474,7 +4474,7 @@ const THEME_STYLE_CSS = `
   .calendar-day-loss { background: linear-gradient(135deg, rgba(239,68,68,.18), rgba(0,0,0,.22)) !important; }
   .calendar-day-breakeven { background: linear-gradient(135deg, rgba(245,158,11,.16), rgba(0,0,0,.22)) !important; }
   .calendar-day-empty,
-  .calendar-day-weekend { background: linear-gradient(135deg, rgba(178,74,242,.09), rgba(0,0,0,.24)) !important; }
+  .calendar-day-weekend { background: rgba(0,0,0,.24) !important; }
 
   .calendar-day-selected {
     border-color: rgba(178,74,242,.85) !important;
@@ -4512,7 +4512,7 @@ const THEME_STYLE_CSS = `
   .light-theme .calendar-day-loss { background: linear-gradient(135deg, #fef2f2 0%, #ffffff 52%, #fee2e2 100%) !important; }
   .light-theme .calendar-day-breakeven { background: linear-gradient(135deg, #fffbeb 0%, #ffffff 52%, #fef3c7 100%) !important; }
   .light-theme .calendar-day-empty,
-  .light-theme .calendar-day-weekend { background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 55%, #f5f3ff 100%) !important; }
+  .light-theme .calendar-day-weekend { background: #ffffff !important; }
 
   @media (max-width: 768px) {
     .calendar-hero-stats-pro,
@@ -9572,7 +9572,7 @@ function TradingActivityPanel({ trades, selectedDate, onSelectDate }) {
       <div className="dashboard-activity-grid relative z-10 mt-4 rounded-2xl border border-white/10 bg-black/40 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
         <div className="mb-4 grid grid-cols-7 gap-2 text-center text-xs font-black">
           {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map((day) => (
-            <div key={day} className={`rounded-xl border py-2 ${day === "SAT" || day === "SUN" ? "border-fuchsia-500/25 bg-fuchsia-500/8 text-fuchsia-400" : "border-white/10 bg-[#090909] text-zinc-400"}`}>
+            <div key={day} className={`rounded-xl border py-2 border-white/10 bg-[#090909] text-zinc-400`}>
               {day}
             </div>
           ))}
@@ -9995,7 +9995,7 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
         <div className="grid min-w-0 grid-cols-7 gap-1.5 xl:min-w-[900px] xl:grid-cols-[repeat(7,minmax(0,1fr))_190px] xl:gap-2">
           {/* Day headers */}
           {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN", "WEEK"].map((day) => (
-            <div key={day} className={`rounded-xl py-2.5 text-center text-[11px] font-black tracking-widest border ${day === "WEEK" ? "hidden xl:block" : ""} ${day === "SAT" || day === "SUN" || day === "WEEK" ? "border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-400" : "border-white/8 bg-white/4 text-zinc-500"}`}>
+            <div key={day} className={`rounded-xl py-2.5 text-center text-[11px] font-black tracking-widest border ${day === "WEEK" ? "hidden xl:block" : ""} ${day === "WEEK" ? "border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-400" : "border-white/8 bg-white/4 text-zinc-500"}`}>
               {day}
             </div>
           ))}
