@@ -2174,11 +2174,11 @@ const THEME_STYLE_CSS = `
   }
 
   .dashboard-hero {
-    border: 1px solid transparent !important;
+    border: 1px solid transparent;
     background:
       linear-gradient(135deg, #14071d 0%, #16081e 48%, #180d17 76%, #21130d 100%) padding-box,
-      linear-gradient(135deg, rgba(178,74,242,.58) 0%, rgba(122,42,170,.48) 58%, rgba(132,76,36,.62) 100%) border-box !important;
-    box-shadow: 0 18px 48px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.035) !important;
+      linear-gradient(135deg, rgba(178,74,242,.58) 0%, rgba(122,42,170,.48) 58%, rgba(132,76,36,.62) 100%) border-box;
+    box-shadow: 0 18px 48px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.035);
   }
 
   .dashboard-hero-bg {
@@ -2218,7 +2218,13 @@ const THEME_STYLE_CSS = `
     transform: scale(1.06);
   }
 
-  .light-theme .dashboard-hero,
+  .light-theme .dashboard-hero {
+    background: linear-gradient(135deg, #ffffff 0%, #faf5ff 52%, #fff8f5 100%) !important;
+    border: 1px solid rgba(178,74,242,.22) !important;
+    box-shadow: 0 8px 28px rgba(178,74,242,.10) !important;
+    color: #0f172a !important;
+  }
+
   .light-theme .dashboard-panel,
   .light-theme .dashboard-activity-card,
   .light-theme .dashboard-recent-list,
@@ -3476,25 +3482,86 @@ const THEME_STYLE_CSS = `
     box-shadow: 18px 0 45px rgba(15,23,42,.06) !important;
   }
 
-  .light-theme aside.fixed button:not(.bg-fuchsia-500),
+  /* ── Sidebar account card (light mode) ── */
   .light-theme .account-sidebar-card {
     background: #ffffff !important;
-    border-color: rgba(226,232,240,.9) !important;
-    color: #111827 !important;
-    box-shadow: 0 10px 26px rgba(15,23,42,.055) !important;
+    border-color: rgba(178,74,242,.22) !important;
+    color: #0f172a !important;
+    box-shadow: 0 4px 14px rgba(178,74,242,.10) !important;
   }
-
-  .light-theme aside.fixed button:hover:not(.bg-fuchsia-500),
   .light-theme .account-sidebar-card:hover {
     background: #faf5ff !important;
-    border-color: rgba(178,74,242,.30) !important;
-    box-shadow: 0 14px 32px rgba(178,74,242,.12) !important;
+    border-color: rgba(178,74,242,.40) !important;
+    box-shadow: 0 8px 22px rgba(178,74,242,.14) !important;
   }
+  .light-theme .account-sidebar-card .text-white,
+  .light-theme .account-sidebar-card .text-zinc-200 { color: #0f172a !important; }
+  .light-theme .account-sidebar-card .text-zinc-400,
+  .light-theme .account-sidebar-card .text-zinc-500 { color: #64748b !important; }
+
+  /* ── Sidebar nav items (light mode) ── */
+  .light-theme .sidebar-nav-item {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #475569 !important;
+  }
+  .light-theme .sidebar-nav-item:hover {
+    background: rgba(178,74,242,.07) !important;
+    color: #6d28d9 !important;
+  }
+  .light-theme .sidebar-nav-item-active {
+    background: rgba(178,74,242,.10) !important;
+    color: #7c3aed !important;
+    font-weight: 700 !important;
+  }
+  .light-theme .sidebar-nav-item-active svg,
+  .light-theme .sidebar-nav-item-active .text-fuchsia-400 { color: #7c3aed !important; }
+  .light-theme .sidebar-nav-item svg { color: #94a3b8 !important; }
+  .light-theme .sidebar-nav-item:hover svg { color: #6d28d9 !important; }
+  .light-theme .sidebar-nav-item-active .bg-fuchsia-500 { background: #7c3aed !important; }
+
+  /* ── Account Modal – dark mode base ── */
+  .account-modal-panel {
+    background: #030303;
+    border: 1px solid #292b31;
+    box-shadow: 0 26px 90px rgba(0,0,0,0.88);
+    color: #ffffff;
+  }
+
+  /* ── Account Modal (light mode) ── */
+  .light-theme .account-modal-panel {
+    background: #ffffff !important;
+    border-color: rgba(226,232,240,.95) !important;
+    box-shadow: 0 26px 80px rgba(15,23,42,.14) !important;
+    color: #0f172a !important;
+  }
+  .light-theme .account-modal-panel .text-white,
+  .light-theme .account-modal-panel .text-zinc-100,
+  .light-theme .account-modal-panel .text-zinc-200,
+  .light-theme .account-modal-panel .text-zinc-300 { color: #0f172a !important; }
+  .light-theme .account-modal-panel .text-zinc-400,
+  .light-theme .account-modal-panel .text-zinc-500 { color: #64748b !important; }
+  .light-theme .account-modal-panel .text-fuchsia-300 { color: #9e1aef !important; }
+  .light-theme .account-modal-panel .border-white\/10,
+  .light-theme .account-modal-panel .border-white\/15 { border-color: rgba(226,232,240,.9) !important; }
+  .light-theme .account-modal-panel input,
+  .light-theme .account-modal-panel select,
+  .light-theme .account-modal-panel textarea {
+    background: #f8fafc !important;
+    border-color: rgba(148,163,184,.4) !important;
+    color: #0f172a !important;
+  }
+  .light-theme .account-modal-panel input::placeholder,
+  .light-theme .account-modal-panel textarea::placeholder { color: #94a3b8 !important; }
+  .light-theme .account-modal-panel .bg-\[#030303\],
+  .light-theme .account-modal-panel .bg-zinc-900,
+  .light-theme .account-modal-panel .bg-zinc-950 { background: #f8fafc !important; }
 
   .light-theme aside.fixed button.bg-fuchsia-500,
   .light-theme .journal-add-btn,
   .light-theme .dashboard-primary-btn,
-  .light-theme button[class*="bg-fuchsia-500"] {
+  .light-theme button[class*="bg-fuchsia-500"]:not(.sidebar-nav-item) {
     background: linear-gradient(135deg, #b24bf3, #8b5cf6) !important;
     color: #ffffff !important;
     border-color: transparent !important;
@@ -3528,12 +3595,58 @@ const THEME_STYLE_CSS = `
     box-shadow: 0 18px 45px rgba(15,23,42,.075) !important;
   }
 
-  .light-theme .dashboard-hero,
   .light-theme .journal-hero,
   .light-theme .calendar-hero-pro {
     background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(250,245,255,.92) 55%, rgba(255,255,255,.96)) !important;
     border-color: rgba(178,74,242,.20) !important;
   }
+
+  /* ── Inline-style gradient headers (Calendar, Statistics, Mistake Detector) ── */
+  .light-theme .page-hero-gradient {
+    background: linear-gradient(135deg, #ffffff 0%, #faf5ff 52%, #fff8f0 100%) !important;
+    border: 1px solid rgba(178,74,242,.25) !important;
+    box-shadow: 0 8px 28px rgba(178,74,242,.10) !important;
+  }
+  .light-theme .page-hero-gradient-bg { opacity: 0 !important; }
+  .light-theme .page-hero-gradient .page-hero-title { color: #0f172a !important; }
+  .light-theme .page-hero-gradient .page-hero-subtitle { color: #64748b !important; }
+  .light-theme .page-hero-gradient * { color: #0f172a; }
+  .light-theme .page-hero-gradient .text-white,
+  .light-theme .page-hero-gradient .text-zinc-100,
+  .light-theme .page-hero-gradient .text-zinc-200,
+  .light-theme .page-hero-gradient .text-zinc-300 { color: #0f172a !important; }
+  .light-theme .page-hero-gradient .text-zinc-400,
+  .light-theme .page-hero-gradient .text-zinc-500 { color: #64748b !important; }
+  .light-theme .page-hero-gradient .text-fuchsia-300,
+  .light-theme .page-hero-gradient .text-fuchsia-200 { color: #9e1aef !important; }
+  .light-theme .page-hero-gradient .text-emerald-300 { color: #059669 !important; }
+  .light-theme .page-hero-gradient .border-white\/10,
+  .light-theme .page-hero-gradient .border-white\/15,
+  .light-theme .page-hero-gradient .border-white\/20 { border-color: rgba(148,163,184,.35) !important; }
+  .light-theme .page-hero-gradient .bg-white\/10,
+  .light-theme .page-hero-gradient .bg-white\/15 { background-color: rgba(0,0,0,.05) !important; }
+  .light-theme .page-hero-gradient .via-white\/15 { opacity: 0 !important; }
+
+  /* ── Dashboard hero dark overlay ── */
+  .light-theme .dashboard-hero-bg { opacity: 0 !important; }
+  .light-theme .dashboard-hero * { color: #0f172a; }
+  .light-theme .dashboard-hero .text-white,
+  .light-theme .dashboard-hero .text-zinc-100,
+  .light-theme .dashboard-hero .text-zinc-200,
+  .light-theme .dashboard-hero .text-zinc-300 { color: #0f172a !important; }
+  .light-theme .dashboard-hero .text-zinc-400,
+  .light-theme .dashboard-hero .text-zinc-500,
+  .light-theme .dashboard-hero .text-zinc-600 { color: #64748b !important; }
+  .light-theme .dashboard-hero .text-fuchsia-300,
+  .light-theme .dashboard-hero .text-fuchsia-200 { color: #9e1aef !important; }
+  .light-theme .dashboard-hero .text-emerald-300 { color: #059669 !important; }
+  .light-theme .dashboard-hero .border-white\/15 { border-color: rgba(178,74,242,.20) !important; }
+  .light-theme .dashboard-hero .border-white\/10 { border-color: rgba(148,163,184,.30) !important; }
+  .light-theme .bg-\[#09090d\] { background-color: #f8fafc !important; }
+  .light-theme .bg-\[#0a0d0c\] { background-color: #f0fdf4 !important; }
+
+  /* ── Routine progress bar track ── */
+  .light-theme .routine-progress-track { background-color: #e2e8f0 !important; }
 
   .light-theme .dashboard-hero::before,
   .light-theme .journal-hero::before,
@@ -3564,6 +3677,52 @@ const THEME_STYLE_CSS = `
     border-color: rgba(178,74,242,.26) !important;
     box-shadow: 0 10px 22px rgba(178,74,242,.10) !important;
   }
+
+  /* ── Stat tile cards – dark mode ──────────────────────────────── */
+  .stat-tile-green  { background: linear-gradient(135deg, #10271f 0%, #0a1713 52%, #070b09 100%); border-color: rgba(16,185,129,0.35); }
+  .stat-tile-red    { background: linear-gradient(135deg, #271010 0%, #170a0a 52%, #0b0707 100%); border-color: rgba(239,68,68,0.35); }
+  .stat-tile-amber  { background: linear-gradient(135deg, #30200b 0%, #1b1207 52%, #0e0a05 100%); border-color: rgba(245,158,11,0.35); }
+  .stat-tile-purple { background: linear-gradient(135deg, #281430 0%, #170c1c 52%, #0b080d 100%); border-color: rgba(178,74,242,0.35); }
+  .stat-tile-green:hover  { border-color: rgba(16,185,129,0.55); }
+  .stat-tile-red:hover    { border-color: rgba(239,68,68,0.55); }
+  .stat-tile-amber:hover  { border-color: rgba(245,158,11,0.55); }
+  .stat-tile-purple:hover { border-color: rgba(178,74,242,0.55); }
+
+  /* ── Stat tile cards – light mode ─────────────────────────────── */
+  .light-theme .stat-tile-green  { background: linear-gradient(145deg,#f0fdf4,#ecfdf5,#ffffff) !important; border-color: rgba(16,185,129,.28) !important; box-shadow: 0 4px 18px rgba(16,185,129,.10) !important; }
+  .light-theme .stat-tile-red    { background: linear-gradient(145deg,#fef2f2,#fff5f5,#ffffff) !important; border-color: rgba(239,68,68,.28) !important; box-shadow: 0 4px 18px rgba(239,68,68,.10) !important; }
+  .light-theme .stat-tile-amber  { background: linear-gradient(145deg,#fffbeb,#fff7ed,#ffffff) !important; border-color: rgba(245,158,11,.28) !important; box-shadow: 0 4px 18px rgba(245,158,11,.10) !important; }
+  .light-theme .stat-tile-purple { background: linear-gradient(145deg,#faf5ff,#f9f1fe,#ffffff) !important; border-color: rgba(178,74,242,.28) !important; box-shadow: 0 4px 18px rgba(178,74,242,.10) !important; }
+  /* hide dark glow in light mode */
+  .light-theme .stat-tile-green .stat-tile-glow,
+  .light-theme .stat-tile-red .stat-tile-glow,
+  .light-theme .stat-tile-amber .stat-tile-glow,
+  .light-theme .stat-tile-purple .stat-tile-glow { opacity: 0 !important; }
+  /* value text colors in light mode */
+  .light-theme .stat-tile-green  .stat-tile-value { color: #059669 !important; }
+  .light-theme .stat-tile-red    .stat-tile-value { color: #dc2626 !important; }
+  .light-theme .stat-tile-amber  .stat-tile-value { color: #d97706 !important; }
+  .light-theme .stat-tile-purple .stat-tile-value { color: #1e1b4b !important; }
+  /* badge in light mode */
+  .light-theme .stat-tile-green  .stat-tile-badge { background: rgba(16,185,129,.12) !important; border-color: rgba(16,185,129,.30) !important; color: #065f46 !important; }
+  .light-theme .stat-tile-red    .stat-tile-badge { background: rgba(239,68,68,.10) !important; border-color: rgba(239,68,68,.30) !important; color: #991b1b !important; }
+  .light-theme .stat-tile-amber  .stat-tile-badge { background: rgba(245,158,11,.12) !important; border-color: rgba(245,158,11,.30) !important; color: #92400e !important; }
+  .light-theme .stat-tile-purple .stat-tile-badge { background: rgba(178,74,242,.10) !important; border-color: rgba(178,74,242,.30) !important; color: #6b21a8 !important; }
+  /* icon box in light mode */
+  .light-theme .stat-tile-green  .stat-tile-icon { background: rgba(16,185,129,.12) !important; border-color: rgba(16,185,129,.30) !important; color: #059669 !important; }
+  .light-theme .stat-tile-red    .stat-tile-icon { background: rgba(239,68,68,.10) !important; border-color: rgba(239,68,68,.30) !important; color: #dc2626 !important; }
+  .light-theme .stat-tile-amber  .stat-tile-icon { background: rgba(245,158,11,.12) !important; border-color: rgba(245,158,11,.30) !important; color: #d97706 !important; }
+  .light-theme .stat-tile-purple .stat-tile-icon { background: rgba(178,74,242,.10) !important; border-color: rgba(178,74,242,.30) !important; color: #7c3aed !important; }
+  /* sparkline in light mode */
+  .light-theme .stat-tile-green  .stat-tile-line { color: #059669 !important; opacity: 0.4 !important; }
+  .light-theme .stat-tile-red    .stat-tile-line { color: #dc2626 !important; opacity: 0.4 !important; }
+  .light-theme .stat-tile-amber  .stat-tile-line { color: #d97706 !important; opacity: 0.4 !important; }
+  .light-theme .stat-tile-purple .stat-tile-line { color: #7c3aed !important; opacity: 0.4 !important; }
+  /* label text in light mode */
+  .light-theme .stat-tile-green .stat-tile-label,
+  .light-theme .stat-tile-red .stat-tile-label,
+  .light-theme .stat-tile-amber .stat-tile-label,
+  .light-theme .stat-tile-purple .stat-tile-label { color: #94a3b8 !important; }
 
   .light-theme .dashboard-dash-card,
   .light-theme .group.relative.overflow-hidden.rounded-xl.border.bg-gradient-to-br,
@@ -8251,9 +8410,9 @@ Skipped duplicates: ${duplicateCount}
             const isActive = active === label && !tradeViewMode;
             return (
               <button key={label} title={label} onClick={() => { setActive(shouldGateForBilling ? "Billing" : label); setTradeViewMode(null); }}
-                className={`relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200
+                className={`sidebar-nav-item relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200
                   ${isActive
-                    ? "bg-fuchsia-500/12 text-fuchsia-200 font-bold"
+                    ? "sidebar-nav-item-active bg-fuchsia-500/12 text-fuchsia-200 font-bold"
                     : "text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
                   }`}>
                 {isActive && <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-fuchsia-500" />}
@@ -9263,7 +9422,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
         <TopCrumb page="Dashboard" className="" />
       </div>
 
-      <div className="dashboard-hero relative overflow-hidden rounded-2xl border border-white/15 bg-[#09090d] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.32)]">
+      <div className="dashboard-hero relative overflow-hidden rounded-2xl p-6">
         {/* Background layers */}
         <div className="dashboard-hero-bg pointer-events-none absolute inset-0" />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
@@ -9377,7 +9536,7 @@ function Dashboard({ stats, account, accountBalance, curve, trades, recentTrades
               </div>
               <div className="mt-6">
                 <div className="mb-2 flex justify-between text-[10px] font-black uppercase tracking-wider text-zinc-500"><span>Checklist Progress</span><span>{routinePercent}%</span></div>
-                <div className="h-4 overflow-hidden rounded-full bg-zinc-900"><div className="h-full rounded-full bg-emerald-600/80" style={{ width: `${routinePercent}%` }} /></div>
+                <div className="routine-progress-track h-4 overflow-hidden rounded-full bg-zinc-900"><div className="h-full rounded-full bg-emerald-600/80" style={{ width: `${routinePercent}%` }} /></div>
               </div>
             </div>
           </button>
@@ -10049,8 +10208,8 @@ function CalendarPage({ trades, onAdd, selectedDate, setSelectedDate, economicCa
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
       <TopCrumb page="Calendar" />
       {/* Header banner */}
-      <div className="mb-6 relative overflow-hidden rounded-2xl px-5 py-4" style={{ border: "1px solid transparent", background: "linear-gradient(135deg, #14071d 0%, #16081e 48%, #180d17 76%, #21130d 100%) padding-box, linear-gradient(135deg, rgba(178,74,242,.58) 0%, rgba(122,42,170,.48) 58%, rgba(132,76,36,.62) 100%) border-box", boxShadow: "0 18px 48px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.035)" }}>
-        <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(circle at 10% 0%, rgba(178,74,242,.09), transparent 34%), radial-gradient(circle at 100% 100%, rgba(123,69,31,.20), transparent 42%), linear-gradient(135deg, rgba(18,6,27,.98) 0%, rgba(20,7,27,.98) 52%, rgba(26,13,20,.98) 78%, rgba(31,18,12,.98) 100%)" }} />
+      <div className="page-hero-gradient mb-6 relative overflow-hidden rounded-2xl px-5 py-4" style={{ border: "1px solid transparent", background: "linear-gradient(135deg, #14071d 0%, #16081e 48%, #180d17 76%, #21130d 100%) padding-box, linear-gradient(135deg, rgba(178,74,242,.58) 0%, rgba(122,42,170,.48) 58%, rgba(132,76,36,.62) 100%) border-box", boxShadow: "0 18px 48px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.035)" }}>
+        <div className="page-hero-gradient-bg pointer-events-none absolute inset-0" style={{ background: "radial-gradient(circle at 10% 0%, rgba(178,74,242,.09), transparent 34%), radial-gradient(circle at 100% 100%, rgba(123,69,31,.20), transparent 42%), linear-gradient(135deg, rgba(18,6,27,.98) 0%, rgba(20,7,27,.98) 52%, rgba(26,13,20,.98) 78%, rgba(31,18,12,.98) 100%)" }} />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
         <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Left: nav + month + subtitle */}
@@ -13610,7 +13769,7 @@ function AccountModal({ account, isNew = false, onSaveAccount, onClose }) {
       <motion.div
         initial={{ opacity: 0, scale: 0.97, y: 8 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="account-modal-scroll w-full max-w-[500px] overflow-y-auto rounded-lg border border-[#292b31] bg-[#030303] px-6 py-5 shadow-[0_26px_90px_rgba(0,0,0,0.88)] sm:max-h-[calc(100vh-56px)]"
+        className="account-modal-panel account-modal-scroll w-full max-w-[500px] overflow-y-auto rounded-lg px-6 py-5 sm:max-h-[calc(100vh-56px)]"
       >
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -13695,19 +13854,19 @@ function SimplePageShell({ crumb, title, subtitle, action, children }) {
       <TopCrumb page={crumb} />
       {/* Hero header — same gradient as dashboard */}
       <div
-        className="mb-7 relative overflow-hidden rounded-2xl px-6 py-5"
+        className="page-hero-gradient mb-7 relative overflow-hidden rounded-2xl px-6 py-5"
         style={{
           border: "1px solid transparent",
           background: "linear-gradient(135deg, #14071d 0%, #16081e 48%, #180d17 76%, #21130d 100%) padding-box, linear-gradient(135deg, rgba(178,74,242,.58) 0%, rgba(122,42,170,.48) 58%, rgba(132,76,36,.62) 100%) border-box",
           boxShadow: "0 18px 48px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.035)",
         }}
       >
-        <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(circle at 10% 0%, rgba(178,74,242,.09), transparent 34%), radial-gradient(circle at 100% 100%, rgba(123,69,31,.20), transparent 42%), linear-gradient(135deg, rgba(18,6,27,.98) 0%, rgba(20,7,27,.98) 52%, rgba(26,13,20,.98) 78%, rgba(31,18,12,.98) 100%)" }} />
+        <div className="page-hero-gradient-bg pointer-events-none absolute inset-0" style={{ background: "radial-gradient(circle at 10% 0%, rgba(178,74,242,.09), transparent 34%), radial-gradient(circle at 100% 100%, rgba(123,69,31,.20), transparent 42%), linear-gradient(135deg, rgba(18,6,27,.98) 0%, rgba(20,7,27,.98) 52%, rgba(26,13,20,.98) 78%, rgba(31,18,12,.98) 100%)" }} />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
         <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="text-4xl font-black tracking-tight text-white">{title}</h1>
-            <p className="mt-2 max-w-3xl text-base font-semibold leading-7 text-zinc-400">{subtitle}</p>
+            <h1 className="page-hero-title text-4xl font-black tracking-tight text-white">{title}</h1>
+            <p className="page-hero-subtitle mt-2 max-w-3xl text-base font-semibold leading-7 text-zinc-400">{subtitle}</p>
           </div>
           {action}
         </div>
@@ -13717,13 +13876,29 @@ function SimplePageShell({ crumb, title, subtitle, action, children }) {
   );
 }
 
-function SimpleStatCard({ label, value, detail, tone = "fuchsia" }) {
-  const color = tone === "green" ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-300" : tone === "red" ? "border-red-500/25 bg-red-500/10 text-red-300" : tone === "amber" ? "border-amber-500/25 bg-amber-500/10 text-amber-300" : "border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300";
+function SimpleStatCard({ label, value, detail, tone = "fuchsia", icon }) {
+  const toneKey = tone === "green" ? "green" : tone === "red" ? "red" : tone === "amber" ? "amber" : "purple";
+  const iconCls = toneKey === "green" ? "border-emerald-500/25 bg-emerald-500/[0.12] text-emerald-300" : toneKey === "red" ? "border-red-500/25 bg-red-500/[0.12] text-red-300" : toneKey === "amber" ? "border-amber-500/25 bg-amber-500/[0.12] text-amber-300" : "border-fuchsia-500/25 bg-fuchsia-500/[0.12] text-fuchsia-300";
+  const valueCls = toneKey === "green" ? "text-emerald-400" : toneKey === "red" ? "text-red-400" : toneKey === "amber" ? "text-amber-300" : "text-zinc-100";
+  const detailCls = toneKey === "green" ? "text-emerald-300/70" : toneKey === "red" ? "text-red-300/70" : toneKey === "amber" ? "text-amber-300/70" : "text-zinc-500";
+  const glowCls = toneKey === "green" ? "bg-emerald-500/[0.09]" : toneKey === "red" ? "bg-red-500/[0.09]" : toneKey === "amber" ? "bg-amber-500/[0.09]" : "bg-fuchsia-500/[0.08]";
+  const lineCls = toneKey === "green" ? "text-emerald-500" : toneKey === "red" ? "text-red-500" : toneKey === "amber" ? "text-amber-500" : "text-violet-500";
   return (
-    <div className={`stats-interactive-card min-w-0 ${tone === "green" ? "stats-card-green" : tone === "amber" ? "stats-card-amber" : "stats-card-purple"} rounded-lg border p-5 ${color}`}>
-      <div className="text-xs font-black uppercase tracking-[0.18em] text-zinc-500">{label}</div>
-      <div className="mt-3 text-3xl font-black text-white">{value}</div>
-      <div className="mt-2 truncate text-sm font-semibold leading-6 text-zinc-400">{detail}</div>
+    <div className={`stat-tile-${toneKey} group relative min-w-0 overflow-hidden rounded-xl border p-5 shadow-[0_16px_36px_rgba(0,0,0,0.24)] transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.01] hover:shadow-[0_20px_42px_rgba(0,0,0,0.34)]`}>
+      <div className={`stat-tile-glow absolute right-0 top-0 h-20 w-20 rounded-bl-3xl ${glowCls}`} />
+      <div className="relative z-10 flex items-start justify-between">
+        <div className="min-w-0">
+          <div className={`stat-tile-label text-xs font-black uppercase tracking-[0.18em] text-zinc-500`}>{label}</div>
+          <div className={`stat-tile-value mt-4 text-3xl font-black ${valueCls}`}>{value}</div>
+        </div>
+        {icon && <div className={`stat-tile-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border text-sm font-black ${iconCls}`}>{icon}</div>}
+      </div>
+      <div className="relative z-10 mt-3 flex items-end justify-between">
+        <div className={`truncate text-sm font-semibold leading-6 ${detailCls}`}>{detail}</div>
+        <svg width="60" height="24" viewBox="0 0 60 24" fill="none" className={`stat-tile-line ${lineCls} ml-2 shrink-0 opacity-50 transition-transform duration-300 group-hover:scale-105 group-hover:opacity-75`}>
+          <path d="M2 19 C5 21, 9 9, 13 13 S19 19, 24 11 S32 8, 37 13 S44 6, 50 8 S54 3, 58 2" stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+        </svg>
+      </div>
     </div>
   );
 }
@@ -13961,25 +14136,51 @@ function StatsSectionTitle({ title, icon, className = "" }) {
 }
 
 function DashboardStatTile({ label, value, badge, tone = "neutral" }) {
-  const valueClass = tone === "green" ? "text-emerald-400" : tone === "red" ? "text-red-400" : "text-zinc-300";
-  const badgeClass = tone === "green" ? "bg-emerald-500/15 text-emerald-300" : tone === "red" ? "bg-red-500/15 text-red-300" : "bg-white/12 text-zinc-200";
+  const toneKey = tone === "green" ? "green" : tone === "red" ? "red" : tone === "amber" ? "amber" : "purple";
+  const iconCls = toneKey === "green" ? "border-emerald-500/25 bg-emerald-500/[0.12] text-emerald-300" : toneKey === "red" ? "border-red-500/25 bg-red-500/[0.12] text-red-300" : toneKey === "amber" ? "border-amber-500/25 bg-amber-500/[0.12] text-amber-300" : "border-fuchsia-500/25 bg-fuchsia-500/[0.12] text-fuchsia-300";
+  const valueCls = toneKey === "green" ? "text-emerald-400" : toneKey === "red" ? "text-red-400" : toneKey === "amber" ? "text-amber-300" : "text-zinc-100";
+  const badgeCls = toneKey === "green" ? "border-emerald-500/25 bg-emerald-500/[0.08] text-emerald-300" : toneKey === "red" ? "border-red-500/25 bg-red-500/[0.08] text-red-300" : toneKey === "amber" ? "border-amber-500/25 bg-amber-500/[0.08] text-amber-300" : "border-fuchsia-500/25 bg-fuchsia-500/[0.08] text-fuchsia-200";
+  const glowCls = toneKey === "green" ? "bg-emerald-500/[0.09]" : toneKey === "red" ? "bg-red-500/[0.09]" : toneKey === "amber" ? "bg-amber-500/[0.09]" : "bg-fuchsia-500/[0.08]";
+  const lineCls = toneKey === "green" ? "text-emerald-500" : toneKey === "red" ? "text-red-500" : toneKey === "amber" ? "text-amber-500" : "text-violet-500";
   return (
-    <div className={`stats-interactive-card ${tone === "green" ? "stats-card-green" : tone === "red" ? "stats-card-amber" : "stats-card-purple"} rounded-lg border border-white/10 p-5 text-center shadow-[0_16px_45px_rgba(0,0,0,0.20)]`}>
-      <div className="mx-auto mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-xs font-black text-zinc-400">$</div>
-      <div className="text-xs font-black uppercase tracking-wider text-zinc-500">{label}</div>
-      <div className={`mt-4 text-3xl font-black ${valueClass}`}>{value}</div>
-      {badge && <div className={`mx-auto mt-3 inline-flex rounded-full px-3 py-1 text-xs font-black ${badgeClass}`}>{badge}</div>}
+    <div className={`stat-tile-${toneKey} group relative overflow-hidden rounded-xl border p-5 shadow-[0_16px_36px_rgba(0,0,0,0.24)] transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.01] hover:shadow-[0_20px_42px_rgba(0,0,0,0.34)]`}>
+      <div className={`stat-tile-glow absolute right-0 top-0 h-20 w-20 rounded-bl-3xl ${glowCls}`} />
+      <div className="relative z-10 flex items-start justify-between">
+        <div>
+          <div className={`stat-tile-label text-xs font-black uppercase tracking-wider text-zinc-500`}>{label}</div>
+          <div className={`stat-tile-value mt-4 text-3xl font-black ${valueCls}`}>{value}</div>
+        </div>
+        <div className={`stat-tile-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border text-sm font-black ${iconCls}`}>$</div>
+      </div>
+      <div className="relative z-10 mt-3 flex items-end justify-between">
+        {badge && <span className={`stat-tile-badge rounded-md border px-2 py-1 text-[10px] font-black ${badgeCls}`}>{badge}</span>}
+        <svg width="70" height="28" viewBox="0 0 70 28" fill="none" className={`stat-tile-line ${lineCls} opacity-55 transition-transform duration-300 group-hover:scale-105 group-hover:opacity-80`}>
+          <path d="M2 22 C7 24, 10 10, 15 15 S22 22, 27 13 S37 10, 42 15 S50 7, 56 9 S62 4, 68 2" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+        </svg>
+      </div>
     </div>
   );
 }
 
 function AdvancedAnalyticsTile({ label, value, badge, active, tone = "green" }) {
-  const activeClass = active ? "stats-card-purple border-fuchsia-500/60" : tone === "amber" ? "stats-card-amber" : tone === "green" ? "stats-card-green" : "stats-card-purple";
+  const toneKey = active ? "purple" : tone === "amber" ? "amber" : tone === "fuchsia" ? "purple" : "green";
+  const valueCls = toneKey === "green" ? "text-emerald-400" : toneKey === "amber" ? "text-amber-300" : "text-zinc-100";
+  const badgeCls = toneKey === "green" ? "border-emerald-500/25 bg-emerald-500/[0.08] text-emerald-300" : toneKey === "amber" ? "border-amber-500/25 bg-amber-500/[0.08] text-amber-300" : "border-fuchsia-500/25 bg-fuchsia-500/[0.08] text-fuchsia-200";
+  const glowCls = toneKey === "green" ? "bg-emerald-500/[0.09]" : toneKey === "amber" ? "bg-amber-500/[0.09]" : "bg-fuchsia-500/[0.08]";
+  const lineCls = toneKey === "green" ? "text-emerald-500" : toneKey === "amber" ? "text-amber-500" : "text-violet-500";
   return (
-    <div className={`stats-interactive-card ${activeClass} rounded-lg border p-6 text-center`}>
-      <div className="text-xs font-black uppercase tracking-wider text-zinc-500">{label}</div>
-      <div className="mt-4 text-3xl font-black text-emerald-400">{value}</div>
-      {badge && <div className="mx-auto mt-3 inline-flex rounded-md bg-white/10 px-3 py-1 text-xs font-black text-zinc-300">{badge}</div>}
+    <div className={`stat-tile-${toneKey} group relative overflow-hidden rounded-xl border p-5 shadow-[0_16px_36px_rgba(0,0,0,0.24)] transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.01] hover:shadow-[0_20px_42px_rgba(0,0,0,0.34)]`}>
+      <div className={`stat-tile-glow absolute right-0 top-0 h-20 w-20 rounded-bl-3xl ${glowCls}`} />
+      <div className="relative z-10">
+        <div className={`stat-tile-label text-xs font-black uppercase tracking-wider text-zinc-500`}>{label}</div>
+        <div className={`stat-tile-value mt-4 text-3xl font-black ${valueCls}`}>{value}</div>
+      </div>
+      <div className="relative z-10 mt-3 flex items-end justify-between">
+        {badge && <span className={`stat-tile-badge rounded-md border px-2 py-1 text-[10px] font-black ${badgeCls}`}>{badge}</span>}
+        <svg width="70" height="28" viewBox="0 0 70 28" fill="none" className={`stat-tile-line ${lineCls} opacity-55 transition-transform duration-300 group-hover:scale-105 group-hover:opacity-80`}>
+          <path d="M2 22 C7 24, 10 10, 15 15 S22 22, 27 13 S37 10, 42 15 S50 7, 56 9 S62 4, 68 2" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+        </svg>
+      </div>
     </div>
   );
 }
@@ -15365,77 +15566,54 @@ function DetectorGroupPanel({ title, rows, empty }) {
 
 function StatisticsMetricCard({ title, value, sub, icon, tone = "white", active }) {
   const upperTitle = String(title || "").toUpperCase();
-  const finalTone = upperTitle.includes("WIN") ? "green" : upperTitle.includes("LOSS") || upperTitle.includes("DRAWDOWN") ? "red" : tone;
-
-  const cardToneClass = {
-    green: "border-emerald-500/30 bg-gradient-to-br from-emerald-950/40 via-emerald-950/10 to-black hover:border-emerald-400/80 hover:shadow-emerald-500/20",
-    red: "border-red-500/30 bg-gradient-to-br from-red-950/40 via-red-950/10 to-black hover:border-red-400/80 hover:shadow-red-500/20",
-    amber: "border-amber-500/30 bg-gradient-to-br from-amber-950/35 via-amber-950/10 to-black hover:border-amber-400/80 hover:shadow-amber-500/20",
-    white: active ? "border-fuchsia-500/35 bg-gradient-to-br from-fuchsia-950/35 via-black to-black hover:border-fuchsia-400/80 hover:shadow-fuchsia-500/20" : "border-fuchsia-500/20 bg-gradient-to-br from-zinc-950 via-black to-black hover:border-fuchsia-400/70 hover:shadow-fuchsia-500/15",
-  }[finalTone] || "border-fuchsia-500/20 bg-gradient-to-br from-zinc-950 via-black to-black";
-
-  const iconClass = {
-    green: "bg-emerald-500/10 text-emerald-300",
-    red: "bg-red-500/10 text-red-300",
-    amber: "bg-amber-500/10 text-amber-300",
-    white: "bg-fuchsia-500/10 text-fuchsia-300",
-  }[finalTone] || "bg-fuchsia-500/10 text-fuchsia-300";
-
-  const valueColor = {
-    green: "text-emerald-400",
-    red: "text-red-400",
-    amber: "text-amber-400",
-    white: "text-white",
-  }[finalTone] || "text-white";
-
-  const subClass = finalTone === "green" ? "border-emerald-500/25 bg-emerald-500/15 text-emerald-300" : finalTone === "red" ? "border-red-500/25 bg-red-500/15 text-red-300" : finalTone === "amber" ? "border-amber-500/25 bg-amber-500/15 text-amber-300" : "border-fuchsia-500/25 bg-fuchsia-500/15 text-fuchsia-200";
+  const rawTone = upperTitle.includes("WIN") ? "green" : upperTitle.includes("LOSS") || upperTitle.includes("DRAWDOWN") ? "red" : tone;
+  const toneKey = rawTone === "green" ? "green" : rawTone === "red" ? "red" : rawTone === "amber" ? "amber" : "purple";
+  const iconCls = toneKey === "green" ? "border-emerald-500/25 bg-emerald-500/[0.12] text-emerald-300" : toneKey === "red" ? "border-red-500/25 bg-red-500/[0.12] text-red-300" : toneKey === "amber" ? "border-amber-500/25 bg-amber-500/[0.12] text-amber-300" : "border-fuchsia-500/25 bg-fuchsia-500/[0.12] text-fuchsia-300";
+  const valueCls = toneKey === "green" ? "text-emerald-400" : toneKey === "red" ? "text-red-400" : toneKey === "amber" ? "text-amber-300" : "text-zinc-100";
+  const badgeCls = toneKey === "green" ? "border-emerald-500/25 bg-emerald-500/[0.08] text-emerald-300" : toneKey === "red" ? "border-red-500/25 bg-red-500/[0.08] text-red-300" : toneKey === "amber" ? "border-amber-500/25 bg-amber-500/[0.08] text-amber-300" : "border-fuchsia-500/25 bg-fuchsia-500/[0.08] text-fuchsia-200";
+  const glowCls = toneKey === "green" ? "bg-emerald-500/[0.09]" : toneKey === "red" ? "bg-red-500/[0.09]" : toneKey === "amber" ? "bg-amber-500/[0.09]" : "bg-fuchsia-500/[0.08]";
+  const lineCls = toneKey === "green" ? "text-emerald-500" : toneKey === "red" ? "text-red-500" : toneKey === "amber" ? "text-amber-500" : "text-violet-500";
 
   return (
-    <button className={`statistics-metric-card statistics-core-card group relative min-h-[180px] overflow-hidden rounded-xl border p-5 text-center transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:shadow-2xl ${cardToneClass}`}>
-      <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-white/5 blur-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-      <div className="relative z-10 mx-auto flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider text-zinc-400">
-        <span className={`flex h-7 w-7 items-center justify-center rounded-md ${iconClass}`}>{icon}</span>
-        {title}
+    <div className={`statistics-metric-card stat-tile-${toneKey} group relative overflow-hidden rounded-xl border p-5 shadow-[0_16px_36px_rgba(0,0,0,0.24)] transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.01] hover:shadow-[0_20px_42px_rgba(0,0,0,0.34)]`}>
+      <div className={`stat-tile-glow absolute right-0 top-0 h-20 w-20 rounded-bl-3xl ${glowCls}`} />
+      <div className="relative z-10 flex items-start justify-between">
+        <div>
+          <div className={`stat-tile-label text-xs font-black uppercase tracking-wider text-zinc-500`}>{title}</div>
+          <div className={`stat-tile-value mt-4 text-3xl font-black ${valueCls}`}><AnimatedValue value={value} /></div>
+        </div>
+        <div className={`stat-tile-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border text-base font-black ${iconCls}`}>{icon}</div>
       </div>
-      <div className={`relative z-10 mt-5 text-3xl font-black ${valueColor}`}><AnimatedValue value={value} /></div>
-      {sub && <div className={`relative z-10 mx-auto mt-4 w-fit rounded-md border px-3 py-1 text-[10px] font-bold ${subClass}`}>{sub}</div>}
-    </button>
+      <div className="relative z-10 mt-3 flex items-end justify-between">
+        {sub && <span className={`stat-tile-badge rounded-md border px-2 py-1 text-[10px] font-black ${badgeCls}`}>{sub}</span>}
+        <svg width="70" height="28" viewBox="0 0 70 28" fill="none" className={`stat-tile-line ${lineCls} opacity-55 transition-transform duration-300 group-hover:scale-105 group-hover:opacity-80`}>
+          <path d="M2 22 C7 24, 10 10, 15 15 S22 22, 27 13 S37 10, 42 15 S50 7, 56 9 S62 4, 68 2" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+        </svg>
+      </div>
+    </div>
   );
 }
 
 function AdvancedStatCard({ title, value, sub, tone, muted }) {
-  const styles = {
-    fuchsia: {
-      card: "border-fuchsia-500/35 bg-gradient-to-br from-fuchsia-950/35 via-black to-black hover:border-fuchsia-400/90 hover:shadow-fuchsia-500/25",
-      glow: "bg-fuchsia-500/20",
-      value: muted ? "text-fuchsia-300" : "text-fuchsia-400",
-      sub: "bg-fuchsia-500/15 text-fuchsia-200 border-fuchsia-500/25",
-    },
-    green: {
-      card: "border-emerald-500/30 bg-gradient-to-br from-emerald-950/50 via-emerald-950/10 to-black hover:border-emerald-400/90 hover:shadow-emerald-500/25",
-      glow: "bg-emerald-500/18",
-      value: "text-emerald-500",
-      sub: "bg-emerald-500/15 text-emerald-300 border-emerald-500/25",
-    },
-    red: {
-      card: "border-red-500/30 bg-gradient-to-br from-red-950/50 via-red-950/10 to-black hover:border-red-400/90 hover:shadow-red-500/25",
-      glow: "bg-red-500/18",
-      value: "text-red-400",
-      sub: "bg-red-500/15 text-red-300 border-red-500/25",
-    },
-  };
-  const s = styles[tone] || styles.fuchsia;
+  const toneKey = tone === "green" ? "green" : tone === "red" ? "red" : tone === "amber" ? "amber" : "purple";
+  const valueCls = toneKey === "green" ? "text-emerald-400" : toneKey === "red" ? "text-red-400" : toneKey === "amber" ? "text-amber-300" : (muted ? "text-fuchsia-300" : "text-zinc-100");
+  const badgeCls = toneKey === "green" ? "border-emerald-500/25 bg-emerald-500/[0.08] text-emerald-300" : toneKey === "red" ? "border-red-500/25 bg-red-500/[0.08] text-red-300" : toneKey === "amber" ? "border-amber-500/25 bg-amber-500/[0.08] text-amber-300" : "border-fuchsia-500/25 bg-fuchsia-500/[0.08] text-fuchsia-200";
+  const glowCls = toneKey === "green" ? "bg-emerald-500/[0.09]" : toneKey === "red" ? "bg-red-500/[0.09]" : toneKey === "amber" ? "bg-amber-500/[0.09]" : "bg-fuchsia-500/[0.08]";
+  const lineCls = toneKey === "green" ? "text-emerald-500" : toneKey === "red" ? "text-red-500" : toneKey === "amber" ? "text-amber-500" : "text-violet-500";
   return (
-    <button className={`group relative overflow-hidden rounded-xl border p-7 text-center transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:shadow-2xl ${s.card}`}>
-      <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-        <div className={`absolute -right-12 -top-12 h-32 w-32 rounded-full blur-2xl ${s.glow}`} />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+    <div className={`stat-tile-${toneKey} group relative overflow-hidden rounded-xl border p-5 shadow-[0_16px_36px_rgba(0,0,0,0.24)] transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.01] hover:shadow-[0_20px_42px_rgba(0,0,0,0.34)]`}>
+      <div className={`stat-tile-glow absolute right-0 top-0 h-20 w-20 rounded-bl-3xl ${glowCls}`} />
+      <div className="relative z-10">
+        <div className={`stat-tile-label text-xs font-black uppercase tracking-wider text-zinc-500`}>{title}</div>
+        <div className={`stat-tile-value mt-4 text-3xl font-black ${valueCls}`}>{value}</div>
       </div>
-      <div className="relative z-10 text-xs font-black uppercase tracking-wider text-zinc-400">{title}</div>
-      <div className={`relative z-10 mt-5 text-3xl font-black ${s.value}`}>{value}</div>
-      {sub && <div className={`relative z-10 mx-auto mt-4 w-fit rounded-md border px-3 py-1 text-[10px] font-bold ${s.sub}`}>{sub}</div>}
-    </button>
+      <div className="relative z-10 mt-3 flex items-end justify-between">
+        {sub && <span className={`stat-tile-badge rounded-md border px-2 py-1 text-[10px] font-black ${badgeCls}`}>{sub}</span>}
+        <svg width="70" height="28" viewBox="0 0 70 28" fill="none" className={`stat-tile-line ${lineCls} opacity-55 transition-transform duration-300 group-hover:scale-105 group-hover:opacity-80`}>
+          <path d="M2 22 C7 24, 10 10, 15 15 S22 22, 27 13 S37 10, 42 15 S50 7, 56 9 S62 4, 68 2" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+        </svg>
+      </div>
+    </div>
   );
 }
 
