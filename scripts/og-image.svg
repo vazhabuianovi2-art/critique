@@ -1,0 +1,91 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0014"/>
+      <stop offset="55%" stop-color="#050007"/>
+      <stop offset="100%" stop-color="#12041f"/>
+    </linearGradient>
+    <linearGradient id="brand" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#e879f9"/>
+    </linearGradient>
+    <linearGradient id="cta" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#a855f7" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#a855f7" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1050" cy="80" r="420" fill="url(#glow)"/>
+  <circle cx="120" cy="600" r="360" fill="url(#glow2)"/>
+
+  <!-- Subtle grid -->
+  <g stroke="#ffffff" stroke-opacity="0.025">
+    <line x1="0" y1="157" x2="1200" y2="157"/>
+    <line x1="0" y1="315" x2="1200" y2="315"/>
+    <line x1="0" y1="472" x2="1200" y2="472"/>
+    <line x1="300" y1="0" x2="300" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="900" y1="0" x2="900" y2="630"/>
+  </g>
+
+  <!-- Logo -->
+  <g transform="translate(80, 70)">
+    <rect x="0" y="-6" width="44" height="44" rx="11" fill="url(#cta)"/>
+    <path d="M9 24 L17 15 L23 20 L34 8" stroke="#ffffff" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="58" y="26" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="800" fill="#ffffff">TryCritique</text>
+  </g>
+
+  <!-- Headline -->
+  <text x="80" y="232" font-family="Segoe UI, Arial, sans-serif" font-size="60" font-weight="800" fill="#ffffff">Your trading journal</text>
+  <text x="80" y="304" font-family="Segoe UI, Arial, sans-serif" font-size="60" font-weight="800" fill="#ffffff">knows <tspan fill="url(#brand)">what you lost.</tspan></text>
+  <text x="80" y="376" font-family="Segoe UI, Arial, sans-serif" font-size="60" font-weight="800" fill="url(#brand)">Ours knows why.</text>
+
+  <!-- Subheadline -->
+  <text x="80" y="436" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="500" fill="#a1a1aa">Mistakes ranked by dollar amount — fix the costliest first.</text>
+
+  <!-- CTA pill -->
+  <g transform="translate(80, 486)">
+    <rect x="0" y="0" width="318" height="58" rx="29" fill="url(#cta)"/>
+    <text x="159" y="38" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" fill="#ffffff" text-anchor="middle">Start free 7-day trial</text>
+    <text x="350" y="38" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="600" fill="#71717a">trycritique.com</text>
+  </g>
+
+  <!-- Mockup card: mistake report -->
+  <g transform="translate(790, 170)">
+    <rect x="0" y="0" width="340" height="332" rx="20" fill="#0c0612" stroke="#a855f7" stroke-opacity="0.35"/>
+    <rect x="0" y="0" width="340" height="332" rx="20" fill="#a855f7" fill-opacity="0.03"/>
+
+    <text x="26" y="42" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="800" fill="#c084fc" letter-spacing="2.5">MISTAKE REPORT</text>
+    <text x="26" y="74" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="800" fill="#ffffff">This week's leaks</text>
+
+    <!-- Row 1 -->
+    <rect x="26" y="96" width="288" height="56" rx="12" fill="#ef4444" fill-opacity="0.08" stroke="#ef4444" stroke-opacity="0.28"/>
+    <text x="42" y="120" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" fill="#fca5a5">FOMO entries</text>
+    <text x="42" y="140" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#71717a">6 trades</text>
+    <text x="298" y="132" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="800" fill="#f87171" text-anchor="end">-$840</text>
+
+    <!-- Row 2 -->
+    <rect x="26" y="162" width="288" height="56" rx="12" fill="#f59e0b" fill-opacity="0.07" stroke="#f59e0b" stroke-opacity="0.25"/>
+    <text x="42" y="186" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" fill="#fcd34d">Moved stop loss</text>
+    <text x="42" y="206" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#71717a">4 trades</text>
+    <text x="298" y="198" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="800" fill="#fbbf24" text-anchor="end">-$610</text>
+
+    <!-- Row 3 -->
+    <rect x="26" y="228" width="288" height="56" rx="12" fill="#8b5cf6" fill-opacity="0.07" stroke="#8b5cf6" stroke-opacity="0.25"/>
+    <text x="42" y="252" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" fill="#c4b5fd">Early exits</text>
+    <text x="42" y="272" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#71717a">3 trades</text>
+    <text x="298" y="264" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="800" fill="#a78bfa" text-anchor="end">-$390</text>
+
+    <text x="26" y="312" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#34d399">↑ Fix the top one first. That's the plan.</text>
+  </g>
+</svg>
