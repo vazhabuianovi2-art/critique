@@ -12372,17 +12372,16 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
     }
     try {
       const photo = await resizeImageToDataUrl(file);
+      // IMPORTANT: never store the base64 image in Supabase auth user_metadata. It gets baked
+      // into every JWT, bloating the access token to ~76KB, which Cloudflare (in front of
+      // Supabase) rejects with HTTP 520 — breaking ALL server-side token verification and
+      // locking the user out of the app. The photo lives in localStorage only.
       localStorage.setItem(PROFILE_PHOTO_KEY, photo);
       localStorage.setItem(getProfilePhotoKey(authUser?.id), photo);
       setProfilePhoto?.(photo);
-      if (supabase && authUser?.id) {
-        const { data, error } = await supabase.auth.updateUser({ data: { profile_photo: photo, avatar_url: photo } });
-        if (error) throw error;
-        if (data?.user) setProfilePhoto?.(getStoredProfilePhoto(data.user));
-      }
       setMessage("Profile photo updated.");
     } catch (error) {
-      setMessage(`Profile photo saved locally, but cloud sync failed: ${error?.message || "try a smaller image"}`);
+      setMessage(`Could not save profile photo: ${error?.message || "try a smaller image"}`);
     }
   }
 
