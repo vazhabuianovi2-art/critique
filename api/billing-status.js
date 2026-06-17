@@ -38,14 +38,28 @@ async function readBody(req) {
   return raw ? JSON.parse(raw) : {};
 }
 
+// TEMP DIAGNOSTIC: capture why token verification fails. Remove after debugging.
+let LAST_AUTH_DIAG = "";
+
 async function getUserFromToken(supabaseUrl, anonKey, accessToken) {
-  const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
-    headers: {
-      apikey: anonKey,
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-  if (!userResponse.ok) return null;
+  let userResponse;
+  try {
+    userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: {
+        apikey: anonKey,
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  } catch (e) {
+    LAST_AUTH_DIAG = `fetch-threw:${String(e?.message || e).slice(0, 40)}`;
+    return null;
+  }
+  if (!userResponse.ok) {
+    const bodyText = await userResponse.text().catch(() => "");
+    LAST_AUTH_DIAG = `status=${userResponse.status} body=${bodyText.slice(0, 80)}`;
+    return null;
+  }
+  LAST_AUTH_DIAG = "ok";
   return userResponse.json();
 }
 
@@ -156,7 +170,11 @@ export default async function handler(req, res) {
         return json(res, 200, { ok: true, subscription: publicSubscription(adminSub) });
       }
 
-      return json(res, 401, { ok: false, error: "Invalid or expired session. Please sign in again." });
+      // TEMP DIAGNOSTIC: surface why verification failed (no secrets — host is already public via VITE_).
+      let urlHost = "";
+      try { urlHost = new URL(supabaseUrl).host; } catch {}
+      const diag = `auth(${LAST_AUTH_DIAG}) host=${urlHost} jwtEmail=${payloadEmail || "none"} jwtExp=${tokenExpired ? "expired" : "valid"}`;
+      return json(res, 401, { ok: false, error: `Invalid or expired session. Please sign in again. [DIAG ${diag}]` });
     }
 
     const email = String(user.email || "").trim().toLowerCase();
