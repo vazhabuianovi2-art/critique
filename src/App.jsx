@@ -3705,10 +3705,11 @@ const THEME_STYLE_CSS = `
   .light-theme .sidebar-nav-item:hover svg { color: #5b21b6 !important; }
   .light-theme .sidebar-nav-item-active .bg-fuchsia-500 { background: rgba(255,255,255,.25) !important; }
   .light-theme .sidebar-nav-item.sidebar-nav-item-active:hover {
-    background: rgba(178,74,242,0.12) !important;
-    color: #c270f5 !important;
+    background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(109,40,217,.32) !important;
   }
-  .light-theme .sidebar-nav-item.sidebar-nav-item-active:hover svg { color: #b24bf3 !important; }
+  .light-theme .sidebar-nav-item.sidebar-nav-item-active:hover svg { color: #ffffff !important; }
 
   /* ── Journal trade rows (light mode) ── */
   .light-theme .trade-list-row {
