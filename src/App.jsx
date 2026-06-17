@@ -637,6 +637,11 @@ const THEME_STYLE_CSS = `
     max-width: none !important;
   }
 
+  aside.app-sidebar {
+    transition: background 0.25s ease, background-color 0.25s ease,
+                border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
   @media (min-width: 1024px) {
     main.app-main {
       width: calc(100vw - 16rem) !important;
@@ -3699,6 +3704,11 @@ const THEME_STYLE_CSS = `
   .light-theme .sidebar-nav-item svg { color: #94a3b8 !important; }
   .light-theme .sidebar-nav-item:hover svg { color: #5b21b6 !important; }
   .light-theme .sidebar-nav-item-active .bg-fuchsia-500 { background: rgba(255,255,255,.25) !important; }
+  .light-theme .sidebar-nav-item.sidebar-nav-item-active:hover {
+    background: rgba(178,74,242,0.12) !important;
+    color: #c270f5 !important;
+  }
+  .light-theme .sidebar-nav-item.sidebar-nav-item-active:hover svg { color: #b24bf3 !important; }
 
   /* ── Journal trade rows (light mode) ── */
   .light-theme .trade-list-row {
@@ -8835,7 +8845,7 @@ Skipped duplicates: ${duplicateCount}
             const isActive = active === label && !tradeViewMode;
             return (
               <button key={label} title={label} onClick={() => { setActive(shouldGateForBilling ? "Billing" : label); setTradeViewMode(null); }}
-                className={`sidebar-nav-item relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200
+                className={`sidebar-nav-item relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors duration-200
                   ${isActive
                     ? "sidebar-nav-item-active bg-fuchsia-500/12 text-fuchsia-200 font-bold"
                     : "text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
