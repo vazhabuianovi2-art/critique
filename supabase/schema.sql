@@ -18,6 +18,12 @@ alter table public.profiles
 alter table public.profiles
   add column if not exists strategies_data jsonb default null;
 
+-- Profile photo (base64 data URL). Stored here, NOT in auth user_metadata, because
+-- user_metadata is embedded in every JWT and a photo bloats the access token to ~76KB,
+-- which Cloudflare rejects with HTTP 520 and breaks all server-side token verification.
+alter table public.profiles
+  add column if not exists profile_photo text default null;
+
 update public.profiles
   set account_data = null
   where account_data = '{}'::jsonb;

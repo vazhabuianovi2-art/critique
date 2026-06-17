@@ -79,7 +79,7 @@ export default async function handler(request, response) {
       // Fetch trades + profile in a single round-trip to avoid two cold starts
       const [tradesRes, profileRes] = await Promise.all([
         fetch(`${supabaseUrl}/rest/v1/trades?user_id=eq.${userId}&select=id,created_at,trade_data&order=created_at.desc`, { headers }),
-        fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=account_data,strategies_data&limit=1`, { headers }),
+        fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=account_data,strategies_data,profile_photo&limit=1`, { headers }),
       ]);
       const [tradesData, profileData] = await Promise.all([
         tradesRes.json().catch(() => null),
@@ -92,6 +92,7 @@ export default async function handler(request, response) {
         rows: Array.isArray(tradesData) ? tradesData : [],
         account: profileRow?.account_data || null,
         strategies: profileRow?.strategies_data || null,
+        profilePhoto: profileRow?.profile_photo || null,
       });
     }
 
@@ -183,6 +184,25 @@ export default async function handler(request, response) {
         return json(response, upstream.status, { error: result?.message || "Could not save strategies." });
       }
       return json(response, 200, { ok: true, strategies });
+    }
+
+    if (action === "saveProfilePhoto") {
+      // Stored in a dedicated profiles column — NOT in auth user_metadata, which would
+      // bloat every JWT and break token verification (Cloudflare 520 on oversized header).
+      const photo = typeof body.photo === "string" && body.photo ? body.photo : null;
+      const upstream = await fetch(`${supabaseUrl}/rest/v1/profiles?on_conflict=id&select=profile_photo`, {
+        method: "POST",
+        headers: { ...headers, Prefer: "resolution=merge-duplicates,return=representation" },
+        body: JSON.stringify({
+          id: userId,
+          profile_photo: photo,
+          updated_at: new Date().toISOString(),
+        }),
+      });
+      const result = await upstream.json().catch(() => null);
+      if (!upstream.ok) return json(response, upstream.status, { error: result?.message || "Could not save profile photo." });
+      const row = Array.isArray(result) ? result[0] : result;
+      return json(response, 200, { ok: true, profilePhoto: row?.profile_photo ?? photo });
     }
 
     if (action === "replaceTrades") {

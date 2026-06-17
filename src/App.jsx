@@ -620,8 +620,9 @@ function readStoredActiveAccountId(userId) {
 }
 
 function getStoredProfilePhoto(user) {
-  const metadataPhoto = user?.user_metadata?.profile_photo || user?.user_metadata?.avatar_url || "";
-  if (metadataPhoto) return metadataPhoto;
+  // Photo is stored in profiles.profile_photo (Supabase) and applied via the loadAll sync.
+  // This reads the localStorage cache for instant display before that round-trip completes.
+  // It is intentionally NOT read from auth user_metadata — storing it there bloats the JWT.
   try {
     return localStorage.getItem(getProfilePhotoKey(user?.id)) || localStorage.getItem(PROFILE_PHOTO_KEY) || "";
   } catch {
@@ -7868,6 +7869,16 @@ export default function TradingJournalDashboard() {
         const rows = result?.rows || [];
         const profileAccount = result?.account || null;
 
+        // Profile photo lives in profiles.profile_photo (Supabase source of truth).
+        // Apply it and refresh the localStorage cache so it survives a cache clear elsewhere.
+        if (typeof result?.profilePhoto === "string" && result.profilePhoto) {
+          setProfilePhoto(result.profilePhoto);
+          try {
+            localStorage.setItem(PROFILE_PHOTO_KEY, result.profilePhoto);
+            localStorage.setItem(getProfilePhotoKey(authUser?.id), result.profilePhoto);
+          } catch {}
+        }
+
         // Update account if server returned one
         if (profileAccount) {
           // --- Preferences: Supabase → localStorage sync / one-time migration ---
@@ -8034,7 +8045,7 @@ export default function TradingJournalDashboard() {
   }, []);
   useEffect(() => {
     setProfilePhoto(getStoredProfilePhoto(authUser));
-  }, [authUser?.id, authUser?.user_metadata?.profile_photo, authUser?.user_metadata?.avatar_url]);
+  }, [authUser?.id]);
 
   useEffect(() => {
     if (!accounts.length || activeAccountId) return;
@@ -12375,13 +12386,17 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
       // IMPORTANT: never store the base64 image in Supabase auth user_metadata. It gets baked
       // into every JWT, bloating the access token to ~76KB, which Cloudflare (in front of
       // Supabase) rejects with HTTP 520 — breaking ALL server-side token verification and
-      // locking the user out of the app. The photo lives in localStorage only.
+      // locking the user out. It lives in the profiles.profile_photo column instead, which
+      // persists in Supabase + syncs across devices without touching the token.
       localStorage.setItem(PROFILE_PHOTO_KEY, photo);
       localStorage.setItem(getProfilePhotoKey(authUser?.id), photo);
       setProfilePhoto?.(photo);
+      if (supabase && authUser?.id) {
+        await postSupabaseSync("saveProfilePhoto", { photo });
+      }
       setMessage("Profile photo updated.");
     } catch (error) {
-      setMessage(`Could not save profile photo: ${error?.message || "try a smaller image"}`);
+      setMessage(`Photo saved on this device, but cloud sync failed: ${error?.message || "try a smaller image"}`);
     }
   }
 
@@ -12391,7 +12406,7 @@ function SettingsPagePro({ account, accountBalance, authUser, theme, setTheme, i
     setProfilePhoto?.("");
     try {
       if (supabase && authUser?.id) {
-        await supabase.auth.updateUser({ data: { profile_photo: null, avatar_url: null } });
+        await postSupabaseSync("saveProfilePhoto", { photo: null });
       }
       setMessage("Profile photo removed.");
     } catch (error) {
