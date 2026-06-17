@@ -7731,6 +7731,10 @@ export default function TradingJournalDashboard() {
   const [billingChecked, setBillingChecked] = useState(false);
   const [billingGateMessage, setBillingGateMessage] = useState("");
   const [billingRefreshTick, setBillingRefreshTick] = useState(0);
+  // Grace access: if a billing check fails transiently (network/500/Supabase blip) but the
+  // user had access on the last successful check, keep them in instead of locking them out.
+  // Never grants access to someone who was never active — only bridges momentary outages.
+  const [billingGraceAccess, setBillingGraceAccess] = useState(false);
   const [trialNudgeDismissed, setTrialNudgeDismissed] = useState(() => {
     try { return localStorage.getItem("critique_nudge_dismissed_v1") === new Date().toDateString(); } catch { return false; }
   });
@@ -7749,7 +7753,7 @@ export default function TradingJournalDashboard() {
   const profileInitial = String(profileName || authUser?.email || "U").trim().charAt(0).toUpperCase();
   const canUseAdminTools = hasAdminAccess || isOwnerAdminEmail(authUser?.email);
   const navItems = useMemo(() => canUseAdminTools ? [...nav, [ShieldCheck, "Admin"]] : nav, [canUseAdminTools]);
-  const hasBillingAccess = useMemo(() => canUseAdminTools || isSubscriptionAccessActive(billingSubscription), [canUseAdminTools, billingSubscription]);
+  const hasBillingAccess = useMemo(() => canUseAdminTools || isSubscriptionAccessActive(billingSubscription) || billingGraceAccess, [canUseAdminTools, billingSubscription, billingGraceAccess]);
   const shouldGateForBilling = Boolean(isAuthenticated && billingChecked && !billingLoading && !hasBillingAccess);
 
   useEffect(() => {
@@ -7776,6 +7780,7 @@ export default function TradingJournalDashboard() {
       setBillingLoading(false);
       setBillingChecked(false);
       setBillingGateMessage("");
+      setBillingGraceAccess(false);
       return undefined;
     }
 
@@ -7796,6 +7801,7 @@ export default function TradingJournalDashboard() {
 
         if (!cancelled) {
           setBillingSubscription(subscription);
+          setBillingGraceAccess(false);
           const hasAccess = isSubscriptionAccessActive(subscription);
           try {
             const cacheKey = getBillingCacheKey(authUser?.id);
@@ -7805,8 +7811,16 @@ export default function TradingJournalDashboard() {
         }
       } catch (error) {
         if (!cancelled) {
+          // Transient failure (network / 500 / Supabase blip). Don't lock out a user who was
+          // active on the last successful check — bridge the outage with cached grace access.
+          let hadAccess = false;
+          try {
+            const cacheKey = getBillingCacheKey(authUser?.id);
+            hadAccess = cacheKey ? localStorage.getItem(cacheKey) === "true" : false;
+          } catch {}
+          setBillingGraceAccess(hadAccess);
           setBillingSubscription(null);
-          setBillingGateMessage(error?.message || "Could not check subscription status.");
+          setBillingGateMessage(hadAccess ? "" : (error?.message || "Could not check subscription status."));
         }
       } finally {
         if (!cancelled) {
