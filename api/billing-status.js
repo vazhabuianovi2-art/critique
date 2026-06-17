@@ -173,7 +173,10 @@ export default async function handler(req, res) {
       // TEMP DIAGNOSTIC: surface why verification failed (no secrets — host is already public via VITE_).
       let urlHost = "";
       try { urlHost = new URL(supabaseUrl).host; } catch {}
-      const diag = `auth(${LAST_AUTH_DIAG}) host=${urlHost} jwtEmail=${payloadEmail || "none"} jwtExp=${tokenExpired ? "expired" : "valid"}`;
+      let jwtIssHost = "";
+      try { jwtIssHost = payload?.iss ? new URL(payload.iss).host : "none"; } catch { jwtIssHost = String(payload?.iss || "none"); }
+      const tokenLen = String(accessToken || "").length;
+      const diag = `auth(${LAST_AUTH_DIAG}) host=${urlHost} iss=${jwtIssHost} jwtEmail=${payloadEmail || "none"} jwtExp=${tokenExpired ? "expired" : "valid"} tokLen=${tokenLen}`;
       return json(res, 401, { ok: false, error: `Invalid or expired session. Please sign in again. [DIAG ${diag}]` });
     }
 

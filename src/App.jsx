@@ -8767,6 +8767,7 @@ Skipped duplicates: ${duplicateCount}
         <BillingGatePage
           authUser={authUser}
           billingSubscription={billingSubscription}
+          gateMessage={billingGateMessage}
           onSignOut={handleSignOut}
           onSubscriptionChange={setBillingSubscription}
           onSubscriptionRefresh={() => setBillingRefreshTick((t) => t + 1)}
@@ -13784,7 +13785,7 @@ function getAccessSuspendedCopy(subscription) {
   };
 }
 
-function BillingGatePage({ authUser, billingSubscription, onSignOut, onSubscriptionChange, onSubscriptionRefresh }) {
+function BillingGatePage({ authUser, billingSubscription, gateMessage = "", onSignOut, onSubscriptionChange, onSubscriptionRefresh }) {
   const [loadingPlan, setLoadingPlan] = useState("");
   const [billingError, setBillingError] = useState("");
   const [selected, setSelected] = useState("yearly");
@@ -13854,6 +13855,10 @@ function BillingGatePage({ authUser, billingSubscription, onSignOut, onSubscript
 
             {billingError && (
               <div className="mb-4 rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-300">{billingError}</div>
+            )}
+
+            {gateMessage && (
+              <div className="mb-4 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-xs font-semibold leading-relaxed text-amber-200 break-words">{gateMessage}</div>
             )}
 
             {/* Plan cards */}
