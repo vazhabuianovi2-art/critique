@@ -399,12 +399,27 @@ async function fetchBillingSubscription(authUser) {
   if (!authUser?.id && !authUser?.email) return null;
   const accessToken = await getCurrentAccessToken();
   if (!accessToken) return null;
-  const response = await fetch("/api/billing-status", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ accessToken, email: authUser?.email }),
-  });
-  const data = await response.json().catch(() => ({}));
+
+  async function call(token) {
+    const response = await fetch("/api/billing-status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accessToken: token, email: authUser?.email }),
+    });
+    const data = await response.json().catch(() => ({}));
+    return { response, data };
+  }
+
+  let { response, data } = await call(accessToken);
+  // A transient/expired access token returns 401 "Invalid or expired session". Refresh the
+  // Supabase session once and retry before treating the user as having no subscription —
+  // otherwise an active trialing/paying user gets wrongly bounced to the billing gate.
+  if (response.status === 401) {
+    const refreshed = await refreshCurrentSession();
+    if (refreshed?.access_token) {
+      ({ response, data } = await call(refreshed.access_token));
+    }
+  }
   if (!response.ok || !data.ok) throw new Error(data.error || "Could not load billing status.");
   return data.subscription || null;
 }
