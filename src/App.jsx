@@ -516,6 +516,40 @@ async function postSupabaseSync(action, payload = {}) {
   return result;
 }
 
+async function postTradovateConnectionTest(credentials = {}) {
+  async function sendWithToken(token) {
+    const response = await fetch("/api/tradovate-test", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accessToken: token, credentials }),
+    });
+    const result = await response.json().catch(() => null);
+    return { response, result };
+  }
+
+  let accessToken = await getCurrentAccessToken();
+  if (!accessToken) {
+    const refreshed = await refreshCurrentSession();
+    accessToken = refreshed?.access_token || "";
+  }
+  if (!accessToken) throw new Error("Login session is missing. Sign in again before testing Tradovate.");
+
+  let { response, result } = await sendWithToken(accessToken);
+  if (response.status === 401) {
+    const refreshed = await refreshCurrentSession();
+    if (refreshed?.access_token) {
+      ({ response, result } = await sendWithToken(refreshed.access_token));
+    }
+  }
+
+  if (!response.ok) {
+    const error = new Error(result?.error || `Tradovate test failed (${response.status}).`);
+    error.status = response.status;
+    throw error;
+  }
+  return result;
+}
+
 function SafeResponsiveContainer({ children, minHeight = 240 }) {
   const hostRef = useRef(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -12013,6 +12047,18 @@ function ConnectionsPage({ authUser, account }) {
   const storageKey = `${CONNECTIONS_KEY}_${authUser?.id || "local"}`;
   const [connections, setConnections] = useState(() => getStoredConnections(authUser?.id));
   const [selectedProvider, setSelectedProvider] = useState("tradovate");
+  const [tradovateForm, setTradovateForm] = useState({
+    environment: "demo",
+    name: "",
+    password: "",
+    appId: "TryCritique",
+    appVersion: "0.1.0",
+    cid: "",
+    sec: "",
+    deviceId: "",
+  });
+  const [tradovateTesting, setTradovateTesting] = useState(false);
+  const [tradovateResult, setTradovateResult] = useState(null);
   const selected = CONNECTION_PROVIDERS.find((provider) => provider.id === selectedProvider) || CONNECTION_PROVIDERS[0];
 
   useEffect(() => {
@@ -12039,6 +12085,36 @@ function ConnectionsPage({ authUser, account }) {
     const next = { ...connections };
     delete next[providerId];
     saveConnections(next);
+  }
+
+  function updateTradovateField(field, value) {
+    setTradovateForm((current) => ({ ...current, [field]: value }));
+    setTradovateResult(null);
+  }
+
+  async function testTradovateConnection() {
+    setTradovateTesting(true);
+    setTradovateResult(null);
+    try {
+      const result = await postTradovateConnectionTest(tradovateForm);
+      setTradovateResult(result);
+      if (result?.ok) {
+        saveConnections({
+          ...connections,
+          tradovate: {
+            status: "tested",
+            environment: result.environment,
+            accountCount: result.accountCount || 0,
+            accounts: Array.isArray(result.accounts) ? result.accounts.slice(0, 5) : [],
+            updatedAt: result.testedAt || new Date().toISOString(),
+          },
+        });
+      }
+    } catch (error) {
+      setTradovateResult({ ok: false, error: error?.message || "Tradovate test failed." });
+    } finally {
+      setTradovateTesting(false);
+    }
   }
 
   const action = (
@@ -12119,6 +12195,127 @@ function ConnectionsPage({ authUser, account }) {
                 ))}
               </div>
             </div>
+
+            {selected.id === "tradovate" && (
+              <div className="mt-5 rounded-xl border border-emerald-500/20 bg-emerald-950/8 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <div className="text-xs font-black uppercase tracking-widest text-emerald-300">Apex / Tradovate test</div>
+                    <p className="mt-2 text-sm font-semibold leading-6 text-zinc-400">
+                      One-time test only. We send these credentials to Tradovate from the server and do not save the password, CID, or secret.
+                    </p>
+                  </div>
+                  <div className="flex rounded-xl border border-white/10 bg-black p-1">
+                    {["demo", "live"].map((mode) => (
+                      <button
+                        key={mode}
+                        type="button"
+                        onClick={() => updateTradovateField("environment", mode)}
+                        className={`rounded-lg px-3 py-1.5 text-xs font-black uppercase tracking-wider transition ${tradovateForm.environment === mode ? "bg-emerald-500 text-black" : "text-zinc-500 hover:text-white"}`}
+                      >
+                        {mode}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  <label className="space-y-1.5">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-zinc-500">Tradovate username</span>
+                    <input
+                      value={tradovateForm.name}
+                      onChange={(event) => updateTradovateField("name", event.target.value)}
+                      placeholder="your username"
+                      className="w-full rounded-xl border border-white/10 bg-black px-3 py-2.5 text-sm font-bold text-white outline-none transition focus:border-emerald-400/60"
+                    />
+                  </label>
+                  <label className="space-y-1.5">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-zinc-500">Password</span>
+                    <input
+                      type="password"
+                      value={tradovateForm.password}
+                      onChange={(event) => updateTradovateField("password", event.target.value)}
+                      placeholder="not saved"
+                      className="w-full rounded-xl border border-white/10 bg-black px-3 py-2.5 text-sm font-bold text-white outline-none transition focus:border-emerald-400/60"
+                    />
+                  </label>
+                  <label className="space-y-1.5">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-zinc-500">App ID</span>
+                    <input
+                      value={tradovateForm.appId}
+                      onChange={(event) => updateTradovateField("appId", event.target.value)}
+                      className="w-full rounded-xl border border-white/10 bg-black px-3 py-2.5 text-sm font-bold text-white outline-none transition focus:border-emerald-400/60"
+                    />
+                  </label>
+                  <label className="space-y-1.5">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-zinc-500">App Version</span>
+                    <input
+                      value={tradovateForm.appVersion}
+                      onChange={(event) => updateTradovateField("appVersion", event.target.value)}
+                      className="w-full rounded-xl border border-white/10 bg-black px-3 py-2.5 text-sm font-bold text-white outline-none transition focus:border-emerald-400/60"
+                    />
+                  </label>
+                  <label className="space-y-1.5">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-zinc-500">CID</span>
+                    <input
+                      value={tradovateForm.cid}
+                      onChange={(event) => updateTradovateField("cid", event.target.value)}
+                      placeholder="Tradovate API CID"
+                      className="w-full rounded-xl border border-white/10 bg-black px-3 py-2.5 text-sm font-bold text-white outline-none transition focus:border-emerald-400/60"
+                    />
+                  </label>
+                  <label className="space-y-1.5">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-zinc-500">Secret</span>
+                    <input
+                      type="password"
+                      value={tradovateForm.sec}
+                      onChange={(event) => updateTradovateField("sec", event.target.value)}
+                      placeholder="not saved"
+                      className="w-full rounded-xl border border-white/10 bg-black px-3 py-2.5 text-sm font-bold text-white outline-none transition focus:border-emerald-400/60"
+                    />
+                  </label>
+                  <label className="space-y-1.5 md:col-span-2">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-zinc-500">Device ID optional</span>
+                    <input
+                      value={tradovateForm.deviceId}
+                      onChange={(event) => updateTradovateField("deviceId", event.target.value)}
+                      placeholder="leave empty to auto-generate for this test"
+                      className="w-full rounded-xl border border-white/10 bg-black px-3 py-2.5 text-sm font-bold text-white outline-none transition focus:border-emerald-400/60"
+                    />
+                  </label>
+                </div>
+
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <Button
+                    onClick={testTradovateConnection}
+                    disabled={tradovateTesting || !tradovateForm.name || !tradovateForm.password || !tradovateForm.cid || !tradovateForm.sec}
+                    className="bg-emerald-500 px-4 py-2 font-black text-black hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-45"
+                  >
+                    {tradovateTesting ? "Testing..." : "Test Tradovate Connection"}
+                  </Button>
+                  <span className="text-xs font-bold text-zinc-500">Use demo first unless Apex explicitly gave you live API credentials.</span>
+                </div>
+
+                {tradovateResult && (
+                  <div className={`mt-4 rounded-xl border p-4 ${tradovateResult.ok ? "border-emerald-500/30 bg-emerald-500/10" : "border-red-500/30 bg-red-500/10"}`}>
+                    <div className={`text-sm font-black ${tradovateResult.ok ? "text-emerald-200" : "text-red-200"}`}>
+                      {tradovateResult.ok ? `Connected: ${tradovateResult.accountCount || 0} account(s) found` : tradovateResult.error || "Connection failed"}
+                    </div>
+                    {tradovateResult.ok && Array.isArray(tradovateResult.accounts) && tradovateResult.accounts.length > 0 && (
+                      <div className="mt-3 grid gap-2">
+                        {tradovateResult.accounts.slice(0, 5).map((item) => (
+                          <div key={item.id || item.name} className="rounded-lg border border-white/10 bg-black px-3 py-2 text-xs font-bold text-zinc-300">
+                            <span className="text-white">{item.name || "Tradovate account"}</span>
+                            {item.nickname ? <span className="text-zinc-500"> - {item.nickname}</span> : null}
+                            {item.active !== null ? <span className="ml-2 text-emerald-300">{item.active ? "active" : "inactive"}</span> : null}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="mt-5 flex flex-wrap gap-2">
               <Button onClick={() => markSetup(selected.id)} className="bg-fuchsia-500 px-4 py-2 font-black text-black hover:bg-fuchsia-400">
