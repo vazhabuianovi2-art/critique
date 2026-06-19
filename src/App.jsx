@@ -124,6 +124,7 @@ const PROFILE_NAME_KEY = "critique_profile_name_v1";
 const TRADING_PREFERENCES_KEY = "critique_settings_preferences_v1";
 const CUSTOM_STRATEGIES_KEY = "critique_custom_strategies_v1";
 const ECONOMIC_CALENDAR_CACHE_KEY = "critique_economic_calendar_v1";
+const CONNECTIONS_KEY = "critique_broker_connections_v1";
 const MAX_SCREENSHOTS = 5;
 const OWNER_ADMIN_EMAILS = (
   (typeof import.meta !== "undefined" && import.meta.env?.VITE_OWNER_ADMIN_EMAILS) ||
@@ -6193,6 +6194,7 @@ function createEmptyTradeForm(dateOverride) {
 const nav = [
   [LayoutDashboard, "Dashboard"],
   [BookOpen, "Journal"],
+  [Database, "Connections"],
   [Calendar, "Calendar"],
   [BarChart3, "Statistics"],
   [Target, "Mistake Detector"],
@@ -9057,6 +9059,8 @@ Skipped duplicates: ${duplicateCount}
             onStrategies={() => setIsStrategiesModalOpen(true)}
             account={account}
           />
+        ) : active === "Connections" ? (
+          <ConnectionsPage authUser={authUser} account={account} />
         ) : active === "Calendar" ? (
           <CalendarPage
             trades={activeTrades}
@@ -11950,6 +11954,205 @@ function TradingStrategiesModal({ strategies = [], onSave, onClose }) {
         </div>
       </motion.div>
     </div>
+  );
+}
+
+const CONNECTION_PROVIDERS = [
+  {
+    id: "tradovate",
+    name: "Tradovate",
+    badge: "First build",
+    route: "Apex / Topstep accounts that trade through Tradovate",
+    status: "MVP target",
+    accent: "emerald",
+    description: "Best first integration for cloud trade history sync. We will use secure tokens to import fills and create journal entries.",
+    steps: ["OAuth/API token flow", "Fetch executions", "Match entry and exit fills", "Write imported trades to journal"],
+  },
+  {
+    id: "rithmic",
+    name: "Rithmic",
+    badge: "Apex heavy",
+    route: "Apex / Topstep accounts that trade through Rithmic",
+    status: "Planned",
+    accent: "fuchsia",
+    description: "Important for funded futures accounts. This is more complex than Tradovate and may need approved API access or a bridge.",
+    steps: ["Confirm API access", "Secure credential flow", "Execution import", "Duplicate protection"],
+  },
+  {
+    id: "ninjatrader",
+    name: "NinjaTrader Bridge",
+    badge: "Desktop",
+    route: "Local NinjaTrader executions",
+    status: "Planned",
+    accent: "cyan",
+    description: "A local connector/add-on can send completed trades from NinjaTrader into TryCritique without storing platform passwords.",
+    steps: ["Desktop connector", "Local auth token", "Send executions to API", "Journal import queue"],
+  },
+  {
+    id: "tradingview",
+    name: "TradingView Webhook",
+    badge: "Alerts",
+    route: "TradingView alerts and strategy signals",
+    status: "Backup option",
+    accent: "amber",
+    description: "Useful for users who can send entry/exit alerts. This is not full account history, but it is a fast semi-auto import path.",
+    steps: ["Unique webhook URL", "User secret key", "Alert template", "Auto-create draft trades"],
+  },
+];
+
+function getStoredConnections(userId) {
+  if (typeof window === "undefined") return {};
+  try {
+    return JSON.parse(localStorage.getItem(`${CONNECTIONS_KEY}_${userId || "local"}`) || "{}") || {};
+  } catch {
+    return {};
+  }
+}
+
+function ConnectionsPage({ authUser, account }) {
+  const storageKey = `${CONNECTIONS_KEY}_${authUser?.id || "local"}`;
+  const [connections, setConnections] = useState(() => getStoredConnections(authUser?.id));
+  const [selectedProvider, setSelectedProvider] = useState("tradovate");
+  const selected = CONNECTION_PROVIDERS.find((provider) => provider.id === selectedProvider) || CONNECTION_PROVIDERS[0];
+
+  useEffect(() => {
+    setConnections(getStoredConnections(authUser?.id));
+  }, [authUser?.id]);
+
+  function saveConnections(next) {
+    setConnections(next);
+    try { localStorage.setItem(storageKey, JSON.stringify(next)); } catch {}
+  }
+
+  function markSetup(providerId) {
+    saveConnections({
+      ...connections,
+      [providerId]: {
+        status: "setup",
+        updatedAt: new Date().toISOString(),
+      },
+    });
+    setSelectedProvider(providerId);
+  }
+
+  function resetSetup(providerId) {
+    const next = { ...connections };
+    delete next[providerId];
+    saveConnections(next);
+  }
+
+  const action = (
+    <div className="flex flex-wrap gap-2">
+      <Button onClick={() => markSetup("tradovate")} className="bg-fuchsia-500 px-5 py-2.5 font-black text-black hover:bg-fuchsia-400">
+        <Database size={16} /> Start Tradovate Setup
+      </Button>
+    </div>
+  );
+
+  return (
+    <SimplePageShell
+      crumb="Connections"
+      title="Broker Connections"
+      subtitle="Connect funded-account routes like Apex, Topstep, Tradovate, Rithmic, and NinjaTrader so trades can sync into your journal."
+      action={action}
+    >
+      <div className="grid gap-5 xl:grid-cols-[1.25fr_.75fr]">
+        <div className="grid gap-4 md:grid-cols-2">
+          {CONNECTION_PROVIDERS.map((provider) => {
+            const saved = connections[provider.id];
+            const active = selectedProvider === provider.id;
+            const tone = provider.accent === "emerald" ? "emerald" : provider.accent === "cyan" ? "cyan" : provider.accent === "amber" ? "amber" : "fuchsia";
+            const toneClass = tone === "emerald"
+              ? "border-emerald-500/30 bg-emerald-950/12 text-emerald-200"
+              : tone === "cyan"
+                ? "border-cyan-500/30 bg-cyan-950/12 text-cyan-200"
+                : tone === "amber"
+                  ? "border-amber-500/30 bg-amber-950/12 text-amber-200"
+                  : "border-fuchsia-500/30 bg-fuchsia-950/12 text-fuchsia-200";
+            return (
+              <button
+                key={provider.id}
+                type="button"
+                onClick={() => setSelectedProvider(provider.id)}
+                className={`group min-h-[260px] rounded-2xl border bg-[#050506] p-5 text-left transition-all duration-300 hover:-translate-y-0.5 ${active ? "border-fuchsia-500/45 shadow-[0_18px_45px_rgba(178,74,242,0.10)]" : "border-white/10 hover:border-white/18"}`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className={`flex h-11 w-11 items-center justify-center rounded-xl border ${toneClass}`}>
+                    <Database size={20} />
+                  </div>
+                  <span className="rounded-full border border-white/10 bg-black px-3 py-1 text-[11px] font-black uppercase tracking-wider text-zinc-400">{saved ? "Setup pending" : provider.status}</span>
+                </div>
+                <div className="mt-5 flex items-center gap-2">
+                  <h2 className="text-2xl font-black text-white">{provider.name}</h2>
+                  <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${toneClass}`}>{provider.badge}</span>
+                </div>
+                <p className="mt-2 text-sm font-semibold leading-6 text-zinc-500">{provider.route}</p>
+                <p className="mt-4 text-sm font-semibold leading-6 text-zinc-300">{provider.description}</p>
+                <div className="mt-5 flex items-center justify-between gap-3">
+                  <span className="text-xs font-black uppercase tracking-widest text-zinc-600">Auto journal sync</span>
+                  <span className={saved ? "text-xs font-black text-emerald-300" : "text-xs font-black text-zinc-500"}>{saved ? "Prepared" : "Not connected"}</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="space-y-5">
+          <section className="rounded-2xl border border-white/10 bg-[#050506] p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-xs font-black uppercase tracking-widest text-fuchsia-300">Selected route</div>
+                <h2 className="mt-2 text-3xl font-black text-white">{selected.name}</h2>
+                <p className="mt-2 text-sm font-semibold leading-6 text-zinc-400">{selected.route}</p>
+              </div>
+              <span className="rounded-xl border border-white/10 bg-black px-3 py-2 text-xs font-black text-zinc-300">{selected.status}</span>
+            </div>
+
+            <div className="mt-5 rounded-xl border border-white/10 bg-black p-4">
+              <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Build checklist</div>
+              <div className="mt-4 space-y-3">
+                {selected.steps.map((step, index) => (
+                  <div key={step} className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/[0.025] px-3 py-3">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-fuchsia-500/25 bg-fuchsia-500/10 text-xs font-black text-fuchsia-200">{index + 1}</span>
+                    <span className="text-sm font-bold text-zinc-300">{step}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Button onClick={() => markSetup(selected.id)} className="bg-fuchsia-500 px-4 py-2 font-black text-black hover:bg-fuchsia-400">
+                Prepare Setup
+              </Button>
+              {connections[selected.id] && (
+                <Button onClick={() => resetSetup(selected.id)} variant="outline" className="border-white/15 bg-black px-4 py-2 font-black text-zinc-300 hover:text-white">
+                  Reset
+                </Button>
+              )}
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-white/10 bg-[#050506] p-5">
+            <div className="flex items-center gap-3">
+              <Lock size={18} className="text-emerald-300" />
+              <h3 className="text-lg font-black text-white">Security model</h3>
+            </div>
+            <div className="mt-4 space-y-3 text-sm font-semibold leading-6 text-zinc-400">
+              <p>We should not store raw platform passwords. Preferred options are OAuth tokens, encrypted API keys, or a local desktop bridge.</p>
+              <p>Imported trades will be tagged with source metadata and duplicate checks before they enter the journal.</p>
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-white/10 bg-[#050506] p-5">
+            <div className="text-xs font-black uppercase tracking-widest text-zinc-500">Current account</div>
+            <div className="mt-3 rounded-xl border border-white/10 bg-black p-4">
+              <div className="text-lg font-black text-white">{account?.name || "No account selected"}</div>
+              <div className="mt-1 text-sm font-semibold text-zinc-500">{authUser?.email || "Signed-in trader"} - {account?.type || "Trading account"}</div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </SimplePageShell>
   );
 }
 
@@ -17795,4 +17998,3 @@ function AuthHeroMetric({ value, label }) {
     </div>
   );
 }
-
