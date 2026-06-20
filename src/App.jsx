@@ -26,6 +26,7 @@ import {
 import { BRAND_NAME } from "./utils/constants";
 import { BrandBolt } from "./components/ui/BrandBolt";
 import { DashboardEmptyState } from "./components/ui/EmptyState";
+import { StrategyRulesPage } from "./components/StrategyRulesPage";
 const LandingHeader      = React.lazy(() => import("./components/landing/LandingHeader").then(m => ({ default: m.LandingHeader })));
 const LandingHero        = React.lazy(() => import("./components/landing/LandingHero").then(m => ({ default: m.LandingHero })));
 const LandingFeatures    = React.lazy(() => import("./components/landing/LandingFeatures").then(m => ({ default: m.LandingFeatures })));
@@ -6207,6 +6208,7 @@ const nav = [
   [LayoutDashboard, "Dashboard"],
   [BookOpen, "Journal"],
   [Calendar, "Calendar"],
+  [ListChecks, "Strategy & Rules"],
   [BarChart3, "Statistics"],
   [Target, "Mistake Detector"],
 ];
@@ -7639,7 +7641,18 @@ export default function TradingJournalDashboard() {
   }, [accounts, activeAccountId, pendingAccountDraft]);
   const [isStrategiesModalOpen, setIsStrategiesModalOpen] = useState(false);
   const [strategiesObjects, setStrategiesObjects] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(STRATEGIES_OBJ_KEY) || "[]"); } catch { return []; }
+    try {
+      const stored = JSON.parse(localStorage.getItem(STRATEGIES_OBJ_KEY) || "[]");
+      if (Array.isArray(stored) && stored.length) return stored;
+      const legacyNames = JSON.parse(localStorage.getItem(CUSTOM_STRATEGIES_KEY) || "[]");
+      const migrated = Array.isArray(legacyNames)
+        ? [...new Set(legacyNames.filter(Boolean))].map((name, index) => ({ id: `migrated-${Date.now()}-${index}`, name, description: "", items: [] }))
+        : [];
+      if (migrated.length) localStorage.setItem(STRATEGIES_OBJ_KEY, JSON.stringify(migrated));
+      return migrated;
+    } catch {
+      return [];
+    }
   });
   function saveStrategiesObjects(next, renameInfo) {
     setStrategiesObjects(next);
@@ -7939,7 +7952,7 @@ export default function TradingJournalDashboard() {
           });
         }
         // Load strategies from cloud
-        if (result?.strategies && Array.isArray(result.strategies) && result.strategies.length > 0) {
+        if (Array.isArray(result?.strategies)) {
           setStrategiesObjects(result.strategies);
           localStorage.setItem(STRATEGIES_OBJ_KEY, JSON.stringify(result.strategies));
           const names = result.strategies.map((s) => s.name);
@@ -8490,7 +8503,7 @@ export default function TradingJournalDashboard() {
     });
   }, [activeTrades, stats.winRate]);
 
-  function openAddTrade(dateOverride) {
+  function openAddTrade(dateOverride, strategyOverride = "") {
     if (shouldGateForBilling) {
       setActive("Billing");
       setTradeViewMode(null);
@@ -8505,7 +8518,7 @@ export default function TradingJournalDashboard() {
     tradeSavingRef.current = false;
     setIsTradeSaving(false);
     setEditingTradeId(null);
-    setForm(createEmptyTradeForm(dateOverride));
+    setForm({ ...createEmptyTradeForm(dateOverride), strategy: strategyOverride || "" });
     setIsTradeModalOpen(true);
   }
   function openEditTrade(trade) {
@@ -9079,6 +9092,13 @@ Skipped duplicates: ${duplicateCount}
             economicCalendar={economicCalendar}
             onRefreshEconomicCalendar={() => setEconomicCalendarRefresh((tick) => tick + 1)}
           />
+        ) : active === "Strategy & Rules" ? (
+          <StrategyRulesPage
+            strategies={strategiesObjects}
+            trades={activeTrades}
+            onSave={saveStrategiesObjects}
+            onAddTrade={(strategyName) => openAddTrade(undefined, strategyName)}
+          />
         ) : active === "Statistics" ? (
           <SimpleStatisticsPage stats={stats} curve={curve} trades={activeTrades} onExport={() => exportTradesToCSV(activeTrades)} onDeleteStrategy={(name) => { const next = strategiesObjects.filter((s) => s.name !== name); saveStrategiesObjects(next); }} />
         ) : active === "Mistake Detector" ? (
@@ -9191,6 +9211,7 @@ function MobileBottomNav({ active, setActive, onAdd, setTradeViewMode, lockedToB
     [LayoutDashboard, "Dashboard"],
     [BookOpen, "Journal"],
     [Calendar, "Calendar"],
+    [ListChecks, "Strategy & Rules"],
     [BarChart3, "Statistics"],
     [Target, "Mistake Detector"],
   ];
@@ -9199,7 +9220,7 @@ function MobileBottomNav({ active, setActive, onAdd, setTradeViewMode, lockedToB
       {active !== "Calendar" && (
         <button onClick={onAdd} className="mobile-nav-fab absolute -top-7 left-1/2 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-2xl bg-fuchsia-500 text-white shadow-[0_0_28px_rgba(178,74,242,.48)]"><Plus size={24} /></button>
       )}
-      <div className="grid grid-cols-5 gap-1">
+      <div className="grid grid-cols-6 gap-1">
         {items.map(([Icon, label]) => {
           const isAdd = false;
           const selected = active === label;
@@ -9213,7 +9234,7 @@ function MobileBottomNav({ active, setActive, onAdd, setTradeViewMode, lockedToB
               className={isAdd ? "mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-fuchsia-500 text-white shadow-[0_0_22px_rgba(178,74,242,.38)]" : selected ? "flex flex-col items-center justify-center rounded-xl border border-fuchsia-500/35 bg-fuchsia-500/15 px-1 py-2 text-fuchsia-300 transition-all duration-200 hover:scale-110" : `flex flex-col items-center justify-center rounded-xl px-1 py-2 text-zinc-500 transition-all duration-200 ${label === "Statistics" || label === "Mistake Detector" ? "hover:scale-110 hover:bg-fuchsia-500/15 hover:text-fuchsia-200" : "hover:text-zinc-300"}`}
             >
               <Icon size={18} />
-              <span className="mt-1 text-[8px] font-black leading-tight">{label === "Mistake Detector" ? "Mistake" : label}</span>
+              <span className="mt-1 text-[8px] font-black leading-tight">{label === "Mistake Detector" ? "Mistake" : label === "Strategy & Rules" ? "Rules" : label}</span>
             </button>
           );
         })}
@@ -11376,12 +11397,9 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
       return [];
     }
   });
-  // Keep customStrategies in sync when strategiesObjects is updated externally
-  // (e.g. after renaming a strategy in TradingStrategiesModal while this modal is open)
+  // Keep Add Trade's dropdown in sync with the shared strategy library.
   useEffect(() => {
-    if (strategiesObjects.length > 0) {
-      setCustomStrategies(strategiesObjects.map((s) => s.name).filter((n) => n && !LEGACY_DEFAULT_STRATEGIES.includes(n)));
-    }
+    setCustomStrategies(strategiesObjects.map((s) => s.name).filter((n) => n && !LEGACY_DEFAULT_STRATEGIES.includes(n)));
   }, [strategiesObjects]);
   const [newStrategyName, setNewStrategyName] = useState("");
   const [showErrors, setShowErrors] = useState(false);
@@ -11818,14 +11836,17 @@ function TradingStrategiesModal({ strategies = [], onSave, onClose }) {
   const [selected, setSelected] = useState(null); // index or "new"
   const [draft, setDraft] = useState({ name: "", description: "", items: [] });
   const [newItem, setNewItem] = useState("");
+  const [strategyError, setStrategyError] = useState("");
 
   function startNew() {
     setSelected("new");
     setDraft({ name: "", description: "", items: [] });
+    setStrategyError("");
   }
   function selectStrategy(idx) {
     setSelected(idx);
     setDraft({ ...list[idx] });
+    setStrategyError("");
   }
   function addChecklistItem() {
     const text = newItem.trim();
@@ -11837,14 +11858,23 @@ function TradingStrategiesModal({ strategies = [], onSave, onClose }) {
     setDraft((d) => ({ ...d, items: d.items.filter((item) => item.id !== id) }));
   }
   function save() {
-    if (!draft.name.trim()) return;
+    const normalizedName = draft.name.trim();
+    if (!normalizedName) {
+      setStrategyError("Strategy name is required.");
+      return;
+    }
+    const duplicate = list.some((strategy, index) => index !== selected && String(strategy.name || "").trim().toLowerCase() === normalizedName.toLowerCase());
+    if (duplicate) {
+      setStrategyError(`A strategy named “${normalizedName}” already exists.`);
+      return;
+    }
     let next;
     let renameInfo = null;
     if (selected === "new") {
-      next = [...list, { id: Date.now(), name: draft.name.trim(), description: draft.description, items: draft.items || [] }];
+      next = [...list, { ...draft, id: draft.id || Date.now(), name: normalizedName, description: draft.description, items: draft.items || [] }];
     } else {
       const oldName = list[selected]?.name || "";
-      const newName = draft.name.trim();
+      const newName = normalizedName;
       if (oldName && oldName !== newName) {
         renameInfo = { oldName, newName };
       }
@@ -11908,8 +11938,9 @@ function TradingStrategiesModal({ strategies = [], onSave, onClose }) {
               <div className="space-y-5">
                 <div>
                   <label className="block text-sm font-semibold text-zinc-300">Strategy Name <span className="text-red-400">*</span></label>
-                  <Input value={draft.name} onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
+                  <Input value={draft.name} onChange={(e) => { setDraft((d) => ({ ...d, name: e.target.value })); setStrategyError(""); }}
                     placeholder="e.g., Scalping, Trend Following, Breakout..." className="mt-2 border-white/15 bg-black focus-visible:border-fuchsia-400" />
+                  {strategyError && <p className="mt-2 rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-xs font-bold text-red-300">{strategyError}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-zinc-300">Description <span className="text-xs font-normal text-zinc-500">(Optional)</span></label>
