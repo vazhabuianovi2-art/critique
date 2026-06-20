@@ -1847,6 +1847,12 @@ const THEME_STYLE_CSS = `
     border-color: rgba(255,255,255,.10) !important;
   }
 
+  .activity-day-weekend {
+    background: linear-gradient(135deg, rgba(15,15,18,.44) 0%, rgba(2,2,3,.68) 100%) !important;
+    border-color: rgba(255,255,255,.055) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.025) !important;
+  }
+
   .activity-day-win {
     background: linear-gradient(135deg, rgba(16,185,129,.18) 0%, rgba(4,55,43,.72) 55%, rgba(1,12,10,.96) 100%) !important;
     border-color: rgba(16,185,129,.38) !important;
@@ -1896,6 +1902,12 @@ const THEME_STYLE_CSS = `
     background: linear-gradient(135deg, #ffffff 0%, #faf5ff 58%, #e7c6fb 100%) !important;
     border-color: rgba(178,74,242, 0.28) !important;
     box-shadow: inset 0 0 18px rgba(178,74,242, 0.08) !important;
+  }
+
+  .light-theme .activity-day-weekend {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border-color: rgba(148,163,184,.18) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.7) !important;
   }
 
   .light-theme .activity-day-win {
@@ -10390,7 +10402,7 @@ function TradingActivityPanel({ trades, selectedDate, onSelectDate }) {
             const hasTrade = day.summary.count > 0;
             const isWin = day.summary.pnl > 0;
             const isBreakEven = day.summary.pnl === 0;
-            const dayClass = hasTrade ? (isWin ? "activity-day-win" : isBreakEven ? "activity-day-breakeven" : "activity-day-loss") : day.isWeekend ? "activity-day-empty opacity-40" : "activity-day-empty";
+            const dayClass = hasTrade ? (isWin ? "activity-day-win" : isBreakEven ? "activity-day-breakeven" : "activity-day-loss") : day.isWeekend ? "activity-day-empty activity-day-weekend" : "activity-day-empty";
             const selectedClass = selectedDate === day.key ? "activity-day-selected ring-1 ring-white/30 ring-offset-2 ring-offset-black" : "";
             const tooltipDate = new Date(`${day.key}T00:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
