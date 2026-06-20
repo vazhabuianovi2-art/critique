@@ -108,8 +108,3 @@ input:disabled {
 .light-theme .strategy-rules-input::placeholder {
   color: #94a3b8 !important;
 }
-
-.light-theme .strategy-checklist-row {
-  background: #f8fafc !important;
-  border-color: rgba(148, 163, 184, 0.3) !important;
-}

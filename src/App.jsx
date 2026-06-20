@@ -8503,7 +8503,7 @@ export default function TradingJournalDashboard() {
     });
   }, [activeTrades, stats.winRate]);
 
-  function openAddTrade(dateOverride, strategyOverride = "") {
+  function openAddTrade(dateOverride) {
     if (shouldGateForBilling) {
       setActive("Billing");
       setTradeViewMode(null);
@@ -8518,7 +8518,7 @@ export default function TradingJournalDashboard() {
     tradeSavingRef.current = false;
     setIsTradeSaving(false);
     setEditingTradeId(null);
-    setForm({ ...createEmptyTradeForm(dateOverride), strategy: strategyOverride || "" });
+    setForm(createEmptyTradeForm(dateOverride));
     setIsTradeModalOpen(true);
   }
   function openEditTrade(trade) {
@@ -9097,7 +9097,6 @@ Skipped duplicates: ${duplicateCount}
             strategies={strategiesObjects}
             trades={activeTrades}
             onSave={saveStrategiesObjects}
-            onAddTrade={(strategyName) => openAddTrade(undefined, strategyName)}
           />
         ) : active === "Statistics" ? (
           <SimpleStatisticsPage stats={stats} curve={curve} trades={activeTrades} onExport={() => exportTradesToCSV(activeTrades)} onDeleteStrategy={(name) => { const next = strategiesObjects.filter((s) => s.name !== name); saveStrategiesObjects(next); }} />
@@ -11835,7 +11834,6 @@ function TradingStrategiesModal({ strategies = [], onSave, onClose }) {
   const [list, setList] = useState(strategies);
   const [selected, setSelected] = useState(null); // index or "new"
   const [draft, setDraft] = useState({ name: "", description: "", items: [] });
-  const [newItem, setNewItem] = useState("");
   const [strategyError, setStrategyError] = useState("");
 
   function startNew() {
@@ -11847,15 +11845,6 @@ function TradingStrategiesModal({ strategies = [], onSave, onClose }) {
     setSelected(idx);
     setDraft({ ...list[idx] });
     setStrategyError("");
-  }
-  function addChecklistItem() {
-    const text = newItem.trim();
-    if (!text) return;
-    setDraft((d) => ({ ...d, items: [...(d.items || []), { id: Date.now(), text, checked: false }] }));
-    setNewItem("");
-  }
-  function removeItem(id) {
-    setDraft((d) => ({ ...d, items: d.items.filter((item) => item.id !== id) }));
   }
   function save() {
     const normalizedName = draft.name.trim();
@@ -11902,12 +11891,12 @@ function TradingStrategiesModal({ strategies = [], onSave, onClose }) {
             <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300"><ListChecks size={18} /></span>
             <div>
               <h2 className="text-xl font-bold text-zinc-100">Trading Strategies</h2>
-              <p className="mt-0.5 text-sm text-zinc-500">Manage your trading strategies and their pre-trade checklists</p>
+              <p className="mt-0.5 text-sm text-zinc-500">Manage the strategy names used in your trade journal</p>
             </div>
           </div>
           <button onClick={onClose} className="text-zinc-400 hover:text-white"><X size={20} /></button>
         </div>
-        <div className="flex" style={{ minHeight: "660px" }}>
+        <div className="flex" style={{ minHeight: "480px" }}>
           {/* Left panel */}
           <div className="w-72 shrink-0 border-r border-white/8 p-4">
             <button onClick={startNew} className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-black px-4 py-3 text-sm font-bold text-zinc-200 transition hover:border-fuchsia-500/40 hover:text-fuchsia-200">
@@ -11918,9 +11907,7 @@ function TradingStrategiesModal({ strategies = [], onSave, onClose }) {
                 <button key={s.id || i} onClick={() => selectStrategy(i)}
                   className={`w-full rounded-xl border p-3 text-left transition ${selected === i ? "border-fuchsia-500/40 bg-fuchsia-500/8" : "border-white/8 bg-black/40 hover:border-white/15"}`}>
                   <div className="text-sm font-bold text-zinc-200">{s.name}</div>
-                  <div className="mt-1 flex items-center gap-1.5 text-xs text-zinc-500">
-                    <ListChecks size={11} /> {(s.items || []).length} items
-                  </div>
+                  <div className="mt-1 truncate text-xs text-zinc-500">{s.description || "No description yet"}</div>
                 </button>
               ))}
               {list.length === 0 && <p className="mt-4 text-xs text-zinc-600">No strategies yet. Create your first one!</p>}
@@ -11947,31 +11934,6 @@ function TradingStrategiesModal({ strategies = [], onSave, onClose }) {
                   <Textarea value={draft.description} onChange={(e) => setDraft((d) => ({ ...d, description: e.target.value }))}
                     placeholder="Describe your trading strategy, entry/exit rules, timeframes, etc..." rows={4}
                     className="mt-2 border-white/15 bg-black focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" />
-                </div>
-                <div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-zinc-300"><ListChecks size={15} className="text-fuchsia-400" /> Pre-Trade Checklist</div>
-                    <span className="rounded-full bg-white/8 px-2.5 py-1 text-xs font-bold text-zinc-400">{(draft.items || []).length} items</span>
-                  </div>
-                  <div className="mt-3 flex gap-2">
-                    <Input value={newItem} onChange={(e) => setNewItem(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addChecklistItem(); } }}
-                      placeholder="Add a checklist item and press Enter..." className="border-white/15 bg-black focus-visible:border-fuchsia-400" />
-                    <button type="button" onClick={addChecklistItem}
-                      className="shrink-0 rounded-xl bg-fuchsia-500 px-4 py-2 text-sm font-bold text-black transition hover:bg-fuchsia-400">+ Add</button>
-                  </div>
-                  {(draft.items || []).length === 0 ? (
-                    <div className="mt-3 rounded-xl border border-dashed border-white/10 p-6 text-center text-sm text-zinc-600">No checklist items yet. Add your first one above!</div>
-                  ) : (
-                    <div className="mt-3 space-y-2">
-                      {draft.items.map((item) => (
-                        <div key={item.id} className="flex items-center justify-between rounded-xl border border-white/8 bg-black/40 px-4 py-2.5">
-                          <span className="text-sm text-zinc-300">{item.text}</span>
-                          <button type="button" onClick={() => removeItem(item.id)} className="ml-3 text-zinc-600 hover:text-red-400"><X size={14} /></button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
                 <div className="flex items-center justify-between border-t border-white/8 pt-5">
                   {selected !== "new" && (

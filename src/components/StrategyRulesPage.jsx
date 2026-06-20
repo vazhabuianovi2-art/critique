@@ -7,7 +7,6 @@ import {
   ClipboardCheck,
   Clock3,
   Layers3,
-  ListChecks,
   Plus,
   Save,
   ShieldCheck,
@@ -15,7 +14,6 @@ import {
   Target,
   Trash2,
   TrendingUp,
-  X,
 } from "lucide-react";
 
 const EMPTY_STRATEGY = {
@@ -103,13 +101,12 @@ function MetricCard({ icon: Icon, label, value, detail, tone = "fuchsia" }) {
   );
 }
 
-export function StrategyRulesPage({ strategies = [], trades = [], onSave, onAddTrade }) {
+export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
   const normalizedStrategies = useMemo(() => strategies.map(normalizeStrategy), [strategies]);
   const [selected, setSelected] = useState(() => normalizedStrategies.length ? 0 : "new");
   const initial = normalizedStrategies.length ? normalizedStrategies[0] : createEmptyStrategy();
   const [draft, setDraft] = useState(initial);
   const [baseline, setBaseline] = useState(initial);
-  const [newChecklistItem, setNewChecklistItem] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
@@ -126,7 +123,6 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave, onAddT
     return { pnl, wins, losses, winRate: decisive ? (wins / decisive) * 100 : 0 };
   }, [linkedTrades]);
   const isDirty = JSON.stringify(normalizeStrategy(draft)) !== JSON.stringify(normalizeStrategy(baseline));
-  const totalRules = normalizedStrategies.reduce((sum, strategy) => sum + strategy.items.length, 0);
   const completedPlans = normalizedStrategies.filter((strategy) => getStrategyCompletion(strategy) === 100).length;
 
   function updateField(field, value) {
@@ -145,7 +141,6 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave, onAddT
     setSelected(index);
     setDraft(next);
     setBaseline(next);
-    setNewChecklistItem("");
     setError("");
     setNotice("");
   }
@@ -156,25 +151,8 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave, onAddT
     setSelected("new");
     setDraft(next);
     setBaseline(next);
-    setNewChecklistItem("");
     setError("");
     setNotice("");
-  }
-
-  function addChecklistItem() {
-    const text = newChecklistItem.trim();
-    if (!text) return;
-    setDraft((current) => ({
-      ...current,
-      items: [...current.items, { id: `rule-${Date.now()}-${current.items.length}`, text, checked: false }],
-    }));
-    setNewChecklistItem("");
-    setError("");
-    setNotice("");
-  }
-
-  function removeChecklistItem(id, targetIndex) {
-    setDraft((current) => ({ ...current, items: current.items.filter((item, index) => id != null ? item.id !== id : index !== targetIndex) }));
   }
 
   function saveStrategy() {
@@ -250,20 +228,18 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave, onAddT
 
       <section className="strategy-rules-hero relative overflow-hidden rounded-3xl border border-fuchsia-500/25 bg-[linear-gradient(120deg,#180521_0%,#100713_55%,#16210e_100%)] px-6 py-7 shadow-[0_24px_70px_rgba(0,0,0,.32)] sm:px-8">
         <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-fuchsia-500/15 blur-3xl" />
-        <div className="relative flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
+        <div className="relative">
           <div className="max-w-3xl">
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-fuchsia-500/25 bg-black/25 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-fuchsia-300"><Sparkles size={13} /> Your trading playbook</div>
             <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">Strategy &amp; Rules</h1>
             <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-zinc-400 sm:text-base">Build a clear trading plan, keep every rule in one place, and use the same strategy names when you journal trades.</p>
           </div>
-          <button type="button" onClick={startNew} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-fuchsia-500 px-5 py-3 text-sm font-black text-black shadow-[0_0_26px_rgba(178,75,243,.25)] transition hover:-translate-y-0.5 hover:bg-fuchsia-400"><Plus size={17} /> New Strategy</button>
         </div>
       </section>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-3">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <MetricCard icon={Layers3} label="Strategies" value={normalizedStrategies.length} detail="Available inside Add Trade" />
-        <MetricCard icon={ListChecks} label="Checklist Rules" value={totalRules} detail="Across your strategy library" tone="emerald" />
-        <MetricCard icon={CheckCircle2} label="Complete Plans" value={completedPlans} detail="Core rule sections completed" tone="amber" />
+        <MetricCard icon={CheckCircle2} label="Complete Plans" value={completedPlans} detail="Core rule sections completed" tone="emerald" />
       </div>
 
       <div className="mt-6 grid min-w-0 gap-6 xl:grid-cols-[330px_minmax(0,1fr)]">
@@ -294,7 +270,7 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave, onAddT
                     <span className={`text-xs font-black ${completion === 100 ? "text-emerald-400" : "text-fuchsia-300"}`}>{completion}%</span>
                   </div>
                   <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/5"><div className={`h-full rounded-full ${completion === 100 ? "bg-emerald-400" : "bg-fuchsia-500"}`} style={{ width: `${completion}%` }} /></div>
-                  <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-zinc-600"><span>{strategy.items.length} rules</span><span>{strategyTrades} trades</span></div>
+                  <div className="mt-2 text-right text-[11px] font-bold text-zinc-600">{strategyTrades} linked trades</div>
                 </button>
               );
             })}
@@ -311,8 +287,7 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave, onAddT
                 </div>
                 <p className="mt-1 text-sm font-semibold text-zinc-500">This name is shared with the Strategy field in Add Trade.</p>
               </div>
-              <div className="flex gap-2">
-                {selected !== "new" && <button type="button" onClick={() => onAddTrade?.(normalizedStrategies[selected]?.name)} className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-black px-4 py-2.5 text-sm font-black text-zinc-300 transition hover:border-fuchsia-500/35 hover:text-fuchsia-300"><Plus size={15} /> Add Trade</button>}
+              <div>
                 <button type="button" onClick={saveStrategy} className="inline-flex items-center gap-2 rounded-xl bg-fuchsia-500 px-4 py-2.5 text-sm font-black text-black transition hover:bg-fuchsia-400"><Save size={15} /> Save Plan</button>
               </div>
             </div>
@@ -344,30 +319,6 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave, onAddT
             <RuleTextarea icon={ShieldCheck} title="Risk Rules" description="Set hard limits for risk, size, and daily exposure." value={draft.riskRules} onChange={(value) => updateField("riskRules", value)} placeholder={'• Maximum 0.5% risk per trade\n• Stop after 2 losses\n• Never widen the stop loss'} tone="red" />
             <div className="lg:col-span-2"><RuleTextarea icon={AlertTriangle} title="Invalidation & No-Trade Conditions" description="List the situations that cancel the setup or keep you out of the market." value={draft.invalidation} onChange={(value) => updateField("invalidation", value)} placeholder={'• High-impact news inside 10 minutes\n• Daily loss limit already reached\n• Market structure does not match the thesis'} tone="red" /></div>
           </div>
-
-          <section className="strategy-editor-panel rounded-2xl border border-white/10 bg-[#09090b] p-5 sm:p-6">
-            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-              <div className="flex items-start gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300"><ListChecks size={18} /></span>
-                <div><h2 className="font-black text-white">Pre-Trade Checklist</h2><p className="mt-1 text-xs font-semibold text-zinc-500">Quick rules to confirm before logging or taking this setup.</p></div>
-              </div>
-              <span className="self-start rounded-lg border border-white/10 bg-black px-3 py-1.5 text-xs font-black text-zinc-400 sm:self-auto">{draft.items.length} rules</span>
-            </div>
-            <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-              <input value={newChecklistItem} onChange={(event) => setNewChecklistItem(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addChecklistItem(); } }} placeholder="Add one clear rule, then press Enter..." className="strategy-rules-input h-11 min-w-0 flex-1 rounded-xl border border-white/10 bg-black/70 px-4 text-sm font-semibold text-white outline-none placeholder:text-zinc-700 focus:border-fuchsia-500/55" />
-              <button type="button" onClick={addChecklistItem} className="inline-flex items-center justify-center gap-2 rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/12 px-4 py-2.5 text-sm font-black text-fuchsia-300 transition hover:bg-fuchsia-500/20"><Plus size={15} /> Add Rule</button>
-            </div>
-            <div className="mt-4 space-y-2">
-              {draft.items.map((item, index) => (
-                <div key={item.id || `${item.text}-${index}`} className="strategy-checklist-row flex items-center gap-3 rounded-xl border border-white/8 bg-black/40 px-4 py-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-fuchsia-500/25 bg-fuchsia-500/10 text-xs font-black text-fuchsia-300">{index + 1}</span>
-                  <span className="min-w-0 flex-1 text-sm font-semibold text-zinc-300">{item.text}</span>
-                  <button type="button" onClick={() => removeChecklistItem(item.id, index)} aria-label={`Remove ${item.text}`} className="rounded-lg p-1.5 text-zinc-600 transition hover:bg-red-500/10 hover:text-red-400"><X size={15} /></button>
-                </div>
-              ))}
-              {!draft.items.length && <div className="rounded-xl border border-dashed border-white/10 px-4 py-7 text-center text-sm font-semibold text-zinc-600">No checklist rules yet. Add the confirmations you must see before taking this setup.</div>}
-            </div>
-          </section>
 
           <section className="strategy-editor-panel rounded-2xl border border-white/10 bg-[#09090b] p-5 sm:p-6">
             <div className="grid gap-4 sm:grid-cols-3">
