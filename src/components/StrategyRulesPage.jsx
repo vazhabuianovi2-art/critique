@@ -343,11 +343,12 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
         <span className="text-zinc-300">TryCritique</span><span>/</span><span>Strategy &amp; Rules</span>
       </div>
 
-      <section className="strategy-rules-hero relative overflow-hidden rounded-3xl border border-fuchsia-500/25 bg-[linear-gradient(120deg,#180521_0%,#100713_55%,#16210e_100%)] px-6 py-7 shadow-[0_24px_70px_rgba(0,0,0,.32)] sm:px-8">
-        <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-fuchsia-500/15 blur-3xl" />
-        <div className="relative">
+      <section className="strategy-rules-hero dashboard-hero relative overflow-hidden rounded-2xl px-6 py-7 sm:px-8">
+        <div className="dashboard-hero-bg pointer-events-none absolute inset-0" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+        <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-fuchsia-600/[0.025] blur-3xl" />
+        <div className="relative z-10">
           <div className="max-w-3xl">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-fuchsia-500/25 bg-black/25 px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] text-fuchsia-300"><Sparkles size={13} /> Your trading playbook</div>
             <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">Strategy &amp; Rules</h1>
             <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-zinc-400 sm:text-base">Build a clear trading plan, keep every rule in one place, and use the same strategy names when you journal trades.</p>
           </div>

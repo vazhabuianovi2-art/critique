@@ -84,12 +84,6 @@ input:disabled {
 }
 
 /* Strategy & Rules page */
-.light-theme .strategy-rules-hero {
-  background: linear-gradient(120deg, #faf5ff 0%, #ffffff 54%, #f0fdf4 100%) !important;
-  border-color: rgba(147, 51, 234, 0.24) !important;
-  box-shadow: 0 24px 70px rgba(76, 29, 149, 0.09) !important;
-}
-
 .light-theme .strategy-rules-metric,
 .light-theme .strategy-library-panel,
 .light-theme .strategy-editor-panel,
