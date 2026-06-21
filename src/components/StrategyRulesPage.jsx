@@ -1,12 +1,15 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
   BarChart3,
   BookOpen,
+  Camera,
   CheckCircle2,
   ClipboardCheck,
   Clock3,
+  ImagePlus,
   Layers3,
+  Loader2,
   Plus,
   Save,
   ShieldCheck,
@@ -14,11 +17,15 @@ import {
   Target,
   Trash2,
   TrendingUp,
+  X,
 } from "lucide-react";
+
+const MAX_STRATEGY_IMAGES = 3;
 
 const EMPTY_STRATEGY = {
   name: "",
   description: "",
+  tradeContents: "",
   market: "",
   timeframe: "",
   setupConditions: "",
@@ -28,6 +35,7 @@ const EMPTY_STRATEGY = {
   invalidation: "",
   notes: "",
   items: [],
+  images: [],
 };
 
 function normalizeStrategy(strategy = {}) {
@@ -35,17 +43,46 @@ function normalizeStrategy(strategy = {}) {
     ...EMPTY_STRATEGY,
     ...strategy,
     items: Array.isArray(strategy.items) ? strategy.items : [],
+    images: Array.isArray(strategy.images)
+      ? strategy.images.map((image, index) => typeof image === "string" ? { id: `legacy-image-${index}`, src: image, caption: "" } : image).filter((image) => image?.src)
+      : [],
   };
 }
 
 function createEmptyStrategy() {
-  return { ...EMPTY_STRATEGY, items: [] };
+  return { ...EMPTY_STRATEGY, items: [], images: [] };
 }
 
 function getStrategyCompletion(strategy) {
-  const fields = ["description", "setupConditions", "entryRules", "exitRules", "riskRules"];
+  const fields = ["description", "tradeContents", "setupConditions", "entryRules", "exitRules", "riskRules"];
   const completed = fields.filter((field) => String(strategy?.[field] || "").trim()).length;
   return Math.round((completed / fields.length) * 100);
+}
+
+function resizeStrategyImage(file, maxSize = 900, quality = 0.72) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Could not read this image."));
+    reader.onload = () => {
+      const image = new Image();
+      image.onerror = () => reject(new Error("This image format is not supported."));
+      image.onload = () => {
+        const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+        const width = Math.max(1, Math.round(image.width * scale));
+        const height = Math.max(1, Math.round(image.height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext("2d");
+        context.fillStyle = "#08080a";
+        context.fillRect(0, 0, width, height);
+        context.drawImage(image, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      image.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 function EditorField({ label, hint, children, full = false }) {
@@ -109,6 +146,9 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
   const [baseline, setBaseline] = useState(initial);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(null);
+  const imageInputRef = useRef(null);
 
   const selectedStoredName = selected === "new" ? "" : normalizedStrategies[selected]?.name || baseline.name;
   const linkedTrades = useMemo(
@@ -138,6 +178,7 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
   function selectStrategy(index) {
     if (!canLeaveDraft()) return;
     const next = normalizeStrategy(normalizedStrategies[index]);
+    setActiveImageIndex(null);
     setSelected(index);
     setDraft(next);
     setBaseline(next);
@@ -148,10 +189,53 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
   function startNew() {
     if (!canLeaveDraft()) return;
     const next = createEmptyStrategy();
+    setActiveImageIndex(null);
     setSelected("new");
     setDraft(next);
     setBaseline(next);
     setError("");
+    setNotice("");
+  }
+
+  async function uploadStrategyImages(event) {
+    const availableSlots = Math.max(MAX_STRATEGY_IMAGES - draft.images.length, 0);
+    const files = Array.from(event.target.files || []).filter((file) => file.type.startsWith("image/")).slice(0, availableSlots);
+    event.target.value = "";
+    if (!availableSlots) {
+      setError(`You can add up to ${MAX_STRATEGY_IMAGES} strategy images.`);
+      return;
+    }
+    if (!files.length) return;
+    if (files.some((file) => file.size > 10 * 1024 * 1024)) {
+      setError("Each image must be smaller than 10MB.");
+      return;
+    }
+
+    setIsUploadingImages(true);
+    setError("");
+    setNotice("");
+    try {
+      const uploaded = await Promise.all(files.map(async (file, index) => ({
+        id: `strategy-image-${Date.now()}-${index}`,
+        src: await resizeStrategyImage(file),
+        caption: "",
+      })));
+      setDraft((current) => ({ ...current, images: [...current.images, ...uploaded].slice(0, MAX_STRATEGY_IMAGES) }));
+    } catch (uploadError) {
+      setError(uploadError?.message || "Could not add this image.");
+    } finally {
+      setIsUploadingImages(false);
+    }
+  }
+
+  function updateImageCaption(index, caption) {
+    setDraft((current) => ({ ...current, images: current.images.map((image, imageIndex) => imageIndex === index ? { ...image, caption } : image) }));
+    setNotice("");
+  }
+
+  function removeStrategyImage(index) {
+    setDraft((current) => ({ ...current, images: current.images.filter((_, imageIndex) => imageIndex !== index) }));
+    setActiveImageIndex(null);
     setNotice("");
   }
 
@@ -306,10 +390,55 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
                   <input value={draft.timeframe} onChange={(event) => updateField("timeframe", event.target.value)} placeholder="5m / 15m" className="strategy-rules-input h-11 w-full rounded-xl border border-white/10 bg-black/70 px-4 text-sm font-bold text-white outline-none transition placeholder:text-zinc-700 focus:border-fuchsia-500/55" />
                 </EditorField>
               </div>
-              <EditorField label="Strategy Thesis" hint="What edge are you trading?" full>
+              <EditorField label="About Your Strategy" hint="Explain your edge and ideal market environment" full>
                 <textarea value={draft.description} onChange={(event) => updateField("description", event.target.value)} placeholder="Explain why this setup should work, the ideal market environment, and what you expect price to do..." rows={4} className="strategy-rules-input w-full resize-y rounded-xl border border-white/10 bg-black/70 px-4 py-3 text-sm font-semibold leading-6 text-zinc-200 outline-none transition placeholder:text-zinc-700 focus:border-fuchsia-500/55 focus:ring-2 focus:ring-fuchsia-500/10" />
               </EditorField>
+              <EditorField label="What This Trade Includes" hint="Describe the complete setup from context to target" full>
+                <textarea value={draft.tradeContents} onChange={(event) => updateField("tradeContents", event.target.value)} placeholder="Describe the market context, setup trigger, confirmation, entry area, stop placement, target and anything else included in this trade model..." rows={4} className="strategy-rules-input w-full resize-y rounded-xl border border-white/10 bg-black/70 px-4 py-3 text-sm font-semibold leading-6 text-zinc-200 outline-none transition placeholder:text-zinc-700 focus:border-fuchsia-500/55 focus:ring-2 focus:ring-fuchsia-500/10" />
+              </EditorField>
             </div>
+          </section>
+
+          <section className="strategy-editor-panel rounded-2xl border border-white/10 bg-[#09090b] p-5 sm:p-6">
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+              <div className="flex items-start gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300"><Camera size={18} /></span>
+                <div>
+                  <h2 className="font-black text-white">Strategy Images</h2>
+                  <p className="mt-1 text-xs font-semibold leading-5 text-zinc-500">Add chart examples and explain what each image shows.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-black text-zinc-500">{draft.images.length}/{MAX_STRATEGY_IMAGES}</span>
+                <input ref={imageInputRef} type="file" accept="image/png,image/jpeg,image/webp" multiple onChange={uploadStrategyImages} className="hidden" />
+                <button type="button" disabled={isUploadingImages || draft.images.length >= MAX_STRATEGY_IMAGES} onClick={() => imageInputRef.current?.click()} className="inline-flex items-center justify-center gap-2 rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/12 px-4 py-2.5 text-sm font-black text-fuchsia-300 transition hover:bg-fuchsia-500/20 disabled:cursor-not-allowed disabled:opacity-40">
+                  {isUploadingImages ? <Loader2 size={15} className="animate-spin" /> : <ImagePlus size={15} />} {isUploadingImages ? "Processing..." : "Upload Images"}
+                </button>
+              </div>
+            </div>
+
+            {draft.images.length ? (
+              <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {draft.images.map((image, index) => (
+                  <div key={image.id || index} className="strategy-image-card group relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+                    <button type="button" onClick={() => setActiveImageIndex(index)} className="block aspect-video w-full overflow-hidden bg-black" aria-label={`Open strategy image ${index + 1}`}>
+                      <img src={image.src} alt={image.caption || `Strategy example ${index + 1}`} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]" />
+                    </button>
+                    <button type="button" onClick={() => removeStrategyImage(index)} aria-label={`Remove strategy image ${index + 1}`} className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-black/80 text-zinc-300 backdrop-blur transition hover:border-red-500/40 hover:bg-red-500/20 hover:text-red-300"><X size={14} /></button>
+                    <div className="p-3">
+                      <label className="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-500">What this image shows</label>
+                      <input value={image.caption || ""} onChange={(event) => updateImageCaption(index, event.target.value)} placeholder="e.g. Liquidity sweep and entry confirmation" className="strategy-rules-input mt-2 h-10 w-full rounded-xl border border-white/10 bg-black/70 px-3 text-xs font-semibold text-white outline-none placeholder:text-zinc-700 focus:border-fuchsia-500/55" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <button type="button" onClick={() => imageInputRef.current?.click()} className="mt-5 flex w-full flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-black/25 px-5 py-10 text-center transition hover:border-fuchsia-500/35 hover:bg-fuchsia-500/[.04]">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-fuchsia-300"><ImagePlus size={21} /></span>
+                <span className="mt-3 text-sm font-black text-zinc-300">Add chart or setup examples</span>
+                <span className="mt-1 text-xs font-semibold text-zinc-600">PNG, JPG or WebP · up to {MAX_STRATEGY_IMAGES} images</span>
+              </button>
+            )}
           </section>
 
           <div className="grid gap-5 lg:grid-cols-2">
@@ -336,6 +465,16 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
           </section>
         </main>
       </div>
+
+      {activeImageIndex !== null && draft.images[activeImageIndex] && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-md" onClick={() => setActiveImageIndex(null)}>
+          <button type="button" onClick={() => setActiveImageIndex(null)} className="absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 bg-black/70 text-white transition hover:bg-white/10" aria-label="Close image preview"><X size={20} /></button>
+          <div className="max-w-6xl" onClick={(event) => event.stopPropagation()}>
+            <img src={draft.images[activeImageIndex].src} alt={draft.images[activeImageIndex].caption || "Strategy example"} className="max-h-[82vh] max-w-[92vw] rounded-2xl border border-white/10 object-contain shadow-[0_30px_100px_rgba(0,0,0,.75)]" />
+            {draft.images[activeImageIndex].caption && <p className="mx-auto mt-4 max-w-3xl text-center text-sm font-semibold text-zinc-300">{draft.images[activeImageIndex].caption}</p>}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

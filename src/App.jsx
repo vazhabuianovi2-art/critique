@@ -7656,10 +7656,14 @@ export default function TradingJournalDashboard() {
   });
   function saveStrategiesObjects(next, renameInfo) {
     setStrategiesObjects(next);
-    localStorage.setItem(STRATEGIES_OBJ_KEY, JSON.stringify(next));
-    // sync names into CUSTOM_STRATEGIES_KEY so existing strategy dropdown stays in sync
     const names = next.map((s) => s.name);
-    localStorage.setItem(CUSTOM_STRATEGIES_KEY, JSON.stringify(names));
+    try {
+      localStorage.setItem(STRATEGIES_OBJ_KEY, JSON.stringify(next));
+      // sync names into CUSTOM_STRATEGIES_KEY so existing strategy dropdown stays in sync
+      localStorage.setItem(CUSTOM_STRATEGIES_KEY, JSON.stringify(names));
+    } catch (error) {
+      console.warn("Strategy browser cache is full; continuing with cloud sync.", error?.message || error);
+    }
     // cloud sync (fire-and-forget)
     if (authUser?.id) {
       postSupabaseSync("saveStrategies", { strategies: next }).catch((err) =>
