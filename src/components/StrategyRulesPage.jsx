@@ -147,6 +147,9 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
   const [notice, setNotice] = useState("");
   const [isUploadingImages, setIsUploadingImages] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [createDraft, setCreateDraft] = useState({ name: "", market: "", description: "" });
+  const [createError, setCreateError] = useState("");
   const imageInputRef = useRef(null);
 
   const selectedStoredName = selected === "new" ? "" : normalizedStrategies[selected]?.name || baseline.name;
@@ -186,14 +189,47 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
   }
 
   function startNew() {
-    if (!canLeaveDraft()) return;
-    const next = createEmptyStrategy();
+    setCreateDraft({ name: "", market: "", description: "" });
+    setCreateError("");
+    setIsCreateModalOpen(true);
+  }
+
+  function closeCreateModal() {
+    setIsCreateModalOpen(false);
+    setCreateError("");
+  }
+
+  function createStrategyFromModal(event) {
+    event.preventDefault();
+    const name = createDraft.name.trim();
+    if (!name) {
+      setCreateError("Strategy name is required.");
+      return;
+    }
+    const duplicate = normalizedStrategies.some((strategy) => strategy.name.trim().toLowerCase() === name.toLowerCase());
+    if (duplicate) {
+      setCreateError(`A strategy named “${name}” already exists.`);
+      return;
+    }
+    if (isDirty && !window.confirm("You have unsaved changes in the current strategy. Create a new strategy without saving them?")) return;
+
+    const saved = {
+      ...createEmptyStrategy(),
+      id: `strategy-${Date.now()}`,
+      name,
+      market: createDraft.market.trim(),
+      description: createDraft.description.trim(),
+      updatedAt: new Date().toISOString(),
+    };
+    const next = [...normalizedStrategies, saved];
+    onSave?.(next);
+    setSelected(next.length - 1);
+    setDraft(saved);
+    setBaseline(saved);
     setActiveImageIndex(null);
-    setSelected("new");
-    setDraft(next);
-    setBaseline(next);
     setError("");
-    setNotice("");
+    setNotice("Strategy created. Add images and detailed rules below.");
+    closeCreateModal();
   }
 
   async function uploadStrategyImages(event) {
@@ -359,6 +395,15 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
         </aside>
 
         <main className="min-w-0 space-y-6">
+          {selected === "new" ? (
+            <section className="strategy-editor-panel flex min-h-[520px] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-[#09090b] px-6 py-12 text-center">
+              <span className="flex h-16 w-16 items-center justify-center rounded-2xl border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300"><Plus size={26} /></span>
+              <h2 className="mt-5 text-2xl font-black text-white">Create your first strategy</h2>
+              <p className="mt-2 max-w-md text-sm font-semibold leading-6 text-zinc-500">Start with the strategy name, market, and a short description. You can add images and detailed rules after creating it.</p>
+              <button type="button" onClick={startNew} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-fuchsia-500 px-5 py-3 text-sm font-black text-black transition hover:-translate-y-0.5 hover:bg-fuchsia-400"><Plus size={16} /> Create new strategy</button>
+            </section>
+          ) : (
+          <>
           <section className="strategy-editor-panel rounded-2xl border border-white/10 bg-[#09090b] p-5 sm:p-6">
             <div className="flex flex-col justify-between gap-4 border-b border-white/8 pb-5 sm:flex-row sm:items-center">
               <div>
@@ -452,8 +497,50 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
               <button type="button" onClick={saveStrategy} className="inline-flex items-center justify-center gap-2 rounded-xl bg-fuchsia-500 px-6 py-3 text-sm font-black text-black transition hover:-translate-y-0.5 hover:bg-fuchsia-400"><Save size={16} /> Save Strategy Plan</button>
             </div>
           </section>
+          </>
+          )}
         </main>
       </div>
+
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center overflow-y-auto bg-black/75 p-4 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="create-strategy-title" onClick={closeCreateModal}>
+          <div className="strategy-create-modal w-full max-w-2xl overflow-hidden rounded-3xl border border-white/15 bg-[#09090b] shadow-[0_35px_120px_rgba(0,0,0,.8)]" onClick={(event) => event.stopPropagation()}>
+            <div className="strategy-create-modal-header relative overflow-hidden border-b border-white/10 bg-[linear-gradient(120deg,#180521_0%,#100713_60%,#15200e_100%)] px-6 py-6 sm:px-7">
+              <div className="absolute -right-10 -top-16 h-40 w-40 rounded-full bg-fuchsia-500/15 blur-3xl" />
+              <div className="relative flex items-start justify-between gap-5">
+                <div className="flex items-start gap-4">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-fuchsia-500/30 bg-fuchsia-500/12 text-fuchsia-300"><Sparkles size={19} /></span>
+                  <div>
+                    <h2 id="create-strategy-title" className="text-2xl font-black text-white">Create New Strategy</h2>
+                    <p className="mt-1.5 text-sm font-semibold leading-6 text-zinc-400">Create the strategy first, then add images and detailed execution rules.</p>
+                  </div>
+                </div>
+                <button type="button" onClick={closeCreateModal} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-black/30 text-zinc-400 transition hover:bg-white/10 hover:text-white" aria-label="Close create strategy modal"><X size={17} /></button>
+              </div>
+            </div>
+
+            <form onSubmit={createStrategyFromModal} className="space-y-5 p-6 sm:p-7">
+              {createError && <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-300">{createError}</div>}
+              <div className="grid gap-5 sm:grid-cols-2">
+                <EditorField label="Strategy Name" hint="Required">
+                  <input autoFocus value={createDraft.name} onChange={(event) => { setCreateDraft((current) => ({ ...current, name: event.target.value })); setCreateError(""); }} placeholder="e.g. NY Open Liquidity Sweep" className="strategy-rules-input h-11 w-full rounded-xl border border-white/10 bg-black/70 px-4 text-sm font-bold text-white outline-none placeholder:text-zinc-700 focus:border-fuchsia-500/55 focus:ring-2 focus:ring-fuchsia-500/10" />
+                </EditorField>
+                <EditorField label="Market">
+                  <input value={createDraft.market} onChange={(event) => setCreateDraft((current) => ({ ...current, market: event.target.value }))} placeholder="NQ, ES, Forex..." className="strategy-rules-input h-11 w-full rounded-xl border border-white/10 bg-black/70 px-4 text-sm font-bold text-white outline-none placeholder:text-zinc-700 focus:border-fuchsia-500/55" />
+                </EditorField>
+              </div>
+              <EditorField label="About Your Strategy" hint="Optional">
+                <textarea value={createDraft.description} onChange={(event) => setCreateDraft((current) => ({ ...current, description: event.target.value }))} placeholder="Explain the idea behind this strategy and the ideal market environment..." rows={5} className="strategy-rules-input w-full resize-y rounded-xl border border-white/10 bg-black/70 px-4 py-3 text-sm font-semibold leading-6 text-zinc-200 outline-none placeholder:text-zinc-700 focus:border-fuchsia-500/55 focus:ring-2 focus:ring-fuchsia-500/10" />
+              </EditorField>
+              <div className="rounded-xl border border-fuchsia-500/20 bg-fuchsia-500/[.06] px-4 py-3 text-xs font-semibold leading-5 text-zinc-400">After creation, the full strategy workspace will open automatically for images, setup conditions, entry rules, exit rules, and risk rules.</div>
+              <div className="flex flex-col-reverse gap-3 border-t border-white/10 pt-5 sm:flex-row sm:justify-end">
+                <button type="button" onClick={closeCreateModal} className="rounded-xl border border-white/15 bg-black px-5 py-2.5 text-sm font-black text-zinc-300 transition hover:border-white/25 hover:text-white">Cancel</button>
+                <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-xl bg-fuchsia-500 px-5 py-2.5 text-sm font-black text-black shadow-[0_0_24px_rgba(178,75,243,.22)] transition hover:-translate-y-0.5 hover:bg-fuchsia-400"><Plus size={16} /> Create Strategy</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {activeImageIndex !== null && draft.images[activeImageIndex] && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-md" onClick={() => setActiveImageIndex(null)}>
