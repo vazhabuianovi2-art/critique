@@ -24,7 +24,6 @@ const EMPTY_STRATEGY = {
   name: "",
   description: "",
   market: "",
-  timeframe: "",
   setupConditions: "",
   entryRules: "",
   exitRules: "",
@@ -38,6 +37,7 @@ const EMPTY_STRATEGY = {
 function normalizeStrategy(strategy = {}) {
   const cleanStrategy = { ...strategy };
   delete cleanStrategy.tradeContents;
+  delete cleanStrategy.timeframe;
   return {
     ...EMPTY_STRATEGY,
     ...cleanStrategy,
@@ -346,7 +346,7 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="truncate text-sm font-black text-white">{strategy.name}</div>
-                      <div className="mt-1 truncate text-xs font-semibold text-zinc-500">{strategy.market || "Any market"}{strategy.timeframe ? ` · ${strategy.timeframe}` : ""}</div>
+                      <div className="mt-1 truncate text-xs font-semibold text-zinc-500">{strategy.market || "Any market"}</div>
                     </div>
                     <span className={`text-xs font-black ${completion === 100 ? "text-emerald-400" : "text-fuchsia-300"}`}>{completion}%</span>
                   </div>
@@ -379,14 +379,9 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
               <EditorField label="Strategy Name" hint="Required">
                 <input value={draft.name} onChange={(event) => updateField("name", event.target.value)} placeholder="e.g. NY Open Liquidity Sweep" className="strategy-rules-input h-11 w-full rounded-xl border border-white/10 bg-black/70 px-4 text-sm font-bold text-white outline-none transition placeholder:text-zinc-700 focus:border-fuchsia-500/55 focus:ring-2 focus:ring-fuchsia-500/10" />
               </EditorField>
-              <div className="grid grid-cols-2 gap-3">
-                <EditorField label="Market">
-                  <input value={draft.market} onChange={(event) => updateField("market", event.target.value)} placeholder="NQ, ES, Forex..." className="strategy-rules-input h-11 w-full rounded-xl border border-white/10 bg-black/70 px-4 text-sm font-bold text-white outline-none transition placeholder:text-zinc-700 focus:border-fuchsia-500/55" />
-                </EditorField>
-                <EditorField label="Timeframe">
-                  <input value={draft.timeframe} onChange={(event) => updateField("timeframe", event.target.value)} placeholder="5m / 15m" className="strategy-rules-input h-11 w-full rounded-xl border border-white/10 bg-black/70 px-4 text-sm font-bold text-white outline-none transition placeholder:text-zinc-700 focus:border-fuchsia-500/55" />
-                </EditorField>
-              </div>
+              <EditorField label="Market">
+                <input value={draft.market} onChange={(event) => updateField("market", event.target.value)} placeholder="NQ, ES, Forex..." className="strategy-rules-input h-11 w-full rounded-xl border border-white/10 bg-black/70 px-4 text-sm font-bold text-white outline-none transition placeholder:text-zinc-700 focus:border-fuchsia-500/55" />
+              </EditorField>
               <EditorField label="About Your Strategy" hint="Explain your edge and ideal market environment" full>
                 <textarea value={draft.description} onChange={(event) => updateField("description", event.target.value)} placeholder="Explain why this setup should work, the ideal market environment, and what you expect price to do..." rows={4} className="strategy-rules-input w-full resize-y rounded-xl border border-white/10 bg-black/70 px-4 py-3 text-sm font-semibold leading-6 text-zinc-200 outline-none transition placeholder:text-zinc-700 focus:border-fuchsia-500/55 focus:ring-2 focus:ring-fuchsia-500/10" />
               </EditorField>
@@ -436,7 +431,7 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
           </section>
 
           <div className="grid gap-5 lg:grid-cols-2">
-            <RuleTextarea icon={Target} title="Setup Conditions" description="What must be present before this setup becomes valid?" value={draft.setupConditions} onChange={(value) => updateField("setupConditions", value)} placeholder={'• Higher-timeframe bias is clear\n• Liquidity level is marked\n• Trade is inside my session window'} />
+            <RuleTextarea icon={Target} title="Setup Conditions" description="What must be present before this setup becomes valid?" value={draft.setupConditions} onChange={(value) => updateField("setupConditions", value)} placeholder={'• Directional bias is clear\n• Liquidity level is marked\n• Trade is inside my session window'} />
             <RuleTextarea icon={TrendingUp} title="Entry Rules" description="Write the exact trigger that allows you to enter." value={draft.entryRules} onChange={(value) => updateField("entryRules", value)} placeholder={'• Wait for confirmation close\n• Enter only after displacement\n• No chasing after the planned entry'} tone="emerald" />
             <RuleTextarea icon={Clock3} title="Exit Rules" description="Define targets, stop movement, partials, and early exits." value={draft.exitRules} onChange={(value) => updateField("exitRules", value)} placeholder={'• Stop beyond invalidation\n• First target at opposing liquidity\n• Exit if the thesis is no longer valid'} tone="amber" />
             <RuleTextarea icon={ShieldCheck} title="Risk Rules" description="Set hard limits for risk, size, and daily exposure." value={draft.riskRules} onChange={(value) => updateField("riskRules", value)} placeholder={'• Maximum 0.5% risk per trade\n• Stop after 2 losses\n• Never widen the stop loss'} tone="red" />

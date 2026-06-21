@@ -11936,7 +11936,7 @@ function TradingStrategiesModal({ strategies = [], onSave, onClose }) {
                 <div>
                   <label className="block text-sm font-semibold text-zinc-300">Description <span className="text-xs font-normal text-zinc-500">(Optional)</span></label>
                   <Textarea value={draft.description} onChange={(e) => setDraft((d) => ({ ...d, description: e.target.value }))}
-                    placeholder="Describe your trading strategy, entry/exit rules, timeframes, etc..." rows={4}
+                    placeholder="Describe your trading strategy, entry/exit rules, and market conditions..." rows={4}
                     className="mt-2 border-white/15 bg-black focus-visible:border-fuchsia-400 focus-visible:ring-fuchsia-500/20" />
                 </div>
                 <div className="flex items-center justify-between border-t border-white/8 pt-5">
