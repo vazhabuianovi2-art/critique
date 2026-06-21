@@ -208,7 +208,7 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
     }
     const duplicate = normalizedStrategies.some((strategy) => strategy.name.trim().toLowerCase() === name.toLowerCase());
     if (duplicate) {
-      setCreateError(`A strategy named “${name}” already exists.`);
+      setCreateError(`You already have a strategy named “${name}” in this account. Other users can use the same name.`);
       return;
     }
     if (isDirty && !window.confirm("You have unsaved changes in the current strategy. Create a new strategy without saving them?")) return;
@@ -280,7 +280,7 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
     }
     const duplicateIndex = normalizedStrategies.findIndex((strategy, index) => index !== selected && strategy.name.trim().toLowerCase() === name.toLowerCase());
     if (duplicateIndex >= 0) {
-      setError(`A strategy named “${name}” already exists. Choose a different name.`);
+      setError(`You already have a strategy named “${name}” in this account. Other users can use the same name.`);
       return;
     }
 

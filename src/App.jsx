@@ -112,6 +112,9 @@ const THEME_KEY = "critique_theme_mode_v1";
 const ACTIVE_PAGE_KEY = "critique_active_page_v1";
 const SIDEBAR_COLLAPSED_KEY = "critique_sidebar_collapsed_v1";
 const STRATEGIES_OBJ_KEY = "critique_strategies_objects_v1";
+function getStrategiesObjectKey(userId) {
+  return userId ? `${STRATEGIES_OBJ_KEY}_${userId}` : null;
+}
 const RESTORE_CACHE_PREFIX = "critique_last_successful_restore_v1";
 function getBillingCacheKey(userId) {
   return userId ? `critique_billing_access_v2_${userId}` : null;
@@ -123,7 +126,6 @@ const REMEMBER_EMAIL_KEY = "critique_remember_email_v1";
 const PROFILE_PHOTO_KEY = "critique_profile_photo_v1";
 const PROFILE_NAME_KEY = "critique_profile_name_v1";
 const TRADING_PREFERENCES_KEY = "critique_settings_preferences_v1";
-const CUSTOM_STRATEGIES_KEY = "critique_custom_strategies_v1";
 const ECONOMIC_CALENDAR_CACHE_KEY = "critique_economic_calendar_v1";
 const MAX_SCREENSHOTS = 5;
 const OWNER_ADMIN_EMAILS = (
@@ -7640,27 +7642,12 @@ export default function TradingJournalDashboard() {
     return accounts[0] || createAccountPlaceholder;
   }, [accounts, activeAccountId, pendingAccountDraft]);
   const [isStrategiesModalOpen, setIsStrategiesModalOpen] = useState(false);
-  const [strategiesObjects, setStrategiesObjects] = useState(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem(STRATEGIES_OBJ_KEY) || "[]");
-      if (Array.isArray(stored) && stored.length) return stored;
-      const legacyNames = JSON.parse(localStorage.getItem(CUSTOM_STRATEGIES_KEY) || "[]");
-      const migrated = Array.isArray(legacyNames)
-        ? [...new Set(legacyNames.filter(Boolean))].map((name, index) => ({ id: `migrated-${Date.now()}-${index}`, name, description: "", items: [] }))
-        : [];
-      if (migrated.length) localStorage.setItem(STRATEGIES_OBJ_KEY, JSON.stringify(migrated));
-      return migrated;
-    } catch {
-      return [];
-    }
-  });
+  const [strategiesObjects, setStrategiesObjects] = useState([]);
   function saveStrategiesObjects(next, renameInfo) {
     setStrategiesObjects(next);
-    const names = next.map((s) => s.name);
     try {
-      localStorage.setItem(STRATEGIES_OBJ_KEY, JSON.stringify(next));
-      // sync names into CUSTOM_STRATEGIES_KEY so existing strategy dropdown stays in sync
-      localStorage.setItem(CUSTOM_STRATEGIES_KEY, JSON.stringify(names));
+      const cacheKey = getStrategiesObjectKey(authUser?.id);
+      if (cacheKey) localStorage.setItem(cacheKey, JSON.stringify(next));
     } catch (error) {
       console.warn("Strategy browser cache is full; continuing with cloud sync.", error?.message || error);
     }
@@ -7785,6 +7772,20 @@ export default function TradingJournalDashboard() {
   const navItems = useMemo(() => canUseAdminTools ? [...nav, [ShieldCheck, "Admin"]] : nav, [canUseAdminTools]);
   const hasBillingAccess = useMemo(() => canUseAdminTools || isSubscriptionAccessActive(billingSubscription) || billingGraceAccess, [canUseAdminTools, billingSubscription, billingGraceAccess]);
   const shouldGateForBilling = Boolean(isAuthenticated && billingChecked && !billingLoading && !hasBillingAccess);
+
+  useEffect(() => {
+    if (!isAuthenticated || !authUser?.id) {
+      setStrategiesObjects([]);
+      return;
+    }
+    try {
+      const cacheKey = getStrategiesObjectKey(authUser.id);
+      const cached = cacheKey ? JSON.parse(localStorage.getItem(cacheKey) || "[]") : [];
+      setStrategiesObjects(Array.isArray(cached) ? cached : []);
+    } catch {
+      setStrategiesObjects([]);
+    }
+  }, [authUser?.id, isAuthenticated]);
 
   useEffect(() => {
     if (!isAuthenticated || !authUser?.email) {
@@ -7958,9 +7959,12 @@ export default function TradingJournalDashboard() {
         // Load strategies from cloud
         if (Array.isArray(result?.strategies)) {
           setStrategiesObjects(result.strategies);
-          localStorage.setItem(STRATEGIES_OBJ_KEY, JSON.stringify(result.strategies));
-          const names = result.strategies.map((s) => s.name);
-          localStorage.setItem(CUSTOM_STRATEGIES_KEY, JSON.stringify(names));
+          try {
+            const cacheKey = getStrategiesObjectKey(authUser?.id);
+            if (cacheKey) localStorage.setItem(cacheKey, JSON.stringify(result.strategies));
+          } catch (error) {
+            console.warn("Could not cache strategies for this user.", error?.message || error);
+          }
         }
 
         if (rows.length) {
@@ -8369,6 +8373,8 @@ export default function TradingJournalDashboard() {
     setIsAuthenticated(false);
     setAuthUser(null);
     setProfilePhoto("");
+    setStrategiesObjects([]);
+    setIsStrategiesModalOpen(false);
     setIsSidebarUserMenuOpen(false);
     try { localStorage.removeItem(ACTIVE_PAGE_KEY); } catch {}
     setActiveRaw("Dashboard");
@@ -11392,14 +11398,7 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
   const riskWarnings = getRiskWarnings(form, accountBalance);
   const formErrors = getTradeFormErrors(form);
   const hasFormErrors = Object.keys(formErrors).length > 0;
-  const [customStrategies, setCustomStrategies] = useState(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(CUSTOM_STRATEGIES_KEY) || "[]");
-      return Array.isArray(saved) ? saved.filter((item) => item && !LEGACY_DEFAULT_STRATEGIES.includes(item)) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [customStrategies, setCustomStrategies] = useState(() => strategiesObjects.map((strategy) => strategy.name).filter((name) => name && !LEGACY_DEFAULT_STRATEGIES.includes(name)));
   // Keep Add Trade's dropdown in sync with the shared strategy library.
   useEffect(() => {
     setCustomStrategies(strategiesObjects.map((s) => s.name).filter((n) => n && !LEGACY_DEFAULT_STRATEGIES.includes(n)));
@@ -11464,7 +11463,6 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
     if (!name) return;
     const next = [...new Set([...customStrategies, name])];
     setCustomStrategies(next);
-    localStorage.setItem(CUSTOM_STRATEGIES_KEY, JSON.stringify(next));
     setNewStrategyName("");
     updateField("strategy", name);
   }
@@ -11474,7 +11472,6 @@ function AddTradeModal({ isEditing, isSaving = false, form, setForm, onClose, on
     if (!shouldDelete) return;
     const next = customStrategies.filter((strategy) => strategy !== name);
     setCustomStrategies(next);
-    localStorage.setItem(CUSTOM_STRATEGIES_KEY, JSON.stringify(next));
     if (form.strategy === name) {
       updateField("strategy", "");
     }
@@ -11858,7 +11855,7 @@ function TradingStrategiesModal({ strategies = [], onSave, onClose }) {
     }
     const duplicate = list.some((strategy, index) => index !== selected && String(strategy.name || "").trim().toLowerCase() === normalizedName.toLowerCase());
     if (duplicate) {
-      setStrategyError(`A strategy named “${normalizedName}” already exists.`);
+      setStrategyError(`You already have a strategy named “${normalizedName}” in this account. Other users can use the same name.`);
       return;
     }
     let next;
