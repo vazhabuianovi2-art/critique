@@ -1,11 +1,11 @@
 import React, { useMemo, useRef, useState } from "react";
+import { BrandBolt } from "./ui/BrandBolt";
 import {
   AlertTriangle,
   BarChart3,
   BookOpen,
   Camera,
   CheckCircle2,
-  ClipboardCheck,
   Clock3,
   ImagePlus,
   Layers3,
@@ -339,7 +339,7 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
   return (
     <div className="strategy-rules-page mx-auto w-full max-w-[1600px] pb-16">
       <div className="mb-7 flex items-center gap-3 text-sm font-bold text-zinc-500">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300"><ClipboardCheck size={17} /></span>
+        <BrandBolt className="h-9 w-9 shrink-0 drop-shadow-[0_0_10px_rgba(178,75,243,.22)]" />
         <span className="text-zinc-300">TryCritique</span><span>/</span><span>Strategy &amp; Rules</span>
       </div>
 
