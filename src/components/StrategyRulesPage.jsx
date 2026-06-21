@@ -20,12 +20,9 @@ import {
   X,
 } from "lucide-react";
 
-const MAX_STRATEGY_IMAGES = 3;
-
 const EMPTY_STRATEGY = {
   name: "",
   description: "",
-  tradeContents: "",
   market: "",
   timeframe: "",
   setupConditions: "",
@@ -39,9 +36,11 @@ const EMPTY_STRATEGY = {
 };
 
 function normalizeStrategy(strategy = {}) {
+  const cleanStrategy = { ...strategy };
+  delete cleanStrategy.tradeContents;
   return {
     ...EMPTY_STRATEGY,
-    ...strategy,
+    ...cleanStrategy,
     items: Array.isArray(strategy.items) ? strategy.items : [],
     images: Array.isArray(strategy.images)
       ? strategy.images.map((image, index) => typeof image === "string" ? { id: `legacy-image-${index}`, src: image, caption: "" } : image).filter((image) => image?.src)
@@ -54,12 +53,12 @@ function createEmptyStrategy() {
 }
 
 function getStrategyCompletion(strategy) {
-  const fields = ["description", "tradeContents", "setupConditions", "entryRules", "exitRules", "riskRules"];
+  const fields = ["description", "setupConditions", "entryRules", "exitRules", "riskRules"];
   const completed = fields.filter((field) => String(strategy?.[field] || "").trim()).length;
   return Math.round((completed / fields.length) * 100);
 }
 
-function resizeStrategyImage(file, maxSize = 900, quality = 0.72) {
+function resizeStrategyImage(file, maxSize = 800, quality = 0.68) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(new Error("Could not read this image."));
@@ -198,13 +197,8 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
   }
 
   async function uploadStrategyImages(event) {
-    const availableSlots = Math.max(MAX_STRATEGY_IMAGES - draft.images.length, 0);
-    const files = Array.from(event.target.files || []).filter((file) => file.type.startsWith("image/")).slice(0, availableSlots);
+    const files = Array.from(event.target.files || []).filter((file) => file.type.startsWith("image/"));
     event.target.value = "";
-    if (!availableSlots) {
-      setError(`You can add up to ${MAX_STRATEGY_IMAGES} strategy images.`);
-      return;
-    }
     if (!files.length) return;
     if (files.some((file) => file.size > 10 * 1024 * 1024)) {
       setError("Each image must be smaller than 10MB.");
@@ -215,12 +209,15 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
     setError("");
     setNotice("");
     try {
-      const uploaded = await Promise.all(files.map(async (file, index) => ({
-        id: `strategy-image-${Date.now()}-${index}`,
-        src: await resizeStrategyImage(file),
-        caption: "",
-      })));
-      setDraft((current) => ({ ...current, images: [...current.images, ...uploaded].slice(0, MAX_STRATEGY_IMAGES) }));
+      const uploaded = [];
+      for (let index = 0; index < files.length; index += 1) {
+        uploaded.push({
+          id: `strategy-image-${Date.now()}-${index}`,
+          src: await resizeStrategyImage(files[index]),
+          caption: "",
+        });
+      }
+      setDraft((current) => ({ ...current, images: [...current.images, ...uploaded] }));
     } catch (uploadError) {
       setError(uploadError?.message || "Could not add this image.");
     } finally {
@@ -393,9 +390,6 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
               <EditorField label="About Your Strategy" hint="Explain your edge and ideal market environment" full>
                 <textarea value={draft.description} onChange={(event) => updateField("description", event.target.value)} placeholder="Explain why this setup should work, the ideal market environment, and what you expect price to do..." rows={4} className="strategy-rules-input w-full resize-y rounded-xl border border-white/10 bg-black/70 px-4 py-3 text-sm font-semibold leading-6 text-zinc-200 outline-none transition placeholder:text-zinc-700 focus:border-fuchsia-500/55 focus:ring-2 focus:ring-fuchsia-500/10" />
               </EditorField>
-              <EditorField label="What This Trade Includes" hint="Describe the complete setup from context to target" full>
-                <textarea value={draft.tradeContents} onChange={(event) => updateField("tradeContents", event.target.value)} placeholder="Describe the market context, setup trigger, confirmation, entry area, stop placement, target and anything else included in this trade model..." rows={4} className="strategy-rules-input w-full resize-y rounded-xl border border-white/10 bg-black/70 px-4 py-3 text-sm font-semibold leading-6 text-zinc-200 outline-none transition placeholder:text-zinc-700 focus:border-fuchsia-500/55 focus:ring-2 focus:ring-fuchsia-500/10" />
-              </EditorField>
             </div>
           </section>
 
@@ -409,9 +403,9 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-xs font-black text-zinc-500">{draft.images.length}/{MAX_STRATEGY_IMAGES}</span>
+                <span className="text-xs font-black text-zinc-500">{draft.images.length} image{draft.images.length === 1 ? "" : "s"}</span>
                 <input ref={imageInputRef} type="file" accept="image/png,image/jpeg,image/webp" multiple onChange={uploadStrategyImages} className="hidden" />
-                <button type="button" disabled={isUploadingImages || draft.images.length >= MAX_STRATEGY_IMAGES} onClick={() => imageInputRef.current?.click()} className="inline-flex items-center justify-center gap-2 rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/12 px-4 py-2.5 text-sm font-black text-fuchsia-300 transition hover:bg-fuchsia-500/20 disabled:cursor-not-allowed disabled:opacity-40">
+                <button type="button" disabled={isUploadingImages} onClick={() => imageInputRef.current?.click()} className="inline-flex items-center justify-center gap-2 rounded-xl border border-fuchsia-500/30 bg-fuchsia-500/12 px-4 py-2.5 text-sm font-black text-fuchsia-300 transition hover:bg-fuchsia-500/20 disabled:cursor-not-allowed disabled:opacity-40">
                   {isUploadingImages ? <Loader2 size={15} className="animate-spin" /> : <ImagePlus size={15} />} {isUploadingImages ? "Processing..." : "Upload Images"}
                 </button>
               </div>
@@ -436,7 +430,7 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
               <button type="button" onClick={() => imageInputRef.current?.click()} className="mt-5 flex w-full flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-black/25 px-5 py-10 text-center transition hover:border-fuchsia-500/35 hover:bg-fuchsia-500/[.04]">
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-fuchsia-300"><ImagePlus size={21} /></span>
                 <span className="mt-3 text-sm font-black text-zinc-300">Add chart or setup examples</span>
-                <span className="mt-1 text-xs font-semibold text-zinc-600">PNG, JPG or WebP · up to {MAX_STRATEGY_IMAGES} images</span>
+                <span className="mt-1 text-xs font-semibold text-zinc-600">PNG, JPG or WebP · add as many images as you need</span>
               </button>
             )}
           </section>
