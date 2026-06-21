@@ -405,16 +405,13 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
           ) : (
           <>
           <section className="strategy-editor-panel rounded-2xl border border-white/10 bg-[#09090b] p-5 sm:p-6">
-            <div className="flex flex-col justify-between gap-4 border-b border-white/8 pb-5 sm:flex-row sm:items-center">
+            <div className="border-b border-white/8 pb-5">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="text-xl font-black text-white">{selected === "new" ? "Create Strategy" : "Edit Strategy Plan"}</h2>
                   {isDirty && <span className="rounded-full border border-amber-500/25 bg-amber-500/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-300">Unsaved changes</span>}
                 </div>
                 <p className="mt-1 text-sm font-semibold text-zinc-500">This name is shared with the Strategy field in Add Trade.</p>
-              </div>
-              <div>
-                <button type="button" onClick={saveStrategy} className="inline-flex items-center gap-2 rounded-xl bg-fuchsia-500 px-4 py-2.5 text-sm font-black text-black transition hover:bg-fuchsia-400"><Save size={15} /> Save Plan</button>
               </div>
             </div>
 
