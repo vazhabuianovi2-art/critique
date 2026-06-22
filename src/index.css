@@ -119,13 +119,20 @@ input:disabled {
 }
 
 .light-theme .strategy-library-item-active {
-  border-color: rgba(147, 51, 234, 0.34) !important;
-  box-shadow: 0 8px 24px rgba(88, 28, 135, 0.07) !important;
+  background: linear-gradient(135deg, #faf5ff 0%, #ffffff 76%) !important;
+  border-color: rgba(147, 51, 234, 0.62) !important;
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.12), 0 12px 28px rgba(88, 28, 135, 0.1) !important;
+  transform: translateX(2px);
+}
+
+.light-theme .strategy-selected-badge {
+  background: #9333ea !important;
+  color: #ffffff !important;
 }
 
 .light-theme .strategy-image-empty:hover,
 .light-theme .strategy-create-trigger:hover,
-.light-theme .strategy-library-item:hover {
+.light-theme .strategy-library-item:not(.strategy-library-item-active):hover {
   background: #f8fafc !important;
   border-color: rgba(147, 51, 234, 0.28) !important;
 }

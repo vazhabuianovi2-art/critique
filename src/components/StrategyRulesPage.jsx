@@ -379,13 +379,17 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
               const completion = getStrategyCompletion(strategy);
               const strategyTrades = trades.filter((trade) => trade.setup === strategy.name).length;
               return (
-                <button key={strategy.id || `${strategy.name}-${index}`} type="button" onClick={() => selectStrategy(index)} className={`strategy-library-item w-full rounded-xl border p-3 text-left transition ${active ? "strategy-library-item-active border-fuchsia-500/45 bg-[#16091d] shadow-[0_0_20px_rgba(178,75,243,.08)]" : "border-white/8 bg-black/35 hover:border-white/20 hover:bg-white/[.035]"}`}>
+                <button key={strategy.id || `${strategy.name}-${index}`} type="button" aria-current={active ? "true" : undefined} onClick={() => selectStrategy(index)} className={`strategy-library-item relative w-full overflow-hidden rounded-xl border p-3 text-left transition ${active ? "strategy-library-item-active border-fuchsia-500/60 bg-[#16091d] shadow-[0_0_24px_rgba(178,75,243,.12)] ring-1 ring-fuchsia-500/20" : "border-white/8 bg-black/35 hover:border-white/20 hover:bg-white/[.035]"}`}>
+                  {active && <span className="absolute bottom-3 left-0 top-3 w-1 rounded-r-full bg-fuchsia-500 shadow-[0_0_12px_rgba(178,75,243,.65)]" />}
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="truncate text-sm font-black text-white">{strategy.name}</div>
                       <div className="mt-1 truncate text-xs font-semibold text-zinc-500">{strategy.market || "Any market"}</div>
                     </div>
-                    <span className={`text-xs font-black ${completion === 100 ? "text-emerald-400" : "text-fuchsia-300"}`}>{completion}%</span>
+                    <div className="flex shrink-0 flex-col items-end gap-1.5">
+                      {active && <span className="strategy-selected-badge inline-flex items-center gap-1 rounded-full bg-fuchsia-500 px-2 py-1 text-[9px] font-black uppercase tracking-wider text-white"><CheckCircle2 size={10} /> Selected</span>}
+                      <span className={`text-xs font-black ${completion === 100 ? "text-emerald-400" : "text-fuchsia-300"}`}>{completion}%</span>
+                    </div>
                   </div>
                   <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/5"><div className={`h-full rounded-full ${completion === 100 ? "bg-emerald-400" : "bg-fuchsia-500"}`} style={{ width: `${completion}%` }} /></div>
                   <div className="mt-2 text-right text-[11px] font-bold text-zinc-600">{strategyTrades} linked trades</div>
