@@ -369,7 +369,7 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
             </div>
             <span className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-black text-zinc-400">{normalizedStrategies.length}</span>
           </div>
-          <button type="button" onClick={startNew} className={`mt-2 flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition ${selected === "new" ? "border-fuchsia-500/45 bg-fuchsia-500/12 text-fuchsia-200" : "border-dashed border-white/15 text-zinc-400 hover:border-fuchsia-500/35 hover:text-fuchsia-300"}`}>
+          <button type="button" onClick={startNew} className={`strategy-create-trigger mt-2 flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition ${selected === "new" ? "border-fuchsia-500/45 bg-[#16091d] text-fuchsia-200" : "border-dashed border-white/15 text-zinc-400 hover:border-fuchsia-500/35 hover:text-fuchsia-300"}`}>
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-fuchsia-500/10"><Plus size={16} /></span>
             <span className="text-sm font-black">Create new strategy</span>
           </button>
@@ -379,7 +379,7 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
               const completion = getStrategyCompletion(strategy);
               const strategyTrades = trades.filter((trade) => trade.setup === strategy.name).length;
               return (
-                <button key={strategy.id || `${strategy.name}-${index}`} type="button" onClick={() => selectStrategy(index)} className={`w-full rounded-xl border p-3 text-left transition ${active ? "border-fuchsia-500/45 bg-fuchsia-500/10 shadow-[0_0_20px_rgba(178,75,243,.08)]" : "border-white/8 bg-black/35 hover:border-white/20 hover:bg-white/[.035]"}`}>
+                <button key={strategy.id || `${strategy.name}-${index}`} type="button" onClick={() => selectStrategy(index)} className={`strategy-library-item w-full rounded-xl border p-3 text-left transition ${active ? "strategy-library-item-active border-fuchsia-500/45 bg-[#16091d] shadow-[0_0_20px_rgba(178,75,243,.08)]" : "border-white/8 bg-black/35 hover:border-white/20 hover:bg-white/[.035]"}`}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="truncate text-sm font-black text-white">{strategy.name}</div>
@@ -465,7 +465,7 @@ export function StrategyRulesPage({ strategies = [], trades = [], onSave }) {
                 ))}
               </div>
             ) : (
-              <button type="button" onClick={() => imageInputRef.current?.click()} className="mt-5 flex w-full flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-black/25 px-5 py-10 text-center transition hover:border-fuchsia-500/35 hover:bg-fuchsia-500/[.04]">
+              <button type="button" onClick={() => imageInputRef.current?.click()} className="strategy-image-empty mt-5 flex w-full flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-black/25 px-5 py-10 text-center transition hover:border-fuchsia-500/35 hover:bg-white/[.035]">
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-fuchsia-300"><ImagePlus size={21} /></span>
                 <span className="mt-3 text-sm font-black text-zinc-300">Add chart or setup examples</span>
                 <span className="mt-1 text-xs font-semibold text-zinc-600">PNG, JPG or WebP · add as many images as you need</span>
