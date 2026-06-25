@@ -1964,6 +1964,23 @@ const THEME_STYLE_CSS = `
     opacity: 1 !important;
   }
 
+  .trade-card .trade-image-chip,
+  .light-theme .trade-card .trade-image-chip {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,.82), 0 0 14px rgba(0,0,0,.58);
+  }
+
+  .trade-card .trade-image-chip-symbol,
+  .light-theme .trade-card .trade-image-chip-symbol {
+    color: #f0abfc !important;
+  }
+
   .light-theme .trade-no-screenshot {
     background: linear-gradient(135deg, #f8fafc 0%, #ffffff 60%, #f1f5f9 100%) !important;
     color: #475569 !important;
@@ -9580,8 +9597,8 @@ function TradeCard({ trade, onView, onEdit, onRemove }) {
 
         {/* Pair + direction */}
         <div className="absolute left-3 top-3 flex gap-1.5">
-          <span className="rounded-full border border-fuchsia-500/30 bg-black/75 px-2.5 py-1 text-xs font-black text-fuchsia-300 backdrop-blur">{trade.pair}</span>
-          <span className={`rounded-full border px-2.5 py-1 text-xs font-black backdrop-blur ${getTradeDirectionClass(trade.direction)}`}>{trade.direction}</span>
+          <span className="trade-image-chip trade-image-chip-symbol rounded-full border border-fuchsia-500/30 bg-black/75 px-2.5 py-1 text-xs font-black text-fuchsia-300 backdrop-blur">{trade.pair}</span>
+          <span className={`trade-image-chip rounded-full border px-2.5 py-1 text-xs font-black backdrop-blur ${getTradeDirectionClass(trade.direction)}`}>{trade.direction}</span>
         </div>
 
         {/* Result badge */}
